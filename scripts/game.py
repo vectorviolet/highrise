@@ -1,10 +1,10 @@
 #-# Import Packages #-#
 import pygame
 from random import choice
-
+import webbrowser
 from scripts.default.application import *
 from scripts.default.database import *
-from scripts.default.menu_button import *
+from scripts.default.button import *
 from scripts.default.color import *
 from scripts.default.object import *
 from scripts.default.path import *
@@ -18,18 +18,21 @@ from scripts.tile import *
 class Game(Application):
 
 	def __init__(self) -> None:
+		
+		#region Settings
 
 		#-# Window Settings #-#
-		super().__init__("2048 Game", (1440, 900), None, 165)
+		self.cursorSize = 25, 25
+		self.backgroundColors = {"menu" : Yellow, "settings" : Yellow, "developer" : Yellow, "game" : CustomBlue}
+		super().__init__("2048 GAME", (1440, 900), self.backgroundColors, 165)
 
 		#-# Game Settings #-#
-		self.cursorSize = 25, 25
-		self.gameBackgorundColor = CustomBlue
-		self.menuBackgroundColor = Yellow
 		self.cloudCount = 30
-		self.maxRowCount, self.maxColumnCount = 7, 7
+		self.maxSize = 7
 		self.maxBuildingLevel = 6
 		self.startingMoney = 10000
+
+		#endregion
 
 		#region Paths
 
@@ -42,37 +45,32 @@ class Game(Application):
 		self.goBackSoundPath = SoundPath("back")
 
 		#endregion
-		
-		#-# Start The Application #-#
+
+		#region Menu
+
+		menuWidth, menuHeight = (440, 315)
+		menuPosition = (self.width - menuWidth) / 2, (self.height - menuHeight) / 2
+
+		self.mainMenu = Menu(menuPosition, ImagePath("blue3", "gui/buttons"), (440, 70), self.title, 30, White, self.fontPath, (118, 15), ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", ["START", "SETTINGS", "DEVELOPER", "EXIT"], 30, Gray, White, self.fontPath)
+		self.settingsMenu = Menu(menuPosition, ImagePath("blue3", "gui/buttons"), (440, 70), "SETTINGS", 30, White, self.fontPath, (128, 15), ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", ["DELETE DATA", "GO BACK"], 30, Gray, White, self.fontPath)
+
+		#endregion
+
+	def Run(self):
+
+		#-# Set Cursor #-#
 		self.SetCursorVisible(False)
 		self.SetCursorImage(Object((0, 0), self.cursorSize, {"Normal" : ImagePath("cursor")}))
-		self.infoPanelTextFont = pygame.font.Font(self.fontPathThin, 15)
 
-		#-# Main Menu #-# 
-		self.menuWidth, self.menuHeight = (440, 315)
-		menuPosition = (self.width - self.menuWidth) / 2, (self.height - self.menuHeight) / 2
-		self.mainMenu = Menu(menuPosition, ImagePath("blue_button03", "gui"), (440, 70), self.title, 30, White, self.fontPath, (118, 15), ImagePath("grey_panel", "gui"), (400, 60), "blue", "yellow", ["Start", "Settings", "Exit"], 30, Gray, White, self.fontPath)
-		
-		#-# Settings Menu #-#
-		self.menuWidth, self.menuHeight = (440, 315)
-		menuPosition = (self.width - self.menuWidth) / 2, (self.height - self.menuHeight) / 2
-		self.settingsMenu = Menu(menuPosition, ImagePath("blue_button03", "gui"), (440, 70), "Settings", 30, White, self.fontPath, (128, 15), ImagePath("grey_panel", "gui"), (400, 60), "blue", "yellow", ["Delete Data", "GO BACK"], 30, Gray, White, self.fontPath)
-
-		#-# GamePanel
-		self.gamePanelSize = self.gamePanelWidth, self.gamePanelHeight = (1400, 100)
-		self.gamePanelPosition = self.gamePanelX, self.gamePanelY = (20, self.height - self.gamePanelHeight - 20)
-
+		#-# Start The Application #-#
 		self.GetDatasFromDatabase()
-
 		self.AddObjects()
+		self.OpenTab("menu")
 
-		#-# Info Panel #-#
-		self.objects["game"]["info mode button"].SetStatus("Off")
-		self.objects["game"]["info panel close button"].surfaces["Normal"].blit(Images(ImagePath("grey_crossWhite", "gui")), (9, 9))
-		self.objects["game"]["info panel close button"].surfaces["Normal"].blit(Images(ImagePath("grey_crossGrey", "gui")), (9, 9))
+		#-# Play Background Music #-#
+		self.PlayMusic(SoundPath("music", extension="mp3")) 
 		
-		self.SetAge(self.buildings.ageNumber)
-		self.UpdateButtonTexts()
+		super().Run()
 
 	def AddObjects(self):
 
@@ -80,21 +78,55 @@ class Game(Application):
 		self.AddObject("menu", "cloud animation", CloudAnimation(self.size))
 		self.AddObject("settings", "settings menu", self.settingsMenu)
 		self.AddObject("settings", "cloud animation", CloudAnimation(self.size))
+		
+		self.AddObject("developer", "credit panel", Object(((self.width - 300)/2, (self.height - 600)/2), (300, 600), {"Normal" : ImagePath("grey", "gui/panels")}))
+		self.AddObject("developer", "photo", Object(("CENTER", 180), (100, 100), {"Normal" : ImagePath("cv", "gui/others")}, self.size))
+		self.AddObject("developer", "name", Text((640, 290), "Umutcan Ekinci", 30, color=Black, isCentered=False))
+		self.AddObject("developer", "nickname", Text((675, 310), "LordCh4os", 25, color=Gray, isCentered=False))
+		
+		self.AddObject("developer", "github", Button((595, 350), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "github.com/LordCh4os", 28, Black, Gray))
+		self.AddObject("developer", "linkedin", Button((595, 400), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
+		self.AddObject("developer", "instagram", Button((595, 450), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
+		self.AddObject("developer", "facebook", Button((595, 500), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
+		self.AddObject("developer", "x", Button((595, 550), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
+		self.AddObject("developer", "youtube", Button((595, 600), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
+		self.AddObject("developer", "go back button", Button((595, 670), (250, 40), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, Black, Gray))
+
+		self["developer"]["github"]["Normal"].blit(Images(ImagePath("github", "gui/others"), (32, 32)), (105, 5))
+		self["developer"]["linkedin"]["Normal"].blit(Images(ImagePath("linkedin", "gui/others"), (32, 32)), (105, 5))
+		self["developer"]["instagram"]["Normal"].blit(Images(ImagePath("instagram", "gui/others"), (32, 32)), (105, 5))
+		self["developer"]["facebook"]["Normal"].blit(Images(ImagePath("facebook", "gui/others"), (32, 32)), (105, 5))
+		self["developer"]["x"]["Normal"].blit(Images(ImagePath("x", "gui/others"), (32, 32)), (105, 5))
+		self["developer"]["youtube"]["Normal"].blit(Images(ImagePath("youtube", "gui/others"), (32, 32)), (105, 5))
+
+		self.AddObject("developer", "cloud animation", CloudAnimation(self.size))
 		self.AddObject("game", "clouds", GameClouds(self.cloudCount, self.size))
-		self.AddObject("game", "game panel", Object(self.gamePanelPosition, self.gamePanelSize, {"Normal" : ImagePath("grey_panel", "gui")}))
-		self.AddObject("game", "info mode button", Button((100, 800), (60, 60),  {"On" : ImagePath("green", "gui"), "Off" : ImagePath("red", "gui")}))
-		self.AddObject("game", "info mode button image", Object((105, 805), (50, 50), {"Normal" : ImagePath("info", "gui")}))
-		self.AddObject("game", "expand button", Button((320, 800), (200, 60), {"Normal" : ImagePath("green", "gui"), "Mouse Over" : ImagePath("red", "gui")}, "EXPAND", str(self.tiles.GetExpandCost()) + "$", 27, textFontPath=self.fontPath))
-		self.AddObject("game", "build button", Button((620, 800), (200, 60), {"Normal" : ImagePath("green", "gui"), "Mouse Over" : ImagePath("red", "gui")}, "BUILD", str(self.buildings.GetBuildCost()) + "$", 27, textFontPath=self.fontPath))
-		self.AddObject("game", "next age button", Button((920, 800), (200, 60), {"Normal" : ImagePath("green", "gui"), "Mouse Over" : ImagePath("red", "gui")}, "NEXT AGE", str(self.buildings.GetAgeCost()) + "$", 27, textFontPath=self.fontPath))
+		self.AddObject("game", "game panel", Object((20, self.height - 100 - 20), (1400, 100), {"Normal" : ImagePath("grey", "gui/panels")}))
+		self.AddObject("game", "info mode button", Button((100, 800), (60, 60),  {"On" : ImagePath("green", "gui/buttons"), "Off" : ImagePath("red", "gui/buttons")}))
+		self.AddObject("game", "info mode button image", Object((105, 805), (50, 50), {"Normal" : ImagePath("info", "gui/others")}))
+		self.AddObject("game", "expand button", Button((320, 800), (200, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("red", "gui/buttons")}, "EXPAND", str(self.tiles.GetExpandCost()) + "$", 27, textFontPath=self.fontPath))
+		self.AddObject("game", "build button", Button((620, 800), (200, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("red", "gui/buttons")}, "BUILD", str(self.buildings.GetBuildCost()) + "$", 27, textFontPath=self.fontPath))
+		self.AddObject("game", "next age button", Button((920, 800), (200, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("red", "gui/buttons")}, "NEXT AGE", str(self.buildings.GetAgeCost()) + "$", 27, textFontPath=self.fontPath))
 		self.AddObject("game", "money text", Text((1180, 810), "", 55, color=Green, backgroundColor=Black, isCentered=False))
 		self.AddObject("game", "tiles", self.tiles)
 		self.AddObject("game", "buildings", self.buildings)
-		self.AddObject("game", "info panel", Object(((self.width - 250)/2, (self.height - 400)/2), (250, 400), {"Normal" : ImagePath("grey_panel", "gui")}, show=False))
-		self.AddObject("game", "info panel top side", Object(((self.width - 250)/2, (self.height - 400)/2), (250, 300), show=False))
-		self.AddObject("game", "info panel close button", Button(((self.width - 250)/2 + 250 - 20, (self.height - 400)/2 - 12), None, {"Normal" : ImagePath("red_circle", "gui"), "Mouse Over" : ImagePath("yellow_circle", "gui")}, show=False))
+		self.AddObject("game", "info panel", Object(((self.width - 250)/2, (self.height - 400)/2), (250, 400), {"Normal" : ImagePath("grey", "gui/panels")}, show=False))
+		self.AddObject("game", "info panel level text", Text(((self.width - 250)/2 + 90, (self.height - 400)/2 + 35), "Level: ", 15, True, Gray, fontPath=self.fontPathThin, isCentered=False, show=False))
+		self.AddObject("game", "info panel speed text", Text(((self.width - 250)/2 + 90, (self.height - 400)/2 + 50), "Speed: ", 15, True, Gray, fontPath=self.fontPathThin, isCentered=False, show=False))
+		self.AddObject("game", "info panel cooldown text", Text(((self.width - 250)/2 + 90, (self.height - 400)/2 + 65), "Cooldown: ", 15, True, Gray, fontPath=self.fontPathThin, isCentered=False, show=False))
+		self.AddObject("game", "info panel sell price text", Text(((self.width - 250)/2 + 90, (self.height - 400)/2 + 80), "Sell Price: ", 15, True, Gray, fontPath=self.fontPathThin, isCentered=False, show=False))
+		self.AddObject("game", "info panel building image", Object(((self.width - 250)/2 + 20, (self.height - 400)/2 + 20), (65, 89), show=False))
+		self.AddObject("game", "info panel sell button", Button(((self.width - 250)/2 + 20, (self.height - 400)/2 + 325), (210, 50), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("red", "gui/buttons")}, "SELL", "", 25, show=False))
+		self.AddObject("game", "info panel close button", Button(((self.width - 250)/2 + 250 - 20, (self.height - 400)/2 - 12), None, {"Normal" : ImagePath("red_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}, show=False))
 		self.AddObject("game", "cloud animation", CloudAnimation(self.size))
 		
+		self["game"]["info mode button"].SetStatus("Off")
+		self["game"]["info panel close button"]["Normal"].blit(Images(ImagePath("grey_crossWhite", "gui/others")), (9, 9))
+		self["game"]["info panel close button"]["Mouse Over"].blit(Images(ImagePath("grey_crossGrey", "gui/others")), (9, 9))
+		
+		self.SetAge(self.buildings.ageNumber)
+		self.UpdateButtonTexts()
+
 	def GetDatasFromDatabase(self):
 
 		self.database = Database("database")
@@ -130,7 +162,7 @@ class Game(Application):
 
 				ageNumber, size, money = gameData[0]
 
-				self.tiles = Tiles([size, size], [self.maxRowCount, self.maxColumnCount])
+				self.tiles = Tiles(size, self.maxSize)
 				self.money = money
 
 				self.database.Execute("CREATE TABLE IF NOT EXISTS buildings(level INTEGER, row INTEGER, column INTEGER)")
@@ -191,36 +223,29 @@ class Game(Application):
 
 		if self.tiles.isMaxSize():
 
-			self.objects["game"]["expand button"].text.UpdateText("Mouse Over", "MAX SIZE")
+			self["game"]["expand button"].text.UpdateText("Mouse Over", "MAX SIZE")
 		
 		else:
 
-			self.objects["game"]["expand button"].text.UpdateText("Mouse Over", str(self.tiles.GetExpandCost()) + "$")
+			self["game"]["expand button"].text.UpdateText("Mouse Over", str(self.tiles.GetExpandCost()) + "$")
 		
 		if len(self.buildings) == self.tiles.rowCount*self.tiles.columnCount:
 			
-			self.objects["game"]["build button"].text.UpdateText("Mouse Over", "TILES ARE FULL")
-			self.objects["game"]["build button"].text.UpdateSize("Mouse Over", 17)
+			self["game"]["build button"].text.UpdateText("Mouse Over", "TILES ARE FULL")
+			self["game"]["build button"].text.UpdateSize("Mouse Over", 17)
 
 		else:
 
-			self.objects["game"]["build button"].text.UpdateText("Mouse Over", str(self.buildings.GetBuildCost()) + "$")
-			self.objects["game"]["build button"].text.UpdateSize("Mouse Over", 27)
+			self["game"]["build button"].text.UpdateText("Mouse Over", str(self.buildings.GetBuildCost()) + "$")
+			self["game"]["build button"].text.UpdateSize("Mouse Over", 27)
 
 		if self.buildings.ageNumber == self.buildings.maxAgeNumber:
 			
-			self.objects["game"]["next age button"].text.UpdateText("Mouse Over", "MAX AGE")
+			self["game"]["next age button"].text.UpdateText("Mouse Over", "MAX AGE")
 
 		else:
 
-			self.objects["game"]["next age button"].text.UpdateText("Mouse Over", str(self.buildings.GetAgeCost()) + "$")
-
-	def Run(self) -> None:
-
-		#-# Open first tab #-#
-		self.OpenTab("menu")
-
-		super().Run()
+			self["game"]["next age button"].text.UpdateText("Mouse Over", str(self.buildings.GetAgeCost()) + "$")
 
 	def ControlSelectingTile(self) -> None:
 
@@ -238,7 +263,7 @@ class Game(Application):
 						
 						tile.selected = True
 						
-						if self.objects["game"]["info mode button"].status == "On":
+						if self["game"]["info mode button"].status == "On":
 
 							tile.rect = tile.selectedRect
 						
@@ -255,6 +280,11 @@ class Game(Application):
 
 				self.money -= self.tiles.GetExpandCost()
 				self.tiles.Expand()
+
+				for building in self.buildings:
+
+					building.tile = self.tiles[building.tile.rowNumber - 1][building.tile.columnNumber - 1]
+
 				self.UpdateButtonTexts()
 				self.PlaySound(self.clickSoundPath)
 	
@@ -288,9 +318,13 @@ class Game(Application):
 
 				self.OpenTab("menu")
 
+			elif self.tab == "developer":
+
+				self.OpenTab("menu")
+
 			elif self.tab == "game":
 
-				if self.objects["game"]["info panel"].show:
+				if self["game"]["info panel"].show:
 
 					self.CloseInfoPanel()
 
@@ -340,41 +374,48 @@ class Game(Application):
 		if self.tab == "menu":
 			
 			#-# Control click button events with space button #-#
-			if event.type == pygame.KEYUP:
+			if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
 
-				if event.key == pygame.K_SPACE:
-
-					if self.mainMenu.buttons[0].status == "Selected":
-
-						self.PlaySound(self.clickSoundPath)
-						self.OpenTab("game")
-
-					elif self.mainMenu.buttons[1].status == "Selected":
-
-						self.PlaySound(self.clickSoundPath)
-						self.OpenTab("settings")
-
-					elif self.mainMenu.buttons[2].status == "Selected":
-
-						self.PlaySound(self.clickSoundPath)
-						self.Exit()
-
-			#-# Control click button events with mouse #-#
-			elif event.type == pygame.MOUSEBUTTONUP:
-				
-				if self.mainMenu.buttons[0].isMouseOver(self.mousePosition):
+				if self.mainMenu.buttons["START"].status == "Selected":
 
 					self.PlaySound(self.clickSoundPath)
 					self.OpenTab("game")
 
-				elif self.mainMenu.buttons[1].isMouseOver(self.mousePosition):
+				elif self.mainMenu.buttons["SETTINGS"].status == "Selected":
 
 					self.PlaySound(self.clickSoundPath)
 					self.OpenTab("settings")
 
-				elif self.mainMenu.buttons[2].isMouseOver(self.mousePosition):
-					self.PlaySound(self.goBackSoundPath)
+				elif self.mainMenu.buttons["DEVELOPER"].status == "Selected":
+
+					self.PlaySound(self.clickSoundPath)
+					self.OpenTab("developer")
+
+				elif self.mainMenu.buttons["EXIT"].status == "Selected":
+
+					self.PlaySound(self.clickSoundPath)
 					self.Exit()
+
+			#-# Control click button events with mouse #-#
+			if self.mainMenu.buttons["START"].isMouseClick(event, self.mousePosition):
+
+				self.PlaySound(self.clickSoundPath)
+				self.OpenTab("game")
+
+			elif self.mainMenu.buttons["SETTINGS"].isMouseClick(event, self.mousePosition):
+
+				self.PlaySound(self.clickSoundPath)
+				self.OpenTab("settings")
+
+			elif self.mainMenu.buttons["DEVELOPER"].isMouseClick(event, self.mousePosition):
+
+				self.PlaySound(self.clickSoundPath)
+				self.OpenTab("developer")
+
+			elif self.mainMenu.buttons["EXIT"].isMouseClick(event, self.mousePosition):
+
+				self.PlaySound(self.goBackSoundPath)
+				self.Exit()
 
 		elif self.tab == "settings":
 
@@ -383,7 +424,7 @@ class Game(Application):
 
 				if event.key == pygame.K_SPACE:
 
-					if self.settingsMenu.buttons[0].status == "Selected":
+					if self.settingsMenu.buttons["DELETE DATA"].status == "Selected":
 
 						self.PlaySound(self.clickSoundPath)
 						self.OpenTab("menu")
@@ -392,7 +433,7 @@ class Game(Application):
 						self.GetDatasFromDatabase()
 						self.AddObjects()
 
-					elif self.settingsMenu.buttons[1].status == "Selected":
+					elif self.settingsMenu.buttons["GO BACK"].status == "Selected":
 
 						self.PlaySound(self.clickSoundPath)
 						self.OpenTab("menu")
@@ -400,7 +441,7 @@ class Game(Application):
 			#-# Control click button events with mouse #-#
 			elif event.type == pygame.MOUSEBUTTONUP:
 				
-				if self.settingsMenu.buttons[0].status == "Selected":
+				if self.settingsMenu.buttons["DELETE DATA"].status == "Selected":
 
 					self.PlaySound(self.clickSoundPath)
 					self.OpenTab("menu")
@@ -409,17 +450,54 @@ class Game(Application):
 					self.GetDatasFromDatabase()
 					self.AddObjects()
 					
-				elif self.settingsMenu.buttons[1].status == "Selected":
+				elif self.settingsMenu.buttons["GO BACK"].status == "Selected":
 
 					self.PlaySound(self.clickSoundPath)
 					self.OpenTab("menu")
 
+		elif self.tab == "developer":
+			
+			if self[self.tab]["github"].isMouseClick(event, self.mousePosition):
+
+				self.PlaySound(self.clickSoundPath)
+				webbrowser.open("https://www.github.com/LordCh4os/")
+
+			elif self[self.tab]["linkedin"].isMouseClick(event, self.mousePosition):
+
+				self.PlaySound(self.clickSoundPath)
+				webbrowser.open("https://www.linkedin.com/in/umutcan-ekinci-b5435a108/")
+
+			elif self[self.tab]["instagram"].isMouseClick(event, self.mousePosition):
+
+				self.PlaySound(self.clickSoundPath)
+				webbrowser.open("https://www.instagram.com/umut_ekinci_/")
+
+			elif self[self.tab]["facebook"].isMouseClick(event, self.mousePosition):
+
+				self.PlaySound(self.clickSoundPath)
+				webbrowser.open("https://www.facebook.com/nmuetn/")
+
+			elif self[self.tab]["x"].isMouseClick(event, self.mousePosition):
+
+				self.PlaySound(self.clickSoundPath)
+				webbrowser.open("https://twitter.com/muetnmuetn/")
+
+			elif self[self.tab]["youtube"].isMouseClick(event, self.mousePosition):
+
+				self.PlaySound(self.clickSoundPath)
+				webbrowser.open("https://www.youtube.com/channel/UC1ma8tkbaD-xxJ4tgSxDthg/")
+			
+			elif self[self.tab]["go back button"].isMouseClick(event, self.mousePosition):
+			
+				self.PlaySound(self.clickSoundPath)
+				self.OpenTab("menu")
+
 		elif self.tab == "game":
 
 			#-# sell building #-#
-			if self.objects["game"]["info panel"].show:
+			if self["game"]["info panel"].show:
 
-				if self.infoPanelSellButton.isMouseClick(event, self.mousePosition):
+				if self[self.tab]["info panel sell button"].isMouseClick(event, self.mousePosition):
 					
 					self.buildings.remove(self.infoBuilding)
 					self.money += self.infoBuilding.sellPrice
@@ -428,7 +506,7 @@ class Game(Application):
 					self.UpdateButtonTexts()
 				
 				#-# close info panel #-#
-				elif self.objects["game"]["info panel close button"].isMouseClick(event, self.mousePosition):
+				elif self["game"]["info panel close button"].isMouseClick(event, self.mousePosition):
 
 					self.CloseInfoPanel()
 					self.PlaySound(self.goBackSoundPath)
@@ -439,20 +517,20 @@ class Game(Application):
 				self.ControlSelectingTile()
 
 				#-# On/off info mode with clicking info mode button #-#
-				if self.objects[self.tab]["info mode button"].isMouseClick(event, self.mousePosition):
+				if self[self.tab]["info mode button"].isMouseClick(event, self.mousePosition):
 
-					if self.objects["game"]["info mode button"].status == "On":
+					if self["game"]["info mode button"].status == "On":
 
-						self.objects[self.tab]["info mode button"].SetStatus("Off")
+						self[self.tab]["info mode button"].SetStatus("Off")
 
 					else:
 
-						self.objects[self.tab]["info mode button"].SetStatus("On")
+						self[self.tab]["info mode button"].SetStatus("On")
 					
 					self.PlaySound(self.clickSoundPath)
 
 				#-# Open building info if tile is clicked #-#
-				if self.objects["game"]["info mode button"].status == "On" and event.type == pygame.MOUSEBUTTONUP:
+				if self["game"]["info mode button"].status == "On" and event.type == pygame.MOUSEBUTTONUP:
 
 					for row in self.tiles:
 
@@ -471,24 +549,24 @@ class Game(Application):
 								break
 
 				#-# expand #-#
-				if self.objects[self.tab]["expand button"].isMouseClick(event, self.mousePosition):
+				if self[self.tab]["expand button"].isMouseClick(event, self.mousePosition):
 
 					self.Expand()
 
 				#-# Create building if build button clicked #-#
-				elif self.objects[self.tab]["build button"].isMouseClick(event, self.mousePosition):
+				elif self[self.tab]["build button"].isMouseClick(event, self.mousePosition):
 
 					self.CreateBuilding()
 
 				#-# Go next age #-#
-				elif self.objects[self.tab]["next age button"].isMouseClick(event, self.mousePosition):
+				elif self[self.tab]["next age button"].isMouseClick(event, self.mousePosition):
 
 					self.NextAge()
 
 			if event.type == pygame.KEYUP:
 
 				#-# Create/Move buildings with keys #-#
-				if not self.objects["game"]["info panel"].show:
+				if not self["game"]["info panel"].show:
 
 					if event.key == pygame.K_SPACE:
 						
@@ -512,33 +590,34 @@ class Game(Application):
 
 	def OpenInfoPanel(self, building: Building) -> None:
 
-		self.objects[self.tab]["info panel"].Show()
-		self.objects[self.tab]["info panel top side"].Show()
-		self.objects[self.tab]["info panel close button"].Show()
-
+		#-# Update Building Info #-#
 		self.infoBuilding = building
-		
-		levelText = self.infoPanelTextFont.render("Level: " + str(building.level), True, Gray)
-		speedText = self.infoPanelTextFont.render("Speed: " + str(building.speed) + " $/sec", True, Gray)
-		cooldownText = self.infoPanelTextFont.render("Cooldown: " + str(building.cooldown) + " sec", True, Gray)
-		sellPriceText = self.infoPanelTextFont.render("Sell Price: " + str(building.sellPrice), True, Gray)
-		
-		self.objects["game"]["info panel top side"].AddSurface("Normal", pygame.Surface((250, 300), pygame.SRCALPHA))
-		self.objects["game"]["info panel top side"].surfaces["Normal"].blit(levelText, (90, 35))
-		self.objects["game"]["info panel top side"].surfaces["Normal"].blit(speedText, (90, 50))
-		self.objects["game"]["info panel top side"].surfaces["Normal"].blit(cooldownText, (90, 65))
-		self.objects["game"]["info panel top side"].surfaces["Normal"].blit(sellPriceText, (90, 80))
-		self.objects["game"]["info panel top side"].surfaces["Normal"].blit(Images(building.GetImagePath(), (65, 89)), (20, 20))
+		self[self.tab]["info panel level text"].UpdateText("Normal", "Level: " + str(building.level))
+		self[self.tab]["info panel speed text"].UpdateText("Normal", "Speed: " + str(building.speed) + " $/sec")
+		self[self.tab]["info panel cooldown text"].UpdateText("Normal", "Cooldown: " + str(building.cooldown) + " sec")
+		self[self.tab]["info panel sell price text"].UpdateText("Normal", "Sell Price: " + str(building.sellPrice))
+		self[self.tab]["info panel sell button"].text.UpdateText("Mouse Over", str(building.sellPrice) + "$")
+		self[self.tab]["info panel building image"].AddSurface("Normal", Images(building.GetImagePath(), (65, 89)))
 
-		self.infoPanelSellButton = Button(((self.width - 250)/2 + 20, (self.height - 400)/2 + 325), (210, 50), {"Normal" : ImagePath("green", "gui"), "Mouse Over" : ImagePath("red", "gui")}, "SELL", str(building.sellPrice) + "$", 25)
-		self.AddObject("game", "info panel sell button", self.infoPanelSellButton)
+		self[self.tab]["info panel"].Show()
+		self[self.tab]["info panel level text"].Show()
+		self[self.tab]["info panel speed text"].Show()
+		self[self.tab]["info panel cooldown text"].Show()
+		self[self.tab]["info panel sell price text"].Show()
+		self[self.tab]["info panel close button"].Show()
+		self[self.tab]["info panel sell button"].Show()
+		self[self.tab]["info panel building image"].Show()
 
 	def CloseInfoPanel(self):
 
-		self.objects[self.tab]["info panel"].Hide()
-		self.objects[self.tab]["info panel top side"].Hide()
-		self.objects[self.tab]["info panel close button"].Hide()
-		self.objects[self.tab]["info panel sell button"].Hide()
+		self[self.tab]["info panel"].Hide()
+		self[self.tab]["info panel level text"].Hide()
+		self[self.tab]["info panel speed text"].Hide()
+		self[self.tab]["info panel cooldown text"].Hide()
+		self[self.tab]["info panel sell price text"].Hide()
+		self[self.tab]["info panel close button"].Hide()
+		self[self.tab]["info panel sell button"].Hide()
+		self[self.tab]["info panel building image"].Hide()
 
 	def MoveBuildings(self, rotation: str) -> None:
 
@@ -550,7 +629,7 @@ class Game(Application):
 				isBuildingsMoving = True
 				break
 
-		if self.objects["game"]["info mode button"].status == "Off" and not isBuildingsMoving:
+		if self["game"]["info mode button"].status == "Off" and not isBuildingsMoving:
 
 			if rotation == "up" or rotation == "down":
                 
@@ -676,10 +755,10 @@ class Game(Application):
 		self.buildings.append(newBuilding)
 		self.buildings.sort(key=lambda building: building.tile.columnNumber)
 
-		if len(self.buildings) == self.tiles.rowCount*self.tiles.columnCount and "game" in self.objects and "build button" in self.objects["game"]:
+		if len(self.buildings) == self.tiles.rowCount*self.tiles.columnCount and "game" in self and "build button" in self["game"]:
 
-			self.objects["game"]["build button"].text.UpdateText("Mouse Over", "TILES ARE FULL")
-			self.objects["game"]["build button"].text.UpdateSize("Mouse Over", 17)
+			self["game"]["build button"].text.UpdateText("Mouse Over", "TILES ARE FULL")
+			self["game"]["build button"].text.UpdateSize("Mouse Over", 17)
 		
 	def CreateBuilding(self) -> None:
 
@@ -730,24 +809,12 @@ class Game(Application):
 	def OpenTab(self, tab: str) -> None:
 
 		super().OpenTab(tab)
-	
-		if tab == "menu":
 
-			self.SetBackgorundColor(self.menuBackgroundColor)
-
-		elif tab == "settings":
-
-			self.SetBackgorundColor(self.menuBackgroundColor)
-
-		elif tab == "game":
-
-			self.SetBackgorundColor(self.gameBackgorundColor)
-
-		if self.tab in self.objects:
+		if self.tab in self:
 			
-			if "cloud animation" in self.objects[self.tab]:
+			if "cloud animation" in self[self.tab]:
 
-				self.objects[self.tab]["cloud animation"].CreateClouds()
+				self[self.tab]["cloud animation"].CreateClouds()
 
 	def UpdateMoney(self) -> None:
 
@@ -763,7 +830,7 @@ class Game(Application):
 				building.lastTime = pygame.time.get_ticks()
 
 		#-# Money Text #-#
-		self.objects[self.tab]["money text"].UpdateText("Normal", str(self.money) + "$")
+		self[self.tab]["money text"].UpdateText("Normal", str(self.money) + "$")
 
 	def Draw(self) -> None:
 		

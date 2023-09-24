@@ -1,6 +1,8 @@
 #-# Import Packages #-#
 from images import *
 from scripts.tile import *
+from scripts.default.application import *
+from scripts.default.path import *
 
 ages = ["wood", "rock", "sand", "stone"]
 
@@ -107,6 +109,9 @@ class Buildings(list[Building]):
                     self.remove(building.newBuilding)
                     self.append(Building(building.level + 1, building.ageNumber, building.tile))
                     self.sort(key=lambda building: building.tile.columnNumber)
+                    
+                    sound = SoundPath("rollover2",)
+                    Application.PlaySound(sound)
 
                 else:
 

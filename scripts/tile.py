@@ -25,7 +25,7 @@ class Tile(object):
 		self.size = self.width, self.height = width, height
 		
 		
-		self.surface = self.unselectedSurface = self.image.surfaces["Normal"]
+		self.surface = self.unselectedSurface = self.image["Normal"]
 		self.selectedSurface = self.unselectedSurface.__copy__()
 		self.isEmpty = True
 
@@ -96,8 +96,8 @@ class Tiles(list[Tile]):
 
 	def __init__(self, size, maxSize) -> None:
 		
-		self.size = self.rowCount, self.columnCount = size
-		self.maxSize = self.maxRowCount, self.maxColumnCount = maxSize
+		self.size = self.rowCount = self.columnCount = size
+		self.maxSize = self.maxRowCount = self.maxColumnCount = maxSize
 
 		self.Create()
 

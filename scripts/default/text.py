@@ -5,13 +5,13 @@ from scripts.default.color import *
 
 class Text(Object):
 
-    def __init__(self, position, text, textSize, antialias=True, color=White, backgroundColor=None, fontPath = None, isCentered=True, status="Normal") -> None:
+    def __init__(self, position, text, textSize, antialias=True, color=White, backgroundColor=None, fontPath = None, isCentered=True, status="Normal", show=True) -> None:
         
         self.position = position
         self.isCentered = isCentered
         self.textArgs = {}
         
-        super().__init__(position)
+        super().__init__(position, show=show)
 
         self.AddText(status, text, textSize, antialias, color, backgroundColor, fontPath)
 
@@ -33,9 +33,9 @@ class Text(Object):
         
         super().SetStatus(status)
 
-        if self.isCentered and status in self.surfaces:
+        if self.isCentered and status in self:
             
-            rect = self.surfaces[status].get_rect(center=(surfacePosition[0] + surfaceSize[0]/2, surfacePosition[1] + surfaceSize[1]/2))
+            rect = self[status].get_rect(center=(surfacePosition[0] + surfaceSize[0]/2, surfacePosition[1] + surfaceSize[1]/2))
 
             self.SetPosition(rect.topleft)
 

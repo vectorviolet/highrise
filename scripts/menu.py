@@ -1,7 +1,7 @@
 #-# Import Packages #-#
 import pygame
 from images import *
-from scripts.default.menu_button import *
+from scripts.default.button import *
 from scripts.default.application import Application
 
 #-# Menu Class #-#
@@ -43,7 +43,7 @@ class Menu(pygame.Surface):
         #-# Title #-#
         self.title = Object(self.position, titleSize, {"Normal" : titleImagePath})
         self.titleText = Text(titleTextPosition, titleText, titleTextSize, False, titleTextColor, None, titleFontPath, isCentered=False)
-        self.titleText.Draw(self.title.surfaces["Normal"])
+        self.titleText.Draw(self.title["Normal"])
 
         #-# Button Panel #-#
         self.buttonPanelSize = [buttonSize[0] + space * 2, buttonSize[1]*buttonCount + (buttonCount + 3)*space]
@@ -53,19 +53,19 @@ class Menu(pygame.Surface):
         
         #-# Buttons #-#
         buttonSelectedSize = buttonSize[0], buttonSize[1] + buttonAdditionalSize
-        self.buttons = []
+        self.buttons = {}
         
         for i in range(buttonCount):
 
             buttonPosition = pygame.math.Vector2(space, space*(i+3/2) + buttonSize[1]*i)
             buttonScreenPosition = buttonPosition + self.buttonPanelPosition
             
-            self.buttons.append(MenuButton(buttonColor, buttonScreenPosition, buttonSelectedColor, buttonTexts[i], buttonTexts[i], buttonTextColor, buttonSelectedTextColor
-                                , buttonTextSize, buttonTextFontName, buttonSize, buttonSelectedSize))
+            self.buttons[buttonTexts[i]] = MenuButton(buttonColor, buttonScreenPosition, buttonSelectedColor, buttonTexts[i], buttonTexts[i], buttonTextColor, buttonSelectedTextColor
+                                , buttonTextSize, buttonTextFontName, buttonSize, buttonSelectedSize)
 
         if buttonCount > 0:
 
-            self.buttons[0].SetStatus("Selected")
+            list(self.buttons.values())[0].SetStatus("Selected")
 
         self.size = self.buttonPanelSize[0], self.buttonPanelSize[1] + titleSize[1] - space/2
 
@@ -76,11 +76,11 @@ class Menu(pygame.Surface):
         #-# Change the color of buttons if mouse over it #-#
         if event.type == pygame.MOUSEMOTION:
 
-            for i, button in enumerate(self.buttons):
+            for i, button in enumerate(self.buttons.values()):
 
                 if button.isMouseOver(mousePosition) and button.status != "Selected":
 
-                    for j, button2 in enumerate(self.buttons):
+                    for j, button2 in enumerate(self.buttons.values()):
 
                         if button2.status == "Selected":
                             
@@ -131,11 +131,8 @@ class Menu(pygame.Surface):
         surface.blit(self, self.position)
         self.title.Draw(surface)
         self.buttonPanel.Draw(surface)
-        
-        for button in self.buttons:
+
+        for button in self.buttons.values():
 
             button.Draw(surface)
-
-        
-
-        
+      

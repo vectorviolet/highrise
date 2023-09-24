@@ -5,11 +5,11 @@ from scripts.default.image import *
 from scripts.default.color import *
 
 #-# Object Class #-#
-class Object(object):
+class Object(dict[str : pygame.Surface]):
 
 	def __init__(self, position: tuple = ("CENTER", "CENTER"), size: tuple = (0, 0), imagePaths = {}, surfaceSize: tuple = None, screenPosition: tuple = None, show = True):
 		
-		self.surfaces = {}
+		super().__init__()
 		self.SetStatus(None)
 		
 		self.surfaceSize = surfaceSize
@@ -37,7 +37,7 @@ class Object(object):
 
 	def AddSurface(self, status: str, surface: pygame.Surface):
 		
-		self.surfaces[status] = surface
+		self[status] = surface
 
 		if not self.status:
 
@@ -63,15 +63,15 @@ class Object(object):
 
 			self.AddImages(self.imagePaths)
 
-			if len(self.surfaces) > 0:
+			if len(self) > 0:
 
-				if "Normal" in self.surfaces:
+				if "Normal" in self:
 
-					size = self.surfaces["Normal"].get_rect().size
+					size = self["Normal"].get_rect().size
 				
 				else:
 
-					size = list(self.surfaces.values())[0].get_rect().size
+					size = list(self.values())[0].get_rect().size
 
 				self.size = self.width, self.height = size
 			
@@ -155,15 +155,15 @@ class Object(object):
 
 	def HandleEvents(self, event, mousePosition):
 		
-		if "Mouse Click" in self.surfaces and self.isMouseClick(event, mousePosition):
+		if "Mouse Click" in self and self.isMouseClick(event, mousePosition):
 			
 			self.SetStatus("Mouse Click")
 
-		elif "Mouse Over" in self.surfaces and self.isMouseOver(mousePosition):
+		elif "Mouse Over" in self and self.isMouseOver(mousePosition):
 
 			self.SetStatus("Mouse Over")
 
-		elif "Normal" in self.surfaces:
+		elif "Normal" in self:
 
 			self.SetStatus("Normal")
 
@@ -189,8 +189,8 @@ class Object(object):
 
 		self.__Move()
 
-		if self.show and self.status in self.surfaces:
+		if self.show and self.status in self:
 				
-			surface.blit(self.surfaces[self.status], self.rect)
+			surface.blit(self[self.status], self.rect)
 
 		

@@ -2,16 +2,17 @@
 import pygame, sys, os
 from pygame import mixer
 
-from scripts.default.button import *
+from scripts.default.buttonxx import *
 from scripts.default.color import *
 from scripts.default.text import *
 from scripts.default.object import *
 
 #-# Application Class #-#
-class Application():
+class Application(dict[str : pygame.Surface]):
     
-    def __init__(self, title: str = "Game", size: tuple = (640, 480), backgroundColor: tuple = None, FPS: int = 60) -> None:
+    def __init__(self, title: str = "Game", size: tuple = (640, 480), backgroundColors: list = {}, FPS: int = 60) -> None:
         
+        super().__init__()
         self.InitPygame()
         self.InitClock()
         self.InitMixer()
@@ -19,8 +20,7 @@ class Application():
         self.SetSize(size)
         self.OpenWindow()
         self.SetFPS(FPS)
-        self.SetBackgorundColor(backgroundColor)
-        self.objects = {}
+        self.SetBackgorundColor(backgroundColors)
         self.tab = ""
 
     def Run(self) -> None:
@@ -55,9 +55,9 @@ class Application():
 
     def HandleEvents(self, event: pygame.event.Event) -> None:
 
-        if self.tab in self.objects:
+        if self.tab in self:
                         
-            for object in self.objects[self.tab].values():
+            for object in self[self.tab].values():
                 
                 object.HandleEvents(event, self.mousePosition)
 
@@ -93,6 +93,11 @@ class Application():
         mixer.music.load(soundPath)
         mixer.music.play()
 
+    def PlayMusic(self, soundPath):
+
+        mixer.Channel(0).play(mixer.Sound(soundPath), -1)
+        mixer.Channel(0).set_volume(0.2)
+
     def OpenWindow(self) -> None:
 
         self.window = pygame.display.set_mode(self.size)
@@ -114,21 +119,22 @@ class Application():
 
         self.size = self.width, self.height = size
 
-    def SetBackgorundColor(self, color: tuple) -> None:
+    def SetBackgorundColor(self, colors: list = {}) -> None:
 
-        self.backgroundColor = color
-
-    def CreateObject(self, tab: str, name: str, *args) -> None:
-        
-        newObject = Object(*args)
-        self.AddObject(tab, name, newObject)
+        self.backgroundColors = colors
 
     def AddObject(self, tab: str, name: str, object: Object) -> None:
         
         #-# Create Tab If not exist #-#
         self.AddTab(tab)
 
-        self.objects[tab][name] = object
+        self[tab][name] = object
+
+    # silinebilir
+    def CreateObject(self, tab: str, name: str, *args) -> None:
+        
+        newObject = Object(*args)
+        self.AddObject(tab, name, newObject)
 
     def CreateButton(self, tab: str, name: str, *args, **kwargs) -> None:
         
@@ -137,7 +143,7 @@ class Application():
         
         #-# Adding button to tab #-#
         newButton = Buttonxx(name, *args, **kwargs)
-        self.objects[tab][name] = newButton
+        self[tab][name] = newButton
 
     def CreateText(self, tab: str, name: str, position, text, textSize, antialias=True, color=White, backgorundColor=None, fontPath=None, isCentered=False, status="Normal") -> None:
         
@@ -146,14 +152,15 @@ class Application():
         
         #-# Adding button to tab #-#
         newText = Text(position, text, textSize, antialias, color, backgorundColor, fontPath, isCentered, status)
-        self.objects[tab][name] = newText
+        self[tab][name] = newText
+    # silinebilir
 
     def AddTab(self, name: str) -> None:
 
         #-# Creat Tab If not exist #-#
-        if not name in self.objects:
+        if not name in self:
 
-            self.objects[name] = {}
+            self[name] = {}
 
     def OpenTab(self, tab: str) -> None:
 
@@ -176,14 +183,14 @@ class Application():
     def Draw(self) -> None:
 
         #-# Fill Background #-#
-        if self.backgroundColor:
+        if self.tab in self.backgroundColors:
 
-            self.window.fill(self.backgroundColor)
+            self.window.fill(self.backgroundColors[self.tab])
 
         #-# Draw Objects #-#
-        if self.tab in self.objects:
+        if self.tab in self:
 
-            for object in self.objects[self.tab].values():
+            for object in self[self.tab].values():
                     
                 object.Draw(self.window)
 
