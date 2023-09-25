@@ -88,15 +88,23 @@ class Application(dict[str : pygame.Surface]):
         self.clock = pygame.time.Clock()
 
     @staticmethod
-    def PlaySound(soundPath: SoundPath) -> None:
+    def PlaySound(channel: int, soundPath: SoundPath, volume: float, loops=0) -> None:
 
-        mixer.music.load(soundPath)
-        mixer.music.play()
+        mixer.Channel(channel).play(mixer.Sound(soundPath), loops)
+        Application.SetVolume(channel, volume)
 
-    def PlayMusic(self, soundPath):
+    @staticmethod
+    def SetVolume(channel: int, volume: float):
 
-        mixer.Channel(0).play(mixer.Sound(soundPath), -1)
-        mixer.Channel(0).set_volume(0.2)
+        if volume < 0:
+
+            volume = 0
+
+        if volume > 1:
+
+            volume = 1
+
+        mixer.Channel(channel).set_volume(volume)
 
     def OpenWindow(self) -> None:
 

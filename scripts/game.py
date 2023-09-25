@@ -23,7 +23,7 @@ class Game(Application):
 
 		#-# Window Settings #-#
 		self.cursorSize = 25, 25
-		self.backgroundColors = {"menu" : Yellow, "settings" : Yellow, "developer" : Yellow, "game" : CustomBlue}
+		self.backgroundColors = {"menu" : Yellow, "settings" : Yellow, "display settings" : Yellow, "audio settings" : Yellow, "game settings" : Yellow, "developer" : Yellow, "game" : CustomBlue}
 		super().__init__("2048 GAME", (1440, 900), self.backgroundColors, 165)
 
 		#-# Game Settings #-#
@@ -31,6 +31,8 @@ class Game(Application):
 		self.maxSize = 7
 		self.maxBuildingLevel = 6
 		self.startingMoney = 10000
+		self.defaultMusicVolume = 1.00
+		self.defaultSFXVolume = 1.00
 
 		#endregion
 
@@ -41,22 +43,13 @@ class Game(Application):
 		self.fontPathThin = FontPath("kenvector_future_thin")
 
 		#-# Sound Paths #-#
+		self.backgroundMusicSoundPath = SoundPath("music", extension="mp3")
 		self.clickSoundPath = SoundPath("click")
 		self.goBackSoundPath = SoundPath("back")
 
 		#endregion
 
-		#region Menu
-
-		menuWidth, menuHeight = (440, 315)
-		menuPosition = (self.width - menuWidth) / 2, (self.height - menuHeight) / 2
-
-		self.mainMenu = Menu(menuPosition, ImagePath("blue3", "gui/buttons"), (440, 70), self.title, 30, White, self.fontPath, (118, 15), ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", ["START", "SETTINGS", "DEVELOPER", "EXIT"], 30, Gray, White, self.fontPath)
-		self.settingsMenu = Menu(menuPosition, ImagePath("blue3", "gui/buttons"), (440, 70), "SETTINGS", 30, White, self.fontPath, (128, 15), ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", ["DELETE DATA", "GO BACK"], 30, Gray, White, self.fontPath)
-
-		#endregion
-
-	def Run(self):
+	def Run(self) -> None:
 
 		#-# Set Cursor #-#
 		self.SetCursorVisible(False)
@@ -68,18 +61,116 @@ class Game(Application):
 		self.OpenTab("menu")
 
 		#-# Play Background Music #-#
-		self.PlayMusic(SoundPath("music", extension="mp3")) 
+		self.SetMusicVolume(self.musicVolume)
+		self.SetSFXVolume(self.SFXVolume)
+		self.PlayMusic(self.backgroundMusicSoundPath) 
 		
 		super().Run()
 
-	def AddObjects(self):
+	#region #-# Music #-#
 
-		self.AddObject("menu", "main menu", self.mainMenu)
+	def PlayMusic(self, soundPath: SoundPath):
+
+		self.PlaySound(0, soundPath, self.musicVolume, -1)
+
+	def SetMusicVolume(self, volume: float):
+
+		if volume < 0:
+
+			volume = 0
+		
+		if volume > 1:
+
+			volume = 1
+
+		self.musicVolume = volume
+		self["audio settings"]["music volume entry"].text.UpdateText("Normal", "%" + str(round(self.musicVolume*100)))
+		self.SetVolume(0, volume)
+
+	def PlaySFX(self, soundPath: SoundPath):
+
+		self.PlaySound(1, soundPath, self.SFXVolume)
+
+	def SetSFXVolume(self, volume: float):
+
+		if volume < 0:
+
+			volume = 0
+		
+		elif volume > 1:
+
+			volume = 1
+
+		self.buildings.SFXVolume = self[self.tab]["menu"].SFXVolume = self[self.tab]["menu"].SFXVolume = self[self.tab]["menu"] = self.SFXVolume = volume
+		self["audio settings"]["SFX volume entry"].text.UpdateText("Normal", "%" + str(round(self.SFXVolume*100)))
+		self.SetVolume(1, volume)
+
+	#endregion
+
+	def AddObjects(self) -> None:
+
+		#region #-# Menu tab #-#
+
+		self.AddObject("menu", "main menu", Menu(ImagePath("blue3", "gui/buttons"), self.title, 30, White, self.fontPath, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", ["START", "SETTINGS", "DEVELOPER", "EXIT"], 30, Gray, White, self.fontPath, self.size))
 		self.AddObject("menu", "cloud animation", CloudAnimation(self.size))
-		self.AddObject("settings", "settings menu", self.settingsMenu)
+		
+		#endregion
+
+		#region #-# Settings tab #-#
+
+		self.AddObject("settings", "settings menu", Menu(ImagePath("blue3", "gui/buttons"), "SETTINGS", 30, White, self.fontPath, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", ["DISPLAY SETTINGS", "AUDIO SETTINGS", "GAME SETTINGS", "GO BACK"], 30, Gray, White, self.fontPath, self.size))
 		self.AddObject("settings", "cloud animation", CloudAnimation(self.size))
 		
-		self.AddObject("developer", "credit panel", Object(((self.width - 300)/2, (self.height - 600)/2), (300, 600), {"Normal" : ImagePath("grey", "gui/panels")}))
+		#endregion
+
+		#region #-# Display Settings tab #-#
+
+		self.AddObject("display settings", "menu", Menu(ImagePath("blue3", "gui/buttons"), "AUDIO SETTINGS", 30, White, self.fontPath, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", [], 30, Gray, White, self.fontPath, self.size, 500))
+		self.AddObject("display settings", "information", Text(((self.width - 300)/2, (self.height - 600)/2 + 100), "THIS PAGE WILL COMING SOON...", 25, color=Black, isCentered=False))
+		self.AddObject("display settings", "go back button", Button((595, 670), (400, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, Black, Gray))
+		self.AddObject("display settings", "cloud animation", CloudAnimation(self.size))
+		
+		#endregion
+
+		#region #-# Audio Settings tab #-#
+
+		#-# Volume #-#
+		self.AddObject("audio settings", "menu", Menu(ImagePath("blue3", "gui/buttons"), "AUDIO SETTINGS", 30, White, self.fontPath, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", [], 30, Gray, White, self.fontPath, self.size, 500))
+		self.AddObject("audio settings", "music volume text", Text((610, 290), "MUSIC VOLUME", 25, color=Gray, fontPath=self.fontPath, isCentered=False))
+		self.AddObject("audio settings", "music volume minus button", Button((600, 340), (36, 36), {"Normal" : ImagePath("blue_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}))
+		self.AddObject("audio settings", "music volume entry", Button((645, 340), (150, 35), {"Normal" : ImagePath("grey8", "gui/buttons")}, "%100", textSize=25, textColor=Gray, textFontPath=self.fontPath))
+		self.AddObject("audio settings", "music volume plus button", Button((814, 340), (36, 36), {"Normal" : ImagePath("blue_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}))
+		self["audio settings"]["music volume minus button"]["Normal"].blit(Images(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
+		self["audio settings"]["music volume minus button"]["Mouse Over"].blit(Images(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
+		self["audio settings"]["music volume plus button"]["Normal"].blit(Images(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
+		self["audio settings"]["music volume plus button"]["Mouse Over"].blit(Images(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
+
+		self.AddObject("audio settings", "SFX volume text", Text((580, 460), "SOUND FX VOLUME", 25, color=Gray, fontPath=self.fontPath, isCentered=False))
+		self.AddObject("audio settings", "SFX volume minus button", Button((600, 510), (36, 36), {"Normal" : ImagePath("blue_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}))
+		self.AddObject("audio settings", "SFX volume entry", Button((645, 510), (150, 35), {"Normal" : ImagePath("grey8", "gui/buttons")}, "%100", textSize=25, textColor=Gray, textFontPath=self.fontPath))
+		self.AddObject("audio settings", "SFX volume plus button", Button((814, 510), (36, 36), {"Normal" : ImagePath("blue_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}))
+		self["audio settings"]["SFX volume minus button"]["Normal"].blit(Images(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
+		self["audio settings"]["SFX volume minus button"]["Mouse Over"].blit(Images(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
+		self["audio settings"]["SFX volume plus button"]["Normal"].blit(Images(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
+		self["audio settings"]["SFX volume plus button"]["Mouse Over"].blit(Images(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
+
+		self.AddObject("audio settings", "cancel button", Button((570, 620), (150, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "CANCEL", "", 28, White, Gray, self.fontPath))
+		self.AddObject("audio settings", "save button", Button((735, 620), (150, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "SAVE", "", 28, White, Gray, self.fontPath))
+		self.AddObject("audio settings", "cloud animation", CloudAnimation(self.size))
+
+		#endregion
+
+		#region #-# Game Settings tab #-#
+
+		self.AddObject("game settings", "menu", Menu(ImagePath("blue3", "gui/buttons"), "AUDIO SETTINGS", 30, White, self.fontPath, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", ["DELETE DATA"], 30, Gray, White, self.fontPath, self.size, 500))
+		self.AddObject("game settings", "go back button", Button((595, 670), (400, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, Black, Gray))
+		self.AddObject("game settings", "cloud animation", CloudAnimation(self.size))
+
+		#endregion
+
+		#region #-# Developer tab #-#
+
+		self.AddObject("developer", "panel", Object(((self.width - 300)/2, (self.height - 600)/2), (300, 600), {"Normal" : ImagePath("grey", "gui/panels")}))
 		self.AddObject("developer", "photo", Object(("CENTER", 180), (100, 100), {"Normal" : ImagePath("cv", "gui/others")}, self.size))
 		self.AddObject("developer", "name", Text((640, 290), "Umutcan Ekinci", 30, color=Black, isCentered=False))
 		self.AddObject("developer", "nickname", Text((675, 310), "LordCh4os", 25, color=Gray, isCentered=False))
@@ -100,6 +191,11 @@ class Game(Application):
 		self["developer"]["youtube"]["Normal"].blit(Images(ImagePath("youtube", "gui/others"), (32, 32)), (105, 5))
 
 		self.AddObject("developer", "cloud animation", CloudAnimation(self.size))
+
+		#endregion
+		
+		#region #-# Game tab #-#
+
 		self.AddObject("game", "clouds", GameClouds(self.cloudCount, self.size))
 		self.AddObject("game", "game panel", Object((20, self.height - 100 - 20), (1400, 100), {"Normal" : ImagePath("grey", "gui/panels")}))
 		self.AddObject("game", "info mode button", Button((100, 800), (60, 60),  {"On" : ImagePath("green", "gui/buttons"), "Off" : ImagePath("red", "gui/buttons")}))
@@ -110,6 +206,7 @@ class Game(Application):
 		self.AddObject("game", "money text", Text((1180, 810), "", 55, color=Green, backgroundColor=Black, isCentered=False))
 		self.AddObject("game", "tiles", self.tiles)
 		self.AddObject("game", "buildings", self.buildings)
+
 		self.AddObject("game", "info panel", Object(((self.width - 250)/2, (self.height - 400)/2), (250, 400), {"Normal" : ImagePath("grey", "gui/panels")}, show=False))
 		self.AddObject("game", "info panel level text", Text(((self.width - 250)/2 + 90, (self.height - 400)/2 + 35), "Level: ", 15, True, Gray, fontPath=self.fontPathThin, isCentered=False, show=False))
 		self.AddObject("game", "info panel speed text", Text(((self.width - 250)/2 + 90, (self.height - 400)/2 + 50), "Speed: ", 15, True, Gray, fontPath=self.fontPathThin, isCentered=False, show=False))
@@ -118,6 +215,7 @@ class Game(Application):
 		self.AddObject("game", "info panel building image", Object(((self.width - 250)/2 + 20, (self.height - 400)/2 + 20), (65, 89), show=False))
 		self.AddObject("game", "info panel sell button", Button(((self.width - 250)/2 + 20, (self.height - 400)/2 + 325), (210, 50), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("red", "gui/buttons")}, "SELL", "", 25, show=False))
 		self.AddObject("game", "info panel close button", Button(((self.width - 250)/2 + 250 - 20, (self.height - 400)/2 - 12), None, {"Normal" : ImagePath("red_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}, show=False))
+		
 		self.AddObject("game", "cloud animation", CloudAnimation(self.size))
 		
 		self["game"]["info mode button"].SetStatus("Off")
@@ -127,13 +225,15 @@ class Game(Application):
 		self.SetAge(self.buildings.ageNumber)
 		self.UpdateButtonTexts()
 
-	def GetDatasFromDatabase(self):
+		#endregion
+	
+	def GetDatasFromDatabase(self) -> None:
 
 		self.database = Database("database")
 	
 		if self.database.Connect():
 
-			sqlCode = "CREATE TABLE IF NOT EXISTS game(age_number INTEGER, size INTEGER, money INTEGER)"
+			sqlCode = "CREATE TABLE IF NOT EXISTS game(age_number INTEGER, size INTEGER, money INTEGER, music_volume INTEGER, sfx_volume INTEGER)"
 			self.database.Execute(sqlCode)
 			self.database.Commit()
 			self.database.Disconnect()
@@ -146,7 +246,7 @@ class Game(Application):
 
 				if not gameData:
 
-					sqlCode = "INSERT INTO game(age_number, size, money) VALUES(0, 2, "+str(self.startingMoney)+")"
+					sqlCode = "INSERT INTO game(age_number, size, money, music_volume, sfx_volume) VALUES(0, 2, "+str(self.startingMoney)+", "+str(self.defaultMusicVolume)+", "+str(self.defaultSFXVolume)+")"
 					self.database.Execute(sqlCode)
 					self.database.Commit()
 					self.database.Disconnect()
@@ -160,10 +260,9 @@ class Game(Application):
 
 						self.Exit()
 
-				ageNumber, size, money = gameData[0]
+				ageNumber, size, self.money, self.musicVolume, self.SFXVolume  = gameData[0]
 
 				self.tiles = Tiles(size, self.maxSize)
-				self.money = money
 
 				self.database.Execute("CREATE TABLE IF NOT EXISTS buildings(level INTEGER, row INTEGER, column INTEGER)")
 				self.database.Commit()
@@ -174,7 +273,7 @@ class Game(Application):
 					data = self.database.Execute("SELECT * FROM buildings")
 					buildings = data.fetchall()
 
-					self.buildings = Buildings()
+					self.buildings = Buildings(self.SFXVolume)
 					self.buildings.ageNumber = ageNumber
 
 					for building in buildings:
@@ -195,7 +294,7 @@ class Game(Application):
 
 			self.Exit()
 
-	def DeleteData(self):
+	def DeleteData(self) -> None:
 
 		if self.database.Connect():
 
@@ -219,7 +318,7 @@ class Game(Application):
 
 			self.Exit()
 
-	def UpdateButtonTexts(self):
+	def UpdateButtonTexts(self) -> None:
 
 		if self.tiles.isMaxSize():
 
@@ -286,7 +385,7 @@ class Game(Application):
 					building.tile = self.tiles[building.tile.rowNumber - 1][building.tile.columnNumber - 1]
 
 				self.UpdateButtonTexts()
-				self.PlaySound(self.clickSoundPath)
+				self.PlaySFX(self.clickSoundPath)
 	
 	def SetAge(self, ageNumber) -> None:
 		
@@ -301,14 +400,14 @@ class Game(Application):
 			
 			self.money -= self.buildings.GetAgeCost()
 			self.SetAge(self.buildings.ageNumber + 1)
-			self.PlaySound(self.clickSoundPath)
+			self.PlaySFX(self.clickSoundPath)
 
 	def HandleExitEvents(self, event) -> None:
 		
 		#-# Go back if escape button pressed #-#
 		if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
 				
-			self.PlaySound(self.goBackSoundPath)
+			self.PlaySFX(self.goBackSoundPath)
 
 			if self.tab == "menu":
 
@@ -317,6 +416,20 @@ class Game(Application):
 			elif self.tab == "settings":
 
 				self.OpenTab("menu")
+
+			elif self.tab == "display settings":
+
+				self.OpenTab("settings")
+
+			elif self.tab == "audio settings":
+
+				self.SetMusicVolume(self.oldMusicVolume)
+				self.SetSFXVolume(self.oldSFXVolume)
+				self.OpenTab("settings")
+
+			elif self.tab == "game settings":
+
+				self.OpenTab("settings")
 
 			elif self.tab == "developer":
 
@@ -376,45 +489,45 @@ class Game(Application):
 			#-# Control click button events with space button #-#
 			if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
 
-				if self.mainMenu.buttons["START"].status == "Selected":
+				if self[self.tab]["menu"].buttons["START"].status == "Selected":
 
-					self.PlaySound(self.clickSoundPath)
+					self.PlaySFX(self.clickSoundPath)
 					self.OpenTab("game")
 
-				elif self.mainMenu.buttons["SETTINGS"].status == "Selected":
+				elif self[self.tab]["menu"].buttons["SETTINGS"].status == "Selected":
 
-					self.PlaySound(self.clickSoundPath)
+					self.PlaySFX(self.clickSoundPath)
 					self.OpenTab("settings")
 
-				elif self.mainMenu.buttons["DEVELOPER"].status == "Selected":
+				elif self[self.tab]["menu"].buttons["DEVELOPER"].status == "Selected":
 
-					self.PlaySound(self.clickSoundPath)
+					self.PlaySFX(self.clickSoundPath)
 					self.OpenTab("developer")
 
-				elif self.mainMenu.buttons["EXIT"].status == "Selected":
+				elif self[self.tab]["menu"].buttons["EXIT"].status == "Selected":
 
-					self.PlaySound(self.clickSoundPath)
+					self.PlaySFX(self.clickSoundPath)
 					self.Exit()
 
 			#-# Control click button events with mouse #-#
-			if self.mainMenu.buttons["START"].isMouseClick(event, self.mousePosition):
+			if self[self.tab]["menu"].buttons["START"].isMouseClick(event, self.mousePosition):
 
-				self.PlaySound(self.clickSoundPath)
+				self.PlaySFX(self.clickSoundPath)
 				self.OpenTab("game")
 
-			elif self.mainMenu.buttons["SETTINGS"].isMouseClick(event, self.mousePosition):
+			elif self[self.tab]["menu"].buttons["SETTINGS"].isMouseClick(event, self.mousePosition):
 
-				self.PlaySound(self.clickSoundPath)
+				self.PlaySFX(self.clickSoundPath)
 				self.OpenTab("settings")
 
-			elif self.mainMenu.buttons["DEVELOPER"].isMouseClick(event, self.mousePosition):
+			elif self[self.tab]["menu"].buttons["DEVELOPER"].isMouseClick(event, self.mousePosition):
 
-				self.PlaySound(self.clickSoundPath)
+				self.PlaySFX(self.clickSoundPath)
 				self.OpenTab("developer")
 
-			elif self.mainMenu.buttons["EXIT"].isMouseClick(event, self.mousePosition):
+			elif self[self.tab]["menu"].buttons["EXIT"].isMouseClick(event, self.mousePosition):
 
-				self.PlaySound(self.goBackSoundPath)
+				self.PlaySFX(self.goBackSoundPath)
 				self.Exit()
 
 		elif self.tab == "settings":
@@ -424,72 +537,156 @@ class Game(Application):
 
 				if event.key == pygame.K_SPACE:
 
-					if self.settingsMenu.buttons["DELETE DATA"].status == "Selected":
+					if self[self.tab]["menu"].buttons["DISPLAY SETTINGS"].status == "Selected":
 
-						self.PlaySound(self.clickSoundPath)
+						self.PlaySFX(self.clickSoundPath)
+						self.OpenTab("display settings")
+
+					elif self[self.tab]["menu"].buttons["AUDIO SETTINGS"].status == "Selected":
+
+						self.oldMusicVolume, self.oldSFXVolume = self.musicVolume, self.SFXVolume
+						self.PlaySFX(self.clickSoundPath)
+						self.OpenTab("audio settings")
+
+					elif self[self.tab]["menu"].buttons["GAME SETTINGS"].status == "Selected":
+
+						self.PlaySFX(self.clickSoundPath)
+						self.OpenTab("game settings")
+
+					elif self[self.tab]["menu"].buttons["DELETE DATA"].status == "Selected":
+
+						self.PlaySFX(self.clickSoundPath)
 						self.OpenTab("menu")
 
 						self.DeleteData()
 						self.GetDatasFromDatabase()
 						self.AddObjects()
 
-					elif self.settingsMenu.buttons["GO BACK"].status == "Selected":
+					elif self[self.tab]["menu"].buttons["GO BACK"].status == "Selected":
 
-						self.PlaySound(self.clickSoundPath)
+						self.PlaySFX(self.clickSoundPath)
 						self.OpenTab("menu")
 
 			#-# Control click button events with mouse #-#
-			elif event.type == pygame.MOUSEBUTTONUP:
+
+			if self[self.tab]["menu"].buttons["DISPLAY SETTINGS"].isMouseClick(event, self.mousePosition):
+
+				self.PlaySFX(self.clickSoundPath)
+				self.OpenTab("display settings")
+
+			elif self[self.tab]["menu"].buttons["AUDIO SETTINGS"].isMouseClick(event, self.mousePosition):
+
+				self.oldMusicVolume, self.oldSFXVolume = self.musicVolume, self.SFXVolume
+				self.PlaySFX(self.clickSoundPath)
+				self.OpenTab("audio settings")
+
+			elif self[self.tab]["menu"].buttons["GAME SETTINGS"].isMouseClick(event, self.mousePosition):
+
+				self.PlaySFX(self.clickSoundPath)
+				self.OpenTab("game settings")
+
+			elif self.self[self.tab]["menu"].buttons["DELETE DATA"].isMouseClick(event, self.mousePosition):
+
+				self.PlaySFX(self.clickSoundPath)
+				self.OpenTab("menu")
+
+				self.DeleteData()
+				self.GetDatasFromDatabase()
+				self.AddObjects()
 				
-				if self.settingsMenu.buttons["DELETE DATA"].status == "Selected":
+			elif self[self.tab]["menu"].buttons["GO BACK"].isMouseClick(event, self.mousePosition):
 
-					self.PlaySound(self.clickSoundPath)
-					self.OpenTab("menu")
+				self.PlaySFX(self.clickSoundPath)
+				self.OpenTab("menu")
 
-					self.DeleteData()
-					self.GetDatasFromDatabase()
-					self.AddObjects()
-					
-				elif self.settingsMenu.buttons["GO BACK"].status == "Selected":
+		elif self.tab == "audio settings":
 
-					self.PlaySound(self.clickSoundPath)
-					self.OpenTab("menu")
+			if self[self.tab]["music volume plus button"].isMouseClick(event, self.mousePosition):
+
+				if self.musicVolume != 1.0:
+
+					self.SetMusicVolume(self.musicVolume + 0.1)
+
+			elif self[self.tab]["music volume minus button"].isMouseClick(event, self.mousePosition):
+
+				if self.musicVolume > 0.0:
+
+					self.SetMusicVolume(self.musicVolume - 0.1)
+
+			elif self[self.tab]["SFX volume plus button"].isMouseClick(event, self.mousePosition):
+
+				if self.SFXVolume != 1.0:
+
+					self.SetSFXVolume(self.SFXVolume + 0.1)
+
+			elif self[self.tab]["SFX volume minus button"].isMouseClick(event, self.mousePosition):
+
+				if self.SFXVolume > 0.0:
+
+					self.SetSFXVolume(self.SFXVolume - 0.1)
+
+			elif self[self.tab]["cancel button"].isMouseClick(event, self.mousePosition):
+
+				self.SetMusicVolume(self.oldMusicVolume)
+				self.SetSFXVolume(self.oldSFXVolume)
+				self.PlaySFX(self.goBackSoundPath)
+				self.OpenTab("settings")
+
+			elif self[self.tab]["save button"].isMouseClick(event, self.mousePosition):
+
+				#region #-# Save Audio Settings to database #-#
+
+				if self.database.Connect():
+
+					sqlCode = "UPDATE game SET music_volume='"+str(self.musicVolume)+"', sfx_volume='"+str(self.SFXVolume)+"'"
+					self.database.Execute(sqlCode)
+					self.database.Commit()
+					self.database.Disconnect()
+
+				else:
+
+					self.Exit()
+				
+				#endregion
+
+				self.PlaySFX(self.goBackSoundPath)
+				self.OpenTab("settings")
 
 		elif self.tab == "developer":
 			
 			if self[self.tab]["github"].isMouseClick(event, self.mousePosition):
 
-				self.PlaySound(self.clickSoundPath)
+				self.PlaySFX(self.clickSoundPath)
 				webbrowser.open("https://www.github.com/LordCh4os/")
 
 			elif self[self.tab]["linkedin"].isMouseClick(event, self.mousePosition):
 
-				self.PlaySound(self.clickSoundPath)
+				self.PlaySFX(self.clickSoundPath)
 				webbrowser.open("https://www.linkedin.com/in/umutcan-ekinci-b5435a108/")
 
 			elif self[self.tab]["instagram"].isMouseClick(event, self.mousePosition):
 
-				self.PlaySound(self.clickSoundPath)
+				self.PlaySFX(self.clickSoundPath)
 				webbrowser.open("https://www.instagram.com/umut_ekinci_/")
 
 			elif self[self.tab]["facebook"].isMouseClick(event, self.mousePosition):
 
-				self.PlaySound(self.clickSoundPath)
+				self.PlaySFX(self.clickSoundPath)
 				webbrowser.open("https://www.facebook.com/nmuetn/")
 
 			elif self[self.tab]["x"].isMouseClick(event, self.mousePosition):
 
-				self.PlaySound(self.clickSoundPath)
+				self.PlaySFX(self.clickSoundPath)
 				webbrowser.open("https://twitter.com/muetnmuetn/")
 
 			elif self[self.tab]["youtube"].isMouseClick(event, self.mousePosition):
 
-				self.PlaySound(self.clickSoundPath)
+				self.PlaySFX(self.clickSoundPath)
 				webbrowser.open("https://www.youtube.com/channel/UC1ma8tkbaD-xxJ4tgSxDthg/")
 			
 			elif self[self.tab]["go back button"].isMouseClick(event, self.mousePosition):
 			
-				self.PlaySound(self.clickSoundPath)
+				self.PlaySFX(self.clickSoundPath)
 				self.OpenTab("menu")
 
 		elif self.tab == "game":
@@ -502,15 +699,16 @@ class Game(Application):
 					self.buildings.remove(self.infoBuilding)
 					self.money += self.infoBuilding.sellPrice
 					self.CloseInfoPanel()
-					self.PlaySound(self.goBackSoundPath)
+					self.PlaySFX(self.goBackSoundPath)
 					self.UpdateButtonTexts()
 				
 				#-# close info panel #-#
 				elif self["game"]["info panel close button"].isMouseClick(event, self.mousePosition):
 
 					self.CloseInfoPanel()
-					self.PlaySound(self.goBackSoundPath)
+					self.PlaySFX(self.goBackSoundPath)
 					self.ControlSelectingTile()
+			
 			else:
 
 				#-# Select tile if mouse over it #-#
@@ -527,7 +725,7 @@ class Game(Application):
 
 						self[self.tab]["info mode button"].SetStatus("On")
 					
-					self.PlaySound(self.clickSoundPath)
+					self.PlaySFX(self.clickSoundPath)
 
 				#-# Open building info if tile is clicked #-#
 				if self["game"]["info mode button"].status == "On" and event.type == pygame.MOUSEBUTTONUP:
@@ -543,7 +741,7 @@ class Game(Application):
 									if building.tile == tile:
 
 										self.OpenInfoPanel(building)
-										self.PlaySound(self.clickSoundPath)
+										self.PlaySFX(self.clickSoundPath)
 
 										break
 								break
@@ -608,7 +806,7 @@ class Game(Application):
 		self[self.tab]["info panel sell button"].Show()
 		self[self.tab]["info panel building image"].Show()
 
-	def CloseInfoPanel(self):
+	def CloseInfoPanel(self) -> None:
 
 		self[self.tab]["info panel"].Hide()
 		self[self.tab]["info panel level text"].Hide()
@@ -749,7 +947,7 @@ class Game(Application):
 
 			self.buildings.sort(key=lambda building: building.tile.columnNumber)
 
-	def AddBuilding(self, level, rowNumber, columnNumber):
+	def AddBuilding(self, level, rowNumber, columnNumber) -> None:
 
 		newBuilding = Building(level, self.buildings.ageNumber, self.tiles[rowNumber - 1][columnNumber - 1])
 		self.buildings.append(newBuilding)
@@ -800,7 +998,7 @@ class Game(Application):
 
 				self.AddBuilding(1, rowNumber, columnNumber)
 				self.money -= self.buildings.GetBuildCost()
-				self.PlaySound(self.clickSoundPath)
+				self.PlaySFX(self.clickSoundPath)
 				
 			else:
 

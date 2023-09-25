@@ -69,9 +69,10 @@ class Building(Object):
 
 class Buildings(list[Building]):
 
-    def __init__(self) -> None:
+    def __init__(self, SFXVolume: 100) -> None:
 
         self.maxAgeNumber = len(ages) - 1
+        self.SFXVolume = SFXVolume
 
         super().__init__()
 
@@ -111,7 +112,7 @@ class Buildings(list[Building]):
                     self.sort(key=lambda building: building.tile.columnNumber)
                     
                     sound = SoundPath("rollover2",)
-                    Application.PlaySound(sound)
+                    Application.PlaySound(1, sound, self.SFXVolume)
 
                 else:
 

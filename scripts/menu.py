@@ -9,65 +9,74 @@ class Menu(pygame.Surface):
 
     def __init__(
             self,
-            position: tuple,
+
             titleImagePath: FilePath,
-            titleSize: tuple,
             titleText: str,
             titleTextSize: int,
             titleTextColor: tuple,
             titleFontPath: FontPath,
-            titleTextPosition: tuple,
+            panelImagePath: FilePath,
 
-            buttonPanelImagePath: FilePath,
             buttonSize: tuple,
             buttonColor: tuple,
             buttonSelectedColor,
-            buttonTexts : tuple,
-            buttonTextSize,
+            buttonTexts: tuple,
+            buttonTextSize: int,
             buttonTextColor: tuple,
             buttonSelectedTextColor: tuple,
-            buttonTextFontName: str
+            buttonTextFontPath: str,
+
+            screenSize: tuple,
+            panelHeight: tuple = None,
+            SFXVolume: int = 100
+
             ) -> None:
         
-
+        self.SFXVolume = SFXVolume
         space = 20 # space between objects
         buttonAdditionalSize = 15
-        buttonCount = len(buttonTexts)
+        self.buttonCount = len(buttonTexts)
         
-        self.position = pygame.math.Vector2(position)
+        self.titleSize = buttonSize[0] + space * 2, 70
+        self.panelSize = buttonSize[0] + space * 2, buttonSize[1]*self.buttonCount + (self.buttonCount + 3)*space
         
+        if panelHeight:
+            
+            self.panelSize = self.panelSize[0], panelHeight
+
+        self.size = self.titleSize[0], self.titleSize[1] + self.panelSize[1] - space/2
+
+        self.position = (screenSize[0] - self.size[0]) / 2, (screenSize[1] - self.size[1]) / 2
+        self.panelPosition = self.position[0], self.position[1] + self.titleSize[1] - space/2
+
         #-# Sound Paths #-#
         self.switchUpSoundPath = SoundPath("switchUp")
         self.switchDownSoundPath = SoundPath("switchDown")
 
         #-# Title #-#
-        self.title = Object(self.position, titleSize, {"Normal" : titleImagePath})
-        self.titleText = Text(titleTextPosition, titleText, titleTextSize, False, titleTextColor, None, titleFontPath, isCentered=False)
-        self.titleText.Draw(self.title["Normal"])
+        self.title = Button(self.position, self.titleSize, {"Normal" : titleImagePath}, titleText, "", titleTextSize, titleTextColor, White, titleFontPath)
 
-        #-# Button Panel #-#
-        self.buttonPanelSize = [buttonSize[0] + space * 2, buttonSize[1]*buttonCount + (buttonCount + 3)*space]
-        self.buttonPanelPosition = self.position[0], self.position[1] + titleSize[1] - space/2
-
-        self.buttonPanel = Object(self.buttonPanelPosition, self.buttonPanelSize, {"Normal" : buttonPanelImagePath})
+        #-# Panel #-#
+        self.panel = Object(self.panelPosition, self.panelSize, {"Normal" : panelImagePath})
         
         #-# Buttons #-#
-        buttonSelectedSize = buttonSize[0], buttonSize[1] + buttonAdditionalSize
         self.buttons = {}
-        
-        for i in range(buttonCount):
 
-            buttonPosition = pygame.math.Vector2(space, space*(i+3/2) + buttonSize[1]*i)
-            buttonScreenPosition = buttonPosition + self.buttonPanelPosition
+        if self.buttonCount:
+
+            buttonSelectedSize = buttonSize[0], buttonSize[1] + buttonAdditionalSize
             
-            self.buttons[buttonTexts[i]] = MenuButton(buttonColor, buttonScreenPosition, buttonSelectedColor, buttonTexts[i], buttonTexts[i], buttonTextColor, buttonSelectedTextColor
-                                , buttonTextSize, buttonTextFontName, buttonSize, buttonSelectedSize)
+            
+            for i in range(self.buttonCount):
 
-        if buttonCount > 0:
+                buttonPosition = pygame.math.Vector2(space, space*(i+3/2) + buttonSize[1]*i)
+                buttonScreenPosition = buttonPosition + self.panelPosition
+                
+                self.buttons[buttonTexts[i]] = MenuButton(buttonColor, buttonScreenPosition, buttonSelectedColor, buttonTexts[i], buttonTexts[i], buttonTextColor, buttonSelectedTextColor
+                                    , buttonTextSize, buttonTextFontPath, buttonSize, buttonSelectedSize)
+
 
             list(self.buttons.values())[0].SetStatus("Selected")
-
-        self.size = self.buttonPanelSize[0], self.buttonPanelSize[1] + titleSize[1] - space/2
 
         super().__init__(self.size, pygame.SRCALPHA)
 
@@ -86,11 +95,11 @@ class Menu(pygame.Surface):
                             
                             if j > i:
 
-                                Application.PlaySound(self.switchDownSoundPath)
+                                Application.PlaySound(1, self.switchDownSoundPath, self.SFXVolume)
 
                             else:
 
-                                Application.PlaySound(self.switchUpSoundPath)
+                                Application.PlaySound(1, self.switchUpSoundPath, self.SFXVolume)
 
                             button.SetStatus("Selected")
                             button2.SetStatus("Unselected")
@@ -102,26 +111,26 @@ class Menu(pygame.Surface):
   
             if event.key == pygame.K_w or event.key == pygame.K_UP:
 
-                for i, button in enumerate(self.buttons):
+                for i, button in enumerate(self.buttons.values()):
                             
                     if button.status == "Selected" and i != 0:
                         
-                        Application.PlaySound(self.switchUpSoundPath)
+                        Application.PlaySound(self.switchUpSoundPath, self.SFXVolume)
 
-                        self.buttons[i-1].SetStatus("Selected")
+                        self.buttons[list(self.buttons.keys())[i-1]].SetStatus("Selected")
                         button.SetStatus("Unselected")
 
                         break
 
             elif event.key == pygame.K_s or event.key == pygame.K_DOWN:
 
-                for i, button in enumerate(self.buttons):
+                for i, button in enumerate(self.buttons.values()):
                             
                     if button.status == "Selected" and i != len(self.buttons) - 1:
                         
-                        Application.PlaySound(self.switchDownSoundPath)
+                        Application.PlaySound(self.switchDownSoundPath, self.SFXVolume)
 
-                        self.buttons[i+1].SetStatus("Selected")
+                        self.buttons[list(self.buttons.keys())[i+1]].SetStatus("Selected")
                         button.SetStatus("Unselected")
 
                         break
@@ -130,7 +139,7 @@ class Menu(pygame.Surface):
 
         surface.blit(self, self.position)
         self.title.Draw(surface)
-        self.buttonPanel.Draw(surface)
+        self.panel.Draw(surface)
 
         for button in self.buttons.values():
 
