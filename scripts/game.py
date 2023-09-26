@@ -850,7 +850,7 @@ class Game(Application):
 
 		for building in self.buildings:
 			
-			if not building.velocity == Vector2(0, 0):
+			if not building.velocity == pygame.math.Vector2(0, 0):
 				isBuildingsMoving = True
 				break
 
@@ -993,7 +993,7 @@ class Game(Application):
 
 		for building in self.buildings:
 
-			if not building.velocity == Vector2(0, 0):
+			if not building.velocity == pygame.math.Vector2(0, 0):
 
 				isBuildingsMoving = True
 
