@@ -1,18 +1,30 @@
-#-# Import Packages #-#
-import pygame
-from random import choice
-import webbrowser
-from scripts.default.application import *
-from scripts.default.database import *
-from scripts.default.button import *
-from scripts.default.color import *
-from scripts.default.object import *
-from scripts.default.path import *
-from scripts.default.text import *
-from scripts.building import *
-from scripts.cloud import *
-from scripts.menu import *
-from scripts.tile import *
+#region #-# Import Packages #-#
+
+try:
+
+	import pygame
+	from random import choice
+	import webbrowser
+
+	from scripts.default.application import Application
+	from scripts.default.database import Database
+	from scripts.default.button import Button
+	from scripts.default.color import *
+	from scripts.default.object import Object
+	from scripts.default.image import GetImage
+	from scripts.default.path import *
+	from scripts.default.text import Text
+
+	from scripts.building import Building, Buildings
+	from scripts.cloud import CloudAnimation, GameClouds
+	from scripts.menu import Menu
+	from scripts.tile import Tiles
+
+except Exception as error:
+
+	print("An error occured during importing packages:", error)
+
+#endregion
 
 #-# Game Class #-#
 class Game(Application):
@@ -56,7 +68,7 @@ class Game(Application):
 		self.SetCursorImage(Object((0, 0), self.cursorSize, {"Normal" : ImagePath("cursor")}))
 
 		#-# Start The Application #-#
-		self.GetDatasFromDatabase()
+		self.GetData()
 		self.AddObjects()
 		self.OpenTab("menu")
 
@@ -69,11 +81,11 @@ class Game(Application):
 
 	#region #-# Music #-#
 
-	def PlayMusic(self, soundPath: SoundPath):
+	def PlayMusic(self, soundPath: SoundPath) -> None:
 
 		self.PlaySound(0, soundPath, self.musicVolume, -1)
 
-	def SetMusicVolume(self, volume: float):
+	def SetMusicVolume(self, volume: float) -> None:
 
 		if volume < 0:
 
@@ -83,15 +95,15 @@ class Game(Application):
 
 			volume = 1
 
-		self.musicVolume = volume
+		self.musicVolume = self["menu"]["menu"].SFXVolume = self["settings"]["menu"].SFXVolume = self["audio settings"]["menu"].SFXVolume = self.SFXVolume = volume
 		self["audio settings"]["music volume entry"].text.UpdateText("Normal", "%" + str(round(self.musicVolume*100)))
 		self.SetVolume(0, volume)
 
-	def PlaySFX(self, soundPath: SoundPath):
+	def PlaySFX(self, soundPath: SoundPath) -> None:
 
 		self.PlaySound(1, soundPath, self.SFXVolume)
 
-	def SetSFXVolume(self, volume: float):
+	def SetSFXVolume(self, volume: float) -> None:
 
 		if volume < 0:
 
@@ -101,7 +113,7 @@ class Game(Application):
 
 			volume = 1
 
-		self.buildings.SFXVolume = self[self.tab]["menu"].SFXVolume = self[self.tab]["menu"].SFXVolume = self[self.tab]["menu"] = self.SFXVolume = volume
+		self.buildings.SFXVolume = self["menu"]["menu"].SFXVolume = self["settings"]["menu"].SFXVolume = self["audio settings"]["menu"].SFXVolume = self.SFXVolume = volume
 		self["audio settings"]["SFX volume entry"].text.UpdateText("Normal", "%" + str(round(self.SFXVolume*100)))
 		self.SetVolume(1, volume)
 
@@ -111,23 +123,23 @@ class Game(Application):
 
 		#region #-# Menu tab #-#
 
-		self.AddObject("menu", "main menu", Menu(ImagePath("blue3", "gui/buttons"), self.title, 30, White, self.fontPath, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", ["START", "SETTINGS", "DEVELOPER", "EXIT"], 30, Gray, White, self.fontPath, self.size))
+		self.AddObject("menu", "menu", Menu(ImagePath("blue3", "gui/buttons"), self.title, 30, White, self.fontPath, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", ["START", "SETTINGS", "DEVELOPER", "EXIT"], 30, Gray, White, self.fontPath, self.size))
 		self.AddObject("menu", "cloud animation", CloudAnimation(self.size))
 		
 		#endregion
 
 		#region #-# Settings tab #-#
 
-		self.AddObject("settings", "settings menu", Menu(ImagePath("blue3", "gui/buttons"), "SETTINGS", 30, White, self.fontPath, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", ["DISPLAY SETTINGS", "AUDIO SETTINGS", "GAME SETTINGS", "GO BACK"], 30, Gray, White, self.fontPath, self.size))
+		self.AddObject("settings", "menu", Menu(ImagePath("blue3", "gui/buttons"), "SETTINGS", 30, White, self.fontPath, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", ["DISPLAY SETTINGS", "AUDIO SETTINGS", "GAME SETTINGS", "GO BACK"], 30, Gray, White, self.fontPath, self.size))
 		self.AddObject("settings", "cloud animation", CloudAnimation(self.size))
 		
 		#endregion
 
 		#region #-# Display Settings tab #-#
 
-		self.AddObject("display settings", "menu", Menu(ImagePath("blue3", "gui/buttons"), "AUDIO SETTINGS", 30, White, self.fontPath, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", [], 30, Gray, White, self.fontPath, self.size, 500))
-		self.AddObject("display settings", "information", Text(((self.width - 300)/2, (self.height - 600)/2 + 100), "THIS PAGE WILL COMING SOON...", 25, color=Black, isCentered=False))
-		self.AddObject("display settings", "go back button", Button((595, 670), (400, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, Black, Gray))
+		self.AddObject("display settings", "menu", Menu(ImagePath("blue3", "gui/buttons"), "DISPLAY SETTINGS", 30, White, self.fontPath, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", [], 30, Gray, White, self.fontPath, self.size, 200))
+		self.AddObject("display settings", "information", Text(((self.width - 300)/2, (self.height - 600)/2 + 280), "THIS PAGE WILL COMING SOON...", 25, color=Black, isCentered=False))
+		self.AddObject("display settings", "go back button", Button((570, 490), (315, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, White, Gray, self.fontPath))
 		self.AddObject("display settings", "cloud animation", CloudAnimation(self.size))
 		
 		#endregion
@@ -140,20 +152,22 @@ class Game(Application):
 		self.AddObject("audio settings", "music volume minus button", Button((600, 340), (36, 36), {"Normal" : ImagePath("blue_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}))
 		self.AddObject("audio settings", "music volume entry", Button((645, 340), (150, 35), {"Normal" : ImagePath("grey8", "gui/buttons")}, "%100", textSize=25, textColor=Gray, textFontPath=self.fontPath))
 		self.AddObject("audio settings", "music volume plus button", Button((814, 340), (36, 36), {"Normal" : ImagePath("blue_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}))
-		self["audio settings"]["music volume minus button"]["Normal"].blit(Images(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
-		self["audio settings"]["music volume minus button"]["Mouse Over"].blit(Images(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
-		self["audio settings"]["music volume plus button"]["Normal"].blit(Images(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
-		self["audio settings"]["music volume plus button"]["Mouse Over"].blit(Images(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
+		self["audio settings"]["music volume minus button"]["Normal"].blit(GetImage(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
+		self["audio settings"]["music volume minus button"]["Mouse Over"].blit(GetImage(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
+		self["audio settings"]["music volume plus button"]["Normal"].blit(GetImage(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
+		self["audio settings"]["music volume plus button"]["Mouse Over"].blit(GetImage(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
 
+		#-# SFX Volume #-#
 		self.AddObject("audio settings", "SFX volume text", Text((580, 460), "SOUND FX VOLUME", 25, color=Gray, fontPath=self.fontPath, isCentered=False))
 		self.AddObject("audio settings", "SFX volume minus button", Button((600, 510), (36, 36), {"Normal" : ImagePath("blue_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}))
 		self.AddObject("audio settings", "SFX volume entry", Button((645, 510), (150, 35), {"Normal" : ImagePath("grey8", "gui/buttons")}, "%100", textSize=25, textColor=Gray, textFontPath=self.fontPath))
 		self.AddObject("audio settings", "SFX volume plus button", Button((814, 510), (36, 36), {"Normal" : ImagePath("blue_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}))
-		self["audio settings"]["SFX volume minus button"]["Normal"].blit(Images(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
-		self["audio settings"]["SFX volume minus button"]["Mouse Over"].blit(Images(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
-		self["audio settings"]["SFX volume plus button"]["Normal"].blit(Images(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
-		self["audio settings"]["SFX volume plus button"]["Mouse Over"].blit(Images(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
+		self["audio settings"]["SFX volume minus button"]["Normal"].blit(GetImage(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
+		self["audio settings"]["SFX volume minus button"]["Mouse Over"].blit(GetImage(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
+		self["audio settings"]["SFX volume plus button"]["Normal"].blit(GetImage(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
+		self["audio settings"]["SFX volume plus button"]["Mouse Over"].blit(GetImage(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
 
+		#-# Buttons #-#
 		self.AddObject("audio settings", "cancel button", Button((570, 620), (150, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "CANCEL", "", 28, White, Gray, self.fontPath))
 		self.AddObject("audio settings", "save button", Button((735, 620), (150, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "SAVE", "", 28, White, Gray, self.fontPath))
 		self.AddObject("audio settings", "cloud animation", CloudAnimation(self.size))
@@ -162,8 +176,9 @@ class Game(Application):
 
 		#region #-# Game Settings tab #-#
 
-		self.AddObject("game settings", "menu", Menu(ImagePath("blue3", "gui/buttons"), "AUDIO SETTINGS", 30, White, self.fontPath, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", ["DELETE DATA"], 30, Gray, White, self.fontPath, self.size, 500))
-		self.AddObject("game settings", "go back button", Button((595, 670), (400, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, Black, Gray))
+		self.AddObject("game settings", "menu", Menu(ImagePath("blue3", "gui/buttons"), "GAME SETTINGS", 30, White, self.fontPath, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", [], 30, Gray, White, self.fontPath, self.size, 200))
+		self.AddObject("game settings", "delete data button", Button((570, 410), (315, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "DELETE DATA", "", 28, White, Gray, self.fontPath))
+		self.AddObject("game settings", "go back button", Button((570, 490), (315, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, White, Gray, self.fontPath))
 		self.AddObject("game settings", "cloud animation", CloudAnimation(self.size))
 
 		#endregion
@@ -183,12 +198,12 @@ class Game(Application):
 		self.AddObject("developer", "youtube", Button((595, 600), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
 		self.AddObject("developer", "go back button", Button((595, 670), (250, 40), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, Black, Gray))
 
-		self["developer"]["github"]["Normal"].blit(Images(ImagePath("github", "gui/others"), (32, 32)), (105, 5))
-		self["developer"]["linkedin"]["Normal"].blit(Images(ImagePath("linkedin", "gui/others"), (32, 32)), (105, 5))
-		self["developer"]["instagram"]["Normal"].blit(Images(ImagePath("instagram", "gui/others"), (32, 32)), (105, 5))
-		self["developer"]["facebook"]["Normal"].blit(Images(ImagePath("facebook", "gui/others"), (32, 32)), (105, 5))
-		self["developer"]["x"]["Normal"].blit(Images(ImagePath("x", "gui/others"), (32, 32)), (105, 5))
-		self["developer"]["youtube"]["Normal"].blit(Images(ImagePath("youtube", "gui/others"), (32, 32)), (105, 5))
+		self["developer"]["github"]["Normal"].blit(GetImage(ImagePath("github", "gui/others"), (32, 32)), (105, 5))
+		self["developer"]["linkedin"]["Normal"].blit(GetImage(ImagePath("linkedin", "gui/others"), (32, 32)), (105, 5))
+		self["developer"]["instagram"]["Normal"].blit(GetImage(ImagePath("instagram", "gui/others"), (32, 32)), (105, 5))
+		self["developer"]["facebook"]["Normal"].blit(GetImage(ImagePath("facebook", "gui/others"), (32, 32)), (105, 5))
+		self["developer"]["x"]["Normal"].blit(GetImage(ImagePath("x", "gui/others"), (32, 32)), (105, 5))
+		self["developer"]["youtube"]["Normal"].blit(GetImage(ImagePath("youtube", "gui/others"), (32, 32)), (105, 5))
 
 		self.AddObject("developer", "cloud animation", CloudAnimation(self.size))
 
@@ -219,15 +234,17 @@ class Game(Application):
 		self.AddObject("game", "cloud animation", CloudAnimation(self.size))
 		
 		self["game"]["info mode button"].SetStatus("Off")
-		self["game"]["info panel close button"]["Normal"].blit(Images(ImagePath("grey_crossWhite", "gui/others")), (9, 9))
-		self["game"]["info panel close button"]["Mouse Over"].blit(Images(ImagePath("grey_crossGrey", "gui/others")), (9, 9))
+		self["game"]["info panel close button"]["Normal"].blit(GetImage(ImagePath("grey_crossWhite", "gui/others")), (9, 9))
+		self["game"]["info panel close button"]["Mouse Over"].blit(GetImage(ImagePath("grey_crossGrey", "gui/others")), (9, 9))
 		
 		self.SetAge(self.buildings.ageNumber)
 		self.UpdateButtonTexts()
 
 		#endregion
 	
-	def GetDatasFromDatabase(self) -> None:
+	#region #-# Database #-#
+
+	def GetData(self) -> None:
 
 		self.database = Database("database")
 	
@@ -318,6 +335,8 @@ class Game(Application):
 
 			self.Exit()
 
+	#endregion
+
 	def UpdateButtonTexts(self) -> None:
 
 		if self.tiles.isMaxSize():
@@ -387,20 +406,7 @@ class Game(Application):
 				self.UpdateButtonTexts()
 				self.PlaySFX(self.clickSoundPath)
 	
-	def SetAge(self, ageNumber) -> None:
-		
-		if ageNumber <= self.buildings.maxAgeNumber:
-
-			self.buildings.SetAge(ageNumber)
-			self.UpdateButtonTexts()
-
-	def NextAge(self) -> None:
-
-		if self.buildings.ageNumber < self.buildings.maxAgeNumber and self.money >= self.buildings.GetAgeCost():
-			
-			self.money -= self.buildings.GetAgeCost()
-			self.SetAge(self.buildings.ageNumber + 1)
-			self.PlaySFX(self.clickSoundPath)
+	#region #-# Events #-#
 
 	def HandleExitEvents(self, event) -> None:
 		
@@ -559,7 +565,7 @@ class Game(Application):
 						self.OpenTab("menu")
 
 						self.DeleteData()
-						self.GetDatasFromDatabase()
+						self.GetData()
 						self.AddObjects()
 
 					elif self[self.tab]["menu"].buttons["GO BACK"].status == "Selected":
@@ -568,7 +574,6 @@ class Game(Application):
 						self.OpenTab("menu")
 
 			#-# Control click button events with mouse #-#
-
 			if self[self.tab]["menu"].buttons["DISPLAY SETTINGS"].isMouseClick(event, self.mousePosition):
 
 				self.PlaySFX(self.clickSoundPath)
@@ -584,20 +589,18 @@ class Game(Application):
 
 				self.PlaySFX(self.clickSoundPath)
 				self.OpenTab("game settings")
-
-			elif self.self[self.tab]["menu"].buttons["DELETE DATA"].isMouseClick(event, self.mousePosition):
-
-				self.PlaySFX(self.clickSoundPath)
-				self.OpenTab("menu")
-
-				self.DeleteData()
-				self.GetDatasFromDatabase()
-				self.AddObjects()
 				
 			elif self[self.tab]["menu"].buttons["GO BACK"].isMouseClick(event, self.mousePosition):
 
 				self.PlaySFX(self.clickSoundPath)
 				self.OpenTab("menu")
+
+		elif self.tab == "display settings":
+			
+			if self[self.tab]["go back button"].isMouseClick(event, self.mousePosition):
+
+				self.PlaySFX(self.clickSoundPath)
+				self.OpenTab("settings")
 
 		elif self.tab == "audio settings":
 
@@ -650,6 +653,22 @@ class Game(Application):
 				#endregion
 
 				self.PlaySFX(self.goBackSoundPath)
+				self.OpenTab("settings")
+
+		elif self.tab == "game settings":
+
+			if self[self.tab]["delete data button"].isMouseClick(event, self.mousePosition):
+
+				self.DeleteData()
+				self.GetData()
+				self.AddObjects()
+
+				self.PlaySFX(self.clickSoundPath)
+				self.OpenTab("menu")
+
+			elif self[self.tab]["go back button"].isMouseClick(event, self.mousePosition):
+
+				self.PlaySFX(self.clickSoundPath)
 				self.OpenTab("settings")
 
 		elif self.tab == "developer":
@@ -786,6 +805,10 @@ class Game(Application):
 					
 						self.MoveBuildings("down")
 
+	#endregion
+	
+	#region #-# Info panel #-#
+
 	def OpenInfoPanel(self, building: Building) -> None:
 
 		#-# Update Building Info #-#
@@ -795,7 +818,7 @@ class Game(Application):
 		self[self.tab]["info panel cooldown text"].UpdateText("Normal", "Cooldown: " + str(building.cooldown) + " sec")
 		self[self.tab]["info panel sell price text"].UpdateText("Normal", "Sell Price: " + str(building.sellPrice))
 		self[self.tab]["info panel sell button"].text.UpdateText("Mouse Over", str(building.sellPrice) + "$")
-		self[self.tab]["info panel building image"].AddSurface("Normal", Images(building.GetImagePath(), (65, 89)))
+		self[self.tab]["info panel building image"].AddSurface("Normal", GetImage(building.GetImagePath(), (65, 89)))
 
 		self[self.tab]["info panel"].Show()
 		self[self.tab]["info panel level text"].Show()
@@ -816,6 +839,10 @@ class Game(Application):
 		self[self.tab]["info panel close button"].Hide()
 		self[self.tab]["info panel sell button"].Hide()
 		self[self.tab]["info panel building image"].Hide()
+
+	#endregion
+
+	#region #-# Building #-#
 
 	def MoveBuildings(self, rotation: str) -> None:
 
@@ -1004,6 +1031,23 @@ class Game(Application):
 
 				pass # not enough space
 	
+	def SetAge(self, ageNumber) -> None:
+		
+		if ageNumber <= self.buildings.maxAgeNumber:
+
+			self.buildings.SetAge(ageNumber)
+			self.UpdateButtonTexts()
+
+	def NextAge(self) -> None:
+
+		if self.buildings.ageNumber < self.buildings.maxAgeNumber and self.money >= self.buildings.GetAgeCost():
+			
+			self.money -= self.buildings.GetAgeCost()
+			self.SetAge(self.buildings.ageNumber + 1)
+			self.PlaySFX(self.clickSoundPath)
+
+	#endregion
+
 	def OpenTab(self, tab: str) -> None:
 
 		super().OpenTab(tab)

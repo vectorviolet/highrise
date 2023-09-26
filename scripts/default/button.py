@@ -62,7 +62,7 @@ class MenuButton(Button):
         selectedImagePath = ImagePath(selectedColor, "gui/buttons")
 
         super().__init__(position, size, {"Unselected" : imagePath})
-        self.AddSurface("Selected", Images(selectedImagePath, selectedSize))
+        self.AddSurface("Selected", GetImage(selectedImagePath, selectedSize))
         self.status = "Unselected"
 
         if text:

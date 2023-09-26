@@ -66,7 +66,7 @@ class Building(Object):
         self.newBuilding = newBuilding
         self.destroy = True
 
-
+# Buildings Class #-#
 class Buildings(list[Building]):
 
     def __init__(self, SFXVolume: 100) -> None:

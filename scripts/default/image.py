@@ -3,7 +3,7 @@ import pygame
 from scripts.default.path import *
 
 #-# Image Function #-#
-def Images(path: ImagePath, Size=[0, 0], ReturnSize=False):
+def GetImage(path: ImagePath, Size=[0, 0], ReturnSize=False):
 
 	if type(Size) == tuple:
 		Size = list(Size)

@@ -1,11 +1,20 @@
-#-# Import Packages #-#
-import pygame, sys, os
-from pygame import mixer
+#region #-# Import Packages #-#
 
-from scripts.default.buttonxx import *
-from scripts.default.color import *
-from scripts.default.text import *
-from scripts.default.object import *
+try:
+
+    import pygame, sys, os
+    from pygame import mixer
+
+    from scripts.default.buttonxx import *
+    from scripts.default.color import *
+    from scripts.default.text import *
+    from scripts.default.object import *
+
+except Exception as error:
+
+	print("An error occured during importing packages:", error)
+
+#endregion
 
 #-# Application Class #-#
 class Application(dict[str : pygame.Surface]):
@@ -56,7 +65,7 @@ class Application(dict[str : pygame.Surface]):
     def HandleEvents(self, event: pygame.event.Event) -> None:
 
         if self.tab in self:
-                        
+            
             for object in self[self.tab].values():
                 
                 object.HandleEvents(event, self.mousePosition)

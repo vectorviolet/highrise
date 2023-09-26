@@ -33,7 +33,7 @@ class Object(dict[str : pygame.Surface]):
 
 	def AddImage(self, status, imagePath):
 
-		self.AddSurface(status, Images(imagePath, self.size))
+		self.AddSurface(status, GetImage(imagePath, self.size))
 
 	def AddSurface(self, status: str, surface: pygame.Surface):
 		
