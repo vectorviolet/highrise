@@ -53,7 +53,7 @@ class Building(Object):
 
         self.tile = targetTile
         self.SetPositionFromTile(targetTile)
-        self.targetPosition = self.selectedPosition
+        self.targetPosition = self.unselectedPosition
         direction = self.targetPosition - self.position # This vector points from the mouse pos to the target.
         self.velocity = direction.normalize() * 8 # The velocity is the normalized direction vector scaled to the desired length.
 
