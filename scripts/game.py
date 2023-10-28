@@ -14,7 +14,6 @@ try:
 	from scripts.default.image import GetImage
 	from scripts.default.path import *
 	from scripts.default.text import Text
-
 	from scripts.building import Building, Buildings
 	from scripts.cloud import CloudAnimation, GameClouds
 	from scripts.menu import Menu
