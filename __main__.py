@@ -7,4 +7,4 @@ from scripts.game import *
 if __name__ == "__main__":
 	
 	game = Game()
-	game.Run()D
+	game.Run()
