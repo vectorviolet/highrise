@@ -19,7 +19,8 @@ try:
 	from scripts.cloud import CloudAnimation, GameClouds
 	from scripts.menu import Menu
 	from scripts.tile import Tiles
- from python.math import Vector2
+	from pygame.math import Vector2
+
 except Exception as error:
 
 	print("An error occured during importing packages:", error)
