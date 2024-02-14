@@ -52,8 +52,8 @@ class Tile(object):
 
 	def GetPosition(self, row, column) -> tuple:
 		
-		x = (column-row)*65 + 655
-		y = (column+row)*32 + 200
+		x = (column-row)*65 + 655 + 240
+		y = (column+row)*32 + 200 + 90
 
 		return x, y
 

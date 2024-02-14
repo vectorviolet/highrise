@@ -36,7 +36,7 @@ class Game(Application):
 		#-# Window Settings #-#
 		self.cursorSize = 25, 25
 		self.backgroundColors = {"menu" : Yellow, "settings" : Yellow, "display settings" : Yellow, "audio settings" : Yellow, "game settings" : Yellow, "developer" : Yellow, "game" : CustomBlue}
-		super().__init__("2048 GAME", (1440, 900), self.backgroundColors, 165)
+		super().__init__("2048 GAME", (1920, 1080), self.backgroundColors, 165)
 
 		#-# Game Settings #-#
 		self.cloudCount = 30
@@ -139,7 +139,7 @@ class Game(Application):
 
 		self.AddObject("display settings", "menu", Menu(ImagePath("blue3", "gui/buttons"), "DISPLAY SETTINGS", 30, White, self.fontPath, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", [], 30, Gray, White, self.fontPath, self.size, 200))
 		self.AddObject("display settings", "information", Text(((self.width - 300)/2, (self.height - 600)/2 + 280), "THIS PAGE WILL COMING SOON...", 25, color=Black, isCentered=False))
-		self.AddObject("display settings", "go back button", Button((570, 490), (315, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, White, Gray, self.fontPath))
+		self.AddObject("display settings", "go back button", Button((810, 580), (315, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, White, Gray, self.fontPath))
 		self.AddObject("display settings", "cloud animation", CloudAnimation(self.size))
 		
 		#endregion
@@ -148,28 +148,28 @@ class Game(Application):
 
 		#-# Volume #-#
 		self.AddObject("audio settings", "menu", Menu(ImagePath("blue3", "gui/buttons"), "AUDIO SETTINGS", 30, White, self.fontPath, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", [], 30, Gray, White, self.fontPath, self.size, 500))
-		self.AddObject("audio settings", "music volume text", Text((610, 290), "MUSIC VOLUME", 25, color=Gray, fontPath=self.fontPath, isCentered=False))
-		self.AddObject("audio settings", "music volume minus button", Button((600, 340), (36, 36), {"Normal" : ImagePath("blue_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}))
-		self.AddObject("audio settings", "music volume entry", Button((645, 340), (150, 35), {"Normal" : ImagePath("grey8", "gui/buttons")}, "%100", textSize=25, textColor=Gray, textFontPath=self.fontPath))
-		self.AddObject("audio settings", "music volume plus button", Button((814, 340), (36, 36), {"Normal" : ImagePath("blue_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}))
+		self.AddObject("audio settings", "music volume text", Text((850, 380), "MUSIC VOLUME", 25, color=Gray, fontPath=self.fontPath, isCentered=False))
+		self.AddObject("audio settings", "music volume minus button", Button((840, 430), (36, 36), {"Normal" : ImagePath("blue_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}))
+		self.AddObject("audio settings", "music volume entry", Button((885, 430), (150, 35), {"Normal" : ImagePath("grey8", "gui/buttons")}, "%100", textSize=25, textColor=Gray, textFontPath=self.fontPath))
+		self.AddObject("audio settings", "music volume plus button", Button((1054, 430), (36, 36), {"Normal" : ImagePath("blue_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}))
 		self["audio settings"]["music volume minus button"]["Normal"].blit(GetImage(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
 		self["audio settings"]["music volume minus button"]["Mouse Over"].blit(GetImage(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
 		self["audio settings"]["music volume plus button"]["Normal"].blit(GetImage(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
 		self["audio settings"]["music volume plus button"]["Mouse Over"].blit(GetImage(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
 
 		#-# SFX Volume #-#
-		self.AddObject("audio settings", "SFX volume text", Text((580, 460), "SOUND FX VOLUME", 25, color=Gray, fontPath=self.fontPath, isCentered=False))
-		self.AddObject("audio settings", "SFX volume minus button", Button((600, 510), (36, 36), {"Normal" : ImagePath("blue_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}))
-		self.AddObject("audio settings", "SFX volume entry", Button((645, 510), (150, 35), {"Normal" : ImagePath("grey8", "gui/buttons")}, "%100", textSize=25, textColor=Gray, textFontPath=self.fontPath))
-		self.AddObject("audio settings", "SFX volume plus button", Button((814, 510), (36, 36), {"Normal" : ImagePath("blue_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}))
+		self.AddObject("audio settings", "SFX volume text", Text((820, 550), "SOUND FX VOLUME", 25, color=Gray, fontPath=self.fontPath, isCentered=False))
+		self.AddObject("audio settings", "SFX volume minus button", Button((840, 600), (36, 36), {"Normal" : ImagePath("blue_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}))
+		self.AddObject("audio settings", "SFX volume entry", Button((885, 600), (150, 35), {"Normal" : ImagePath("grey8", "gui/buttons")}, "%100", textSize=25, textColor=Gray, textFontPath=self.fontPath))
+		self.AddObject("audio settings", "SFX volume plus button", Button((1054, 600), (36, 36), {"Normal" : ImagePath("blue_circle", "gui/buttons"), "Mouse Over" : ImagePath("yellow_circle", "gui/buttons")}))
 		self["audio settings"]["SFX volume minus button"]["Normal"].blit(GetImage(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
 		self["audio settings"]["SFX volume minus button"]["Mouse Over"].blit(GetImage(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
 		self["audio settings"]["SFX volume plus button"]["Normal"].blit(GetImage(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
 		self["audio settings"]["SFX volume plus button"]["Mouse Over"].blit(GetImage(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
 
 		#-# Buttons #-#
-		self.AddObject("audio settings", "cancel button", Button((570, 620), (150, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "CANCEL", "", 28, White, Gray, self.fontPath))
-		self.AddObject("audio settings", "save button", Button((735, 620), (150, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "SAVE", "", 28, White, Gray, self.fontPath))
+		self.AddObject("audio settings", "cancel button", Button((810, 710), (150, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "CANCEL", "", 28, White, Gray, self.fontPath))
+		self.AddObject("audio settings", "save button", Button((975, 710), (150, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "SAVE", "", 28, White, Gray, self.fontPath))
 		self.AddObject("audio settings", "cloud animation", CloudAnimation(self.size))
 
 		#endregion
@@ -177,8 +177,8 @@ class Game(Application):
 		#region #-# Game Settings tab #-#
 
 		self.AddObject("game settings", "menu", Menu(ImagePath("blue3", "gui/buttons"), "GAME SETTINGS", 30, White, self.fontPath, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", [], 30, Gray, White, self.fontPath, self.size, 200))
-		self.AddObject("game settings", "delete data button", Button((570, 410), (315, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "DELETE DATA", "", 28, White, Gray, self.fontPath))
-		self.AddObject("game settings", "go back button", Button((570, 490), (315, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, White, Gray, self.fontPath))
+		self.AddObject("game settings", "delete data button", Button((810, 500), (315, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "DELETE DATA", "", 28, White, Gray, self.fontPath))
+		self.AddObject("game settings", "go back button", Button((810, 560), (315, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, White, Gray, self.fontPath))
 		self.AddObject("game settings", "cloud animation", CloudAnimation(self.size))
 
 		#endregion
@@ -186,17 +186,17 @@ class Game(Application):
 		#region #-# Developer tab #-#
 
 		self.AddObject("developer", "panel", Object(((self.width - 300)/2, (self.height - 600)/2), (300, 600), {"Normal" : ImagePath("grey", "gui/panels")}))
-		self.AddObject("developer", "photo", Object(("CENTER", 180), (100, 100), {"Normal" : ImagePath("cv", "gui/others")}, self.size))
-		self.AddObject("developer", "name", Text((640, 290), "Umutcan Ekinci", 30, color=Black, isCentered=False))
-		self.AddObject("developer", "nickname", Text((675, 310), "LordCh4os", 25, color=Gray, isCentered=False))
+		self.AddObject("developer", "photo", Object(("CENTER", 270), (100, 100), {"Normal" : ImagePath("cv", "gui/others")}, self.size))
+		self.AddObject("developer", "name", Text((880, 380), "Umutcan Ekinci", 30, color=Black, isCentered=False))
+		self.AddObject("developer", "subtitle", Text((880, 400), "Software Engineer", 25, color=Gray, isCentered=False))
 		
-		self.AddObject("developer", "github", Button((595, 350), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "github.com/LordCh4os", 28, Black, Gray))
-		self.AddObject("developer", "linkedin", Button((595, 400), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
-		self.AddObject("developer", "instagram", Button((595, 450), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
-		self.AddObject("developer", "facebook", Button((595, 500), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
-		self.AddObject("developer", "x", Button((595, 550), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
-		self.AddObject("developer", "youtube", Button((595, 600), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
-		self.AddObject("developer", "go back button", Button((595, 670), (250, 40), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, Black, Gray))
+		self.AddObject("developer", "github", Button((835, 440), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "github.com/LordCh4os", 28, Black, Gray))
+		self.AddObject("developer", "linkedin", Button((835, 490), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
+		self.AddObject("developer", "instagram", Button((835, 540), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
+		self.AddObject("developer", "facebook", Button((835, 590), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
+		self.AddObject("developer", "x", Button((835, 640), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
+		self.AddObject("developer", "youtube", Button((835, 690), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
+		self.AddObject("developer", "go back button", Button((835, 760), (250, 40), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, Black, Gray))
 
 		self["developer"]["github"]["Normal"].blit(GetImage(ImagePath("github", "gui/others"), (32, 32)), (105, 5))
 		self["developer"]["linkedin"]["Normal"].blit(GetImage(ImagePath("linkedin", "gui/others"), (32, 32)), (105, 5))
@@ -212,13 +212,13 @@ class Game(Application):
 		#region #-# Game tab #-#
 
 		self.AddObject("game", "clouds", GameClouds(self.cloudCount, self.size))
-		self.AddObject("game", "game panel", Object((20, self.height - 100 - 20), (1400, 100), {"Normal" : ImagePath("grey", "gui/panels")}))
-		self.AddObject("game", "info mode button", Button((100, 800), (60, 60),  {"On" : ImagePath("green", "gui/buttons"), "Off" : ImagePath("red", "gui/buttons")}))
-		self.AddObject("game", "info mode button image", Object((105, 805), (50, 50), {"Normal" : ImagePath("info", "gui/others")}))
-		self.AddObject("game", "expand button", Button((320, 800), (200, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("red", "gui/buttons")}, "EXPAND", str(self.tiles.GetExpandCost()) + "$", 27, textFontPath=self.fontPath))
-		self.AddObject("game", "build button", Button((620, 800), (200, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("red", "gui/buttons")}, "BUILD", str(self.buildings.GetBuildCost()) + "$", 27, textFontPath=self.fontPath))
-		self.AddObject("game", "next age button", Button((920, 800), (200, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("red", "gui/buttons")}, "NEXT AGE", str(self.buildings.GetAgeCost()) + "$", 27, textFontPath=self.fontPath))
-		self.AddObject("game", "money text", Text((1180, 810), "", 55, color=Green, backgroundColor=Black, isCentered=False))
+		self.AddObject("game", "game panel", Object((0, self.height - 230), (1920, 100), {"Normal" : ImagePath("grey", "gui/panels")}))
+		self.AddObject("game", "info mode button", Button((340, 870), (60, 60),  {"On" : ImagePath("green", "gui/buttons"), "Off" : ImagePath("red", "gui/buttons")}))
+		self.AddObject("game", "info mode button image", Object((345, 875), (50, 50), {"Normal" : ImagePath("info", "gui/others")}))
+		self.AddObject("game", "expand button", Button((560, 870), (200, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("red", "gui/buttons")}, "EXPAND", str(self.tiles.GetExpandCost()) + "$", 27, textFontPath=self.fontPath))
+		self.AddObject("game", "build button", Button((860, 870), (200, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("red", "gui/buttons")}, "BUILD", str(self.buildings.GetBuildCost()) + "$", 27, textFontPath=self.fontPath))
+		self.AddObject("game", "next age button", Button((1160, 870), (200, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("red", "gui/buttons")}, "NEXT AGE", str(self.buildings.GetAgeCost()) + "$", 27, textFontPath=self.fontPath))
+		self.AddObject("game", "money text", Text((1420, 880), "", 55, color=Green, backgroundColor=Black, isCentered=False))
 		self.AddObject("game", "tiles", self.tiles)
 		self.AddObject("game", "buildings", self.buildings)
 
