@@ -3,7 +3,6 @@
 try:
 
 	import pygame
-	from pygame.math import Vector2
 
 	from random import choice
 	import webbrowser
@@ -43,7 +42,7 @@ class Game(Application):
 		self.cloudCount = 30
 		self.maxSize = 7
 		self.maxBuildingLevel = 6
-		self.startingMoney = 10000
+		self.startingMoney = 1000
 		self.defaultMusicVolume = 1.00
 		self.defaultSFXVolume = 1.00
 
@@ -213,13 +212,13 @@ class Game(Application):
 		#region #-# Game tab #-#
 
 		self.AddObject("game", "clouds", GameClouds(self.cloudCount, self.size))
-		self.AddObject("game", "game panel", Object((0, self.height - 230), (1920, 100), {"Normal" : ImagePath("grey", "gui/panels")}))
-		self.AddObject("game", "info mode button", Button((340, 870), (60, 60),  {"On" : ImagePath("green", "gui/buttons"), "Off" : ImagePath("red", "gui/buttons")}))
-		self.AddObject("game", "info mode button image", Object((345, 875), (50, 50), {"Normal" : ImagePath("info", "gui/others")}))
-		self.AddObject("game", "expand button", Button((560, 870), (200, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("red", "gui/buttons")}, "EXPAND", str(self.tiles.GetExpandCost()) + "$", 27, textFontPath=self.fontPath))
-		self.AddObject("game", "build button", Button((860, 870), (200, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("red", "gui/buttons")}, "BUILD", str(self.buildings.GetBuildCost()) + "$", 27, textFontPath=self.fontPath))
-		self.AddObject("game", "next age button", Button((1160, 870), (200, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("red", "gui/buttons")}, "NEXT AGE", str(self.buildings.GetAgeCost()) + "$", 27, textFontPath=self.fontPath))
-		self.AddObject("game", "money text", Text((1420, 880), "", 55, color=Green, backgroundColor=Black, isCentered=False))
+		self.AddObject("game", "game panel", Object((0, self.height - 115), (1920, 100), {"Normal" : ImagePath("grey", "gui/panels")}))
+		self.AddObject("game", "info mode button", Button((340, 985), (60, 60),  {"On" : ImagePath("green", "gui/buttons"), "Off" : ImagePath("red", "gui/buttons")}))
+		self.AddObject("game", "info mode button image", Object((345, 990), (50, 50), {"Normal" : ImagePath("info", "gui/others")}))
+		self.AddObject("game", "expand button", Button((560, 985), (200, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("red", "gui/buttons")}, "EXPAND", str(self.tiles.GetExpandCost()) + "$", 27, textFontPath=self.fontPath))
+		self.AddObject("game", "build button", Button((860, 985), (200, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("red", "gui/buttons")}, "BUILD", str(self.buildings.GetBuildCost()) + "$", 27, textFontPath=self.fontPath))
+		self.AddObject("game", "next age button", Button((1160, 985), (200, 60), {"Normal" : ImagePath("green", "gui/buttons"), "Mouse Over" : ImagePath("red", "gui/buttons")}, "NEXT AGE", str(self.buildings.GetAgeCost()) + "$", 27, textFontPath=self.fontPath))
+		self.AddObject("game", "money text", Text((1450, 995), "", 55, color=Green, backgroundColor=Black, isCentered=False))
 		self.AddObject("game", "tiles", self.tiles)
 		self.AddObject("game", "buildings", self.buildings)
 
