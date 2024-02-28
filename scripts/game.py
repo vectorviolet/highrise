@@ -178,7 +178,7 @@ class Game(Application):
 
 		self.AddObject("game settings", "menu", Menu(ImagePath("blue3", "gui/buttons"), "GAME SETTINGS", 30, White, self.fontPath, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", [], 30, Gray, White, self.fontPath, self.size, 200))
 		self.AddObject("game settings", "delete data button", Button((810, 500), (315, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "DELETE DATA", "", 28, White, Gray, self.fontPath))
-		self.AddObject("game settings", "go back button", Button((810, 560), (315, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, White, Gray, self.fontPath))
+		self.AddObject("game settings", "go back button", Button((810, 580), (315, 60), {"Normal" : ImagePath("red", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, White, Gray, self.fontPath))
 		self.AddObject("game settings", "cloud animation", CloudAnimation(self.size))
 
 		#endregion
