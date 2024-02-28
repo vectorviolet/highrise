@@ -190,7 +190,9 @@ class Game(Application):
 		self.AddObject("developer", "name", Text((880, 380), "Umutcan Ekinci", 30, color=Black, isCentered=False))
 		self.AddObject("developer", "subtitle", Text((880, 400), "Software Engineer", 25, color=Gray, isCentered=False))
 		
-		self.AddObject("developer", "github", Button((835, 440), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "github.com/LordCh4os", 28, Black, Gray))
+		# BUG: Mouse over text is not showing
+
+		self.AddObject("developer", "github", Button((835, 440), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "github.com/umutcanekinci", 28, Black, Gray))
 		self.AddObject("developer", "linkedin", Button((835, 490), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
 		self.AddObject("developer", "instagram", Button((835, 540), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
 		self.AddObject("developer", "facebook", Button((835, 590), (250, 40), {"Normal" : ImagePath("grey15", "gui/buttons"), "Mouse Over" : ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
@@ -676,12 +678,12 @@ class Game(Application):
 			if self[self.tab]["github"].isMouseClick(event, self.mousePosition):
 
 				self.PlaySFX(self.clickSoundPath)
-				webbrowser.open("https://www.github.com/LordCh4os/")
+				webbrowser.open("https://www.github.com/umutcanekinci/")
 
 			elif self[self.tab]["linkedin"].isMouseClick(event, self.mousePosition):
 
 				self.PlaySFX(self.clickSoundPath)
-				webbrowser.open("https://www.linkedin.com/in/umutcan-ekinci-b5435a108/")
+				webbrowser.open("https://www.linkedin.com/in/umutcanekinci/")
 
 			elif self[self.tab]["instagram"].isMouseClick(event, self.mousePosition):
 
