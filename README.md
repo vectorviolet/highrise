@@ -67,7 +67,7 @@ BUILD butonu → Bina inşa etmeye yarar.
 
 EXPAND butonu → Araziyi genişletmeye yarar.
 
-EVOLVE butonu → Sonraki çağa geçmeye yarar.
+NEXT AGE butonu → Sonraki çağa geçmeye yarar.
 
 *İnceleme modu aktifken binaların üzerine tıklayıp bilgilerini görebilir, ayrıca onları satabilirsiniz.
 
