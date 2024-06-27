@@ -10,7 +10,7 @@ Projeyi çalıştırmak için aşağıdaki yazılımlara ihtiyacınız olacaktı
 
 - Python 3.x
 - Gerekli kütüphaneler (aşağıda listelenmiştir)
-
+    - pygame=2.5.2
 
 ### Kurulum
 
