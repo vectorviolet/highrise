@@ -42,7 +42,8 @@ python __main__.py
 ```
 
 ### Kullanım
-Oyunun amacı: [Amaç]
+
+Oyunun amacı: Şehrini geliştirip 
 Kontroller: [Kontroller]
 
 ### Katkıda Bulunma
@@ -54,7 +55,7 @@ Katkıda bulunmak isterseniz, lütfen şu adımları izleyin:
 2. Fork'ladığınız depoyu yerel makinenize klonlayın:
 ```sh
 git clone https://github.com/umutcanekinci/2048-idle-evolution.git
-cd projeadı
+cd 2048-idle-evolution
 ```
 
 3. Yeni bir dal oluşturun (örn: feature/yenilik):
@@ -75,7 +76,9 @@ git push origin feature/yenilik
 6. Pull request oluşturun.
 
 ### Lisans
+
 Bu proje MIT Lisansı ile lisanslanmıştır - detaylar için LICENSE dosyasına bakabilirsiniz.
 
 ### İletişim
+
 Sorularınız veya önerileriniz için umutcannekinci@gmail.com üzerinden iletişime geçebilirsiniz.
