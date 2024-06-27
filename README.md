@@ -46,17 +46,27 @@ Oyunun amacı: Şehrini kur ve yönet, şehrin geliri ile daha fazla bina inşa 
 
 #### Kontroller: 
 
-Binaları hareket ettirme tuşları:
+##### Binaları hareket ettirme tuşları:
+
 W / Yukarı ok tuşu
+
 A / Sol ok tuşu
+
 S / Aşağı ok tuşu
+
 D / Sağ ok tuşu
+
 Boşluk tuşu → Bina inşa etmek için kullanılır
 
-Butonlar ve işlevleri:
+
+##### Butonlar ve işlevleri:
+
 INFORMATION MODE butonu → İnceleme modunu açıp kapamayı sağlar.
+
 BUILD butonu → Bina inşa etmeye yarar.
+
 EXPAND butonu → Araziyi genişletmeye yarar.
+
 EVOLVE butonu → Sonraki çağa geçmeye yarar.
 
 *İnceleme modu aktifken binaların üzerine tıklayıp bilgilerini görebilir, ayrıca onları satabilirsiniz.
