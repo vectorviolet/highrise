@@ -2,6 +2,12 @@
 
 Bu projede, Python ile geliştirilmiş bir oyun bulunmaktadır. 2048 Idle Evolution isimli bu oyunda şehrini geliştir ve kazancını katla!
 
+## Oyundan Görseller
+
+![alt text](https://github.com/umutcanekinci/2048-idle-evolution/blob/main/images/samples/sample-1.png?raw=true)
+![alt text](https://github.com/umutcanekinci/2048-idle-evolution/blob/main/images/samples/sample-2.png?raw=true)
+![alt text](https://github.com/umutcanekinci/2048-idle-evolution/blob/main/images/samples/sample-3.png?raw=true)
+
 ## Başlangıç
 
 ### Gereksinimler
