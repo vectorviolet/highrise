@@ -4,14 +4,13 @@ Bu projede, Python ile geliştirilmiş bir oyun bulunmaktadır. 2048 Idle Evolut
 
 ## Başlangıç
 
-Bu bölüm, projenin nasıl çalıştırılacağına dair talimatları içerir. 
-
 ### Gereksinimler
 
 Projeyi çalıştırmak için aşağıdaki yazılımlara ihtiyacınız olacaktır:
 
 - Python 3.x
 - Gerekli kütüphaneler (aşağıda listelenmiştir)
+
 
 ### Kurulum
 
