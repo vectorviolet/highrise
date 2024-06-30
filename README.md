@@ -49,7 +49,7 @@ To start the game, use the following command:
 python __main__.py
 ```
 
-### Gameplay
+## Gameplay
 
 The objective of the game: Build and manage your city, construct more buildings with your income, and merge them to develop your city further and earn more.
 
@@ -78,7 +78,7 @@ NEXT AGE button → Progresses to the next age.
 
 While in inspection mode, you can click on buildings to view their details and sell them.
 
-### Contributing
+## Contributing
 
 If you would like to contribute, please follow these steps:
 
@@ -107,11 +107,17 @@ git push origin feature/yenilik
 
 6. Create a pull request.
 
-### License
+## Authors
+
+Umutcan Ekinci - Developer
+
+
+See also the list of <a href="https://github.com/umutcanekinci/2048-idle-evolution/contributors">contributors</a> who participated in this project.
+
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-
-### Contact
+## Contact
 
 For questions or suggestions, feel free to contact me at umutcannekinci@gmail.com.
