@@ -10,6 +10,8 @@ This project features a game developed in Python. In 2048 Idle Evolution, build 
 
 ## Getting Started
 
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+
 ### Requirments
 
 To run the project, you will need the following:
