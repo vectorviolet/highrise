@@ -1,118 +1,117 @@
 # 2048 Idle Evolution
 
-Bu projede, Python ile geliştirilmiş bir oyun bulunmaktadır. 2048 Idle Evolution isimli bu oyunda şehrini geliştir ve kazancını katla!
+This project features a game developed in Python. In 2048 Idle Evolution, build your city and multiply your earnings!
 
-## Oyundan Görseller
+## Game Screenshots
 
 ![alt text](https://github.com/umutcanekinci/2048-idle-evolution/blob/main/images/samples/sample-1.png?raw=true)
 ![alt text](https://github.com/umutcanekinci/2048-idle-evolution/blob/main/images/samples/sample-2.png?raw=true)
 ![alt text](https://github.com/umutcanekinci/2048-idle-evolution/blob/main/images/samples/sample-3.png?raw=true)
 
-## Başlangıç
+## Getting Started
 
-### Gereksinimler
+### Requirments
 
-Projeyi çalıştırmak için aşağıdaki yazılımlara ihtiyacınız olacaktır:
+To run the project, you will need the following:
 
 - Python 3.x
-- Gerekli kütüphaneler (aşağıda listelenmiştir)
+- Required libraries (listed below)
     - pygame=2.5.2
 
-### Kurulum
+### Installation
 
-*Kurulum yapmadan derlenmiş edilmiş çalıştırılabilir uygulama ile devam etmek istiyorsanız kurulum aşaması atlayıp __main__.exe dosyasını çalıştırabilirsiniz.
+If you prefer to use the precompiled executable without installation, you can skip the setup and run the __main__.exe file directly.
 
 
-Gerekli kütüphaneleri yüklemek için aşağıdaki adımları izleyin:
+Follow these steps to install the required libraries:
 
-1. Bu projeyi klonlayın:
+1. Clone this project:
     ```sh
     git clone https://github.com/umutcanekinci/2048-idle-evolution.git
     cd 2048-idle-evolution
     ```
 
-2. Sanal ortam oluşturun:
+2. Create a virtual environment:
     ```sh
     python -m venv venv
     source venv/bin/activate # Windows kullanıyorsanız: venv\Scripts\activate
     ```
 
-3. Gerekli paketleri yükleyin:
+3. Install the required packages:
     ```sh
     pip install -r requirements.txt
     ```
 
-### Çalıştırma
+### Running the Game
 
-Oyunu çalıştırmak için şu komutu kullanın:
+To start the game, use the following command:
 ```sh
 python __main__.py
 ```
 
-### Kullanım
+### Gameplay
 
-Oyunun amacı: Şehrini kur ve yönet, şehrin geliri ile daha fazla bina inşa et ve onları birleştirerek şehrini geliştir geliştir ve bu sayede daha fazla kazan.
+The objective of the game: Build and manage your city, construct more buildings with your income, and merge them to develop your city further and earn more.
 
-#### Kontroller: 
+#### Controls:
 
-##### Binaları hareket ettirme tuşları:
+Building Movement Keys:
 
-W / Yukarı ok tuşu
+W / Up Arrow
 
-A / Sol ok tuşu
+A / Left Arrow
 
-S / Aşağı ok tuşu
+S / Down Arrow
 
-D / Sağ ok tuşu
+D / Right Arrow
 
-Boşluk tuşu → Bina inşa etmek için kullanılır
+Spacebar → Used to construct a building
 
+Buttons and Functions:
+INFORMATION MODE button → Toggles inspection mode on and off.
 
-##### Butonlar ve işlevleri:
+BUILD button → Used to construct buildings.
 
-INFORMATION MODE butonu → İnceleme modunu açıp kapamayı sağlar.
+EXPAND button → Used to expand the land.
 
-BUILD butonu → Bina inşa etmeye yarar.
+NEXT AGE button → Progresses to the next age.
 
-EXPAND butonu → Araziyi genişletmeye yarar.
+While in inspection mode, you can click on buildings to view their details and sell them.
 
-NEXT AGE butonu → Sonraki çağa geçmeye yarar.
+### Contributing
 
-*İnceleme modu aktifken binaların üzerine tıklayıp bilgilerini görebilir, ayrıca onları satabilirsiniz.
+If you would like to contribute, please follow these steps:
 
-### Katkıda Bulunma
+1. Fork this repository (click the Fork button at the top right).
 
-Katkıda bulunmak isterseniz, lütfen şu adımları izleyin:
-
-1. Bu depoyu fork'layın (sağ üstteki Fork butonuna tıklayın).
-
-2. Fork'ladığınız depoyu yerel makinenize klonlayın:
+2. Clone your forked repository locally:
 ```sh
 git clone https://github.com/umutcanekinci/2048-idle-evolution.git
 cd 2048-idle-evolution
 ```
 
-3. Yeni bir dal oluşturun (örn: feature/yenilik):
+3. Create a new branch (e.g., feature/new-feature):
 ```sh
 git checkout -b feature/yenilik
 ```
 
-4. Değişikliklerinizi yapın ve commit edin:
+4. Make your changes and commit them:
 ```sh
 git commit -am 'Yeni özellik ekledim'
 ```
 
-5. Değişikliklerinizi dalınıza iterek GitHub'a gönderin:
+5. Push your changes to your branch on GitHub:
 ```sh
 git push origin feature/yenilik
 ```
 
-6. Pull request oluşturun.
+6. Create a pull request.
 
-### Lisans
+### License
 
-Bu proje MIT Lisansı ile lisanslanmıştır - detaylar için LICENSE dosyasına bakabilirsiniz.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-### İletişim
 
-Sorularınız veya önerileriniz için umutcannekinci@gmail.com üzerinden iletişime geçebilirsiniz.
+### Contact
+
+For questions or suggestions, feel free to contact me at umutcannekinci@gmail.com.
