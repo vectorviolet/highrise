@@ -36,7 +36,7 @@ Follow these steps to install the required libraries:
 2. Create a virtual environment:
     ```sh
     python -m venv venv
-    source venv/bin/activate # Windows kullanıyorsanız: venv\Scripts\activate
+    source venv/bin/activate # If you are using Windows: venv\Scripts\activate
     ```
 
 3. Install the required packages:
