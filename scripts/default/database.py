@@ -1,6 +1,7 @@
 #-# Import Packages #-#
 import sqlite3
 import sys
+import os
 
 #-# Database Class #-#
 class Database():
@@ -12,6 +13,11 @@ class Database():
     def Connect(self) -> bool:
         
         try:
+
+            # Check if there is no databases folder
+            if not os.path.exists("databases"):
+                os.makedirs("databases")
+                print("==> Created databases folder!")
         
             self.connection = sqlite3.connect(("databases/" + self.name + ".db")) 
 
