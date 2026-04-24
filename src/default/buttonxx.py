@@ -1,6 +1,6 @@
 import pygame
-from scripts.default.image import *
-from scripts.default.object import *
+from game_core.image import *
+from src.default.object import *
 
 class Buttonxx(Object):
 
@@ -58,8 +58,8 @@ class Buttonxx(Object):
 			
 		if self.IconPath != None:
 
-			Images((self.IconSide, self.IconSize), self.IconPath).Draw(self.Surface)
-			Images((self.IconSide, self.IconSize), self.IconPath).Draw(self.MouseOverSurface)
+			Images((self.IconSide, self.IconSize), self.IconPath).draw(self.Surface)
+			Images((self.IconSide, self.IconSize), self.IconPath).draw(self.MouseOverSurface)
 		
 		self.Surface.blit(self.Text, self.FontSide)
 		self.MouseOverSurface.blit(self.Text2, self.FontSide)
@@ -95,7 +95,7 @@ class Buttonxx(Object):
 		 "BottomCenter" : (self.CenterX, self.Bottom),
 		 "BottomCenter" : (self.Right, self.Bottom)}.get(Side)
 
-	def HandleEvents(self, event, MousePosition):
+	def handle_events(self, event, MousePosition):
 
 		if self.isMouseOver(MousePosition):
 			
@@ -113,7 +113,7 @@ class Buttonxx(Object):
 			
 			self.status = "MouseOverActive" if self.status == "MouseOver" else "MouseOver"
 
-	def Draw(self, surface):
+	def draw(self, surface):
 
 		if self.show:
 

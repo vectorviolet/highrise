@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
-#-# Import Application Script #-#
-from scripts.game import *
+from src.game import Game
 
 #-# Start Application #-#
 if __name__ == "__main__":
-	
-	Game().Run()
+	Game().run()
