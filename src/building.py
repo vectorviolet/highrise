@@ -1,7 +1,7 @@
 from pygame import Vector2
 from src.tile import Tile
-from src.default.application import Application
-from game_core.path import *
+from src.default.tabbedapplication import TabbedApplication
+from pygame_core.path import *
 from src.default.object import Object
 
 ages = ["wood", "rock", "sand", "stone"]
@@ -111,7 +111,7 @@ class Buildings(list[Building]):
                     self.sort(key=lambda b: b.tile.column_number)
 
                     sound = SoundPath("rollover2")
-                    Application.play_sound(1, sound, self.sfx_volume)
+                    TabbedApplication.play_sound(1, sound, self.sfx_volume)
 
                 else:
 

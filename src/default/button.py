@@ -6,9 +6,9 @@ from src.default.text import *
 #-# Button Class #-#
 class Button(Object):
 
-    def __init__(self, position: tuple = ..., size: tuple = ..., imagePaths=..., text: str = "", selectedText: str = "", textSize: int = 20, textColor: tuple = White, selectedTextColor: tuple = White, textFontPath: pygame.font.Font = None, surfaceSize: tuple = None, screenPosition: tuple = None, visible=True):
+    def __init__(self, position: tuple = ..., size: tuple = ..., imagePaths=..., text: str = "", selectedText: str = "", textSize: int = 20, textColor: tuple = White, selectedTextColor: tuple = White, textFontPath: pygame.font.Font = None, surfaceSize: tuple = None, screen_position: tuple = None, visible=True):
 
-        super().__init__(position, size, imagePaths, surfaceSize, screenPosition, visible)
+        super().__init__(position, size, imagePaths, surfaceSize, screen_position, visible)
 
         if text:
 
@@ -19,15 +19,15 @@ class Button(Object):
             self.add_text("Normal", text, textSize, True, textColor, None, textFontPath)
             self.add_text("Mouse Over", selectedText, textSize, True, selectedTextColor, None, textFontPath)
 
-    def add_text(self, status, text: str, textSize: int, antialias: bool, color: tuple, backgroundColor, fontPath: pygame.font.Font = None) -> None:
+    def add_text(self, status, text: str, text_size: int, antialias: bool, color: tuple, background_color, fontPath: pygame.font.Font = None) -> None:
 
         if not hasattr(self, "text"):
 
-            self.text = Text((0, 0), text, textSize, True, color, backgroundColor, fontPath, True, status)
+            self.text = Text((0, 0), text, text_size, True, color, background_color, fontPath, True, status)
 
         else:
 
-            self.text.add_text(status, text, textSize, antialias, color, backgroundColor, fontPath)
+            self.text.add_text(status, text, text_size, antialias, color, background_color, fontPath)
 
     def draw(self, surface):
 

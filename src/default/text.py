@@ -1,7 +1,7 @@
 import pygame
-from game_core.color import White
+from pygame_core.color import White
 from src.default.object import *
-from game_core.color import *
+from pygame_core.color import *
 
 class Text(Object):
 
@@ -15,11 +15,11 @@ class Text(Object):
 
         self.add_text(status, text, textSize, antialias, color, backgroundColor, fontPath)
 
-    def add_text(self, status, text, textSize, antialias=True, color=White, backgroundColor=None, fontPath=None):
+    def add_text(self, status, text, text_size, antialias=True, color=White, background_color=None, fontPath=None):
 
-        super().add_text(status, text, textSize, antialias, color, backgroundColor, fontPath)
+        super().add_text(status, text, text_size, antialias, color, background_color, fontPath)
 
-        self.textArgs[status] = [text, textSize, antialias, color, backgroundColor, fontPath]
+        self.textArgs[status] = [text, text_size, antialias, color, background_color, fontPath]
 
     def update_text(self, status, text) -> None:
 

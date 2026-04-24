@@ -1,14 +1,16 @@
+from _distutils_hack import override
+
 try:
 	import pygame
 	from random import choice
 	import webbrowser
 
-	from game_core.database import Database
-	from game_core.image import load_image
-	from game_core.color import Black, CustomBlue, Gray, Green, White, Yellow
-	from game_core.path import FilePath, ImagePath, FontPath, SoundPath
+	from pygame_core.database import Database
+	from pygame_core.image import load_image
+	from pygame_core.color import Black, CustomBlue, Gray, Green, White, Yellow
+	from pygame_core.path import FilePath, ImagePath, FontPath, SoundPath
 
-	from src.default.application import Application
+	from src.default.tabbedapplication import TabbedApplication
 	from src.default.button import Button
 	from src.default.object import Object
 	from src.default.text import Text
@@ -19,11 +21,11 @@ try:
 except Exception as error:
 	print("An error occurred during importing packages:", error)
 
-class Game(Application):
+class Game(TabbedApplication):
 	def __init__(self) -> None:
 		self.cursor_size = 25, 25
 		self.background_colors = {"menu": Yellow, "settings": Yellow, "display settings": Yellow, "audio settings": Yellow, "game settings": Yellow, "developer": Yellow, "game": CustomBlue}
-		super().__init__("2048 GAME", (1920, 1080), self.background_colors, 165)
+		super().__init__((1920, 1080), "2048 GAME", 165, self.background_colors)
 
 		self.cloud_count = 30
 		self.max_size = 7
@@ -82,7 +84,7 @@ class Game(Application):
 
 	def add_objects(self) -> None:
 		# Menu
-		self.add_object("menu", "menu", Menu(ImagePath("blue3", "gui/buttons"), self.title, 30, White, self.font_path, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", ["START", "SETTINGS", "DEVELOPER", "EXIT"], 30, Gray, White, self.font_path, self.size))
+		self.add_object("menu", "menu", Menu(ImagePath("blue3", "gui/buttons"), self.get_title(), 30, White, self.font_path, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", ["START", "SETTINGS", "DEVELOPER", "EXIT"], 30, Gray, White, self.font_path, self.size))
 		self.add_object("menu", "cloud animation", CloudAnimation(self.size))
 
 		# Settings
@@ -258,7 +260,7 @@ class Game(Application):
 		for row in self.tiles:
 			for tile in row:
 
-				is_over = tile.is_mouse_over(self.mouse_position)
+				is_over = tile.is_mouse_over(self.mouse.position)
 
 				if is_over:
 					if not is_there_selected:
@@ -281,8 +283,7 @@ class Game(Application):
 			self.update_button_texts()
 			self.play_sfx(self.click_sound_path)
 
-	def handle_exit_events(self, event) -> None:
-
+	def _on_exit(self, event) -> None:
 		if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
 			self.play_sfx(self.go_back_sound_path)
 
@@ -326,9 +327,9 @@ class Game(Application):
 
 					self.open_tab("menu")
 
-	def handle_events(self, event) -> None:
+	def _handle_event(self, event) -> None:
 
-		super().handle_events(event)
+		super()._handle_event(event)
 
 		if self.tab == "menu":
 
@@ -342,13 +343,13 @@ class Game(Application):
 				elif self[self.tab]["menu"].buttons["EXIT"].status == "Selected":
 					self.play_sfx(self.click_sound_path); self.exit()
 
-			if self[self.tab]["menu"].buttons["START"].is_mouse_click(event, self.mouse_position):
+			if self[self.tab]["menu"].buttons["START"].is_mouse_click(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); self.open_tab("game")
-			elif self[self.tab]["menu"].buttons["SETTINGS"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["menu"].buttons["SETTINGS"].is_mouse_click(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); self.open_tab("settings")
-			elif self[self.tab]["menu"].buttons["DEVELOPER"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["menu"].buttons["DEVELOPER"].is_mouse_click(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); self.open_tab("developer")
-			elif self[self.tab]["menu"].buttons["EXIT"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["menu"].buttons["EXIT"].is_mouse_click(event, self.mouse.position):
 				self.play_sfx(self.go_back_sound_path); self.exit()
 
 		elif self.tab == "settings":
@@ -364,35 +365,35 @@ class Game(Application):
 				elif self[self.tab]["menu"].buttons["GO BACK"].status == "Selected":
 					self.play_sfx(self.click_sound_path); self.open_tab("menu")
 
-			if self[self.tab]["menu"].buttons["DISPLAY SETTINGS"].is_mouse_click(event, self.mouse_position):
+			if self[self.tab]["menu"].buttons["DISPLAY SETTINGS"].is_mouse_click(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); self.open_tab("display settings")
-			elif self[self.tab]["menu"].buttons["AUDIO SETTINGS"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["menu"].buttons["AUDIO SETTINGS"].is_mouse_click(event, self.mouse.position):
 				self.old_music_volume, self.old_sfx_volume = self.music_volume, self.sfx_volume
 				self.play_sfx(self.click_sound_path); self.open_tab("audio settings")
-			elif self[self.tab]["menu"].buttons["GAME SETTINGS"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["menu"].buttons["GAME SETTINGS"].is_mouse_click(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); self.open_tab("game settings")
-			elif self[self.tab]["menu"].buttons["GO BACK"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["menu"].buttons["GO BACK"].is_mouse_click(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); self.open_tab("menu")
 
 		elif self.tab == "display settings":
 
-			if self[self.tab]["go back button"].is_mouse_click(event, self.mouse_position):
+			if self[self.tab]["go back button"].is_mouse_click(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); self.open_tab("settings")
 
 		elif self.tab == "audio settings":
 
-			if self[self.tab]["music volume plus button"].is_mouse_click(event, self.mouse_position):
+			if self[self.tab]["music volume plus button"].is_mouse_click(event, self.mouse.position):
 				if self.music_volume != 1.0: self.set_music_volume(self.music_volume + 0.1)
-			elif self[self.tab]["music volume minus button"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["music volume minus button"].is_mouse_click(event, self.mouse.position):
 				if self.music_volume > 0.0: self.set_music_volume(self.music_volume - 0.1)
-			elif self[self.tab]["SFX volume plus button"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["SFX volume plus button"].is_mouse_click(event, self.mouse.position):
 				if self.sfx_volume != 1.0: self.set_sfx_volume(self.sfx_volume + 0.1)
-			elif self[self.tab]["SFX volume minus button"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["SFX volume minus button"].is_mouse_click(event, self.mouse.position):
 				if self.sfx_volume > 0.0: self.set_sfx_volume(self.sfx_volume - 0.1)
-			elif self[self.tab]["cancel button"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["cancel button"].is_mouse_click(event, self.mouse.position):
 				self.set_music_volume(self.old_music_volume); self.set_sfx_volume(self.old_sfx_volume)
 				self.play_sfx(self.go_back_sound_path); self.open_tab("settings")
-			elif self[self.tab]["save button"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["save button"].is_mouse_click(event, self.mouse.position):
 				if self.database.connect():
 					self.database.execute("UPDATE game SET music_volume='" + str(self.music_volume) + "', sfx_volume='" + str(self.sfx_volume) + "'")
 					self.database.commit(); self.database.disconnect()
@@ -402,40 +403,40 @@ class Game(Application):
 
 		elif self.tab == "game settings":
 
-			if self[self.tab]["delete data button"].is_mouse_click(event, self.mouse_position):
+			if self[self.tab]["delete data button"].is_mouse_click(event, self.mouse.position):
 				self.delete_data(); self.get_data(); self.add_objects()
 				self.play_sfx(self.click_sound_path); self.open_tab("menu")
-			elif self[self.tab]["go back button"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["go back button"].is_mouse_click(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); self.open_tab("settings")
 
 		elif self.tab == "developer":
 
-			if self[self.tab]["github"].is_mouse_click(event, self.mouse_position):
+			if self[self.tab]["github"].is_mouse_click(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); webbrowser.open("https://www.github.com/umutcanekinci/")
-			elif self[self.tab]["linkedin"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["linkedin"].is_mouse_click(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); webbrowser.open("https://www.linkedin.com/in/umutcanekinci/")
-			elif self[self.tab]["instagram"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["instagram"].is_mouse_click(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); webbrowser.open("https://www.instagram.com/umut_ekinci_/")
-			elif self[self.tab]["facebook"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["facebook"].is_mouse_click(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); webbrowser.open("https://www.facebook.com/nmuetn/")
-			elif self[self.tab]["x"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["x"].is_mouse_click(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); webbrowser.open("https://twitter.com/muetnmuetn/")
-			elif self[self.tab]["youtube"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["youtube"].is_mouse_click(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); webbrowser.open("https://www.youtube.com/channel/UC1ma8tkbaD-xxJ4tgSxDthg/")
-			elif self[self.tab]["go back button"].is_mouse_click(event, self.mouse_position):
+			elif self[self.tab]["go back button"].is_mouse_click(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); self.open_tab("menu")
 
 		elif self.tab == "game":
 
 			if self["game"]["info panel"].visible:
 
-				if self[self.tab]["info panel sell button"].is_mouse_click(event, self.mouse_position):
+				if self[self.tab]["info panel sell button"].is_mouse_click(event, self.mouse.position):
 					self.buildings.remove(self.info_building)
 					self.money += self.info_building.sell_price
 					self.close_info_panel()
 					self.play_sfx(self.go_back_sound_path)
 					self.update_button_texts()
-				elif self["game"]["info panel close button"].is_mouse_click(event, self.mouse_position):
+				elif self["game"]["info panel close button"].is_mouse_click(event, self.mouse.position):
 					self.close_info_panel()
 					self.play_sfx(self.go_back_sound_path)
 					self.control_selecting_tile()
@@ -444,7 +445,7 @@ class Game(Application):
 
 				self.control_selecting_tile()
 
-				if self[self.tab]["info mode button"].is_mouse_click(event, self.mouse_position):
+				if self[self.tab]["info mode button"].is_mouse_click(event, self.mouse.position):
 					status = "Off" if self["game"]["info mode button"].status == "On" else "On"
 					self[self.tab]["info mode button"].set_status(status)
 					self.play_sfx(self.click_sound_path)
@@ -460,11 +461,11 @@ class Game(Application):
 										break
 								break
 
-				if self[self.tab]["expand button"].is_mouse_click(event, self.mouse_position):
+				if self[self.tab]["expand button"].is_mouse_click(event, self.mouse.position):
 					self.expand()
-				elif self[self.tab]["build button"].is_mouse_click(event, self.mouse_position):
+				elif self[self.tab]["build button"].is_mouse_click(event, self.mouse.position):
 					self.create_building()
-				elif self[self.tab]["next age button"].is_mouse_click(event, self.mouse_position):
+				elif self[self.tab]["next age button"].is_mouse_click(event, self.mouse.position):
 					self.next_age()
 
 			if event.type == pygame.KEYUP and not self["game"]["info panel"].visible:

@@ -1,5 +1,5 @@
 import pygame
-from game_core.image import *
+from pygame_core.image import *
 from src.default.object import *
 
 class Buttonxx(Object):

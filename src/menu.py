@@ -1,10 +1,10 @@
 #-# Import Packages #-#
 import pygame
-from game_core.path import FilePath, FontPath, SoundPath
-from game_core.color import White
+from pygame_core.path import FilePath, FontPath, SoundPath
+from pygame_core.color import White
 from default.object import Object
 from src.default.button import Button, MenuButton
-from src.default.application import Application
+from src.default.tabbedapplication import TabbedApplication
 
 #-# Menu Class #-#
 class Menu(pygame.Surface):
@@ -82,9 +82,9 @@ class Menu(pygame.Surface):
                     for j, button2 in enumerate(self.buttons.values()):
                         if button2.status == "Selected":
                             if j > i:
-                                Application.play_sound(1, self.switch_down_sound_path, self.sfx_volume)
+                                TabbedApplication.play_sound(1, self.switch_down_sound_path, self.sfx_volume)
                             else:
-                                Application.play_sound(1, self.switch_up_sound_path, self.sfx_volume)
+                                TabbedApplication.play_sound(1, self.switch_up_sound_path, self.sfx_volume)
 
                             button.set_status("Selected")
                             button2.set_status("Unselected")
@@ -94,7 +94,7 @@ class Menu(pygame.Surface):
             if event.key == pygame.K_w or event.key == pygame.K_UP:
                 for i, button in enumerate(self.buttons.values()):
                     if button.status == "Selected" and i != 0:
-                        Application.play_sound(1, self.switch_up_sound_path, self.sfx_volume)
+                        TabbedApplication.play_sound(1, self.switch_up_sound_path, self.sfx_volume)
                         self.buttons[list(self.buttons.keys())[i-1]].set_status("Selected")
                         button.set_status("Unselected")
                         break
@@ -102,7 +102,7 @@ class Menu(pygame.Surface):
             elif event.key == pygame.K_s or event.key == pygame.K_DOWN:
                 for i, button in enumerate(self.buttons.values()):
                     if button.status == "Selected" and i != len(self.buttons) - 1:
-                        Application.play_sound(1, self.switch_down_sound_path, self.sfx_volume)
+                        TabbedApplication.play_sound(1, self.switch_down_sound_path, self.sfx_volume)
                         self.buttons[list(self.buttons.keys())[i+1]].set_status("Selected")
                         button.set_status("Unselected")
                         break

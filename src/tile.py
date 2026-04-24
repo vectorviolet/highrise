@@ -1,7 +1,7 @@
 from pygame.math import Vector2
 
-from game_core.color import White, Gray
-from game_core.path import ImagePath
+from pygame_core.color import White, Gray
+from pygame_core.path import ImagePath
 
 from src.default.object import Object
 from pygame import Surface
