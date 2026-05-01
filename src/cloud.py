@@ -1,98 +1,79 @@
 #-# Import Packages #-#
-from src.default.object import *
+from default.object import Object
 import random
+from pygame_core.asset_path import ImagePath, AssetPath
+from untiy.rigidbody2d import Rigidbody2D
+
 
 class Cloud(Object):
-
-    def __init__(self, imagePath: FilePath, surfaceSize: tuple, size=(100, 100)):
-
-        x = random.randint(0, surfaceSize[0] - 101)
-        y = random.randint(0, surfaceSize[1] - 101)
-
-        self.set_velocity((random.choice([1/6, 1/7, 1/8, 1/9, 1/10, 1/11, 1/12, -1/6, -1/7, -1/8 -1/9, -1/10, -1/11 -1/12]), 0))
-
-        super().__init__((x, y), size, {"Normal" : imagePath})
+    def __init__(self, image_path: AssetPath, surface_size: tuple, size=(100, 100)):
+        x = random.randint(0, surface_size[0] - 101)
+        y = random.randint(0, surface_size[1] - 101)
+        super().__init__((x, y), size, {"Normal": image_path})
+        self.get_component(Rigidbody2D).set_velocity((random.choice([1/6, 1/7, 1/8, 1/9, 1/10, 1/11, 1/12, -1/6, -1/7, -1/8 -1/9, -1/10, -1/11 -1/12]), 0))
 
 class GameClouds(list[Cloud]):
-
-    def __init__(self, count, surfaceSize) -> None:
-
+    def __init__(self, count, surface_size) -> None:
         super().__init__()
-
-        self.surfaceSize = surfaceSize
+        self.surface_size = surface_size
         self.count = count
-
         self.create_clouds()
 
     def create_clouds(self):
-
         for i in range(self.count):
-
-            cloud = Cloud(ImagePath("cloud"), self.surfaceSize)
+            cloud = Cloud(ImagePath("cloud"), self.surface_size)
             self.append(cloud)
-
-    def handle_events(self, event, mouse_position):
-
-        pass
-
-    def draw(self, surface) -> None:
-
+    def update(self) -> None:
         for cloud in self:
-
-            if self.surfaceSize[0] - cloud.width + cloud.velocity[0] >= cloud.position.x > self.surfaceSize[0] - cloud.width and cloud.velocity[0] > 0:
-
-                new_cloud = Cloud(ImagePath("cloud"), self.surfaceSize)
-                new_cloud.set_position((cloud.position.x - self.surfaceSize[0], cloud.position.y))
-                new_cloud.velocity = cloud.velocity
+            velocity = cloud.get_component(Rigidbody2D).velocity
+            xvel = velocity.x
+            position = cloud.transform
+            width = cloud.transform.width
+            a = self.surface_size[0] - width
+            is_left_exit = a >= position.x + xvel > self.surface_size[0] - width and xvel > 0
+            is_right_exit = xvel <= position.x < 0 and xvel < 0
+            if is_left_exit:
+                new_cloud = Cloud(ImagePath("cloud"), self.surface_size)
+                new_cloud.transform.topleft = (position.x - self.surface_size[0], position.y)
+                new_cloud.get_component(Rigidbody2D).set_velocity(velocity)
+                self.append(new_cloud)
+            elif is_right_exit:
+                new_cloud = Cloud(ImagePath("cloud"), self.surface_size)
+                new_cloud.transform.topleft = (position.x + self.surface_size[0], position.y)
+                new_cloud.get_component(Rigidbody2D).set_velocity(velocity)
                 self.append(new_cloud)
 
-            elif cloud.velocity[0] <= cloud.position.x < 0 and cloud.velocity[0] < 0:
-
-                new_cloud = Cloud(ImagePath("cloud"), self.surfaceSize)
-                new_cloud.set_position((cloud.position.x + self.surfaceSize[0], cloud.position.y))
-                new_cloud.velocity = cloud.velocity
-                self.append(new_cloud)
-
-            if cloud.position.x >= self.surfaceSize[0] or cloud.position.x < -cloud.width:
-
+            if position.x >= self.surface_size[0] or position.x < -width:
                 self.remove(cloud)
 
+            cloud.update()
+
+    def draw(self, surface) -> None:
+        for cloud in self:
             cloud.draw(surface)
 
 class CloudAnimation(list[Cloud]):
-
-    def __init__(self, surfaceSize):
-
+    def __init__(self, surface_size):
         super().__init__()
-
-        self.surfaceSize = surfaceSize
+        self.surfaceSize = surface_size
 
     def create_clouds(self):
-
         for i in range(100):
-
             cloud = Cloud(ImagePath("cloud"), self.surfaceSize, (200, 200))
-
-            if cloud.position.x <= self.surfaceSize[0]/2:
-
-                cloud.set_velocity((-10, 0))
-
+            if cloud.transform.x <= self.surfaceSize[0]/2:
+                cloud.get_component(Rigidbody2D).set_velocity((-10, 0))
             else:
-
-                cloud.set_velocity((10, 0))
+                cloud.get_component(Rigidbody2D).set_velocity((10, 0))
 
             self.append(cloud)
 
-    def handle_events(self, event, mouse_position):
+    def update(self) -> None:
+        for cloud in self:
+            if cloud.transform.x >= self.surfaceSize[0] or cloud.transform.x <= -cloud.width:
+                self.remove(cloud)
 
-        pass
+            cloud.update()
 
     def draw(self, surface):
-
         for cloud in self:
-
             cloud.draw(surface)
-
-            if cloud.position.x >= self.surfaceSize[0] or cloud.position.x <= -cloud.width:
-
-                self.remove(cloud)

@@ -1,27 +1,27 @@
 from pygame.math import Vector2
 
 from pygame_core.color import White, Gray
-from pygame_core.path import ImagePath
+from pygame_core.asset_path import ImagePath
 
-from src.default.object import Object
+from default.object import Object
 from pygame import Surface
 from pygame.event import Event
 from pygame.draw import polygon
 
-class Tile(object):
+class Tile:
 
 	def __init__(self, width, height, row_number, column_number):
 		self.row_number, self.column_number = row_number, column_number
 		self.position = self.x, self.y = self.get_position(self.row_number, self.column_number)
 		self.image = Object(self.position, (0, 0), {"Normal" : ImagePath("tile")})
 		self.selected = False
-		self.rect = self.image.rect
+		self.rect = self.image.transform
 		self.selected_rect = self.rect.copy()
 		self.unselected_rect = self.rect.copy()
 		self.selected_rect.y -= 10
 		self.position = Vector2(self.x, self.y)
 		self.size = self.width, self.height = width, height
-		self.surface = self.unselected_surface = self.image["Normal"]
+		self.surface = self.unselected_surface = self.image.states["Normal"]
 		self.selected_surface = self.unselected_surface.__copy__()
 		self.is_empty = True
 
@@ -135,7 +135,7 @@ class Tiles(list[Tile]):
 			self.size = self.rowCount, self.columnCount = self.rowCount, self.columnCount + 1
 			self.create()
 
-	def handle_events(self, event: Event, mouse_position: tuple):
+	def handle_event(self, event: Event, mouse_position: tuple):
 		pass
 
 	def draw(self, surface: Surface) -> None:

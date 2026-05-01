@@ -1,6 +1,6 @@
 import pygame
 from pygame_core.image import *
-from src.default.object import *
+from default.object import *
 
 class Buttonxx(Object):
 
@@ -23,11 +23,11 @@ class Buttonxx(Object):
 			IconSize=[10, 10],
 			IconSide="LeftCenter",
 			IconMargin=20,
-			surfaceSize: tuple = None,
+			surface_size: tuple = None,
 			show = True
 			):
 
-		super().__init__(position, size, {}, surfaceSize, None, show)
+		super().__init__(position, size, {}, surface_size, None, show)
 		
 		#-# Button Proporties #-#
 		self.rect = pygame.Rect(self.position[0] - CornerRadius, self.position[1] - CornerRadius, self.size[0] + CornerRadius*2, self.size[1] + CornerRadius*2)
@@ -95,7 +95,7 @@ class Buttonxx(Object):
 		 "BottomCenter" : (self.CenterX, self.Bottom),
 		 "BottomCenter" : (self.Right, self.Bottom)}.get(Side)
 
-	def handle_events(self, event, MousePosition):
+	def handle_event(self, event, MousePosition):
 
 		if self.isMouseOver(MousePosition):
 			

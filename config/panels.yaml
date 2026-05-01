@@ -1,0 +1,172 @@
+#groups:
+#  menu_chrome:
+#    logo:
+#      position: [CENTER, 60]
+#      size: [1085, 175]
+#      asset: logo
+#
+object_templates:
+  settings_text:
+    type: text
+    font: kenvector_future
+    font_size: 25
+    color: [128,128,128]
+#  btn-sm:
+#    size: [ 375, 100 ]
+#    asset: btn
+#    hover: btn_hover
+#    nine_slice: 10
+#  btn-lg:
+#    size: [1000, 100]
+#    asset: btn
+#    hover: btn_hover
+#    nine_slice: 10
+#  menu_text:
+#    type: text
+#    font: Impact
+#    font_size: 48
+#
+#  music_toggle:
+#    position: [ 25, 25 ]
+#    size: [ 80, 80 ]
+#    asset: btn_music_pause
+#    states:
+#      paused:
+#        asset: btn_music_resume
+#
+panels:
+  audio_settings:
+    objects:
+      music_volume_text:
+        extends: settings_text
+        position: [CENTER, 380]
+        text: "MUSIC VOLUME"
+      sfx_volume_text:
+        extends: settings_text
+        position: [CENTER, 550]
+        text: "SFX VOLUME"
+  developer:
+    objects:
+      name_text:
+        type: text
+        font: freesansbold
+        color: Black
+        font_size: 20
+        position: [CENTER, 380]
+        text: "Umutcan Ekinci"
+      title_text:
+        type: text
+        font: freesansbold
+        color: [128,128,128]
+        font_size: 17
+        position: [CENTER, 400]
+        text: "Software Engineer"
+  game:
+    objects:
+      money_text_1:
+         type: text
+         font: kenvector_future
+         font_size: 55
+         color: Green
+         position: [1450, 995]
+         text: "MONEY"
+
+#  main_menu:
+#    extends: [menu_chrome]
+#    objects:
+#      play:
+#        extends: btn-lg
+#        position: [CENTER, 300]
+#      contact:
+#        extends: btn-lg
+#        position: [CENTER, 420]
+#      exit:
+#        extends: btn-lg
+#        position: [CENTER, 540]
+#
+#      play_text:
+#        extends: menu_text
+#        position: [ CENTER, 320 ]
+#        text: "PLAY"
+#      contact_text:
+#        extends: menu_text
+#        position: [ CENTER, 440 ]
+#        text: "CONTACT US"
+#      exit_text:
+#        extends: menu_text
+#        position: [ CENTER, 560 ]
+#        text: "EXIT"
+#
+#      music_toggle:
+#        extends: music_toggle
+#
+#  contact:
+#    extends: [menu_chrome]
+#    objects:
+#      social_media:
+#        position: [CENTER, 240]
+#        size: [750, 750]
+#        asset: social_media
+#      back:
+#        extends: btn-sm
+#        position: [93, 840]
+#      back_text:
+#        extends: menu_text
+#        position: [235, 860]
+#        text: "BACK"
+#      music_toggle:
+#        extends: music_toggle
+#
+#  game:
+#    objects:
+#      money_box:
+#        position: [1525, 86]
+#        size: [375, 156]
+#        asset: money_box
+#      live_image:
+#        position: [1660, 252]
+#        size: [50, 50]
+#        asset: heart
+#      buy_tower_1:
+#        position: [1545, 318]
+#        size: [160, 160]
+#        asset: buy_tower_1
+#      buy_tower_2:
+#        position: [1736, 318]
+#        size: [160, 160]
+#        asset: buy_tower_2
+#      buy_tower_3:
+#        position: [1545, 546]
+#        size: [160, 160]
+#        asset: buy_tower_3
+#      buy_tower_4:
+#        position: [1736, 546]
+#        size: [160, 160]
+#        asset: buy_tower_4
+#        states:
+#          lvl2:
+#            asset: buy_tower_4_lvl2
+#      upgrade_planes:
+#        position: [1547, 876]
+#        size: [338, 88]
+#        asset: btn_upgrade_hover
+#        hover: btn_upgrade
+#      menu:
+#        position: [1547, 984]
+#        size: [338, 88]
+#        asset: btn_menu_hover
+#        hover: btn_menu
+#      start_pause_button:
+#        position: [1640, 780]
+#        size: [80, 80]
+#        asset: btn_start
+#        states:
+#          pause:
+#            asset: btn_pause
+#      x2:
+#        position: [1747, 780]
+#        size: [80, 80]
+#        asset: btn_2x
+#        states:
+#          active:
+#            asset: btn_2x_active

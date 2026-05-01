@@ -1,1 +1,3 @@
 pygame-ce
+https://github.com/umutcanekinci/pygame-core/zipball/master
+pyyaml

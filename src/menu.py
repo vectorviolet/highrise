@@ -1,23 +1,22 @@
 #-# Import Packages #-#
 import pygame
-from pygame_core.path import FilePath, FontPath, SoundPath
+from default.sound_manager import SoundManager
+from pygame_core.asset_path import AssetPath, FontPath, SoundPath
 from pygame_core.color import White
 from default.object import Object
-from src.default.button import Button, MenuButton
-from src.default.tabbedapplication import TabbedApplication
+from default.button import Button, MenuButton
 
 #-# Menu Class #-#
 class Menu(pygame.Surface):
 
     def __init__(
             self,
-
-            title_image_path: FilePath,
+            title_image_path: AssetPath,
             title_text: str,
             title_text_size: int,
             title_text_color: tuple,
             title_font_path: FontPath,
-            panel_image_path: FilePath,
+            panel_image_path: AssetPath,
 
             button_size: tuple,
             button_color: tuple,
@@ -75,16 +74,16 @@ class Menu(pygame.Surface):
 
         super().__init__(size, pygame.SRCALPHA)
 
-    def handle_events(self, event, mouse_position) -> None:
+    def handle_event(self, event, mouse_position) -> None:
         if event.type == pygame.MOUSEMOTION:
             for i, button in enumerate(self.buttons.values()):
                 if button.is_mouse_over(mouse_position) and button.status != "Selected":
                     for j, button2 in enumerate(self.buttons.values()):
                         if button2.status == "Selected":
                             if j > i:
-                                TabbedApplication.play_sound(1, self.switch_down_sound_path, self.sfx_volume)
+                                SoundManager.play_sound(1, self.switch_down_sound_path, self.sfx_volume)
                             else:
-                                TabbedApplication.play_sound(1, self.switch_up_sound_path, self.sfx_volume)
+                                SoundManager.play_sound(1, self.switch_up_sound_path, self.sfx_volume)
 
                             button.set_status("Selected")
                             button2.set_status("Unselected")
@@ -94,7 +93,7 @@ class Menu(pygame.Surface):
             if event.key == pygame.K_w or event.key == pygame.K_UP:
                 for i, button in enumerate(self.buttons.values()):
                     if button.status == "Selected" and i != 0:
-                        TabbedApplication.play_sound(1, self.switch_up_sound_path, self.sfx_volume)
+                        SoundManager.play_sound(1, self.switch_up_sound_path, self.sfx_volume)
                         self.buttons[list(self.buttons.keys())[i-1]].set_status("Selected")
                         button.set_status("Unselected")
                         break
@@ -102,7 +101,7 @@ class Menu(pygame.Surface):
             elif event.key == pygame.K_s or event.key == pygame.K_DOWN:
                 for i, button in enumerate(self.buttons.values()):
                     if button.status == "Selected" and i != len(self.buttons) - 1:
-                        TabbedApplication.play_sound(1, self.switch_down_sound_path, self.sfx_volume)
+                        SoundManager.play_sound(1, self.switch_down_sound_path, self.sfx_volume)
                         self.buttons[list(self.buttons.keys())[i+1]].set_status("Selected")
                         button.set_status("Unselected")
                         break

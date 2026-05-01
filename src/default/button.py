@@ -1,14 +1,17 @@
 #-# Importing Packages #-#
 import pygame
-from src.default.object import *
-from src.default.text import *
+from default.object import Object
+from text import Text
+from pygame_core.asset_path import ImagePath
+from pygame_core.image import load_image
+from pygame_core.color import White
 
 #-# Button Class #-#
 class Button(Object):
 
-    def __init__(self, position: tuple = ..., size: tuple = ..., imagePaths=..., text: str = "", selectedText: str = "", textSize: int = 20, textColor: tuple = White, selectedTextColor: tuple = White, textFontPath: pygame.font.Font = None, surfaceSize: tuple = None, screen_position: tuple = None, visible=True):
+    def __init__(self, position: tuple = ..., size: tuple = ..., image_paths=..., text: str = "", selectedText: str = "", textSize: int = 20, textColor: tuple = White, selectedTextColor: tuple = White, textFontPath: pygame.font.Font = None, surface_size: tuple = None, screen_position: tuple = None, visible=True):
 
-        super().__init__(position, size, imagePaths, surfaceSize, screen_position, visible)
+        super().__init__(position, size, image_paths, surface_size, screen_position, visible)
 
         if text:
 
@@ -35,7 +38,7 @@ class Button(Object):
 
         if hasattr(self, "text") and self.visible:
 
-            self.text.set_status(self.status, self.position, self.size)
+            self.text.set_status(self.status, self.transform.topleft, self.size)
 
             self.text.draw(surface)
 
