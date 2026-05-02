@@ -1,7 +1,12 @@
 # config/assets.yaml
 fonts:
     kenvector_future: {folder: , name: kenvector_future}
+    kenvector_future_thin: {folder: , name: kenvector_future_thin}
 images:
+    profile_image: {folder: gui/others, name: cv}
+    grey_panel: {folder: gui/panels, name: grey}
+    github_icon: {folder: gui/others, name: github}
+    linkedin_icon: {folder: gui/others, name: linkedin}
 #  # ── Backgrounds & general ─────────────────────────────────────────────
 #  bg_main:           {folder: others, name: bg}
 #  bg_game:           {folder: others, name: gray_bg, extension: jpg}

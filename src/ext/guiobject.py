@@ -4,17 +4,18 @@ import pygame
 from pygame_core.asset_path import ImagePath
 from pygame_core.utils import Centerable
 from ext.image_object import ImageObject
+from untiy.components.transform import Transform
 
 PathLike = Union[str, ImagePath, os.PathLike]
 
 
 class GuiObject(Centerable):
-	def __init__(self, surface_size: tuple[int, int] = (0, 0),
+	def __init__(self, parent: Transform = None,
 	             pos=("CENTER", "CENTER"),
 	             size=(None, None),
 	             image_path: PathLike = None,
 	             nine_slice: int = 0) -> None:
-		self._pos = self.resolve_pos(pos, surface_size, size)
+		self._pos = self.resolve_pos(pos, parent.size, size)
 		self._size = size
 		self._nine_slice = nine_slice
 		self._state: Any = None
@@ -38,28 +39,18 @@ class GuiObject(Centerable):
 	def is_clicked(self, event, mouse_pos) -> bool:
 		return self._active_image.is_clicked(event, mouse_pos)
 
-	def handle_event(self, event, mouse_pos: tuple) -> None:
-		pass
-
 	def draw(self, surface: pygame.Surface) -> None:
 		self._active_image.draw(surface)
 
-	def get_info(self) -> tuple:
-		return "GUI Object Info:", {
-			"state": self._state,
-			"pos": self._active_image.rect.topleft,
-			"size": self._active_image.rect.size,
-		}
-
 
 class HoverableGuiObject(GuiObject):
-	def __init__(self, surface_size: tuple[int, int] = (0, 0),
+	def __init__(self, parent: Transform = None,
 	             pos=("CENTER", "CENTER"),
 	             size=(None, None),
 	             image_path: PathLike = None,
 	             hover_image_path: PathLike = None,
 	             nine_slice: int = 0) -> None:
-		super().__init__(surface_size, pos, size, image_path, nine_slice)
+		super().__init__(parent, pos, size, image_path, nine_slice)
 		self._hovered = False
 		self._hover_images: dict[Any, ImageObject] = {}
 		if hover_image_path is not None:

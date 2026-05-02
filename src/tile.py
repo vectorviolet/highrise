@@ -3,7 +3,7 @@ from pygame.math import Vector2
 from pygame_core.color import White, Gray
 from pygame_core.asset_path import ImagePath
 
-from default.object import Object
+from object import Object
 from pygame import Surface
 from pygame.event import Event
 from pygame.draw import polygon
@@ -15,7 +15,7 @@ class Tile:
 		self.position = self.x, self.y = self.get_position(self.row_number, self.column_number)
 		self.image = Object(self.position, (0, 0), {"Normal" : ImagePath("tile")})
 		self.selected = False
-		self.rect = self.image.transform
+		self.rect = self.image.rect
 		self.selected_rect = self.rect.copy()
 		self.unselected_rect = self.rect.copy()
 		self.selected_rect.y -= 10

@@ -1,30 +1,26 @@
-from default.sound_manager import SoundManager
-from ext import panel_factory
+import pygame
+from random import choice
+import webbrowser
+
 from pygame_core.panel_loader_ext import PanelLoaderExt
 from pygame_core.asset_manager import AssetManager
-from untiy.rigidbody2d import Rigidbody2D
+from pygame_core.database import Database
+from pygame_core.image import load_image
+from pygame_core.color import Black, CustomBlue, Gray, White, Yellow
+from pygame_core.asset_path import ImagePath, FontPath, SoundPath
+from pygame_core.application import Application
+from pygame_core.panel_manager import PanelManager
 
-try:
-	import pygame
-	from random import choice
-	import webbrowser
+from sound_manager import SoundManager
+from ext import panel_factory
 
-	from pygame_core.database import Database
-	from pygame_core.image import load_image
-	from pygame_core.color import Black, CustomBlue, Gray, Green, White, Yellow
-	from pygame_core.asset_path import AssetPath, ImagePath, FontPath, SoundPath
-	from pygame_core.application import Application
-	from pygame_core.panel_manager import PanelManager
-
-	from default.button import Button
-	from default.object import Object
-	from text import Text
-	from building import Building, Buildings
-	from cloud import CloudAnimation, GameClouds
-	from menu import Menu
-	from tile import Tiles
-except Exception as error:
-	print("An error occurred during importing packages:", error)
+from untiy.components.transform import Transform
+from button import Button
+from object import Object
+from building import Building, Buildings
+from cloud import CloudAnimation, GameClouds
+from menu import Menu
+from tile import Tiles
 
 class Game(Application):
 	def __init__(self) -> None:
@@ -32,7 +28,8 @@ class Game(Application):
 		self.background_colors = {"menu": Yellow, "settings": Yellow, "display_settings": Yellow, "audio_settings": Yellow, "game settings": Yellow, "developer": Yellow, "game": CustomBlue}
 
 		super().__init__((1920, 1080), "2048 GAME", 165)
-
+		self.window_transform = Transform((0, 0), self.size)
+		self._last_displayed_money = None
 		self.panel_manager = PanelManager(self.background_colors)
 
 		self.assets = AssetManager()
@@ -57,15 +54,30 @@ class Game(Application):
 
 	def run(self) -> None:
 		self.mouse.set_cursor_visible(False)
-		self.mouse.set_cursor(Object((0, 0), self.cursor_size, {"Normal": ImagePath("cursor")}))
+		self.mouse.set_cursor_image(Object((0, 0), self.cursor_size, {"Normal": ImagePath("cursor")}))
 
 		self.get_data()
 		self.add_objects()
 
-		loader = PanelLoaderExt(self.panel_manager, self.size, self.assets)
+		loader = PanelLoaderExt(self.panel_manager, self.window_transform, self.assets)
 		loader.register("object", panel_factory.make_factory(self.assets), default=True)
 		loader.register("text", panel_factory.make_text_factory(self.assets))
 		loader.load("config/panels.yaml")
+
+		# Developer
+		paths = {"Normal": ImagePath("grey15", "gui/buttons"),
+				"Mouse Over": ImagePath("yellow", "gui/buttons")}
+
+		self.panel_manager.add_object("developer", "github",         Button(("CENTER", 440), (250, 40), paths, "", "github.com/umutcanekinci", 28, Black, Gray, parent=self.window_transform))
+		self.panel_manager.add_object("developer", "linkedin",       Button(("CENTER", 490), (250, 40), paths, "", "instagram.com/umut_ekinci_", 28, Black, Gray, parent=self.window_transform))
+		self.panel_manager.add_object("developer", "go back button", Button(("CENTER", 760), (250, 40), paths, "GO BACK", "", 28, Black, Gray, parent=self.window_transform))
+
+		self.panel_manager["developer"]["github"].states["Normal"].blit(
+			load_image(self.assets.image_path("github_icon"), (32, 32)), (105, 5))
+		self.panel_manager["developer"]["linkedin"].states["Normal"].blit(
+			load_image(self.assets.image_path("linkedin_icon"), (32, 32)), (105, 5))
+
+		self.panel_manager.add_object("developer", "cloud animation", CloudAnimation(self.size))
 
 		self.open_panel("menu")
 
@@ -112,14 +124,13 @@ class Game(Application):
 
 		# Display Settings
 		self.panel_manager.add_object("display_settings", "menu", Menu(ImagePath("blue3", "gui/buttons"), "display_settings", 30, White, self.font_path, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", [], 30, Gray, White, self.font_path, self.size, 200))
-		self.panel_manager.add_object("display_settings", "information", Text(((self.width - 300) / 2, (self.height - 600) / 2 + 280), "THIS PAGE WILL COMING SOON...", 25, color=Black, is_centered=False))
 		self.panel_manager.add_object("display_settings", "go back button", Button((810, 580), (315, 60), {"Normal": ImagePath("red", "gui/buttons"), "Mouse Over": ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, White, Gray, self.font_path))
 		self.panel_manager.add_object("display_settings", "cloud animation", CloudAnimation(self.size))
 
 		# Audio Settings
 		self.panel_manager.add_object("audio_settings", "menu", Menu(ImagePath("blue3", "gui/buttons"), "audio_settings", 30, White, self.font_path, ImagePath("grey", "gui/panels"), (400, 60), "blue", "yellow", [], 30, Gray, White, self.font_path, self.size, 500))
 		self.panel_manager.add_object("audio_settings", "music volume minus button", Button((840, 430), (36, 36), {"Normal": ImagePath("blue_circle", "gui/buttons"), "Mouse Over": ImagePath("yellow_circle", "gui/buttons")}))
-		self.panel_manager.add_object("audio_settings", "music volume entry", Button((885, 430), (150, 35), {"Normal": ImagePath("grey8", "gui/buttons")}, "%100", textSize=25, textColor=Gray, textFontPath=self.font_path))
+		self.panel_manager.add_object("audio_settings", "music volume entry", Button((885, 430), (150, 35), {"Normal": ImagePath("grey8", "gui/buttons")}, "%100", text_size=25, text_color=Gray, text_font_path=self.font_path))
 		self.panel_manager.add_object("audio_settings", "music volume plus button", Button((1054, 430), (36, 36), {"Normal": ImagePath("blue_circle", "gui/buttons"), "Mouse Over": ImagePath("yellow_circle", "gui/buttons")}))
 		self.panel_manager["audio_settings"]["music volume minus button"].states["Normal"].blit(load_image(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
 		self.panel_manager["audio_settings"]["music volume minus button"].states["Mouse Over"].blit(load_image(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
@@ -127,7 +138,7 @@ class Game(Application):
 		self.panel_manager["audio_settings"]["music volume plus button"].states["Mouse Over"].blit(load_image(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
 
 		self.panel_manager.add_object("audio_settings", "SFX volume minus button", Button((840, 600), (36, 36), {"Normal": ImagePath("blue_circle", "gui/buttons"), "Mouse Over": ImagePath("yellow_circle", "gui/buttons")}))
-		self.panel_manager.add_object("audio_settings", "SFX volume entry", Button((885, 600), (150, 35), {"Normal": ImagePath("grey8", "gui/buttons")}, "%100", textSize=25, textColor=Gray, textFontPath=self.font_path))
+		self.panel_manager.add_object("audio_settings", "SFX volume entry", Button((885, 600), (150, 35), {"Normal": ImagePath("grey8", "gui/buttons")}, "%100", text_size=25, text_color=Gray, text_font_path=self.font_path))
 		self.panel_manager.add_object("audio_settings", "SFX volume plus button", Button((1054, 600), (36, 36), {"Normal": ImagePath("blue_circle", "gui/buttons"), "Mouse Over": ImagePath("yellow_circle", "gui/buttons")}))
 		self.panel_manager["audio_settings"]["SFX volume minus button"].states["Normal"].blit(load_image(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
 		self.panel_manager["audio_settings"]["SFX volume minus button"].states["Mouse Over"].blit(load_image(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
@@ -143,47 +154,25 @@ class Game(Application):
 		self.panel_manager.add_object("game settings", "go back button", Button((810, 580), (315, 60), {"Normal": ImagePath("red", "gui/buttons"), "Mouse Over": ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, White, Gray, self.font_path))
 		self.panel_manager.add_object("game settings", "cloud animation", CloudAnimation(self.size))
 
-		# Developer
-		self.panel_manager.add_object("developer", "panel", Object(((self.width - 300) / 2, (self.height - 600) / 2), (300, 600), {"Normal": ImagePath("grey", "gui/panels")}))
-		self.panel_manager.add_object("developer", "photo", Object(("CENTER", 270), (100, 100), {"Normal": ImagePath("cv", "gui/others")}, self.size))
-		self.panel_manager.add_object("developer", "github", Button((835, 440), (250, 40), {"Normal": ImagePath("grey15", "gui/buttons"), "Mouse Over": ImagePath("yellow", "gui/buttons")}, "", "github.com/umutcanekinci", 28, Black, Gray))
-		self.panel_manager.add_object("developer", "linkedin", Button((835, 490), (250, 40), {"Normal": ImagePath("grey15", "gui/buttons"), "Mouse Over": ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
-		self.panel_manager.add_object("developer", "instagram", Button((835, 540), (250, 40), {"Normal": ImagePath("grey15", "gui/buttons"), "Mouse Over": ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
-		self.panel_manager.add_object("developer", "facebook", Button((835, 590), (250, 40), {"Normal": ImagePath("grey15", "gui/buttons"), "Mouse Over": ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
-		self.panel_manager.add_object("developer", "x", Button((835, 640), (250, 40), {"Normal": ImagePath("grey15", "gui/buttons"), "Mouse Over": ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
-		self.panel_manager.add_object("developer", "youtube", Button((835, 690), (250, 40), {"Normal": ImagePath("grey15", "gui/buttons"), "Mouse Over": ImagePath("yellow", "gui/buttons")}, "", "instagram.com/umut_ekinci_", 28, Black, Gray))
-		self.panel_manager.add_object("developer", "go back button", Button((835, 760), (250, 40), {"Normal": ImagePath("red", "gui/buttons"), "Mouse Over": ImagePath("yellow", "gui/buttons")}, "GO BACK", "", 28, Black, Gray))
-		self.panel_manager["developer"]["github"].states["Normal"].blit(load_image(ImagePath("github", "gui/others"), (32, 32)), (105, 5))
-		self.panel_manager["developer"]["linkedin"].states["Normal"].blit(load_image(ImagePath("linkedin", "gui/others"), (32, 32)), (105, 5))
-		self.panel_manager["developer"]["instagram"].states["Normal"].blit(load_image(ImagePath("instagram", "gui/others"), (32, 32)), (105, 5))
-		self.panel_manager["developer"]["facebook"].states["Normal"].blit(load_image(ImagePath("facebook", "gui/others"), (32, 32)), (105, 5))
-		self.panel_manager["developer"]["x"].states["Normal"].blit(load_image(ImagePath("x", "gui/others"), (32, 32)), (105, 5))
-		self.panel_manager["developer"]["youtube"].states["Normal"].blit(load_image(ImagePath("youtube", "gui/others"), (32, 32)), (105, 5))
-		self.panel_manager.add_object("developer", "cloud animation", CloudAnimation(self.size))
 
 		# Game
 		self.panel_manager.add_object("game", "clouds", GameClouds(self.cloud_count, self.size))
 		self.panel_manager.add_object("game", "game panel", Object((0, self.height - 115), (1920, 100), {"Normal": ImagePath("grey", "gui/panels")}))
 		self.panel_manager.add_object("game", "info mode button", Button((340, 985), (60, 60), {"On": ImagePath("green", "gui/buttons"), "Off": ImagePath("red", "gui/buttons")}))
 		self.panel_manager.add_object("game", "info mode button image", Object((345, 990), (50, 50), {"Normal": ImagePath("info", "gui/others")}))
-		self.panel_manager.add_object("game", "expand button", Button((560, 985), (200, 60), {"Normal": ImagePath("green", "gui/buttons"), "Mouse Over": ImagePath("red", "gui/buttons")}, "EXPAND", str(self.tiles.get_expand_cost()) + "$", 27, textFontPath=self.font_path))
-		self.panel_manager.add_object("game", "build button", Button((860, 985), (200, 60), {"Normal": ImagePath("green", "gui/buttons"), "Mouse Over": ImagePath("red", "gui/buttons")}, "BUILD", str(self.buildings.get_build_cost()) + "$", 27, textFontPath=self.font_path))
-		self.panel_manager.add_object("game", "next age button", Button((1160, 985), (200, 60), {"Normal": ImagePath("green", "gui/buttons"), "Mouse Over": ImagePath("red", "gui/buttons")}, "NEXT AGE", str(self.buildings.get_age_cost()) + "$", 27, textFontPath=self.font_path))
-
-
-		self.panel_manager.add_object("game", "money_text", Text((1450, 995), "", 55, color=Green, background_color=Black, is_centered=False))
-
+		self.panel_manager.add_object("game", "expand button", Button((560, 985), (200, 60), {"Normal": ImagePath("green", "gui/buttons"), "Mouse Over": ImagePath("red", "gui/buttons")}, "EXPAND", str(self.tiles.get_expand_cost()) + "$", 27, text_font_path=self.font_path))
+		self.panel_manager.add_object("game", "build button", Button((860, 985), (200, 60), {"Normal": ImagePath("green", "gui/buttons"), "Mouse Over": ImagePath("red", "gui/buttons")}, "BUILD", str(self.buildings.get_build_cost()) + "$", 27, text_font_path=self.font_path))
+		self.panel_manager.add_object("game", "next age button", Button((1160, 985), (200, 60), {"Normal": ImagePath("green", "gui/buttons"), "Mouse Over": ImagePath("red", "gui/buttons")}, "NEXT AGE", str(self.buildings.get_age_cost()) + "$", 27, text_font_path=self.font_path))
 
 		self.panel_manager.add_object("game", "tiles", self.tiles)
 		self.panel_manager.add_object("game", "buildings", self.buildings)
 		self.panel_manager.add_object("game", "info panel", Object(((self.width - 250) / 2, (self.height - 400) / 2), (250, 400), {"Normal": ImagePath("grey", "gui/panels")}, visible=False))
-		self.panel_manager.add_object("game", "info panel level text", Text(((self.width - 250) / 2 + 90, (self.height - 400) / 2 + 35), "Level: ", 15, True, Gray, font_path=self.font_path_thin, is_centered=False, visible=False))
-		self.panel_manager.add_object("game", "info panel speed text", Text(((self.width - 250) / 2 + 90, (self.height - 400) / 2 + 50), "Speed: ", 15, True, Gray, font_path=self.font_path_thin, is_centered=False, visible=False))
-		self.panel_manager.add_object("game", "info panel cooldown text", Text(((self.width - 250) / 2 + 90, (self.height - 400) / 2 + 65), "Cooldown: ", 15, True, Gray, font_path=self.font_path_thin, is_centered=False, visible=False))
-		self.panel_manager.add_object("game", "info panel sell price text", Text(((self.width - 250) / 2 + 90, (self.height - 400) / 2 + 80), "Sell Price: ", 15, True, Gray, font_path=self.font_path_thin, is_centered=False, visible=False))
+
 		self.panel_manager.add_object("game", "info panel building image", Object(((self.width - 250) / 2 + 20, (self.height - 400) / 2 + 20), (65, 89), visible=False))
 		self.panel_manager.add_object("game", "info panel sell button", Button(((self.width - 250) / 2 + 20, (self.height - 400) / 2 + 325), (210, 50), {"Normal": ImagePath("green", "gui/buttons"), "Mouse Over": ImagePath("red", "gui/buttons")}, "SELL", "", 25, visible=False))
-		self.panel_manager.add_object("game", "info panel close button", Button(((self.width - 250) / 2 + 250 - 20, (self.height - 400) / 2 - 12), None, {"Normal": ImagePath("red_circle", "gui/buttons"), "Mouse Over": ImagePath("yellow_circle", "gui/buttons")}, visible=False))
+
+		## size random
+		self.panel_manager.add_object("game", "info panel close button", Button(((self.width - 250) / 2 + 250 - 20, (self.height - 400) / 2 - 12), (20, 20), {"Normal": ImagePath("red_circle", "gui/buttons"), "Mouse Over": ImagePath("yellow_circle", "gui/buttons")}, visible=False))
 		self.panel_manager.add_object("game", "cloud animation", CloudAnimation(self.size))
 
 		self.panel_manager["game"]["info mode button"].set_status("Off")
@@ -377,34 +366,20 @@ class Game(Application):
 				self.play_sfx(self.go_back_sound_path); self.open_panel("settings")
 
 		elif panel == "game settings":
-
 			if self.panel_manager[panel]["delete data button"].is_clicked(event, self.mouse.position):
 				self.delete_data(); self.get_data(); self.add_objects()
 				self.play_sfx(self.click_sound_path); self.open_panel("menu")
 			elif self.panel_manager[panel]["go back button"].is_clicked(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); self.open_panel("settings")
-
 		elif panel == "developer":
-
 			if self.panel_manager[panel]["github"].is_clicked(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); webbrowser.open("https://www.github.com/umutcanekinci/")
 			elif self.panel_manager[panel]["linkedin"].is_clicked(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); webbrowser.open("https://www.linkedin.com/in/umutcanekinci/")
-			elif self.panel_manager[panel]["instagram"].is_clicked(event, self.mouse.position):
-				self.play_sfx(self.click_sound_path); webbrowser.open("https://www.instagram.com/umut_ekinci_/")
-			elif self.panel_manager[panel]["facebook"].is_clicked(event, self.mouse.position):
-				self.play_sfx(self.click_sound_path); webbrowser.open("https://www.facebook.com/nmuetn/")
-			elif self.panel_manager[panel]["x"].is_clicked(event, self.mouse.position):
-				self.play_sfx(self.click_sound_path); webbrowser.open("https://twitter.com/muetnmuetn/")
-			elif self.panel_manager[panel]["youtube"].is_clicked(event, self.mouse.position):
-				self.play_sfx(self.click_sound_path); webbrowser.open("https://www.youtube.com/channel/UC1ma8tkbaD-xxJ4tgSxDthg/")
 			elif self.panel_manager[panel]["go back button"].is_clicked(event, self.mouse.position):
 				self.play_sfx(self.click_sound_path); self.open_panel("menu")
-
 		elif panel == "game":
-
 			if self.panel_manager["game"]["info panel"].visible:
-
 				if self.panel_manager[panel]["info panel sell button"].is_clicked(event, self.mouse.position):
 					self.buildings.remove(self.info_building)
 					self.money += self.info_building.sell_price
@@ -415,7 +390,6 @@ class Game(Application):
 					self.close_info_panel()
 					self.play_sfx(self.go_back_sound_path)
 					self.control_selecting_tile()
-
 			else:
 
 				self.control_selecting_tile()
@@ -508,18 +482,18 @@ class Game(Application):
 
 		self.info_building = building
 		panel = self.panel_manager[self.panel_manager.current_panel]
-		panel["info panel level text"].update_text("Normal", "Level: " + str(building.level))
-		panel["info panel speed text"].update_text("Normal", "Speed: " + str(building.speed) + " $/sec")
-		panel["info panel cooldown text"].update_text("Normal", "Cooldown: " + str(building.cooldown) + " sec")
-		panel["info panel sell price text"].update_text("Normal", "Sell Price: " + str(building.sell_price))
+		panel["level_text"].set_text("Level: " + str(building.level))
+		panel["speed_text"].set_text("Speed: " + str(building.speed) + " $/sec")
+		panel["cooldown_text"].set_text("Cooldown: " + str(building.cooldown) + " sec")
+		panel["sell_price_text"].set_text("Sell Price: " + str(building.sell_price))
 		panel["info panel sell button"].text.update_text("Mouse Over", str(building.sell_price) + "$")
 		panel["info panel building image"].add_surface("Normal", load_image(building.get_image_path(), (65, 89)))
 
 		panel["info panel"].show()
-		panel["info panel level text"].show()
-		panel["info panel speed text"].show()
-		panel["info panel cooldown text"].show()
-		panel["info panel sell price text"].show()
+		panel["level_text"].active = True
+		panel["speed_text"].active = True
+		panel["cooldown_text"].active = True
+		panel["sell_price_text"].active = True
 		panel["info panel close button"].show()
 		panel["info panel sell button"].show()
 		panel["info panel building image"].show()
@@ -527,16 +501,16 @@ class Game(Application):
 	def close_info_panel(self) -> None:
 		panel = self.panel_manager[self.panel_manager.current_panel]
 		panel["info panel"].hide()
-		panel["info panel level text"].hide()
-		panel["info panel speed text"].hide()
-		panel["info panel cooldown text"].hide()
-		panel["info panel sell price text"].hide()
+		panel["level_text"].active = False
+		panel["speed_text"].active = False
+		panel["cooldown_text"].active = False
+		panel["sell_price_text"].active = False
 		panel["info panel close button"].hide()
 		panel["info panel sell button"].hide()
 		panel["info panel building image"].hide()
 
 	def move_buildings(self, rotation: str) -> None:
-		is_moving = any(b.get_component(Rigidbody2D).velocity != pygame.math.Vector2(0, 0) for b in self.buildings)
+		is_moving = self.buildings.is_moving()
 
 		if self.panel_manager["game"]["info mode button"].status == "Off" and not is_moving:
 			if rotation in ("up", "down"):
@@ -610,17 +584,12 @@ class Game(Application):
 			self.panel_manager["game"]["build button"].text.update_size("Mouse Over", 17)
 
 	def create_building(self) -> None:
-		is_moving = any(b.velocity != pygame.math.Vector2(0, 0) for b in self.buildings)
+		is_moving = self.buildings.is_moving()
 
 		if not is_moving and self.money >= self.buildings.get_build_cost():
-			empty_tiles = [
-				(r + 1, c + 1)
-				for r in range(self.tiles.rowCount)
-				for c in range(self.tiles.columnCount)
-			]
-
-			for building in self.buildings:
-				empty_tiles.remove((building.tile.row_number, building.tile.column_number))
+			all_tiles = {(r + 1, c + 1) for r in range(self.tiles.rowCount) for c in range(self.tiles.columnCount)}
+			occupied = {(b.tile.row_number, b.tile.column_number) for b in self.buildings}
+			empty_tiles = list(all_tiles - occupied)
 
 			if empty_tiles:
 				row_number, column_number = choice(empty_tiles)
@@ -657,9 +626,11 @@ class Game(Application):
 
 			if now - building.last_time > building.cooldown * 1000:
 				self.money += building.cooldown * building.speed
-				building.last_time = pygame.time.get_ticks()
+				building.last_time = now
 
-		self.panel_manager[self.panel_manager.current_panel]["money_text"].update_text("Normal", str(self.money) + "$")
+		if self.money != self._last_displayed_money:
+			self._last_displayed_money = self.money
+			self.panel_manager[self.panel_manager.current_panel]["money_text"].set_text(str(self.money) + "$")
 
 	def draw(self) -> None:
 		self.panel_manager.draw(self.window)

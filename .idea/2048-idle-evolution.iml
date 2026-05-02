@@ -3,7 +3,11 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/pygame_core" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/pygame_core/build/lib" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/pygame_core/pygame_core" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/src/pygame_core/.venv" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.14 (2048-idle-evolution)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

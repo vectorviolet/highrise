@@ -1,27 +1,29 @@
 import pygame
+from pygame import Vector2
 from pygame_core.image import load_image
 from pygame_core.color import White
 from pygame_core.utils import MouseInteractive
-from untiy.rigidbody2d import Rigidbody2D
+from untiy.components.rigidbody2d import Rigidbody2D
 from untiy.gameobject import GameObject
 
 
-class Object(MouseInteractive, GameObject):
+class Object(GameObject, MouseInteractive):
 	def __init__(self,
 	             position: tuple = ("CENTER", "CENTER"),
-	             size: tuple = (0, 0),
-	             image_paths = {},
-	             surface_size: tuple = None,
+	             size: tuple | Vector2 = (0, 0),
+	             image_paths = None,
+	             parent = None,
 	             screen_position: tuple = None,
 				 visible = True):
 
 		super().__init__()
 		super().add_component(Rigidbody2D)
-		#super().transform.parent =
-		self.transform.set_position(position)
+		self.rect.size = size
+		self.rect.set_parent(parent)
+		self.rect.set_position(position)
 
 		self.states = {}
-		self.image_paths = image_paths
+		self.image_paths = image_paths if image_paths is not None else {"Normal": None}
 		self.visible = visible
 		self.status = None
 
@@ -33,6 +35,8 @@ class Object(MouseInteractive, GameObject):
 
 	def add_images(self, image_paths):
 		for status, path in image_paths.items():
+			if path is None or status is None: continue
+
 			self.add_image(status, path)
 
 	def add_image(self, status, image_path):
@@ -42,9 +46,6 @@ class Object(MouseInteractive, GameObject):
 		self.states[status] = surface
 		if not self.status and status == "Normal":
 			self.set_status("Normal")
-
-	def resize(self, size: tuple):
-		self = Object(self.position, size, self.image_paths, self.surface_size, self.visible)
 
 	def set_size(self, size):
 		if size and size[0] and size[1]:
@@ -62,9 +63,9 @@ class Object(MouseInteractive, GameObject):
 
 				self.size = self.width, self.height = size
 
-	def set_screen_position(self, screen_position: tuple):
+	def set_screen_position(self, screen_position: tuple | None):
 		if not screen_position:
-			self.screen_position = self.transform.topleft
+			self.screen_position = self.rect.topleft
 		else:
 			self.screen_position = screen_position
 
@@ -89,7 +90,7 @@ class Object(MouseInteractive, GameObject):
 
 	def draw(self, surface) -> None:
 		if self.visible and self.status in self.states:
-			surface.blit(self.states[self.status], self.transform)
+			surface.blit(self.states[self.status], self.rect)
 
 	def set_status(self, status: str):
 		self.status = status

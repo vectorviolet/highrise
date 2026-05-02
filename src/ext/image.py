@@ -1,23 +1,9 @@
 import pygame
 
-def load_image(path: str, extension=".png"):
-    if path is None:
-        return None
-    return pygame.image.load("assets/images/" + path + extension).convert_alpha()
-
-def rotate_surface(image, angle):
-    return pygame.transform.rotate(image, angle)
 
 def scale_surface(image, size):
     return pygame.transform.scale(image, size)
 
-def scale_surface_by(surface: pygame.Surface, factor: tuple[float, float] | float) -> pygame.Surface:
-    if isinstance(factor, float) or isinstance(factor, int):
-        factor = (factor, factor)
-
-    width  = int(surface.get_width()  * factor[0])
-    height = int(surface.get_height() * factor[1])
-    return scale_surface(surface, (width, height))
 
 def nine_slice_scale(image: pygame.Surface, target_size: tuple[int, int], corner: int) -> pygame.Surface:
     """Scale image to target_size using 9-slice.

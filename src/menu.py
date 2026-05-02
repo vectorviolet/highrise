@@ -1,10 +1,10 @@
 #-# Import Packages #-#
 import pygame
-from default.sound_manager import SoundManager
+from sound_manager import SoundManager
 from pygame_core.asset_path import AssetPath, FontPath, SoundPath
 from pygame_core.color import White
-from default.object import Object
-from default.button import Button, MenuButton
+from object import Object
+from button import Button, MenuButton
 
 #-# Menu Class #-#
 class Menu(pygame.Surface):
