@@ -2,6 +2,8 @@ import pygame
 from random import choice
 import webbrowser
 
+from pygame import event
+
 from pygame_core.panel_loader_ext import PanelLoaderExt
 from pygame_core.asset_manager import AssetManager
 from pygame_core.database import Database
@@ -92,24 +94,27 @@ class Game(Application):
 		loader.load("config/panels.yaml")
 
 		# Developer
-		self.panel_manager["developer"]["github"].states["default"].blit(load_image(self.assets.image_path("github_icon"), (32, 32)), (105, 5))
-		self.panel_manager["developer"]["linkedin"].states["default"].blit(load_image(self.assets.image_path("linkedin_icon"), (32, 32)), (105, 5))
+		panel = self.panel_manager["developer"]
+		panel["github"].states["default"].blit(load_image(self.assets.image_path("github_icon"), (32, 32)), (105, 5))
+		panel["linkedin"].states["default"].blit(load_image(self.assets.image_path("linkedin_icon"), (32, 32)), (105, 5))
 
-		self.panel_manager["audio_settings"]["music_volume_minus_button"].states["default"].blit(load_image(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
-		self.panel_manager["audio_settings"]["music_volume_minus_button"].states["hover"].blit(load_image(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
-		self.panel_manager["audio_settings"]["music_volume_plus_button"].states["default"].blit(load_image(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
-		self.panel_manager["audio_settings"]["music_volume_plus_button"].states["hover"].blit(load_image(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
-		self.panel_manager["audio_settings"]["sfx_volume_minus_button"].states["default"].blit(load_image(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
-		self.panel_manager["audio_settings"]["sfx_volume_minus_button"].states["hover"].blit(load_image(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
-		self.panel_manager["audio_settings"]["sfx_volume_plus_button"].states["default"].blit(load_image(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
-		self.panel_manager["audio_settings"]["sfx_volume_plus_button"].states["hover"].blit(load_image(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
+		panel = self.panel_manager["audio_settings"]
+		panel["music_volume_minus_button"].states["default"].blit(load_image(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
+		panel["music_volume_minus_button"].states["hover"].blit(load_image(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
+		panel["music_volume_plus_button"].states["default"].blit(load_image(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
+		panel["music_volume_plus_button"].states["hover"].blit(load_image(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
+		panel["sfx_volume_minus_button"].states["default"].blit(load_image(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
+		panel["sfx_volume_minus_button"].states["hover"].blit(load_image(ImagePath("minus", "gui/others"), (16, 16)), (10, 10))
+		panel["sfx_volume_plus_button"].states["default"].blit(load_image(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
+		panel["sfx_volume_plus_button"].states["hover"].blit(load_image(ImagePath("plus", "gui/others"), (16, 16)), (10, 10))
 
 		self.panel_manager.add_object("game", "info_mode_button_image", Object((345, 990), (50, 50), {"default": ImagePath("info", "gui/others")}))
 		self.panel_manager.add_object("game", "info_panel_building_image", Object(((self.width - 250) / 2 + 20, (self.height - 400) / 2 + 20), (65, 89), visible=False))
 
-		self.panel_manager["game"]["info_mode_button"].set_state("off")
-		self.panel_manager["game"]["info_panel_close_button"].states["default"].blit(load_image(ImagePath("grey_crossWhite", "gui/others")), (9, 9))
-		self.panel_manager["game"]["info_panel_close_button"].states["hover"].blit(load_image(ImagePath("grey_crossGrey", "gui/others")), (9, 9))
+		panel = self.panel_manager["game"]
+		panel["info_mode_button"].set_state("off")
+		panel["info_panel_close_button"].states["default"].blit(load_image(ImagePath("grey_crossWhite", "gui/others")), (9, 9))
+		panel["info_panel_close_button"].states["hover"].blit(load_image(ImagePath("grey_crossGrey", "gui/others")), (9, 9))
 
 
 	def play_music(self, sound_path) -> None:
@@ -180,22 +185,23 @@ class Game(Application):
 		return result
 
 	def update_button_texts(self) -> None:
+		panel = self.panel_manager["game"]
 		if self.tiles.is_max_size():
-			self.panel_manager["game"]["expand_button"].text.update_text("hover", "MAX SIZE")
+			panel["expand_button"].text.update_text("hover", "MAX SIZE")
 		else:
-			self.panel_manager["game"]["expand_button"].text.update_text("hover", str(self.tiles.get_expand_cost()) + "$")
+			panel["expand_button"].text.update_text("hover", f"{self.tiles.get_expand_cost()}$")
 
 		if len(self.buildings) == self.tiles.rowCount * self.tiles.columnCount:
-			self.panel_manager["game"]["build_button"].text.update_text("hover", "TILES ARE FULL")
-			self.panel_manager["game"]["build_button"].text.update_size("hover", 17)
+			panel["build_button"].text.update_text("hover", "TILES ARE FULL")
+			panel["build_button"].text.update_size("hover", 17)
 		else:
-			self.panel_manager["game"]["build_button"].text.update_text("hover", str(self.buildings.get_build_cost()) + "$")
-			self.panel_manager["game"]["build_button"].text.update_size("hover", 27)
+			panel["build_button"].text.update_text("hover", str(self.buildings.get_build_cost()) + "$")
+			panel["build_button"].text.update_size("hover", 27)
 
 		if self.buildings.age_number == self.buildings.max_age_number:
-			self.panel_manager["game"]["next_age_button"].text.update_text("hover", "MAX AGE")
+			panel["next_age_button"].text.update_text("hover", "MAX AGE")
 		else:
-			self.panel_manager["game"]["next_age_button"].text.update_text("hover", str(self.buildings.get_age_cost()) + "$")
+			panel["next_age_button"].text.update_text("hover", str(self.buildings.get_age_cost()) + "$")
 
 	def control_selecting_tile(self) -> None:
 		is_there_selected = self.tiles.is_there_selected_tile()
@@ -245,51 +251,40 @@ class Game(Application):
 
 	def handle_menu_events(self, event: pygame.event.Event) -> None:
 		buttons = self.panel_manager["menu"]["menu"].buttons
-
-		if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
-			if buttons["START"].state == "hover":
-				self.play_sfx(self.click_sound_path); self.open_panel("game")
-			elif buttons["SETTINGS"].state == "hover":
-				self.play_sfx(self.click_sound_path); self.open_panel("settings")
-			elif buttons["DEVELOPER"].state == "hover":
-				self.play_sfx(self.click_sound_path); self.open_panel("developer")
-			elif buttons["EXIT"].state == "hover":
-				self.play_sfx(self.click_sound_path); self.exit()
-
-		if buttons["EXIT"].is_clicked(event, self.mouse.position):
-			self.play_sfx(self.go_back_sound_path)
-			self.exit()
-
-		navigations = {"START": "game", "SETTINGS": "settings", "DEVELOPER": "developer"}
+		navigations = {"START": "game",
+					   "SETTINGS": "settings",
+					   "DEVELOPER": "developer",
+					   "EXIT": "exit"}
 
 		for navigation, panel in navigations.items():
-			if buttons[navigation].is_clicked(event, self.mouse.position):
-				self.play_sfx(self.click_sound_path);
+			button = buttons[navigation]
+			if (button.is_clicked(event, self.mouse.position) or
+					(event.type == pygame.KEYUP and event.key == pygame.K_SPACE) and button.state == "hover"):
+				sound_path = self.go_back_sound_path if navigation == "EXIT" else self.click_sound_path
+				self.play_sfx(sound_path)
 				self.open_panel(panel)
 
 	def handle_settings_events(self, event: pygame.event.Event) -> None:
-		panel = "settings"
+		buttons = self.panel_manager["settings"]["menu"].buttons
+		navigations = {
+			"display_settings": "display_settings",
+			"audio_settings": "audio_settings",
+			"game_settings": "game_settings",
+			"GO BACK": "menu"
+		}
 
-		if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
-			if self.panel_manager[panel]["menu"].buttons["display_settings"].state == "hover":
-				self.play_sfx(self.click_sound_path); self.open_panel("display_settings")
-			elif self.panel_manager[panel]["menu"].buttons["audio_settings"].state == "hover":
-				self.old_music_volume, self.old_sfx_volume = SoundManager.get_volume(0), SoundManager.get_volume(1)
-				self.play_sfx(self.click_sound_path); self.open_panel("audio_settings")
-			elif self.panel_manager[panel]["menu"].buttons["game_settings"].state == "hover":
-				self.play_sfx(self.click_sound_path); self.open_panel("game_settings")
-			elif self.panel_manager[panel]["menu"].buttons["GO BACK"].state == "hover":
-				self.play_sfx(self.click_sound_path); self.open_panel("menu")
+		for navigation, panel in navigations.items():
+			button = buttons[navigation]
+			if (button.is_clicked(event, self.mouse.position) or
+					(event.type == pygame.KEYUP and event.key == pygame.K_SPACE) and button.state == "hover"):
 
-		if self.panel_manager[panel]["menu"].buttons["display_settings"].is_clicked(event, self.mouse.position):
-			self.play_sfx(self.click_sound_path); self.open_panel("display_settings")
-		elif self.panel_manager[panel]["menu"].buttons["audio_settings"].is_clicked(event, self.mouse.position):
-			self.old_music_volume, self.old_sfx_volume = SoundManager.get_volume(0), SoundManager.get_volume(1)
-			self.play_sfx(self.click_sound_path); self.open_panel("audio_settings")
-		elif self.panel_manager[panel]["menu"].buttons["game_settings"].is_clicked(event, self.mouse.position):
-			self.play_sfx(self.click_sound_path); self.open_panel("game_settings")
-		elif self.panel_manager[panel]["menu"].buttons["GO BACK"].is_clicked(event, self.mouse.position):
-			self.play_sfx(self.click_sound_path); self.open_panel("menu")
+				# Save old volumes before opening audio settings
+				if navigation == "audio_settings":
+					self.old_music_volume = SoundManager.get_volume(0)
+					self.old_sfx_volume = SoundManager.get_volume(1)
+
+				self.play_sfx(self.click_sound_path)
+				self.open_panel(panel)
 
 	def handle_display_settings_events(self, event: pygame.event.Event):
 		panel = "display_settings"
@@ -297,62 +292,69 @@ class Game(Application):
 			self.play_sfx(self.click_sound_path); self.open_panel("settings")
 
 	def handle_audio_settings_events(self, event: pygame.event.Event) -> None:
-		panel = "audio_settings"
-		if self.panel_manager[panel]["music_volume_plus_button"].is_clicked(event, self.mouse.position):
+		panel = self.panel_manager["audio_settings"]
+		if panel["music_volume_plus_button"].is_clicked(event, self.mouse.position):
 			self.set_music_volume(SoundManager.get_volume(0) + 0.1)
 			self.set_music_label(SoundManager.get_volume(0) + 0.1)
-		elif self.panel_manager[panel]["music_volume_minus_button"].is_clicked(event, self.mouse.position):
+		elif panel["music_volume_minus_button"].is_clicked(event, self.mouse.position):
 			self.set_music_volume(SoundManager.get_volume(0) - 0.1)
 			self.set_music_label(SoundManager.get_volume(0) - 0.1)
-		elif self.panel_manager[panel]["sfx_volume_plus_button"].is_clicked(event, self.mouse.position):
+		elif panel["sfx_volume_plus_button"].is_clicked(event, self.mouse.position):
 			self.set_sfx_volume(SoundManager.get_volume(1) + 0.1)
 			self.set_sfx_label(SoundManager.get_volume(1) + 0.1)
-		elif self.panel_manager[panel]["sfx_volume_minus_button"].is_clicked(event, self.mouse.position):
+		elif panel["sfx_volume_minus_button"].is_clicked(event, self.mouse.position):
 			self.set_sfx_volume(SoundManager.get_volume(1) - 0.1)
 			self.set_sfx_label(SoundManager.get_volume(1) - 0.1)
-		elif self.panel_manager[panel]["cancel_button"].is_clicked(event, self.mouse.position):
+		elif panel["cancel_button"].is_clicked(event, self.mouse.position):
 			self.set_music_volume(self.old_music_volume)
 			self.set_sfx_volume(self.old_sfx_volume)
+			self.set_music_label(self.old_music_volume)
+			self.set_sfx_label(self.old_sfx_volume)
+
 			self.play_sfx(self.go_back_sound_path)
 			self.open_panel("settings")
-		elif self.panel_manager[panel]["save_button"].is_clicked(event, self.mouse.position):
-			self._execute_sql(f"UPDATE game SET music_volume='{SoundManager.get_volume(0)}', sfx_volume='{SoundManager.get_volume(1)}'")
-			self.play_sfx(self.go_back_sound_path); self.open_panel("settings")
+		elif panel["save_button"].is_clicked(event, self.mouse.position):
+			self.save_audio_settings()
+			self.play_sfx(self.go_back_sound_path)
+			self.open_panel("settings")
+
+	def save_audio_settings(self) -> None:
+		self._execute_sql(f"UPDATE game SET music_volume='{SoundManager.get_volume(0)}', sfx_volume='{SoundManager.get_volume(1)}'")
 
 	def handle_game_settings_events(self, event: pygame.event.Event) -> None:
-		panel = "game_settings"
-		if self.panel_manager[panel]["delete_data_button"].is_clicked(event, self.mouse.position):
+		panel = self.panel_manager["game_settings"]
+		if panel["delete_data_button"].is_clicked(event, self.mouse.position):
 			self.delete_data(); self.get_data(); self.add_objects()
 			self.play_sfx(self.click_sound_path); self.open_panel("menu")
-		elif self.panel_manager[panel]["go_back_button"].is_clicked(event, self.mouse.position):
+		elif panel["go_back_button"].is_clicked(event, self.mouse.position):
 			self.play_sfx(self.click_sound_path); self.open_panel("settings")
 
 	def handle_developer_events(self, event: pygame.event.Event) -> None:
-		panel = "developer"
-		if self.panel_manager[panel]["github"].is_clicked(event, self.mouse.position):
+		panel = self.panel_manager["developer"]
+		if panel["github"].is_clicked(event, self.mouse.position):
 			self.play_sfx(self.click_sound_path); webbrowser.open("https://www.github.com/umutcanekinci/")
-		elif self.panel_manager[panel]["linkedin"].is_clicked(event, self.mouse.position):
+		elif panel["linkedin"].is_clicked(event, self.mouse.position):
 			self.play_sfx(self.click_sound_path); webbrowser.open("https://www.linkedin.com/in/umutcanekinci/")
-		elif self.panel_manager[panel]["go_back_button"].is_clicked(event, self.mouse.position):
+		elif panel["go_back_button"].is_clicked(event, self.mouse.position):
 			self.play_sfx(self.click_sound_path); self.open_panel("menu")
 
 	def handle_game_events(self, event: pygame.event.Event) -> None:
-		panel = "game"
-		if self.panel_manager[panel]["info_panel"].visible:
-			if self.panel_manager[panel]["info_panel_sell_button"].is_clicked(event, self.mouse.position):
+		panel = self.panel_manager["game"]
+		if panel["info_panel"].visible:
+			if panel["info_panel_sell_button"].is_clicked(event, self.mouse.position):
 				self.buildings.remove(self.info_building)
 				self.money += self.info_building.sell_price
 				self.close_info_panel()
 				self.play_sfx(self.go_back_sound_path)
 				self.update_button_texts()
-			elif self.panel_manager[panel]["info_panel_close_button"].is_clicked(event, self.mouse.position):
+			elif panel["info_panel_close_button"].is_clicked(event, self.mouse.position):
 				self.close_info_panel()
 				self.play_sfx(self.go_back_sound_path)
 				self.control_selecting_tile()
 		else:
 			self.control_selecting_tile()
 
-			info_button = self.panel_manager[panel]["info_mode_button"]
+			info_button = panel["info_mode_button"]
 			if info_button.is_clicked(event, self.mouse.position):
 				state = "off" if info_button.state == "on" else "on"
 				info_button.set_state(state)
@@ -370,14 +372,14 @@ class Game(Application):
 									break
 							break
 
-			if self.panel_manager[panel]["expand_button"].is_clicked(event, self.mouse.position):
+			if panel["expand_button"].is_clicked(event, self.mouse.position):
 				self.expand()
-			elif self.panel_manager[panel]["build_button"].is_clicked(event, self.mouse.position):
+			elif panel["build_button"].is_clicked(event, self.mouse.position):
 				self.create_building()
-			elif self.panel_manager[panel]["next_age_button"].is_clicked(event, self.mouse.position):
+			elif panel["next_age_button"].is_clicked(event, self.mouse.position):
 				self.next_age()
 
-		if event.type == pygame.KEYUP and not self.panel_manager["game"]["info_panel"].visible:
+		if event.type == pygame.KEYUP and not panel["info_panel"].visible:
 
 			if event.key == pygame.K_SPACE:
 				self.create_building()
@@ -540,6 +542,10 @@ class Game(Application):
 			self.play_sfx(self.click_sound_path)
 
 	def open_panel(self, tab: str) -> None:
+		if tab == "exit":
+			self.exit()
+			return
+
 		self.panel_manager.open_panel(tab)
 		self.cloud_animation.create_clouds()
 
@@ -556,7 +562,7 @@ class Game(Application):
 
 		if self.money != self._last_displayed_money:
 			self._last_displayed_money = self.money
-			self.panel_manager[self.panel_manager.current_panel]["money_text"].set_text(str(self.money) + "$")
+			self.panel_manager[self.panel_manager.current_panel]["money_text"].set_text(f"{self.money}$")
 
 	def draw(self) -> None:
 		self.panel_manager.draw(self.window)
