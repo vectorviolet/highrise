@@ -22,7 +22,7 @@ class Building(Object):
         self.sell_price = self.level*(self.age_number+1)*70
         self.__set_size()
         self.set_position_from_tile(self.tile)
-        super().__init__(self.unselected_position, self.size, {"Normal" : self.get_image_path()})
+        super().__init__(self.unselected_position, self.size, {"default" : self.get_image_path()})
         self.get_component(Rigidbody2D).set_velocity((0, 0))
 
     def get_image_path(self) -> str:

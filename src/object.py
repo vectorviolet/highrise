@@ -23,29 +23,29 @@ class Object(GameObject, MouseInteractive):
 		self.rect.set_position(position)
 
 		self.states = {}
-		self.image_paths = image_paths if image_paths is not None else {"Normal": None}
+		self.image_paths = image_paths if image_paths is not None else {"default": None}
 		self.visible = visible
-		self.status = None
+		self.state = None
 
 		self.set_size(size)
 		self.set_screen_position(screen_position)
 
-	def add_text(self, status, text, text_size, antialias=True, color=White, background_color=None, fontPath = None):
-		self.add_surface(status, pygame.font.Font(fontPath, text_size).render(text, antialias, color, background_color))
+	def add_text(self, state, text, font, antialias=True, color=White, background_color=None):
+		self.add_surface(state, font.render(text, antialias, color, background_color))
 
 	def add_images(self, image_paths):
-		for status, path in image_paths.items():
-			if path is None or status is None: continue
+		for state, path in image_paths.items():
+			if path is None or state is None: continue
 
-			self.add_image(status, path)
+			self.add_image(state, path)
 
-	def add_image(self, status, image_path):
-		self.add_surface(status, load_image(image_path, self.size))
+	def add_image(self, state, image_path):
+		self.add_surface(state, load_image(image_path, self.size))
 
-	def add_surface(self, status: str | None, surface: pygame.Surface):
-		self.states[status] = surface
-		if not self.status and status == "Normal":
-			self.set_status("Normal")
+	def add_surface(self, state: str | None, surface: pygame.Surface):
+		self.states[state] = surface
+		if not self.state and state == "default":
+			self.set_state("default")
 
 	def set_size(self, size):
 		if size and size[0] and size[1]:
@@ -56,8 +56,8 @@ class Object(GameObject, MouseInteractive):
 			self.add_images(self.image_paths)
 
 			if len(self.states) > 0:
-				if "Normal" in self.states:
-					size = self.states["Normal"].get_rect().size
+				if "default" in self.states:
+					size = self.states["default"].get_rect().size
 				else:
 					size = list(self.values())[0].get_rect().size
 
@@ -82,15 +82,15 @@ class Object(GameObject, MouseInteractive):
 
 	def handle_event(self, event, mouse_position):
 		if "Mouse Click" in self.states and self.is_clicked(event, mouse_position):
-			self.status = "Mouse Click"
-		elif "Mouse Over" in self.states and self.is_mouse_over(mouse_position):
-			self.status = "Mouse Over"
-		elif "Normal" in self.states:
-			self.status = "Normal"
+			self.state = "Mouse Click"
+		elif "hover" in self.states and self.is_mouse_over(mouse_position):
+			self.state = "hover"
+		elif "default" in self.states:
+			self.state = "default"
 
 	def draw(self, surface) -> None:
-		if self.visible and self.status in self.states:
-			surface.blit(self.states[self.status], self.rect)
+		if self.visible and self.state in self.states:
+			surface.blit(self.states[self.state], self.rect)
 
-	def set_status(self, status: str):
-		self.status = status
+	def set_state(self, state: str):
+		self.state = state

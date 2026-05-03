@@ -13,7 +13,7 @@ class Tile:
 	def __init__(self, width, height, row_number, column_number):
 		self.row_number, self.column_number = row_number, column_number
 		self.position = self.x, self.y = self.get_position(self.row_number, self.column_number)
-		self.image = Object(self.position, (0, 0), {"Normal" : ImagePath("tile")})
+		self.image = Object(self.position, (0, 0), {"default" : ImagePath("tile")})
 		self.selected = False
 		self.rect = self.image.rect
 		self.selected_rect = self.rect.copy()
@@ -21,7 +21,7 @@ class Tile:
 		self.selected_rect.y -= 10
 		self.position = Vector2(self.x, self.y)
 		self.size = self.width, self.height = width, height
-		self.surface = self.unselected_surface = self.image.states["Normal"]
+		self.surface = self.unselected_surface = self.image.states["default"]
 		self.selected_surface = self.unselected_surface.__copy__()
 		self.is_empty = True
 
@@ -38,7 +38,7 @@ class Tile:
 		self.corners_of_unselected_polygon[2] = self.corners_of_unselected_polygon[2][0] + self.rect.x, self.corners_of_unselected_polygon[2][1] + self.rect.y
 		self.corners_of_unselected_polygon[3] = self.corners_of_unselected_polygon[3][0] + self.rect.x, self.corners_of_unselected_polygon[3][1] + self.rect.y
 
-		self.corners_of_selected_polygon = self.corners_of_unselected_polygon
+		self.corners_of_selected_polygon = self.corners_of_unselected_polygon.copy()
 		self.corners_of_selected_polygon[0] = self.corners_of_selected_polygon[0][0], self.corners_of_selected_polygon[0][1] - self.y + self.selected_rect.y
 		self.corners_of_selected_polygon[1] = self.corners_of_selected_polygon[1][0], self.corners_of_selected_polygon[1][1] - self.y + self.selected_rect.y
 		self.corners_of_selected_polygon[2] = self.corners_of_selected_polygon[2][0], self.corners_of_selected_polygon[2][1] - self.y + self.selected_rect.y
@@ -63,7 +63,7 @@ class Tile:
 		area_apb = self.get_area_of_triangle([points_of_triangle[0], point, points_of_triangle[1]])
 		area_apc = self.get_area_of_triangle([points_of_triangle[0], point, points_of_triangle[2]])
 		area_bpc = self.get_area_of_triangle([points_of_triangle[1], point, points_of_triangle[2]])
-		return area_abc == area_apb + area_apc + area_bpc
+		return abs(area_abc - (area_apb + area_apc + area_bpc)) < 0.5
 
 	def is_point_in_quadrangle(self, points_of_quadrangle, point) -> bool:
 		top = self.is_point_in_triangle([points_of_quadrangle[0], points_of_quadrangle[1], points_of_quadrangle[2]], point)

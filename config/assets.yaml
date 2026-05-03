@@ -1,4 +1,3 @@
-# config/assets.yaml
 fonts:
     kenvector_future: {folder: , name: kenvector_future}
     kenvector_future_thin: {folder: , name: kenvector_future_thin}
@@ -7,86 +6,12 @@ images:
     grey_panel: {folder: gui/panels, name: grey}
     github_icon: {folder: gui/others, name: github}
     linkedin_icon: {folder: gui/others, name: linkedin}
-#  # ── Backgrounds & general ─────────────────────────────────────────────
-#  bg_main:           {folder: others, name: bg}
-#  bg_game:           {folder: others, name: gray_bg, extension: jpg}
-#  logo:              {folder: others, name: logo}
-#  social_media:      {folder: others, name: social_media}
-#  money_box:         {folder: others, name: button}
-#  heart:             {folder: others, name: heart}
-#
-#  # ── Menu buttons (normal + hover pairs) ───────────────────────────────
-#  btn:          {folder: ui, name: button_grey}
-#  btn_hover:    {folder: ui, name: button_red}
-#  btn_back:          {folder: button, name: goBack}
-#  btn_back_hover:    {folder: button, name: goBack2}
-#
-#  # ── In-game control buttons ───────────────────────────────────────────
-#  btn_menu:          {folder: button, name: menu}
-#  btn_menu_hover:    {folder: button, name: menu2}
-#  btn_upgrade:       {folder: button, name: upgrade_planes}
-#  btn_upgrade_hover: {folder: button, name: upgrade_planes2}
-#  btn_start:         {folder: button, name: start}
-#  btn_pause:         {folder: button, name: pause}
-#  btn_2x:            {folder: button, name: 2x}
-#  btn_2x_active:     {folder: button, name: 2x2}
-#
-#  # ── Music toggle buttons ──────────────────────────────────────────────
-#  btn_music_pause:   {folder: button, name: pauseMusic}
-#  btn_music_resume:  {folder: button, name: resumeMusic}
-#
-#  # ── Tower buy panel icons ─────────────────────────────────────────────
-#  buy_tower_1:       {folder: towers, name: buy_tower1}
-#  buy_tower_2:       {folder: towers, name: buy_tower2}
-#  buy_tower_3:       {folder: towers, name: buy_tower3}
-#  buy_tower_4:       {folder: towers, name: buy_tower4}
-#  tower_2_lvl2: { folder: towers, name: tower2L2 }
-#  tower_2_lvl3: { folder: towers, name: tower2L3 }
-#  tower_3_lvl2: { folder: towers, name: tower3L2 }
-#  buy_tower_4_lvl2:  {folder: towers, name: tower4L2}
-#
-#  # ── In-world tower sprites ────────────────────────────────────────────
-#  tower_1_lvl1:      {folder: towers, name: tower1L1}
-#  tower_2_lvl1:      {folder: towers, name: tower2L1}
-#  tower_3_lvl1:      {folder: towers, name: tower3L1}
-#  tower_4_lvl1:      {folder: towers, name: tower4L1}
-#  tower_4_lvl2:      {folder: towers, name: tower4L2}
-#
-#  # ── Tile overlays (placement preview) ─────────────────────────────────
-#  tile_block:        {folder: tiles, name: block}
-#  tile_enable:       {folder: tiles, name: enable}
-#
-#  # ── Life counter digits (0-9) ─────────────────────────────────────────
-#  digit_0:           {folder: numbers, name: 0}
-#  digit_1:           {folder: numbers, name: 1}
-#  digit_2:           {folder: numbers, name: 2}
-#  digit_3:           {folder: numbers, name: 3}
-#  digit_4:           {folder: numbers, name: 4}
-#  digit_5:           {folder: numbers, name: 5}
-#  digit_6:           {folder: numbers, name: 6}
-#  digit_7:           {folder: numbers, name: 7}
-#  digit_8:           {folder: numbers, name: 8}
-#  digit_9:           {folder: numbers, name: 9}
-#
-#  # Base tiles
-#  tile_grass:        {folder: tiles, name: grass}
-#  tile_clay:         {folder: tiles, name: clay}
-#  tile_stone:        {folder: tiles, name: stone}
-#  tile_sand:         {folder: tiles, name: sand}
-#
-#  # Decorations
-#  tile_decoration_1: {folder: tiles, name: B1}
-#  tile_decoration_2: {folder: tiles, name: B2}
-#  tile_decoration_3: {folder: tiles, name: B3}
-#  tile_decoration_4: {folder: tiles, name: B4}
-#  tile_decoration_5: {folder: tiles, name: B5}
-#  tile_decoration_6: {folder: tiles, name: B6}
-#  tile_decoration_7: {folder: tiles, name: B7}
-#  tile_decoration_8: {folder: tiles, name: B8}
-#
-#  btn_sell: { folder: button, name: sell }
-#  btn_upgrade: { folder: button, name: upgrade }
-#  btn_max: { folder: button, name: max }
-#
-#sounds:
+    blue_button: {folder: gui/buttons, name: blue3}
+    grey_button: {folder: gui/buttons, name: grey15}
+    green_button: {folder: gui/buttons, name: green}
+    yellow_button: {folder: gui/buttons, name: yellow}
+    blue_circle: {folder: gui/buttons, name: blue_circle}
+    yellow_circle: {folder: gui/buttons, name: yellow_circle}
+    grey8: {folder: gui/buttons, name: grey8}
+    red_button: {folder: gui/buttons, name: red}
 #  bg_music:          {folder: "", name: bg, extension: mp3}

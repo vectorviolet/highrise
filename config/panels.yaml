@@ -10,9 +10,40 @@ object_templates:
     font_size: 15
     color: Black
     text: ""
+  volume_entry:
+    type: button
+    size: [150, 35]
+    text: "%100"
+    font_size: 25
+    font: kenvector_future_thin
+    text_color: Gray
+    paths:
+      default: grey8
+  volume_button:
+    type: button
+    size: [36, 36]
+    paths:
+      default: blue_circle
+      hover: yellow_circle
+  go_back_template:
+    type: button
+    text: "GO BACK"
+    selected_text: ""
+    font_size: 28
+    text_color: White
+    selected_text_color: [128,128,128]
+    paths:
+      default: red_button
+      hover: yellow_button
+    font: kenvector_future
 panels:
   game:
     objects:
+      # Bottom panel
+      game_panel:
+        position: [ 0, 965 ]
+        size: [ 1920, 100 ]
+        asset: grey_panel
       money_text:
         type: text
         font: freesansbold
@@ -21,6 +52,82 @@ panels:
         background_color: Black
         position: [ 1450, 995 ]
         text: ""
+      expand_button:
+        type: button
+        position: [560, 985]
+        size: [200, 60]
+        text: "EXPAND"
+        paths:
+          default: blue_button
+          hover: yellow_button
+        selected_text: ""
+        font_size: 27
+        font: kenvector_future
+      next_age_button:
+        type: button
+        position: [1160, 985]
+        size: [200, 60]
+        text: "NEXT AGE"
+        paths:
+          default: green_button
+          hover: yellow_button
+        selected_text: ""
+        font_size: 27
+        font: kenvector_future
+      build_button:
+        type: button
+        position: [860, 985]
+        size: [200, 60]
+        text: "BUILD"
+        paths:
+          default: green_button
+          hover: yellow_button
+        selected_text: ""
+        font_size: 27
+        font: kenvector_future
+
+#    self.panel_manager.add_object("game", "info_panel_sell_button", Button(((self.width - 250) / 2 + 20, (self.height - 400) / 2 + 325), (210, 50), {"default":
+#      ImagePath("green", "gui/buttons"), "hover": ImagePath("red", "gui/buttons")}, "SELL", font=btn_font25, visible=False))
+#        ## size random
+#        self.panel_manager.add_object("game", "info_panel_close_button", Button(((self.width - 250) / 2 + 250 - 20, (self.height - 400) / 2 - 12), (20, 20), {"default":
+#          ImagePath("red_circle", "gui/buttons"), "hover": ImagePath("yellow_circle", "gui/buttons")}, visible=False))
+
+      # Info panel
+      info_panel_sell_button:
+        type: button
+        position: [CENTER, 430]
+        size: [210, 50]
+        text: "SELL"
+        selected_text: ""
+        font_size: 28
+        text_color: White
+        selected_text_color: [128,128,128]
+        paths:
+          default: green_button
+          hover: red_button
+        font: kenvector_future
+
+      info_panel_close_button:
+        type: button
+        position: [CENTER, 370]
+        size: [20, 20]
+        paths:
+          default: red_button
+          hover: yellow_button
+        font: kenvector_future
+
+      info_mode_button:
+        type: button
+        position: [340, 985]
+        size: [60, 60]
+        paths:
+          on: green_button
+          off: red_button
+          default: green_button
+          hover: yellow_button
+          selected_default: red_button
+          selected_hover: yellow_button
+
       level_text:
         extends: panel_text
         position: [ CENTER, 370 ]
@@ -34,6 +141,7 @@ panels:
         extends: panel_text
         position: [ CENTER, 430 ]
 
+
   display_settings:
     objects:
       coming_soon_text:
@@ -43,6 +151,11 @@ panels:
         color: [ 128,128,128 ]
         position: [ CENTER, 500 ]
         text: "THIS PAGE WILL COMING SOON..."
+      go_back_button:
+        extends: go_back_template
+        position: [810, 580]
+        size: [315, 60]
+        font_size: 28
 
   audio_settings:
     objects:
@@ -54,15 +167,88 @@ panels:
         extends: settings_text
         position: [CENTER, 550]
         text: "SFX VOLUME"
+      music_volume_minus_button:
+        extends: volume_button
+        position: [840, 430]
+      music_volume_plus_button:
+        extends: volume_button
+        position: [1054, 430]
+      music_volume_entry:
+        extends: volume_entry
+        position: [885, 430]
+      sfx_volume_minus_button:
+        extends: volume_button
+        position: [840, 600]
+      sfx_volume_plus_button:
+        extends: volume_button
+        position: [1054, 600]
+      sfx_volume_entry:
+        extends: volume_entry
+        position: [885, 600]
+      cancel_button:
+        type: button
+        position: [810, 710]
+        size: [150, 60]
+        text: "CANCEL"
+        selected_text: ""
+        font_size: 28
+        text_color: White
+        selected_text_color: [128,128,128]
+        paths:
+          default: red_button
+          hover: yellow_button
+        font: kenvector_future
+      save_button:
+        type: button
+        position: [975, 710]
+        size: [150, 60]
+        text: "SAVE"
+        selected_text: ""
+        font_size: 28
+        text_color: White
+        selected_text_color: [128,128,128]
+        paths:
+          default: green_button
+          hover: yellow_button
+        font: kenvector_future
+
+  game_settings:
+    objects:
+      delete_data_button:
+        type: button
+        position: [810, 500]
+        size: [315, 60]
+        text: "DELETE DATA"
+        selected_text: ""
+        font_size: 28
+        text_color: White
+        selected_text_color: [128,128,128]
+        paths:
+          default: red_button
+          hover: yellow_button
+        font: kenvector_future
+      go_back_button:
+        extends: go_back_template
+        position: [810, 580]
+        size: [315, 60]
+#      music_volume_entry:
+#        type: button
+#        position: [885, 430]
+#        size: [150, 35]
+#        text: "%100"
+#        font_size: 25
+#        text_color: Gray
+#        paths:
+#          default: grey8
 
   developer:
     objects:
       panel:
         position: [CENTER, CENTER]
-        size: [300, 600]
+        size: [300, 380]
         asset: grey_panel
       profile_image:
-        position: [CENTER, 270]
+        position: [CENTER, 370]
         size: [100, 100]
         asset: profile_image
       name_text:
@@ -70,12 +256,40 @@ panels:
         font: freesansbold
         color: Black
         font_size: 20
-        position: [CENTER, 380]
+        position: [CENTER, 480]
         text: "Umutcan Ekinci"
       title_text:
         type: text
         font: freesansbold
         color: [128,128,128]
         font_size: 17
-        position: [CENTER, 400]
+        position: [CENTER, 500]
         text: "Software Engineer"
+      github:
+        type: button
+        position: [CENTER, 550]
+        size: [250, 40]
+        selected_text: "github.com/umutcanekinci"
+        font_size: 28
+        text_color: Black
+        selected_text_color: [128,128,128]
+        paths:
+          default: grey_button
+          hover: yellow_button
+      linkedin:
+        type: button
+        position: [CENTER, 600]
+        size: [250, 40]
+        selected_text: "linkedin.com/in/umutcanekinci"
+        font_size: 28
+        text_color: Black
+        selected_text_color: [128,128,128]
+        paths:
+          default: grey_button
+          hover: yellow_button
+      go_back_button:
+        extends: go_back_template
+        position: [CENTER, 650]
+        size: [250, 40]
+        font_size: 28
+        text_color: Black
