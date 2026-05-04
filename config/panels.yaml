@@ -97,7 +97,7 @@ panels:
 #    self.panel_manager.add_object("game", "info_panel_sell_button", Button(((self.width - 250) / 2 + 20, (self.height - 400) / 2 + 325), (210, 50), {"default":
 #      ImagePath("green", "gui/buttons"), "hover": ImagePath("red", "gui/buttons")}, "SELL", font=btn_font25, visible=False))
 #        ## size random
-#        self.panel_manager.add_object("game", "info_panel_close_button", Button(((self.width - 250) / 2 + 250 - 20, (self.height - 400) / 2 - 12), (20, 20), {"default":
+#        self.panel_manager.add_object("game", "close_button", Button(((self.width - 250) / 2 + 250 - 20, (self.height - 400) / 2 - 12), (20, 20), {"default":
 #          ImagePath("red_circle", "gui/buttons"), "hover": ImagePath("yellow_circle", "gui/buttons")}, visible=False))
 
       # Info panel
@@ -106,9 +106,9 @@ panels:
         position: [CENTER, CENTER]
         size: [250, 400]
         asset: grey_panel
-      info_panel_sell_button:
+      sell_button:
         type: button
-        position: [CENTER, 430]
+        position: [CENTER, 660]
         size: [210, 50]
         text: "SELL"
         selected_text: ""
@@ -119,9 +119,9 @@ panels:
           default: green_button
           hover: red_button
         font: kenvector_future
-      info_panel_close_button:
+      close_button:
         type: button
-        position: [CENTER, 370]
+        position: [1070, 335]
         size: [20, 20]
         paths:
           default: red_button
@@ -129,16 +129,16 @@ panels:
         font: kenvector_future
       level_text:
         extends: panel_text
-        position: [CENTER, 370]
+        position: [930, 370]
       speed_text:
         extends: panel_text
-        position: [CENTER, 390]
+        position: [930, 390]
       cooldown_text:
         extends: panel_text
-        position: [CENTER, 410]
+        position: [930, 410]
       sell_price_text:
         extends: panel_text
-        position: [CENTER, 430]
+        position: [930, 430]
 
   display_settings:
     objects:

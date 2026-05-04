@@ -100,9 +100,9 @@ class Buildings(list[Building]):
                     building.get_component(Rigidbody2D).set_velocity(Vector2(0, 0))
 
     def update(self):
-        self.control_moving()
         for building in self:
             building.update()
+        self.control_moving()
 
     def draw(self, surface):
         for building in self:

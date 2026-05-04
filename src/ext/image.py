@@ -1,10 +1,6 @@
 import pygame
 
 
-def scale_surface(image, size):
-    return pygame.transform.scale(image, size)
-
-
 def nine_slice_scale(image: pygame.Surface, target_size: tuple[int, int], corner: int) -> pygame.Surface:
     """Scale image to target_size using 9-slice.
 
