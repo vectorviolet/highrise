@@ -1,7 +1,7 @@
 import pygame
 
 from button import Button
-from untiy.components.transform import Transform
+from pygame_core.unity.components.transform import Transform
 from ui_widgets.text_object import TextObject
 
 from ext.guiobject import GuiObject, HoverableGuiObject

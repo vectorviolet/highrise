@@ -3,17 +3,16 @@ from pygame.math import Vector2
 from pygame_core.color import White, Gray
 from pygame_core.asset_path import ImagePath
 
-from object import Object
+from state_object import StateObject
 from pygame import Surface
 from pygame.event import Event
 from pygame.draw import polygon
 
 class Tile:
-
 	def __init__(self, width, height, row_number, column_number):
 		self.row_number, self.column_number = row_number, column_number
 		self.position = self.x, self.y = self.get_position(self.row_number, self.column_number)
-		self.image = Object(self.position, (0, 0), {"default" : ImagePath("tile")})
+		self.image = StateObject(self.position, (width, height), {"default" : ImagePath("tile")})
 		self.selected = False
 		self.rect = self.image.rect
 		self.selected_rect = self.rect.copy()
@@ -80,24 +79,23 @@ class Tile:
 		return self.is_mouse_over_selected(mouse_position) or self.is_mouse_over_unselected(mouse_position)
 
 	def draw(self, window: Surface) -> None:
-
 		if self.selected:
 			window.blit(self.selected_surface, self.rect)
 		else:
 			window.blit(self.unselected_surface, self.rect)
 
-class Tiles(list[Tile]):
+class Tilemap(list[list[Tile]]):
 	def __init__(self, size, max_size) -> None:
-		self.size = self.rowCount = self.columnCount = size
-		self.maxSize = self.maxRowCount = self.maxColumnCount = max_size
+		self.size = self.row_count = self.column_count = size
+		self.max_size = self.max_row_count = self.max_column_count = max_size
 		self.create()
 
 	def create(self) -> None:
 		super().__init__()
-		for row_number in range(self.rowCount):
+		for row_number in range(self.row_count):
 
 			row = []
-			for column_number in range(self.columnCount):
+			for column_number in range(self.column_count):
 				row.append(Tile(132, 99, row_number + 1, column_number + 1))
 
 			self.append(row)
@@ -111,28 +109,28 @@ class Tiles(list[Tile]):
 		return False
 
 	def get_expand_cost(self):
-		return (self.rowCount + 1) * 100
+		return (self.row_count + 1) * 100
 
 	def expand(self):
 		if self.is_max_size(): return
 
-		self.size = self.rowCount, self.columnCount = self.rowCount + 1, self.columnCount + 1
+		self.size = self.row_count, self.column_count = self.row_count + 1, self.column_count + 1
 		self.create()
 
 	def is_max_size(self) -> bool:
 
-		return (self.rowCount == self.maxRowCount) or (self.columnCount == self.maxColumnCount)
+		return (self.row_count == self.max_row_count) or (self.column_count == self.max_column_count)
 
 	def expand_rows(self):
 
-		if self.rowCount < self.maxRowCount:
+		if self.row_count < self.max_row_count:
 
-			self.size = self.rowCount, self.columnCount = self.rowCount + 1, self.columnCount
+			self.size = self.row_count, self.column_count = self.row_count + 1, self.column_count
 			self.create()
 
 	def expand_columns(self):
-		if self.columnCount < self.maxColumnCount:
-			self.size = self.rowCount, self.columnCount = self.rowCount, self.columnCount + 1
+		if self.column_count < self.max_column_count:
+			self.size = self.row_count, self.column_count = self.row_count, self.column_count + 1
 			self.create()
 
 	def handle_event(self, event: Event, mouse_position: tuple):

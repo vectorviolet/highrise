@@ -1,13 +1,9 @@
-#-# Importing Packages #-#
 import pygame
-from pygame_core.asset_path import ImagePath
-from pygame_core.image import load_image
-
-from object import Object
+from state_object import StateObject
 from pygame_core.color import White
 
 
-class ButtonText(Object):
+class ButtonText(StateObject):
     def __init__(self,
                  position,
                  text,
@@ -27,7 +23,7 @@ class ButtonText(Object):
         self.add_text(state, text, font, antialias, color, background_color)
 
     def add_text(self, state, text, font, antialias=True, color=White, background_color=None):
-        super().add_text(state, text, font, antialias, color, background_color)
+        self.add_surface(state, font.render(text, antialias, color, background_color))
         self.text_args[state] = [text, font, antialias, color, background_color]
 
     def update_text(self, state, text) -> None:
@@ -49,7 +45,7 @@ class ButtonText(Object):
             rect = self.states[state].get_rect(center=c)
             self.rect.set_position(rect.topleft)
 
-class Button(Object):
+class Button(StateObject):
 
     def __init__(self, position: tuple = ...,
                  size: tuple = ...,
@@ -59,12 +55,11 @@ class Button(Object):
                  font: pygame.Font = None,
                  text_color: tuple = White,
                  selected_text_color: tuple = White,
-                 screen_position: tuple = None,
                  visible=True,
                  parent=None
              ) -> None:
 
-        super().__init__(position, size, image_paths, parent, screen_position, visible)
+        super().__init__(position, size, image_paths, parent, visible)
 
         self.text = None
 
@@ -87,36 +82,3 @@ class Button(Object):
         if self.text is not None and self.visible:
             self.text.set_state(self.state, self.rect.topleft, self.size)
             self.text.draw(surface)
-
-class MenuButton(Button):
-    def __init__(
-            self,
-            color: str,
-            position: tuple,
-            selectedColor: str = None,
-            text: str = None,
-            selected_text: str = None,
-            text_color: tuple = None,
-            selected_text_color: tuple = None,
-            text_size: int = 10,
-            fontPath: str = None,
-            size: tuple = None,
-            selectedSize: tuple = None
-        ) -> None:
-
-        imagePath = ImagePath(color, "gui/buttons")
-        if not selectedColor: selectedColor = color
-        selectedImagePath = ImagePath(selectedColor, "gui/buttons")
-
-        super().__init__(position, size, {"Unselected" : imagePath})
-        self.add_surface("Selected", load_image(selectedImagePath, selectedSize or [0, 0]))
-        self.state = "Unselected"
-
-        if text:
-
-            if not selected_text:
-
-                selected_text = text
-
-            self.add_text("Selected", text, text_size, True, text_color, None, fontPath)
-            self.add_text("Unselected", selected_text, text_size, True, selected_text_color, None, fontPath)

@@ -2,13 +2,12 @@ from sound_manager import SoundManager
 from pygame import Vector2
 from tile import Tile
 from pygame_core.asset_path import ImagePath, SoundPath
-from object import Object
-from untiy.components.rigidbody2d import Rigidbody2D
+from state_object import StateObject
+from pygame_core.unity.components.rigidbody2d import Rigidbody2D
 
 ages = ["wood", "rock", "sand", "stone"]
 
-class Building(Object):
-
+class Building(StateObject):
     def __init__(self, level, age_number, tile: Tile) -> None:
         self.tile = tile
         self.age_number = age_number
@@ -29,13 +28,7 @@ class Building(Object):
         return ImagePath("level" + str(self.level), "buildings/" + self.age)
 
     def __set_size(self) -> None:
-        if self.level == 1 or self.level == 2:
-            self.floor_count = 1
-        elif self.level == 3 or self.level == 4:
-            self.floor_count = 2
-        elif self.level == 5 or self.level == 6:
-            self.floor_count = 3
-
+        self.floor_count = (self.level + 1) // 2
         self.size = self.width, self.height = (50, 75 + (self.floor_count - 1) * 23)
 
     def set_position_from_tile(self, tile: Tile) -> None:
@@ -59,14 +52,12 @@ class Building(Object):
         self.should_destroy = True
 
 class Buildings(list[Building]):
-    def __init__(self, sfx_volume: 100) -> None:
-        self.max_age_number = len(ages) - 1
-        self.sfx_volume = sfx_volume
-
+    def __init__(self) -> None:
         super().__init__()
+        self.max_age_number = len(ages) - 1
+        self.age_number = 0
 
     def set_age(self, age_number):
-
         if age_number <= self.max_age_number:
             self.age_number = age_number
 
@@ -92,7 +83,7 @@ class Buildings(list[Building]):
                     self.sort(key=lambda b: b.tile.column_number)
 
                     sound = SoundPath("rollover2")
-                    SoundManager.play_sound(1, sound, self.sfx_volume)
+                    SoundManager.play_sound(1, sound)
                 else:
                     if building.tile.selected and building.tile.rect == building.tile.selected_rect:
                         building.rect.topleft = (int(building.selected_position.x), int(building.selected_position.y))
@@ -108,8 +99,11 @@ class Buildings(list[Building]):
 
                     building.get_component(Rigidbody2D).set_velocity(Vector2(0, 0))
 
-    def draw(self, surface):
+    def update(self):
         self.control_moving()
+        for building in self:
+            building.update()
 
+    def draw(self, surface):
         for building in self:
             building.draw(surface)

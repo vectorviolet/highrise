@@ -10,8 +10,12 @@ from ext.image import nine_slice_scale, scale_surface
 PathLike = Union[str, ImagePath, os.PathLike]
 
 class ImageObject(MouseInteractive):
-	def __init__(self, path: PathLike, pos: tuple[int, int],
-	             size: tuple[int, int] = (0, 0), nine_slice: int = 0) -> None:
+	def __init__(self,
+				 path: PathLike,
+				 pos: tuple[int, int],
+	             size: tuple[int, int] = (0, 0),
+				 nine_slice: int = 0) -> None:
+
 		loaded = load_image(path)
 		if size != (0, 0):
 			self.image = nine_slice_scale(loaded, size, nine_slice) if nine_slice > 0 else scale_surface(loaded, size)

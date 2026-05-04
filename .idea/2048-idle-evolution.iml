@@ -6,8 +6,10 @@
       <sourceFolder url="file://$MODULE_DIR$/src/pygame_core" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/pygame_core/build/lib" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/pygame_core/pygame_core" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/pygame_core/pygame_core/pygame_core" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/src/pygame_core/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/src/pygame_core/pygame_core/.venv" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.14 (2048-idle-evolution)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

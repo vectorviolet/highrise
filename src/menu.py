@@ -3,7 +3,7 @@ import pygame
 
 from sound_manager import SoundManager
 from pygame_core.asset_path import AssetPath, FontPath, SoundPath
-from object import Object
+from state_object import StateObject
 from button import Button
 
 #-# Menu Class #-#
@@ -30,7 +30,7 @@ class Menu(pygame.Surface):
             screen_size: tuple,
             button_factory,
             *,
-            panel_height: tuple = None,
+            panel_height: int = None,
             ) -> None:
 
         space = 20
@@ -54,7 +54,7 @@ class Menu(pygame.Surface):
         self.title = Button(self.position, self.titleSize, {"default": title_image_path},
                             title_text, title_text, title_font, title_text_color, title_text_color)
 
-        self.panel = Object(self.panelPosition, self.panelSize, {"default": panel_image_path})
+        self.panel = StateObject(self.panelPosition, self.panelSize, {"default": panel_image_path})
 
         self.buttons = {}
 

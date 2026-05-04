@@ -36,6 +36,14 @@ object_templates:
       default: red_button
       hover: yellow_button
     font: kenvector_future
+  bottom_panel_button:
+    type: button
+    size: [200, 60]
+    selected_text: ""
+    font_size: 27
+    text_color: White
+    selected_text_color: [128,128,128]
+    font: kenvector_future
 panels:
   game:
     objects:
@@ -44,6 +52,39 @@ panels:
         position: [ 0, 965 ]
         size: [ 1920, 100 ]
         asset: grey_panel
+      selection_mode_button:
+        type: button
+        position: [ 340, 985 ]
+        size: [ 60, 60 ]
+        paths:
+          on: green_button
+          off: red_button
+          default: green_button
+          hover: yellow_button
+          selected_default: red_button
+          selected_hover: yellow_button
+      expand_button:
+        extends: bottom_panel_button
+        position: [560, 985]
+        text: "EXPAND"
+        paths:
+          default: blue_button
+          hover: yellow_button
+
+      build_button:
+        extends: bottom_panel_button
+        position: [860, 985]
+        text: "BUILD"
+        paths:
+          default: green_button
+          hover: yellow_button
+      next_age_button:
+        extends: bottom_panel_button
+        position: [1160, 985]
+        text: "NEXT AGE"
+        paths:
+          default: green_button
+          hover: yellow_button
       money_text:
         type: text
         font: freesansbold
@@ -52,39 +93,6 @@ panels:
         background_color: Black
         position: [ 1450, 995 ]
         text: ""
-      expand_button:
-        type: button
-        position: [560, 985]
-        size: [200, 60]
-        text: "EXPAND"
-        paths:
-          default: blue_button
-          hover: yellow_button
-        selected_text: ""
-        font_size: 27
-        font: kenvector_future
-      next_age_button:
-        type: button
-        position: [1160, 985]
-        size: [200, 60]
-        text: "NEXT AGE"
-        paths:
-          default: green_button
-          hover: yellow_button
-        selected_text: ""
-        font_size: 27
-        font: kenvector_future
-      build_button:
-        type: button
-        position: [860, 985]
-        size: [200, 60]
-        text: "BUILD"
-        paths:
-          default: green_button
-          hover: yellow_button
-        selected_text: ""
-        font_size: 27
-        font: kenvector_future
 
 #    self.panel_manager.add_object("game", "info_panel_sell_button", Button(((self.width - 250) / 2 + 20, (self.height - 400) / 2 + 325), (210, 50), {"default":
 #      ImagePath("green", "gui/buttons"), "hover": ImagePath("red", "gui/buttons")}, "SELL", font=btn_font25, visible=False))
@@ -93,6 +101,11 @@ panels:
 #          ImagePath("red_circle", "gui/buttons"), "hover": ImagePath("yellow_circle", "gui/buttons")}, visible=False))
 
       # Info panel
+      # self.panel_manager.add_object("game", "info_panel", Object(((self.width - 250) / 2, (self.height - 400) / 2), (250, 400), {"default": grey_panel}, visible=False))
+      info_panel:
+        position: [CENTER, CENTER]
+        size: [250, 400]
+        asset: grey_panel
       info_panel_sell_button:
         type: button
         position: [CENTER, 430]
@@ -106,7 +119,6 @@ panels:
           default: green_button
           hover: red_button
         font: kenvector_future
-
       info_panel_close_button:
         type: button
         position: [CENTER, 370]
@@ -115,32 +127,18 @@ panels:
           default: red_button
           hover: yellow_button
         font: kenvector_future
-
-      info_mode_button:
-        type: button
-        position: [340, 985]
-        size: [60, 60]
-        paths:
-          on: green_button
-          off: red_button
-          default: green_button
-          hover: yellow_button
-          selected_default: red_button
-          selected_hover: yellow_button
-
       level_text:
         extends: panel_text
-        position: [ CENTER, 370 ]
+        position: [CENTER, 370]
       speed_text:
         extends: panel_text
-        position: [ CENTER, 390 ]
+        position: [CENTER, 390]
       cooldown_text:
         extends: panel_text
-        position: [ CENTER, 410 ]
+        position: [CENTER, 410]
       sell_price_text:
         extends: panel_text
-        position: [ CENTER, 430 ]
-
+        position: [CENTER, 430]
 
   display_settings:
     objects:

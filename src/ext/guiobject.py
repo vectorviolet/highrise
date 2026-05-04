@@ -4,8 +4,8 @@ import pygame
 from pygame_core.asset_path import ImagePath
 from pygame_core.utils import Centerable
 from ext.image_object import ImageObject
-from untiy.components.transform import Transform
-from untiy.gameobject import GameObject
+from pygame_core.unity.components.transform import Transform
+from pygame_core.unity.gameobject import GameObject
 
 PathLike = Union[str, ImagePath, os.PathLike]
 
@@ -24,7 +24,7 @@ class GuiObject(GameObject, Centerable):
 		self.state: Any = None
 		self.images: dict[Any, ImageObject] = {}
 		if image_path is not None:
-			self.images[None] = ImageObject(image_path, self.rect.topleft, self.rect.size, nine_slice)
+			self.add_state(None, image_path)
 
 	def add_state(self, state: Any, image_path: PathLike) -> None:
 		self.images[state] = ImageObject(image_path, self.rect.topleft, self.rect.size, self._nine_slice)
