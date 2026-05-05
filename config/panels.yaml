@@ -1,9 +1,15 @@
 object_templates:
+  minus_icon_template:
+    asset: minus_icon
+    size: [16, 16]
+  plus_icon_template:
+    asset: plus_icon
+    size: [16, 16]
   settings_text:
     type: text
     font: kenvector_future
     font_size: 25
-    color: [128,128,128]
+    color: Grey
   panel_text:
     type: text
     font: kenvector_future_thin
@@ -31,7 +37,7 @@ object_templates:
     selected_text: ""
     font_size: 28
     text_color: White
-    selected_text_color: [128,128,128]
+    selected_text_color: Grey
     paths:
       default: red_button
       hover: yellow_button
@@ -42,9 +48,23 @@ object_templates:
     selected_text: ""
     font_size: 27
     text_color: White
-    selected_text_color: [128,128,128]
+    selected_text_color: Grey
     font: kenvector_future
 panels:
+  menu:
+    objects:
+      menu:
+        type: menu
+        title: "2048 GAME"
+        buttons: ["START", "SETTINGS", "DEVELOPER", "EXIT"]
+
+  settings:
+    objects:
+      menu:
+        type: menu
+        title: "SETTINGS"
+        buttons: ["display_settings", "audio_settings", "game_settings", "GO BACK"]
+
   game:
     objects:
       # Bottom panel
@@ -61,8 +81,6 @@ panels:
           off: red_button
           default: green_button
           hover: yellow_button
-          selected_default: red_button
-          selected_hover: yellow_button
       expand_button:
         extends: bottom_panel_button
         position: [560, 985]
@@ -93,15 +111,13 @@ panels:
         background_color: Black
         position: [ 1450, 995 ]
         text: ""
-
-#    self.panel_manager.add_object("game", "info_panel_sell_button", Button(((self.width - 250) / 2 + 20, (self.height - 400) / 2 + 325), (210, 50), {"default":
-#      ImagePath("green", "gui/buttons"), "hover": ImagePath("red", "gui/buttons")}, "SELL", font=btn_font25, visible=False))
-#        ## size random
-#        self.panel_manager.add_object("game", "close_button", Button(((self.width - 250) / 2 + 250 - 20, (self.height - 400) / 2 - 12), (20, 20), {"default":
-#          ImagePath("red_circle", "gui/buttons"), "hover": ImagePath("yellow_circle", "gui/buttons")}, visible=False))
-
-      # Info panel
-      # self.panel_manager.add_object("game", "info_panel", Object(((self.width - 250) / 2, (self.height - 400) / 2), (250, 400), {"default": grey_panel}, visible=False))
+      selection_mode_button_image:
+        position: [345, 990]
+        size: [50, 50]
+        asset: info_icon
+      info_panel_building_image:
+        position: [855, 360]
+        size: [65, 89]
       info_panel:
         position: [CENTER, CENTER]
         size: [250, 400]
@@ -114,7 +130,7 @@ panels:
         selected_text: ""
         font_size: 28
         text_color: White
-        selected_text_color: [128,128,128]
+        selected_text_color: Grey
         paths:
           default: green_button
           hover: red_button
@@ -122,7 +138,7 @@ panels:
       close_button:
         type: button
         position: [1070, 335]
-        size: [20, 20]
+        size: [38, 38]
         paths:
           default: red_button
           hover: yellow_button
@@ -142,11 +158,15 @@ panels:
 
   display_settings:
     objects:
+      menu:
+        type: menu
+        title: "display_settings"
+        panel_height: 200
       coming_soon_text:
         type: text
         font: kenvector_future
         font_size: 18
-        color: [ 128,128,128 ]
+        color: Green
         position: [ CENTER, 500 ]
         text: "THIS PAGE WILL COMING SOON..."
       go_back_button:
@@ -157,6 +177,10 @@ panels:
 
   audio_settings:
     objects:
+      menu:
+        type: menu
+        title: "audio_settings"
+        panel_height: 500
       music_volume_text:
         extends: settings_text
         position: [CENTER, 380]
@@ -174,6 +198,12 @@ panels:
       music_volume_entry:
         extends: volume_entry
         position: [885, 430]
+      music_volume_minus_icon:
+        extends: minus_icon_template
+        position: [ 850, 440 ]
+      music_volume_plus_icon:
+        extends: plus_icon_template
+        position: [ 1064, 440 ]
       sfx_volume_minus_button:
         extends: volume_button
         position: [840, 600]
@@ -183,6 +213,12 @@ panels:
       sfx_volume_entry:
         extends: volume_entry
         position: [885, 600]
+      sfx_volume_minus_icon:
+        extends: minus_icon_template
+        position: [850, 610]
+      sfx_volume_plus_icon:
+        extends: plus_icon_template
+        position: [1064, 610]
       cancel_button:
         type: button
         position: [810, 710]
@@ -191,7 +227,7 @@ panels:
         selected_text: ""
         font_size: 28
         text_color: White
-        selected_text_color: [128,128,128]
+        selected_text_color: Grey
         paths:
           default: red_button
           hover: yellow_button
@@ -204,7 +240,7 @@ panels:
         selected_text: ""
         font_size: 28
         text_color: White
-        selected_text_color: [128,128,128]
+        selected_text_color: Grey
         paths:
           default: green_button
           hover: yellow_button
@@ -212,6 +248,10 @@ panels:
 
   game_settings:
     objects:
+      menu:
+        type: menu
+        title: "game_settings"
+        panel_height: 200
       delete_data_button:
         type: button
         position: [810, 500]
@@ -220,7 +260,7 @@ panels:
         selected_text: ""
         font_size: 28
         text_color: White
-        selected_text_color: [128,128,128]
+        selected_text_color: Grey
         paths:
           default: red_button
           hover: yellow_button
@@ -259,7 +299,7 @@ panels:
       title_text:
         type: text
         font: freesansbold
-        color: [128,128,128]
+        color: Grey
         font_size: 17
         position: [CENTER, 500]
         text: "Software Engineer"
@@ -270,7 +310,7 @@ panels:
         selected_text: "github.com/umutcanekinci"
         font_size: 28
         text_color: Black
-        selected_text_color: [128,128,128]
+        selected_text_color: Grey
         paths:
           default: grey_button
           hover: yellow_button
@@ -281,7 +321,7 @@ panels:
         selected_text: "linkedin.com/in/umutcanekinci"
         font_size: 28
         text_color: Black
-        selected_text_color: [128,128,128]
+        selected_text_color: Grey
         paths:
           default: grey_button
           hover: yellow_button

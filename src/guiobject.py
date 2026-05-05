@@ -2,7 +2,7 @@ from typing import Union, Any
 import os
 from pygame_core.asset_path import ImagePath
 from pygame_core.unity.components.transform import Transform
-from state_object import StateObject
+from state_object.state_object import StateObject
 
 PathLike = Union[str, ImagePath, os.PathLike]
 
@@ -14,6 +14,7 @@ class GuiObject(StateObject):
                  image_path: PathLike = None,
                  nine_slice: int = 0,
                  hover_image_path: PathLike = None) -> None:
+
         if not isinstance(size, tuple) or not all(isinstance(v, (int, float)) for v in size):
             size = (0, 0)
         super().__init__(pos, size, None, parent, True, nine_slice)

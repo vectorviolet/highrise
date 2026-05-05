@@ -14,4 +14,7 @@ images:
     yellow_circle: {folder: gui/buttons, name: yellow_circle}
     grey8: {folder: gui/buttons, name: grey8}
     red_button: {folder: gui/buttons, name: red}
+    minus_icon: {folder: gui/others, name: minus}
+    plus_icon:  {folder: gui/others, name: plus}
+    info_icon:  {folder: gui/others, name: info}
 #  bg_music:          {folder: "", name: bg, extension: mp3}

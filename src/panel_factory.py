@@ -1,17 +1,17 @@
 import pygame
 
-from button import Button
+from state_object.button import Button
 from pygame_core.unity.components.transform import Transform
 from ui_widgets.text_object import TextObject
 
-from ext.guiobject import GuiObject
+from guiobject import GuiObject
 
 
 def make_factory(assets):
     def make_gui_object(cfg: dict, parent: Transform) -> GuiObject:
         pos          = cfg["position"]
         size         = tuple(cfg["size"]) if cfg["size"] != "WINDOW" else parent
-        asset        = cfg["asset"]
+        asset        = cfg.get("asset")
         hover        = cfg.get("hover")
         extra_states = cfg.get("states", {})
         nine_slice   = cfg.get("nine_slice", 0)
@@ -41,6 +41,25 @@ def make_text_factory(assets):
             cfg.get("background_color", None),
         )
     return make_text_object
+
+def make_menu_factory(assets, screen_size, font_path):
+    from menu import Menu
+    btn_factory = make_button_factory(assets)
+
+    def make_menu(cfg: dict, parent) -> Menu:
+        return Menu(
+            assets.image_path("blue_button"),
+            cfg.get("title", ""),
+            30, "white", font_path,
+            assets.image_path("grey_panel"),
+            (400, 60), "blue_button", "yellow_button",
+            tuple(cfg.get("buttons", [])),
+            30, "gray", "white", "kenvector_future",
+            screen_size, btn_factory,
+            panel_height=cfg.get("panel_height"),
+        )
+    return make_menu
+
 
 def make_button_factory(assets):
     def make_button(cfg: dict, parent: Transform) -> Button:

@@ -1,8 +1,9 @@
+from typing import Callable
 from sound_manager import SoundManager
 from pygame import Vector2
-from tile import Tile
+from gameobject.tile import Tile
 from pygame_core.asset_path import ImagePath, SoundPath
-from state_object import StateObject
+from state_object.state_object import StateObject
 from pygame_core.unity.components.rigidbody2d import Rigidbody2D
 
 ages = ["wood", "rock", "sand", "stone"]
@@ -15,7 +16,6 @@ class Building(StateObject):
         self.selected = False
         self.should_destroy = False
         self.cooldown = 2
-        self.last_time = None
         self.level = level
         self.speed = (self.level * 2 * (age_number + 1)) - 1
         self.sell_price = self.level*(self.age_number+1)*70
@@ -23,6 +23,12 @@ class Building(StateObject):
         self.set_position_from_tile(self.tile)
         super().__init__(self.unselected_position, self.size, {"default" : self.get_image_path()})
         self.get_component(Rigidbody2D).set_velocity((0, 0))
+        self.on_payout: Callable[[int], None] | None = None
+        self.invoke_repeating(self._payout, delay=self.cooldown, interval=self.cooldown)
+
+    def _payout(self) -> None:
+        if self.on_payout:
+            self.on_payout(self.cooldown * self.speed)
 
     def get_image_path(self) -> str:
         return ImagePath("level" + str(self.level), "buildings/" + self.age)
@@ -32,7 +38,7 @@ class Building(StateObject):
         self.size = self.width, self.height = (50, 75 + (self.floor_count - 1) * 23)
 
     def set_position_from_tile(self, tile: Tile) -> None:
-        x, y = tile.x + 43, tile.y - 23 - (self.floor_count - 1) * 23
+        x, y = tile.rect.x + 43, tile.rect.y - 23 - (self.floor_count - 1) * 23
         self.unselected_position = Vector2(x, y)
         self.selected_position = Vector2(x, y - 10)
 
@@ -96,8 +102,8 @@ class Buildings(list[Building]):
                 x_done = v.x == 0 or (v.x > 0 and p.x >= tp.x) or (v.x < 0 and p.x <= tp.x)
                 y_done = v.y == 0 or (v.y > 0 and p.y >= tp.y) or (v.y < 0 and p.y <= tp.y)
                 if x_done and y_done:
-
                     building.get_component(Rigidbody2D).set_velocity(Vector2(0, 0))
+                    building.rect.topleft = (int(building.target_position.x), int(building.target_position.y))
 
     def update(self):
         for building in self:

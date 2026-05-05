@@ -5,28 +5,27 @@ from pygame_core.panel_loader_ext import PanelLoaderExt
 from pygame_core.asset_manager import AssetManager
 from pygame_core.database import Database
 from pygame_core.image import load_image
-from pygame_core.color import Black, White, Gray, Yellow, CustomBlue
 from pygame_core.asset_path import ImagePath, FontPath, SoundPath
 from pygame_core.application import Application
 from pygame_core.panel_manager import PanelManager
 from pygame_core.unity.components.transform import Transform
+from pygame_core.unity.gameobject import GameObject
 
 from sound_manager import SoundManager
 import panel_factory
 
-from state_object import StateObject
-from building import Building, Buildings
-from cloud import CloudAnimation, GameClouds
-from menu import Menu
-from tile import Tilemap, Tile
+from state_object.state_object import StateObject
+from state_object.building import Building, Buildings
+from gameobject.cloud import CloudAnimation, GameClouds
+from gameobject.tile import Tile
 from game_persistence import GamePersistenceMixin
 from game_audio import GameAudioMixin
 from game_events import GameEventsMixin
 
-
+CustomBlue = (72, 218, 233)
 class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
-    BACKGROUND_COLORS = {"menu": Yellow, "settings": Yellow, "display_settings": Yellow, "audio_settings": Yellow,
-                         "game_settings": Yellow, "developer": Yellow, "game": CustomBlue}
+    BACKGROUND_COLORS = {"menu": "yellow", "settings": "yellow", "display_settings": "yellow", "audio_settings": "yellow",
+                         "game_settings": "yellow", "developer": "yellow", "game": CustomBlue}
     TITLE = "2048 GAME"
     SIZE = (1920, 1080)
     FPS = 165
@@ -55,7 +54,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         self.default_music_volume = 1.00
         self.default_sfx_volume = 1.00
         self.is_selection_mode = False
-        self.is_info_panel_active = False
+        self.info_panel_root = GameObject("info_panel")
         self.money = 0
         self.old_music_volume = self.default_music_volume
         self.old_sfx_volume = self.default_sfx_volume
@@ -88,16 +87,6 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         super().run()
 
     def add_objects(self) -> None:
-        blue3 = self.assets.image_path("blue_button")
-        grey_panel = self.assets.image_path("grey_panel")
-
-        # Menus
-        self.panel_manager.add_object("menu",             "menu", Menu(blue3, self.get_title(), 30, White, self.font_path, grey_panel, (400, 60), "blue_button", "yellow_button", ("START", "SETTINGS", "DEVELOPER", "EXIT"), 30, Gray, White, "kenvector_future", self.size, panel_factory.make_button_factory(self.assets)))
-        self.panel_manager.add_object("settings",         "menu", Menu(blue3, "SETTINGS", 30, White, self.font_path, grey_panel, (400, 60), "blue_button", "yellow_button", ("display_settings", "audio_settings", "game_settings", "GO BACK"), 30, Gray, White, "kenvector_future", self.size, panel_factory.make_button_factory(self.assets)))
-        self.panel_manager.add_object("display_settings", "menu", Menu(blue3, "display_settings", 30, White, self.font_path, grey_panel, (400, 60), "blue_button", "yellow_button", (), 30, Gray, White, "kenvector_future", self.size, panel_factory.make_button_factory(self.assets), panel_height=200))
-        self.panel_manager.add_object("audio_settings",   "menu", Menu(blue3, "audio_settings", 30, White, self.font_path, grey_panel, (400, 60),"blue_button", "yellow_button", (), 30, Gray, White, "kenvector_future", self.size, panel_factory.make_button_factory(self.assets), panel_height=500))
-        self.panel_manager.add_object("game_settings",    "menu", Menu(blue3, "game_settings", 30, White, self.font_path, grey_panel, (400, 60), "blue_button", "yellow_button", (), 30, Gray, White, "kenvector_future", self.size, panel_factory.make_button_factory(self.assets), panel_height=200))
-
         # Game
         self.panel_manager.add_object("game", "clouds", GameClouds(self.cloud_count, self.size))
         self.panel_manager.add_object("game", "tiles", self.tilemap)
@@ -107,6 +96,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         loader.register("object", panel_factory.make_factory(self.assets), default=True)
         loader.register("text", panel_factory.make_text_factory(self.assets))
         loader.register("button", panel_factory.make_button_factory(self.assets))
+        loader.register("menu", panel_factory.make_menu_factory(self.assets, self.size, self.font_path))
         loader.load("config/panels.yaml")
 
         # Developer panel icons
@@ -114,22 +104,11 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         panel["github"].states["default"].blit(load_image(self.assets.image_path("github_icon"), (32, 32)), (105, 5))
         panel["linkedin"].states["default"].blit(load_image(self.assets.image_path("linkedin_icon"), (32, 32)), (105, 5))
 
-        # Audio settings icons
-        panel = self.panel_manager["audio_settings"]
-        minus_icon = load_image(ImagePath("minus", "gui/others"), (16, 16))
-        plus_icon  = load_image(ImagePath("plus",  "gui/others"), (16, 16))
-        for key in ("music_volume_minus_button", "sfx_volume_minus_button"):
-            for state in ("default", "hover"):
-                panel[key].states[state].blit(minus_icon, (10, 10))
-        for key in ("music_volume_plus_button", "sfx_volume_plus_button"):
-            for state in ("default", "hover"):
-                panel[key].states[state].blit(plus_icon, (10, 10))
-
-        # Game panel
-        self.panel_manager.add_object("game", "selection_mode_button_image", StateObject((345, 990), (50, 50), {"default": ImagePath("info", "gui/others")}))
-        self.panel_manager.add_object("game", "info_panel_building_image", StateObject(((self.width - 250) / 2 + 20, (self.height - 400) / 2 + 20), (65, 89), visible=False))
-
         panel = self.panel_manager["game"]
+        for name in ("info_panel", "level_text", "speed_text", "cooldown_text",
+                     "sell_price_text", "close_button", "sell_button", "info_panel_building_image"):
+            panel[name].set_parent(self.info_panel_root)
+
         panel["selection_mode_button"].set_state("off")
         panel["close_button"].states["default"].blit(load_image(ImagePath("grey_crossWhite", "gui/others")), (9, 9))
         panel["close_button"].states["hover"].blit(load_image(ImagePath("grey_crossGrey",   "gui/others")), (9, 9))
@@ -174,22 +153,26 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
     def update(self) -> None:
         self.panel_manager.update()
         self.buildings.update()
+        for building in self.buildings:
+            if building.on_payout is None:
+                building.on_payout = self._on_building_payout
         self.cloud_animation.update()
-        if self.panel_manager.current_panel == "game":
-            self.update_money()
+        if self.panel_manager.current_panel == "game" and self.money != self._last_displayed_money:
+            self._last_displayed_money = self.money
+            self.panel_manager["game"]["money_text"].set_text(f"{self.money}$")
 
     def draw(self) -> None:
         self.panel_manager.draw(self.window)
         self.cloud_animation.draw(self.window)
         super().draw()
 
-        self.window.blit(self._debug_font.render("v1.0.0", True, Black), (self.width - 60, self.height - 20))
+        self.window.blit(self._debug_font.render("v1.0.0", True, "black"), (self.width - 60, self.height - 20))
         if Game.DEBUG:
             hovered = self.get_hovered_tile()
-            self.window.blit(self._debug_font.render(f"info_panel: {self.is_info_panel_active}", True, Black), (10, self.height - 80))
-            self.window.blit(self._debug_font.render(f"selection_mode: {self.is_selection_mode}", True, Black), (10, self.height - 60))
-            self.window.blit(self._debug_font.render(f"mouse_tile: {(hovered.row_number, hovered.column_number) if hovered else None}", True, Black), (10, self.height - 40))
-            self.window.blit(self._debug_font.render(f"mouse_pos: {self.mouse.position}", True, Black), (10, self.height - 20))
+            self.window.blit(self._debug_font.render(f"info_panel: {self.info_panel_root.active}", True, "black"), (10, self.height - 80))
+            self.window.blit(self._debug_font.render(f"selection_mode: {self.is_selection_mode}", True, "black"), (10, self.height - 60))
+            self.window.blit(self._debug_font.render(f"mouse_tile: {(hovered.row_number, hovered.column_number) if hovered else None}", True, "black"), (10, self.height - 40))
+            self.window.blit(self._debug_font.render(f"mouse_pos: {self.mouse.position}", True, "black"), (10, self.height - 20))
 
     def on_exit(self) -> None:
         self.play_sfx(self.go_back_sound_path)
@@ -208,7 +191,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         elif panel == "developer":
             self.open_panel("menu")
         elif panel == "game":
-            if self.is_info_panel_active:
+            if self.info_panel_root.active:
                 self.close_info_panel()
             else:
                 self.save_game()
@@ -233,14 +216,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         self.set_info_panel_active(False)
 
     def set_info_panel_active(self, active: bool) -> None:
-        self.is_info_panel_active = active
-        panel = self.panel_manager["game"]
-        for name in ("info_panel", "level_text", "speed_text", "cooldown_text",
-                     "sell_price_text", "close_button", "sell_button", "info_panel_building_image"):
-            obj = panel[name]
-            obj.active = active
-            if hasattr(obj, "visible"):
-                obj.visible = active
+        self.info_panel_root.active = active
+        self.info_panel_root.active = active
 
     # ── Tile / building selection ─────────────────────────────────────────────
 
@@ -348,7 +325,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
             )
             if not line_buildings: continue
 
-            previous = None
+            previous: Building | None = None
             target   = 0
 
             for building in line_buildings:
@@ -364,19 +341,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
 
         self.buildings.sort(key=lambda b: b.tile.column_number)
 
-    def update_money(self) -> None:
-        now = pygame.time.get_ticks()
-
-        for building in self.buildings:
-            if not building.last_time:
-                building.last_time = now
-            if now - building.last_time > building.cooldown * 1000:
-                self.money += building.cooldown * building.speed
-                building.last_time = now
-
-        if self.money != self._last_displayed_money:
-            self._last_displayed_money = self.money
-            self.panel_manager[self.panel_manager.current_panel]["money_text"].set_text(f"{self.money}$")
+    def _on_building_payout(self, amount: int) -> None:
+        self.money += amount
 
     def open_panel(self, tab: str) -> None:
         if tab == "exit":

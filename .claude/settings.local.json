@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\user\\\\PycharmProjects\\\\2048-idle-evolution\\\\src\" -Depth 2 -Recurse -Force | Where-Object { -not $_.FullName.Contains\\('.git'\\) -and -not $_.FullName.Contains\\('.venv'\\) -and -not $_.FullName.Contains\\('build\\\\lib'\\) -and -not $_.FullName.Contains\\('.idea'\\) } | Select-Object @{Name=\"Path\"; Expression={$_.FullName.Replace\\(\"C:\\\\Users\\\\user\\\\PycharmProjects\\\\2048-idle-evolution\\\\\", \"\"\\)}}, @{Name=\"Type\"; Expression={if \\($_.PSIsContainer\\) {\"DIR\"} else {\"FILE\"}}} | Format-Table -AutoSize)"
+    ]
+  }
+}

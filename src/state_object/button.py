@@ -1,6 +1,5 @@
 import pygame
-from state_object import StateObject
-from pygame_core.color import White
+from state_object.state_object import StateObject
 
 
 class ButtonText(StateObject):
@@ -9,7 +8,7 @@ class ButtonText(StateObject):
                  text,
                  font,
                  antialias=True,
-                 color=White,
+                 color="white",
                  background_color=None,
                  is_centered=True,
                  state="default",
@@ -22,7 +21,7 @@ class ButtonText(StateObject):
         super().__init__(position, visible=visible)
         self.add_text(state, text, font, antialias, color, background_color)
 
-    def add_text(self, state, text, font, antialias=True, color=White, background_color=None):
+    def add_text(self, state, text, font, antialias=True, color="white", background_color=None):
         self.add_surface(state, font.render(text, antialias, color, background_color))
         self.text_args[state] = [text, font, antialias, color, background_color]
 
@@ -33,7 +32,7 @@ class ButtonText(StateObject):
         old_font = self.text_args[state][1]
         try:
             new_font = pygame.font.Font(old_font.name, size)
-        except (FileNotFoundError, OSError, TypeError):
+        except (OSError, TypeError):
             new_font = pygame.font.SysFont(old_font.name, size)
         self.add_text(state, self.text_args[state][0], new_font, *self.text_args[state][2:])
 
@@ -52,9 +51,9 @@ class Button(StateObject):
                  image_paths=...,
                  text: str = "",
                  selected_text: str = "",
-                 font: pygame.Font = None,
-                 text_color: tuple = White,
-                 selected_text_color: tuple = White,
+                 font: pygame.Font | None = None,
+                 text_color: tuple | str = "white",
+                 selected_text_color: tuple | str = "white",
                  visible=True,
                  parent=None
              ) -> None:
@@ -70,7 +69,7 @@ class Button(StateObject):
             self.add_text("default", text, font, True, text_color, None)
             self.add_text("hover", selected_text, font, True, selected_text_color, None)
 
-    def add_text(self, state, text: str, font: pygame.Font, antialias: bool, color: tuple, background_color) -> None:
+    def add_text(self, state, text: str, font: pygame.Font | None, antialias: bool, color: tuple, background_color) -> None:
         if self.text is None:
             self.text = ButtonText((0, 0), text, font, True, color, background_color, True, state)
         else:
@@ -80,5 +79,8 @@ class Button(StateObject):
         super().draw(surface)
 
         if self.text is not None and self.visible:
-            self.text.set_state(self.state, self.rect.topleft, self.size)
+            text_state = self.state if self.state in self.text.states else (
+                "hover" if self._hovered and "hover" in self.text.states else "default"
+            )
+            self.text.set_state(text_state, self.rect.topleft, self.size)
             self.text.draw(surface)

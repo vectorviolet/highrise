@@ -1,5 +1,5 @@
 from sound_manager import SoundManager
-from tile import Tilemap
+from tilemap import Tilemap
 
 
 class GamePersistenceMixin:

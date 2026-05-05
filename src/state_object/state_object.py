@@ -4,7 +4,7 @@ from pygame_core.image import load_image
 from pygame_core.utils import MouseInteractive
 from pygame_core.unity.components.rigidbody2d import Rigidbody2D
 from pygame_core.unity.gameobject import GameObject
-from ext.image import nine_slice_scale
+from image import nine_slice_scale
 
 
 class StateObject(GameObject, MouseInteractive):
@@ -25,6 +25,7 @@ class StateObject(GameObject, MouseInteractive):
         self.states = {}
         self._hover_states: dict = {}
         self._hovered = False
+        self._base_state: str | None = None
         self._nine_slice = nine_slice
         self.image_paths = image_paths if image_paths is not None else {"default": None}
         self.visible = visible
@@ -70,21 +71,34 @@ class StateObject(GameObject, MouseInteractive):
             self.set_state("default")
 
     def handle_event(self, event, mouse_position):
+        if not self.active:
+            return
         self._hovered = self.is_mouse_over(mouse_position)
         if "mouse_click" in self.states and self.is_clicked(event, mouse_position):
             self.state = "mouse_click"
-        elif "hover" in self.states and self._hovered:
-            self.state = "hover"
-        elif "default" in self.states:
-            self.state = "default"
+        elif self._hovered:
+            hover_key = f"{self._base_state}_hover" if self._base_state else None
+            if hover_key and hover_key in self.states:
+                self.state = hover_key
+            elif "hover" in self.states:
+                self.state = "hover"
+        else:
+            self.state = self._base_state if self._base_state and self._base_state in self.states else (
+                "default" if "default" in self.states else self.state
+            )
 
     def draw(self, surface) -> None:
+        if not self.active:
+            return
         if not (self.visible and self.state in self.states):
             return
         if self._hovered and self.state in self._hover_states:
             surface.blit(self._hover_states[self.state], self.rect)
         else:
             surface.blit(self.states[self.state], self.rect)
+
+    def on_disable(self):
+        self._hovered = False
 
     def show(self):
         self.visible = True
@@ -93,4 +107,5 @@ class StateObject(GameObject, MouseInteractive):
         self.visible = False
 
     def set_state(self, state: str):
+        self._base_state = state
         self.state = state
