@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from typing import Callable
+
+from pygame_core.asset_manager import AssetManager
 from sound_manager import SoundManager
 from pygame import Vector2
 from gameobject.tile import Tile
@@ -69,10 +71,11 @@ class Building(StateObject):
         self.should_destroy = True
 
 class Buildings(list[Building]):
-    def __init__(self) -> None:
+    def __init__(self, assets: AssetManager) -> None:
         super().__init__()
         self.max_age_number = len(ages) - 1
         self.age_number = 0
+        self.assets = assets
 
     def set_age(self, age_number):
         if age_number <= self.max_age_number:
@@ -99,7 +102,7 @@ class Buildings(list[Building]):
                     self.append(Building(building.level + 1, building.age_number, building.tile))
                     self.sort(key=lambda b: b.tile.column_number)
 
-                    sound = SoundPath("rollover2")
+                    sound = self.assets.sound_path("merge")
                     SoundManager.play_sound(1, sound)
                 else:
                     if building.tile.selected and building.tile.rect == building.tile.selected_rect:

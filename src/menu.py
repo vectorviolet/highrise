@@ -1,5 +1,6 @@
 import pygame
 
+from pygame_core.asset_manager import AssetManager
 from sound_manager import SoundManager
 from pygame_core.asset_path import SoundPath
 from state_object.state_object import StateObject
@@ -12,15 +13,15 @@ class Menu(GameObject):
 
     HOVER_SHIFT_Y = -10
 
-    def __init__(self, title: Button, panel: StateObject, buttons: dict) -> None:
+    def __init__(self, title: Button, panel: StateObject, buttons: dict, assets: AssetManager) -> None:
         super().__init__()
 
         self.title = title
         self.panel = panel
         self.buttons = buttons
 
-        self.switch_up_sound_path = SoundPath("switchUp")
-        self.switch_down_sound_path = SoundPath("switchDown")
+        self.switch_up_sound_path = assets.sound_path("switch_up")
+        self.switch_down_sound_path = assets.sound_path("switch_down")
 
         if self.buttons:
             self._focus(next(iter(self.buttons.values())))

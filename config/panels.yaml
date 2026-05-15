@@ -9,7 +9,7 @@ object_templates:
     type: text
     font: kenvector_future
     font_size: 25
-    color: Grey
+    color: [128, 128, 128]
   panel_text:
     type: text
     font: kenvector_future_thin
@@ -37,7 +37,7 @@ object_templates:
     selected_text: ""
     font_size: 28
     text_color: White
-    selected_text_color: Grey
+    selected_text_color: [128, 128, 128]
     paths:
       default: red_button
       hover: yellow_button
@@ -48,7 +48,7 @@ object_templates:
     selected_text: ""
     font_size: 27
     text_color: White
-    selected_text_color: Grey
+    selected_text_color: [128, 128, 128]
     font: kenvector_future
   menu_template:
     title_image: blue_button
@@ -145,7 +145,7 @@ panels:
         selected_text: ""
         font_size: 28
         text_color: White
-        selected_text_color: Grey
+        selected_text_color: [128, 128, 128]
         paths:
           default: green_button
           hover: red_button
@@ -244,7 +244,7 @@ panels:
         selected_text: ""
         font_size: 28
         text_color: White
-        selected_text_color: Grey
+        selected_text_color: [128, 128, 128]
         paths:
           default: red_button
           hover: yellow_button
@@ -257,7 +257,7 @@ panels:
         selected_text: ""
         font_size: 28
         text_color: White
-        selected_text_color: Grey
+        selected_text_color: [128, 128, 128]
         paths:
           default: green_button
           hover: yellow_button
@@ -278,7 +278,7 @@ panels:
         selected_text: ""
         font_size: 28
         text_color: White
-        selected_text_color: Grey
+        selected_text_color: [128, 128, 128]
         paths:
           default: red_button
           hover: yellow_button
@@ -287,15 +287,6 @@ panels:
         extends: go_back_template
         position: [810, 580]
         size: [315, 60]
-#      music_volume_entry:
-#        type: button
-#        position: [885, 430]
-#        size: [150, 35]
-#        text: "%100"
-#        font_size: 25
-#        text_color: Gray
-#        paths:
-#          default: grey8
 
   developer:
     objects:
@@ -317,7 +308,7 @@ panels:
       title_text:
         type: text
         font: freesansbold
-        color: Grey
+        color: [128, 128, 128]
         font_size: 17
         position: [CENTER, 500]
         text: "Software Engineer"
@@ -328,7 +319,7 @@ panels:
         selected_text: "github.com/umutcanekinci"
         font_size: 28
         text_color: Black
-        selected_text_color: Grey
+        selected_text_color: [128, 128, 128]
         paths:
           default: grey_button
           hover: yellow_button
@@ -343,7 +334,7 @@ panels:
         selected_text: "linkedin.com/in/umutcanekinci"
         font_size: 28
         text_color: Black
-        selected_text_color: Grey
+        selected_text_color: [128, 128, 128]
         paths:
           default: grey_button
           hover: yellow_button

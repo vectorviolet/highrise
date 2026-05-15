@@ -1,5 +1,6 @@
 import pygame
 from menu import Menu
+from pygame_core.asset_manager import AssetManager
 from state_object.button import Button
 from state_object.state_object import StateObject
 from widget_settings import MenuSettings
@@ -16,13 +17,15 @@ class MenuBuilder:
             title_text: str,
             button_texts: tuple,
             screen_size: tuple,
+            assets: AssetManager,
             *,
-            panel_height: int = None,
+            panel_height: int = None
             ) -> None:
 
         self._settings = settings
         self._title_text = title_text
         self._button_texts = button_texts
+        self.assets = assets
 
         space = self.SPACE
         button_count = len(button_texts)
@@ -70,5 +73,5 @@ class MenuBuilder:
         title = self._build_title()
         panel = StateObject(self._panel_position, self._panel_size, {"default": self._settings.panel_image_path})
         buttons = self._build_buttons()
-        return Menu(title, panel, buttons)
+        return Menu(title, panel, buttons, self.assets)
 

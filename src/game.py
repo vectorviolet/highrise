@@ -33,18 +33,20 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
 
     def __init__(self) -> None:
         super().__init__(Game.WINDOW_SIZE, Game.TITLE, Game.FPS)
-        self._last_displayed_money = None
-        self.tilemap = None
-        self.window_transform = Transform((0, 0), Game.WINDOW_SIZE)
-        self.panel_manager = PanelManager(Game.BACKGROUND_COLORS)
-        self.database = Database("database")
-        self.buildings = Buildings()
+
         self.assets = AssetManager()
         self.assets.load_manifest("config/assets.yaml")
         missing = self.assets.validate()
         if missing:
             raise RuntimeError("Missing assets:\n" + "\n".join(missing))
 
+        self._last_displayed_money = None
+        self.tilemap = None
+        self.window_transform = Transform((0, 0), Game.WINDOW_SIZE)
+        self.panel_manager = PanelManager(Game.BACKGROUND_COLORS)
+        self.database = Database("database")
+
+        self.buildings = Buildings(self.assets)
         self.cloud_count = 30
         self.max_size = 7
         self.max_building_level = 6

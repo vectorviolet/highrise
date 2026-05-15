@@ -104,6 +104,7 @@ def make_menu_factory(assets, screen_size):
             title_text=cfg.get("title", ""),
             button_texts=tuple(cfg.get("buttons", [])),
             screen_size=screen_size,
+            assets=assets,
             panel_height=cfg.get("panel_height"),
         ).build()
     return make_menu

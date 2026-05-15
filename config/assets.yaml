@@ -1,26 +1,33 @@
 fonts:
-    kenvector_future:      {folder: , name: kenvector_future}
-    kenvector_future_thin: {folder: , name: kenvector_future_thin}
+    #kenvector_future:      {folder: , name: kenvector_future}
+    kenvector_future:      {folder: , name: "Kenney Future"}
+    kenvector_future_thin: {folder: , name: "Kenney Future Narrow"}
 images:
-    cursor:         {folder: gui/others, name: cursor}
-    profile_image:  {folder: gui/others, name: cv}
-    grey_panel:     {folder: gui/panels, name: grey}
-    github_icon:    {folder: gui/others, name: github}
-    linkedin_icon:  {folder: gui/others, name: linkedin}
-    blue_button:    {folder: gui/buttons, name: blue3}
-    grey_button:    {folder: gui/buttons, name: grey15}
-    green_button:   {folder: gui/buttons, name: green}
-    yellow_button:  {folder: gui/buttons, name: yellow}
-    blue_circle:    {folder: gui/buttons, name: blue_circle}
-    yellow_circle:  {folder: gui/buttons, name: yellow_circle}
-    grey8:          {folder: gui/buttons, name: grey8}
-    red_button:     {folder: gui/buttons, name: red}
+    cursor:         { folder: gui/others, name: cursor }
+    profile_image:  { folder: gui/others, name: cv }
+    grey_panel:     { folder: gui/panels, name: grey }
+    github_icon:    { folder: gui/others, name: github }
+    linkedin_icon:  { folder: gui/others, name: linkedin }
+
+    blue_button:    {folder: gui/Blue/Default, name: button_rectangle_depth_gloss}
+    green_button:   {folder: gui/Green/Default, name: button_rectangle_depth_gloss}
+    yellow_button:  {folder: gui/Yellow/Default, name: button_rectangle_depth_gloss}
+    grey_button:    {folder: gui/Grey/Default, name: button_rectangle_depth_gloss}
+    blue_circle:    {folder: gui/Blue/Default, name: check_round_color}
+    yellow_circle:  {folder: gui/Yellow//Default, name: check_round_color}
+    red_button:     {folder: gui/Red//Default, name: button_rectangle_depth_flat}
+    grey8:          {folder: gui/Grey/Default, name: button_square_gloss}
+    cross_white:    {folder: gui/Grey/Default, name: icon_outline_cross}
+    cross_grey:     {folder: gui/Grey/Default, name: icon_outline_cross}
+    
     minus_icon:     {folder: gui/others, name: minus}
     plus_icon:      {folder: gui/others, name: plus}
     info_icon:      {folder: gui/others, name: info}
-    cross_white:    {folder: gui/others, name: grey_crossWhite}
-    cross_grey:     {folder: gui/others, name: grey_crossGrey}
+
 sounds:
-    bg:     {folder: "", name: music, extension: mp3}
-    click:  {folder: "", name: click}
-    back:   {folder: "", name: back}
+    bg:             {folder: "", name: music, extension: mp3}
+    click:          {folder: "", name: click-a}
+    back:           {folder: "", name: click-b}
+    switch_up:      {folder: "", name: switch-b}
+    switch_down:    {folder: "", name: switch-a}
+    merge:          {folder: "", name: tap-a}
