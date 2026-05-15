@@ -10,7 +10,11 @@ from unity.gameobject import GameObject
 
 
 class Tile(GameObject):
-	def __init__(self, width, height, row_number, column_number):
+	GRID_COLOR = (128, 128, 128)
+	GRID_HOVER_COLOR = "yellow"
+	HOVER_SHIFT_Y = 10
+
+	def __init__(self, row_number, column_number):
 		super().__init__()
 		self.selected = False
 		self.is_empty = True
@@ -24,7 +28,7 @@ class Tile(GameObject):
 
 		self.unselected_rect = self.rect.copy()
 		self.selected_rect = self.rect.copy()
-		self.selected_rect.y -= 10
+		self.selected_rect.y -= self.HOVER_SHIFT_Y
 
 		self.surface = self.unselected_surface = renderer.image
 		self.selected_surface = self.unselected_surface.__copy__()
@@ -36,14 +40,14 @@ class Tile(GameObject):
 			(self.rect.width / 2, self.rect.height - 34),
 		]
 
-		polygon(self.selected_surface, "white", local_corners, 1)
-		polygon(self.unselected_surface, "gray", local_corners, 1)
+		polygon(self.selected_surface, self.GRID_HOVER_COLOR, local_corners, 1)
+		polygon(self.unselected_surface, self.GRID_COLOR, local_corners, 1)
 
 		self.corners_of_unselected_polygon = [
 			(x + self.rect.x, y + self.rect.y) for x, y in local_corners
 		]
 		self.corners_of_selected_polygon = [
-			(x, y - 10) for x, y in self.corners_of_unselected_polygon
+			(x, y - self.HOVER_SHIFT_Y) for x, y in self.corners_of_unselected_polygon
 		]
 
 	@staticmethod

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Callable
 from sound_manager import SoundManager
 from pygame import Vector2
@@ -7,6 +8,16 @@ from state_object.state_object import StateObject
 from pygame_core.unity.components.rigidbody2d import Rigidbody2D
 
 ages = ["wood", "rock", "sand", "stone"]
+
+
+@dataclass
+class _MoveAxis:
+    line_count: int
+    line_length: int
+    get_line: Callable
+    get_pos: Callable
+    get_tile: Callable
+    reverse: bool
 
 class Building(StateObject):
     def __init__(self, level, age_number, tile: Tile) -> None:
@@ -113,3 +124,60 @@ class Buildings(list[Building]):
     def draw(self, surface):
         for building in self:
             building.draw(surface)
+
+    def move(self, rotation: str, tilemap, max_level: int) -> None:
+        if self.is_moving():
+            return
+        axis = self._axis_for(rotation, tilemap)
+        for line in range(axis.line_count):
+            self._resolve_line(line, axis, max_level)
+        self.sort(key=lambda b: b.tile.column_number)
+
+    @staticmethod
+    def _axis_for(rotation: str, tilemap) -> _MoveAxis:
+        reverse = rotation in ("down", "right")
+        if rotation in ("up", "down"):
+            return _MoveAxis(
+                line_count  = tilemap.column_count,
+                line_length = tilemap.row_count,
+                get_line    = lambda b: b.tile.column_number - 1,
+                get_pos     = lambda b: b.tile.row_number - 1,
+                get_tile    = lambda line, pos: tilemap[pos][line],
+                reverse     = reverse,
+            )
+        return _MoveAxis(
+            line_count  = tilemap.row_count,
+            line_length = tilemap.column_count,
+            get_line    = lambda b: b.tile.row_number - 1,
+            get_pos     = lambda b: b.tile.column_number - 1,
+            get_tile    = lambda line, pos: tilemap[line][pos],
+            reverse     = reverse,
+        )
+
+    @staticmethod
+    def _can_merge(previous: "Building | None", building: "Building", max_level: int) -> bool:
+        return (previous is not None
+                and previous.level == building.level
+                and previous.level < max_level)
+
+    def _resolve_line(self, line: int, axis: _MoveAxis, max_level: int) -> None:
+        line_buildings = sorted(
+            [b for b in self if axis.get_line(b) == line],
+            key=axis.get_pos,
+            reverse=axis.reverse,
+        )
+        if not line_buildings:
+            return
+
+        previous: Building | None = None
+        target = 0
+        for building in line_buildings:
+            if self._can_merge(previous, building, max_level):
+                previous.level_up(building)
+                previous = None
+                continue
+            target_pos = axis.line_length - target - 1 if axis.reverse else target
+            if axis.get_pos(building) != target_pos:
+                building.set_target_tile(axis.get_tile(line, target_pos))
+            previous = building
+            target += 1

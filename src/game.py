@@ -6,35 +6,36 @@ import panel_factory
 from game_audio import GameAudioMixin
 from game_events import GameEventsMixin
 from game_persistence import GamePersistenceMixin
-from gameobject.cloud import OneShotCloudAnimation, LoopingCloudAnimation
-from gameobject.tile import Tile
+from gameobject.cloud_container import OneShotCloudAnimation, LoopingCloudAnimation
+from info_panel import InfoPanel
+from player import Player
 from pygame_core.application import Application
 from pygame_core.asset_manager import AssetManager
 from pygame_core.database import Database
-from pygame_core.image import load_image
 from pygame_core.panel_loader_ext import PanelLoaderExt
 from pygame_core.panel_manager import PanelManager
 from pygame_core.unity.components.transform import Transform
-from pygame_core.unity.gameobject import GameObject
 from sound_manager import SoundManager
 from state_object.building import Building, Buildings
 from state_object.state_object import StateObject
+from tile_selector import TileSelector
 
 CustomBlue = (72, 218, 233)
+
+
 class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
     BACKGROUND_COLORS = {"menu": "yellow", "settings": "yellow", "display_settings": "yellow", "audio_settings": "yellow",
                          "game_settings": "yellow", "developer": "yellow", "game": CustomBlue}
     TITLE = "2048 GAME"
-    SIZE = (1920, 1080)
+    WINDOW_SIZE = (1920, 1080)
     FPS = 165
     CURSOR_SIZE = (25, 25)
 
     def __init__(self) -> None:
-        super().__init__(Game.SIZE, Game.TITLE, Game.FPS)
+        super().__init__(Game.WINDOW_SIZE, Game.TITLE, Game.FPS)
         self._last_displayed_money = None
         self.tilemap = None
-        self.info_building = None
-        self.window_transform = Transform((0, 0), Game.SIZE)
+        self.window_transform = Transform((0, 0), Game.WINDOW_SIZE)
         self.panel_manager = PanelManager(Game.BACKGROUND_COLORS)
         self.database = Database("database")
         self.buildings = Buildings()
@@ -48,9 +49,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         self.max_size = 7
         self.max_building_level = 6
         self.starting_money = 1000
-        self.is_selection_mode = False
 
-        self.money = 0
+        self.player = Player()
         self.old_music_volume = 1.0
         self.old_sfx_volume = 1.0
 
@@ -58,7 +58,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         self.click_sound_path = self.assets.sound_path("click")
         self.go_back_sound_path = self.assets.sound_path("back")
 
-        self.info_panel_root = GameObject("info_panel")
+        self.info_panel = InfoPanel(self.panel_manager)
+        self.tile_selector = TileSelector(self.tilemap, self.mouse, self.buildings)
         self.cloud_animation = OneShotCloudAnimation(self.size)
 
         self.handlers = {
@@ -76,13 +77,14 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         self.mouse.set_cursor_image(StateObject((0, 0), Game.CURSOR_SIZE, {"default": self.assets.image_path("cursor")}))
 
         self.load_data()
+        self.tile_selector.tilemap = self.tilemap
         self.add_objects()
 
         self.set_age(self.buildings.age_number)
         self.update_button_texts()
 
         self.open_panel("menu")
-        self.close_info_panel()
+        self.info_panel.close()
         self.set_music_volume(SoundManager.get_volume(0))
         self.set_sfx_volume(SoundManager.get_volume(1))
         self.play_music(self.background_music_sound_path)
@@ -105,7 +107,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         panel = self.panel_manager["game"]
         for name in ("info_panel", "level_text", "speed_text", "cooldown_text",
                      "sell_price_text", "close_button", "sell_button", "info_panel_building_image"):
-            panel[name].set_parent(self.info_panel_root)
+            panel[name].set_parent(self.info_panel.root)
 
         panel["selection_mode_button"].set_base_state("off")
         panel["close_button"].states["default"].blit(self.assets.get_image("cross_white"), (9, 9))
@@ -145,9 +147,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
             if building.on_payout is None:
                 building.on_payout = self._on_building_payout
         self.cloud_animation.update()
-        if self.panel_manager.current_panel == "game" and self.money != self._last_displayed_money:
-            self._last_displayed_money = self.money
-            self.panel_manager["game"]["money_text"].set_text(f"{self.money}$")
+        if self.panel_manager.current_panel == "game" and self.player.money != self._last_displayed_money:
+            self._last_displayed_money = self.player.money
+            self.panel_manager["game"]["money_text"].set_text(f"{self.player.money}$")
 
     def draw(self) -> None:
         self.panel_manager.draw(self.window)
@@ -171,71 +173,18 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         elif panel == "developer":
             self.open_panel("menu")
         elif panel == "game":
-            if self.info_panel_root.active:
-                self.close_info_panel()
+            if self.info_panel.is_active:
+                self.info_panel.close()
             else:
                 self.save_game()
                 self.open_panel("menu")
 
-    # ── Info panel ────────────────────────────────────────────────────────────
-
-    def refresh_info_panel(self, building: Building) -> None:
-        self.info_building = building
-        panel = self.panel_manager[self.panel_manager.current_panel]
-        panel["level_text"].set_text("Level: " + str(building.level))
-        panel["speed_text"].set_text("Speed: " + str(building.speed) + " $/sec")
-        panel["cooldown_text"].set_text("Cooldown: " + str(building.cooldown) + " sec")
-        panel["sell_price_text"].set_text("Sell Price: " + str(building.sell_price))
-        panel["sell_button"].text.update_text("hover", str(building.sell_price) + "$")
-        panel["info_panel_building_image"].add_surface("default", load_image(building.get_image_path(), (65, 89)))
-
-    def open_info_panel(self) -> None:
-        self.set_info_panel_active(True)
-
-    def close_info_panel(self) -> None:
-        self.set_info_panel_active(False)
-
-    def set_info_panel_active(self, active: bool) -> None:
-        self.info_panel_root.active = active
-        self.info_panel_root.active = active
-
-    # ── Tile / building selection ─────────────────────────────────────────────
-
-    def control_selecting_tile(self) -> None:
-        hovered = self.get_hovered_tile()
-        for row in self.tilemap:
-            for tile in row:
-                tile.selected = tile is hovered
-                tile.rect = tile.selected_rect if tile.selected and self.is_selection_mode else tile.unselected_rect
-
-    def get_hovered_tile(self) -> Tile | None:
-        for row in self.tilemap:
-            for tile in row:
-                if tile.is_mouse_over(self.mouse.position):
-                    return tile
-        return None
-
-    def get_selected_tile(self) -> Tile | None:
-        for row in self.tilemap:
-            for tile in row:
-                if tile.selected:
-                    return tile
-        return None
-
-    def get_selected_building(self) -> Building | None:
-        tile = self.get_selected_tile()
-        if not tile: return None
-        for building in self.buildings:
-            if building.tile == tile:
-                return building
-        return None
-
     # ── Game mechanics ────────────────────────────────────────────────────────
 
     def expand(self) -> None:
-        if self.money < self.tilemap.get_expand_cost() or self.tilemap.is_max_size(): return
+        if self.tilemap.is_max_size() or not self.player.spend(self.tilemap.get_expand_cost()):
+            return
 
-        self.money -= self.tilemap.get_expand_cost()
         self.tilemap.expand()
 
         for building in self.buildings:
@@ -254,7 +203,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
             self.panel_manager["game"]["build_button"].text.update_size("hover", 17)
 
     def create_building(self) -> None:
-        if self.buildings.is_moving() or self.money < self.buildings.get_build_cost():
+        if self.buildings.is_moving() or not self.player.can_afford(self.buildings.get_build_cost()):
             return
 
         all_tiles = {(r + 1, c + 1) for r in range(self.tilemap.row_count) for c in range(self.tilemap.column_count)}
@@ -264,7 +213,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         if empty_tiles:
             row_number, column_number = choice(empty_tiles)
             self.add_building(1, row_number, column_number)
-            self.money -= self.buildings.get_build_cost()
+            self.player.spend(self.buildings.get_build_cost())
             self.play_sfx(self.click_sound_path)
 
     def set_age(self, age_number) -> None:
@@ -273,56 +222,20 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
             self.update_button_texts()
 
     def next_age(self) -> None:
-        if self.buildings.age_number < self.buildings.max_age_number and self.money >= self.buildings.get_age_cost():
-            self.money -= self.buildings.get_age_cost()
-            self.set_age(self.buildings.age_number + 1)
-            self.play_sfx(self.click_sound_path)
+        if self.buildings.age_number >= self.buildings.max_age_number:
+            return
+        if not self.player.spend(self.buildings.get_age_cost()):
+            return
+        self.set_age(self.buildings.age_number + 1)
+        self.play_sfx(self.click_sound_path)
 
     def move_buildings(self, rotation: str) -> None:
-        if self.is_selection_mode or self.buildings.is_moving(): return
-
-        is_vertical   = rotation in ("up", "down")
-        reverse_sort  = rotation in ("down", "right")
-
-        if is_vertical:
-            line_count  = self.tilemap.column_count
-            line_length = self.tilemap.row_count
-            get_line    = lambda b: b.tile.column_number - 1
-            get_pos     = lambda b: b.tile.row_number - 1
-            get_tile    = lambda line, pos: self.tilemap[pos][line]
-        else:
-            line_count  = self.tilemap.row_count
-            line_length = self.tilemap.column_count
-            get_line    = lambda b: b.tile.row_number - 1
-            get_pos     = lambda b: b.tile.column_number - 1
-            get_tile    = lambda line, pos: self.tilemap[line][pos]
-
-        for line in range(line_count):
-            line_buildings = sorted(
-                [b for b in self.buildings if get_line(b) == line],
-                key=get_pos,
-                reverse=reverse_sort,
-            )
-            if not line_buildings: continue
-
-            previous: Building | None = None
-            target   = 0
-
-            for building in line_buildings:
-                if previous and previous.level == building.level and previous.level < self.max_building_level:
-                    previous.level_up(building)
-                    previous = None
-                else:
-                    target_pos = target if not reverse_sort else line_length - target - 1
-                    if get_pos(building) != target_pos:
-                        building.set_target_tile(get_tile(line, target_pos))
-                    previous = building
-                    target += 1
-
-        self.buildings.sort(key=lambda b: b.tile.column_number)
+        if self.tile_selector.is_active:
+            return
+        self.buildings.move(rotation, self.tilemap, self.max_building_level)
 
     def _on_building_payout(self, amount: int) -> None:
-        self.money += amount
+        self.player.earn(amount)
 
     def open_panel(self, tab: str) -> None:
         if tab == "exit":

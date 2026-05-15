@@ -23,7 +23,8 @@ class GamePersistenceMixin:
     def load_game_data(self, game_data: list[tuple] | None) -> None:
         if not game_data: return
 
-        age_number, size, self.money, music_volume, sfx_volume = game_data[0]
+        age_number, size, money, music_volume, sfx_volume = game_data[0]
+        self.player.money = money
         self.set_music_volume(music_volume)
         self.set_sfx_volume(sfx_volume)
         self.tilemap = Tilemap(size, self.max_size)
@@ -41,7 +42,7 @@ class GamePersistenceMixin:
 
     def save_game(self) -> None:
         self.database.execute_safely("UPDATE game SET age_number=?, size=?, money=?",
-                                     params=(self.buildings.age_number, self.tilemap.row_count, self.money))
+                                     params=(self.buildings.age_number, self.tilemap.row_count, self.player.money))
         self.database.execute_safely("DELETE FROM buildings")
 
         for building in self.buildings:

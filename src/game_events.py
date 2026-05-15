@@ -95,32 +95,32 @@ class GameEventsMixin:
     def handle_game_events(self, event: pygame.event.Event) -> None:
         panel = self.panel_manager["game"]
 
-        if self.is_selection_mode:
-            self.control_selecting_tile()
+        if self.tile_selector.is_active:
+            self.tile_selector.update_selection()
 
         if panel["info_panel"].active:
             if panel["sell_button"].is_clicked(event, self.mouse.position):
-                self.buildings.remove(self.info_building)
-                self.money += self.info_building.sell_price
-                self.close_info_panel()
+                self.buildings.remove(self.info_panel.building)
+                self.player.earn(self.info_panel.building.sell_price)
+                self.info_panel.close()
                 self.play_sfx(self.go_back_sound_path)
                 self.update_button_texts()
             elif panel["close_button"].is_clicked(event, self.mouse.position):
-                self.close_info_panel()
+                self.info_panel.close()
                 self.play_sfx(self.go_back_sound_path)
             return
 
         info_button = panel["selection_mode_button"]
         if info_button.is_clicked(event, self.mouse.position):
-            self.is_selection_mode = not self.is_selection_mode
-            info_button.set_base_state("on" if self.is_selection_mode else "off")
+            self.tile_selector.is_active = not self.tile_selector.is_active
+            info_button.set_base_state("on" if self.tile_selector.is_active else "off")
             self.play_sfx(self.click_sound_path)
 
-        if self.is_selection_mode and event.type == pygame.MOUSEBUTTONUP:
-            building = self.get_selected_building()
+        if self.tile_selector.is_active and event.type == pygame.MOUSEBUTTONUP:
+            building = self.tile_selector.get_selected_building()
             if building:
-                self.refresh_info_panel(building)
-                self.open_info_panel()
+                self.info_panel.refresh(building)
+                self.info_panel.open()
                 self.play_sfx(self.click_sound_path)
 
         if panel["expand_button"].is_clicked(event, self.mouse.position):
