@@ -50,10 +50,24 @@ object_templates:
     text_color: White
     selected_text_color: Grey
     font: kenvector_future
+  menu_template:
+    title_image: blue_button
+    title_text_size: 30
+    title_text_color: white
+    title_font: kenvector_future
+    panel_image: grey_panel
+    button_size: [400, 60]
+    button_image: blue_button
+    button_hover_image: yellow_button
+    button_text_size: 30
+    button_text_color: [251, 254, 255]
+    button_selected_text_color: [128, 128, 128]
+    button_font: kenvector_future
 panels:
   menu:
     objects:
       menu:
+        extends: menu_template
         type: menu
         title: "2048 GAME"
         buttons: ["START", "SETTINGS", "DEVELOPER", "EXIT"]
@@ -61,6 +75,7 @@ panels:
   settings:
     objects:
       menu:
+        extends: menu_template
         type: menu
         title: "SETTINGS"
         buttons: ["display_settings", "audio_settings", "game_settings", "GO BACK"]
@@ -159,6 +174,7 @@ panels:
   display_settings:
     objects:
       menu:
+        extends: menu_template
         type: menu
         title: "display_settings"
         panel_height: 200
@@ -178,6 +194,7 @@ panels:
   audio_settings:
     objects:
       menu:
+        extends: menu_template
         type: menu
         title: "audio_settings"
         panel_height: 500
@@ -249,6 +266,7 @@ panels:
   game_settings:
     objects:
       menu:
+        extends: menu_template
         type: menu
         title: "game_settings"
         panel_height: 200
@@ -314,6 +332,10 @@ panels:
         paths:
           default: grey_button
           hover: yellow_button
+      github_icon:
+        position: [940, 555]
+        size: [16, 16]
+        asset: github_icon
       linkedin:
         type: button
         position: [CENTER, 600]
@@ -325,6 +347,10 @@ panels:
         paths:
           default: grey_button
           hover: yellow_button
+      linkedin_icon:
+        position: [940, 605]
+        size: [16, 16]
+        asset: linkedin_icon
       go_back_button:
         extends: go_back_template
         position: [CENTER, 650]

@@ -113,7 +113,7 @@ class GameEventsMixin:
         info_button = panel["selection_mode_button"]
         if info_button.is_clicked(event, self.mouse.position):
             self.is_selection_mode = not self.is_selection_mode
-            info_button.set_state("on" if self.is_selection_mode else "off")
+            info_button.set_base_state("on" if self.is_selection_mode else "off")
             self.play_sfx(self.click_sound_path)
 
         if self.is_selection_mode and event.type == pygame.MOUSEBUTTONUP:

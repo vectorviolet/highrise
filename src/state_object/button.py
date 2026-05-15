@@ -37,7 +37,7 @@ class ButtonText(StateObject):
         self.add_text(state, self.text_args[state][0], new_font, *self.text_args[state][2:])
 
     def set_state(self, state: str, surface_position = (0, 0), surface_size = (0, 0)):
-        super().set_state(state)
+        super().set_base_state(state)
 
         if self.isCentered and state in self.states:
             c = (surface_position[0] + surface_size[0] / 2, surface_position[1] + surface_size[1] / 2)

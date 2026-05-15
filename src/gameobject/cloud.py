@@ -31,7 +31,7 @@ class CloudContainer(GameObjectList):
             self.remove(cloud)
 
 
-class GameClouds(CloudContainer):
+class LoopingCloudAnimation(CloudContainer):
     _cloud_image = ImagePath("cloud")
 
     def __init__(self, count: int, surface_size: tuple) -> None:
@@ -87,7 +87,7 @@ class GameClouds(CloudContainer):
         self._remove_offscreen()
 
 
-class CloudAnimation(CloudContainer):
+class OneShotCloudAnimation(CloudContainer):
     def __init__(self, surface_size: tuple) -> None:
         super().__init__(surface_size)
 

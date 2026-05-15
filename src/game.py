@@ -1,26 +1,24 @@
-import pygame
 from random import choice
 
-from pygame_core.panel_loader_ext import PanelLoaderExt
+import pygame
+
+import panel_factory
+from game_audio import GameAudioMixin
+from game_events import GameEventsMixin
+from game_persistence import GamePersistenceMixin
+from gameobject.cloud import OneShotCloudAnimation, LoopingCloudAnimation
+from gameobject.tile import Tile
+from pygame_core.application import Application
 from pygame_core.asset_manager import AssetManager
 from pygame_core.database import Database
 from pygame_core.image import load_image
-from pygame_core.asset_path import ImagePath, FontPath, SoundPath
-from pygame_core.application import Application
+from pygame_core.panel_loader_ext import PanelLoaderExt
 from pygame_core.panel_manager import PanelManager
 from pygame_core.unity.components.transform import Transform
 from pygame_core.unity.gameobject import GameObject
-
 from sound_manager import SoundManager
-import panel_factory
-
-from state_object.state_object import StateObject
 from state_object.building import Building, Buildings
-from gameobject.cloud import CloudAnimation, GameClouds
-from gameobject.tile import Tile
-from game_persistence import GamePersistenceMixin
-from game_audio import GameAudioMixin
-from game_events import GameEventsMixin
+from state_object.state_object import StateObject
 
 CustomBlue = (72, 218, 233)
 class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
@@ -30,7 +28,6 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
     SIZE = (1920, 1080)
     FPS = 165
     CURSOR_SIZE = (25, 25)
-    DEBUG = False
 
     def __init__(self) -> None:
         super().__init__(Game.SIZE, Game.TITLE, Game.FPS)
@@ -51,26 +48,32 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         self.max_size = 7
         self.max_building_level = 6
         self.starting_money = 1000
-        self.default_music_volume = 1.00
-        self.default_sfx_volume = 1.00
         self.is_selection_mode = False
-        self.info_panel_root = GameObject("info_panel")
+
         self.money = 0
-        self.old_music_volume = self.default_music_volume
-        self.old_sfx_volume = self.default_sfx_volume
+        self.old_music_volume = 1.0
+        self.old_sfx_volume = 1.0
 
-        self.font_path = FontPath("kenvector_future")
-        self.font_path_thin = FontPath("kenvector_future_thin")
-        self._debug_font = pygame.font.Font(str(self.font_path), 12)
+        self.background_music_sound_path = self.assets.sound_path("bg")
+        self.click_sound_path = self.assets.sound_path("click")
+        self.go_back_sound_path = self.assets.sound_path("back")
 
-        self.background_music_sound_path = SoundPath("music", extension="mp3")
-        self.click_sound_path = SoundPath("click")
-        self.go_back_sound_path = SoundPath("back")
-        self.cloud_animation = CloudAnimation(self.size)
+        self.info_panel_root = GameObject("info_panel")
+        self.cloud_animation = OneShotCloudAnimation(self.size)
+
+        self.handlers = {
+            "menu":             self.handle_menu_events,
+            "settings":         self.handle_settings_events,
+            "display_settings": self.handle_display_settings_events,
+            "audio_settings":   self.handle_audio_settings_events,
+            "game_settings":    self.handle_game_settings_events,
+            "developer":        self.handle_developer_events,
+            "game":             self.handle_game_events,
+        }
 
     def run(self) -> None:
         self.mouse.set_cursor_visible(False)
-        self.mouse.set_cursor_image(StateObject((0, 0), Game.CURSOR_SIZE, {"default": ImagePath("cursor")}))
+        self.mouse.set_cursor_image(StateObject((0, 0), Game.CURSOR_SIZE, {"default": self.assets.image_path("cursor")}))
 
         self.load_data()
         self.add_objects()
@@ -88,7 +91,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
 
     def add_objects(self) -> None:
         # Game
-        self.panel_manager.add_object("game", "clouds", GameClouds(self.cloud_count, self.size))
+        self.panel_manager.add_object("game", "clouds", LoopingCloudAnimation(self.cloud_count, self.size))
         self.panel_manager.add_object("game", "tiles", self.tilemap)
         self.panel_manager.add_object("game", "buildings", self.buildings)
 
@@ -96,22 +99,17 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         loader.register("object", panel_factory.make_factory(self.assets), default=True)
         loader.register("text", panel_factory.make_text_factory(self.assets))
         loader.register("button", panel_factory.make_button_factory(self.assets))
-        loader.register("menu", panel_factory.make_menu_factory(self.assets, self.size, self.font_path))
+        loader.register("menu", panel_factory.make_menu_factory(self.assets, self.size))
         loader.load("config/panels.yaml")
-
-        # Developer panel icons
-        panel = self.panel_manager["developer"]
-        panel["github"].states["default"].blit(load_image(self.assets.image_path("github_icon"), (32, 32)), (105, 5))
-        panel["linkedin"].states["default"].blit(load_image(self.assets.image_path("linkedin_icon"), (32, 32)), (105, 5))
 
         panel = self.panel_manager["game"]
         for name in ("info_panel", "level_text", "speed_text", "cooldown_text",
                      "sell_price_text", "close_button", "sell_button", "info_panel_building_image"):
             panel[name].set_parent(self.info_panel_root)
 
-        panel["selection_mode_button"].set_state("off")
-        panel["close_button"].states["default"].blit(load_image(ImagePath("grey_crossWhite", "gui/others")), (9, 9))
-        panel["close_button"].states["hover"].blit(load_image(ImagePath("grey_crossGrey",   "gui/others")), (9, 9))
+        panel["selection_mode_button"].set_base_state("off")
+        panel["close_button"].states["default"].blit(self.assets.get_image("cross_white"), (9, 9))
+        panel["close_button"].states["hover"].blit(self.assets.get_image("cross_grey"), (9, 9))
 
     def update_button_texts(self) -> None:
         panel = self.panel_manager["game"]
@@ -137,17 +135,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         super().handle_event(event)
         self.panel_manager.handle_event(event, self.mouse.position)
 
-        handlers = {
-            "menu":             self.handle_menu_events,
-            "settings":         self.handle_settings_events,
-            "display_settings": self.handle_display_settings_events,
-            "audio_settings":   self.handle_audio_settings_events,
-            "game_settings":    self.handle_game_settings_events,
-            "developer":        self.handle_developer_events,
-            "game":             self.handle_game_events,
-        }
-
-        if handler := handlers.get(self.panel_manager.current_panel):
+        if handler := self.handlers.get(self.panel_manager.current_panel):
             handler(event)
 
     def update(self) -> None:
@@ -165,14 +153,6 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         self.panel_manager.draw(self.window)
         self.cloud_animation.draw(self.window)
         super().draw()
-
-        self.window.blit(self._debug_font.render("v1.0.0", True, "black"), (self.width - 60, self.height - 20))
-        if Game.DEBUG:
-            hovered = self.get_hovered_tile()
-            self.window.blit(self._debug_font.render(f"info_panel: {self.info_panel_root.active}", True, "black"), (10, self.height - 80))
-            self.window.blit(self._debug_font.render(f"selection_mode: {self.is_selection_mode}", True, "black"), (10, self.height - 60))
-            self.window.blit(self._debug_font.render(f"mouse_tile: {(hovered.row_number, hovered.column_number) if hovered else None}", True, "black"), (10, self.height - 40))
-            self.window.blit(self._debug_font.render(f"mouse_pos: {self.mouse.position}", True, "black"), (10, self.height - 20))
 
     def on_exit(self) -> None:
         self.play_sfx(self.go_back_sound_path)

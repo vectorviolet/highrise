@@ -17,7 +17,7 @@ class StateObject(GameObject, MouseInteractive):
                  nine_slice: int = 0):
 
         super().__init__()
-        super().add_component(Rigidbody2D)
+        self.add_component(Rigidbody2D)
         self.rect.size = size
         self.rect.set_parent(parent)
         self.rect.set_position(position)
@@ -27,25 +27,19 @@ class StateObject(GameObject, MouseInteractive):
         self._hovered = False
         self._base_state: str | None = None
         self._nine_slice = nine_slice
-        self.image_paths = image_paths if image_paths is not None else {"default": None}
+        self.image_paths = image_paths if image_paths is not None else {}
         self.visible = visible
         self.state = None
 
-        if size and size[0] and size[1]:
-            self.size = self.width, self.height = size
-            self.add_images(self.image_paths)
-            return
-
-        self.size = [0, 0]
+        has_size = bool(size and size[0] and size[1])
+        self.size = size if has_size else (0, 0)
         self.add_images(self.image_paths)
 
-        if len(self.states) > 0:
-            if "default" in self.states:
-                size = self.states["default"].get_rect().size
-            else:
-                size = list(self.states.values())[0].get_rect().size
+        if not has_size and self.states:
+            surface = self.states["default"] if "default" in self.states else next(iter(self.states.values()))
+            self.size = surface.get_rect().size
 
-            self.size = self.width, self.height = size
+        self.width, self.height = self.size
 
     def add_images(self, image_paths: dict):
         for state, path in image_paths.items():
@@ -68,24 +62,29 @@ class StateObject(GameObject, MouseInteractive):
     def add_surface(self, state: str | None, surface: pygame.Surface):
         self.states[state] = surface
         if not self.state and state == "default":
-            self.set_state("default")
+            self.set_base_state("default")
+
+    def _resolve_state(self, event, mouse_position) -> str | None:
+        if "mouse_click" in self.states and self.is_clicked(event, mouse_position):
+            return "mouse_click"
+        if self._hovered:
+            hover_key = f"{self._base_state}_hover" if self._base_state else None
+            if hover_key and hover_key in self.states:
+                return hover_key
+            if "hover" in self.states:
+                return "hover"
+        if self._base_state and self._base_state in self.states:
+            return self._base_state
+        if "default" in self.states:
+            return "default"
+        return self.state
 
     def handle_event(self, event, mouse_position):
         if not self.active:
             return
-        self._hovered = self.is_mouse_over(mouse_position)
-        if "mouse_click" in self.states and self.is_clicked(event, mouse_position):
-            self.state = "mouse_click"
-        elif self._hovered:
-            hover_key = f"{self._base_state}_hover" if self._base_state else None
-            if hover_key and hover_key in self.states:
-                self.state = hover_key
-            elif "hover" in self.states:
-                self.state = "hover"
-        else:
-            self.state = self._base_state if self._base_state and self._base_state in self.states else (
-                "default" if "default" in self.states else self.state
-            )
+        if event.type == pygame.MOUSEMOTION:
+            self._hovered = self.is_mouse_over(mouse_position)
+        self.state = self._resolve_state(event, mouse_position)
 
     def draw(self, surface) -> None:
         if not self.active:
@@ -106,6 +105,6 @@ class StateObject(GameObject, MouseInteractive):
     def hide(self):
         self.visible = False
 
-    def set_state(self, state: str):
+    def set_base_state(self, state: str):
         self._base_state = state
         self.state = state

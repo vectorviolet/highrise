@@ -1,20 +1,26 @@
 fonts:
-    kenvector_future: {folder: , name: kenvector_future}
+    kenvector_future:      {folder: , name: kenvector_future}
     kenvector_future_thin: {folder: , name: kenvector_future_thin}
 images:
-    profile_image: {folder: gui/others, name: cv}
-    grey_panel: {folder: gui/panels, name: grey}
-    github_icon: {folder: gui/others, name: github}
-    linkedin_icon: {folder: gui/others, name: linkedin}
-    blue_button: {folder: gui/buttons, name: blue3}
-    grey_button: {folder: gui/buttons, name: grey15}
-    green_button: {folder: gui/buttons, name: green}
-    yellow_button: {folder: gui/buttons, name: yellow}
-    blue_circle: {folder: gui/buttons, name: blue_circle}
-    yellow_circle: {folder: gui/buttons, name: yellow_circle}
-    grey8: {folder: gui/buttons, name: grey8}
-    red_button: {folder: gui/buttons, name: red}
-    minus_icon: {folder: gui/others, name: minus}
-    plus_icon:  {folder: gui/others, name: plus}
-    info_icon:  {folder: gui/others, name: info}
-#  bg_music:          {folder: "", name: bg, extension: mp3}
+    cursor:         {folder: gui/others, name: cursor}
+    profile_image:  {folder: gui/others, name: cv}
+    grey_panel:     {folder: gui/panels, name: grey}
+    github_icon:    {folder: gui/others, name: github}
+    linkedin_icon:  {folder: gui/others, name: linkedin}
+    blue_button:    {folder: gui/buttons, name: blue3}
+    grey_button:    {folder: gui/buttons, name: grey15}
+    green_button:   {folder: gui/buttons, name: green}
+    yellow_button:  {folder: gui/buttons, name: yellow}
+    blue_circle:    {folder: gui/buttons, name: blue_circle}
+    yellow_circle:  {folder: gui/buttons, name: yellow_circle}
+    grey8:          {folder: gui/buttons, name: grey8}
+    red_button:     {folder: gui/buttons, name: red}
+    minus_icon:     {folder: gui/others, name: minus}
+    plus_icon:      {folder: gui/others, name: plus}
+    info_icon:      {folder: gui/others, name: info}
+    cross_white:    {folder: gui/others, name: grey_crossWhite}
+    cross_grey:     {folder: gui/others, name: grey_crossGrey}
+sounds:
+    bg:     {folder: "", name: music, extension: mp3}
+    click:  {folder: "", name: click}
+    back:   {folder: "", name: back}
