@@ -1,0 +1,3 @@
+[submodule "src/pygame_core"]
+	path = src/pygame_core
+	url = https://github.com/umutcanekinci/pygame-core.git
