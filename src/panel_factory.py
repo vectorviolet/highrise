@@ -1,20 +1,12 @@
 import pygame
 
 from state_object.button import Button
+from pygame_core.font import load_font
 from pygame_core.unity.components.transform import Transform
 from ui_widgets.text_object import TextObject
 
 from guiobject import GuiObject
 from widget_settings import TextSettings, ButtonSettings, TitleSettings, MenuSettings
-
-
-def load_font(cfg: dict, assets, key1="font", key2="font_size"):
-    font_key = cfg.get(key1, "Arial")
-    font_size = cfg.get(key2, 32)
-    try:
-        return pygame.font.Font(str(assets.font_path(font_key)), font_size)
-    except KeyError:
-        return pygame.font.SysFont(font_key, font_size)
 
 
 def make_factory(assets):

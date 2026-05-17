@@ -1,10 +1,7 @@
-from typing import Union, Any
-import os
-from pygame_core.asset_path import ImagePath
+from typing import Any
+from pygame_core.asset_path import PathLike
 from pygame_core.unity.components.transform import Transform
 from state_object.state_object import StateObject
-
-PathLike = Union[str, ImagePath, os.PathLike]
 
 
 class GuiObject(StateObject):
