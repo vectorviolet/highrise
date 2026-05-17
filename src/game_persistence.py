@@ -1,4 +1,3 @@
-from sound_manager import SoundManager
 from tilemap import Tilemap
 
 
@@ -25,8 +24,8 @@ class GamePersistenceMixin:
 
         age_number, size, money, music_volume, sfx_volume = game_data[0]
         self.player.money = money
-        self.set_music_volume(music_volume)
-        self.set_sfx_volume(sfx_volume)
+        self.audio.set_music_volume(music_volume)
+        self.audio.set_sfx_volume(sfx_volume)
         self.tilemap = Tilemap(size, self.max_size)
         self.buildings.age_number = age_number
 
@@ -38,7 +37,7 @@ class GamePersistenceMixin:
 
     def save_audio_settings(self) -> None:
         self.database.execute_safely("UPDATE game SET music_volume=?, sfx_volume=?",
-                                     params=(SoundManager.get_volume(0), SoundManager.get_volume(1)))
+                                     params=(self.audio.music_volume(), self.audio.sfx_volume()))
 
     def save_game(self) -> None:
         self.database.execute_safely("UPDATE game SET age_number=?, size=?, money=?",

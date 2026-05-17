@@ -3,7 +3,6 @@ from random import choice
 import pygame
 
 import panel_factory
-from game_audio import GameAudioMixin
 from game_events import GameEventsMixin
 from game_persistence import GamePersistenceMixin
 from gameobject.cloud_container import OneShotCloudAnimation, LoopingCloudAnimation
@@ -15,7 +14,7 @@ from pygame_core.database import Database
 from pygame_core.panel_loader_ext import PanelLoaderExt
 from pygame_core.panel_manager import PanelManager
 from pygame_core.unity.components.transform import Transform
-from sound_manager import SoundManager
+from pygame_core.unity.game_audio import GameAudio
 from state_object.building import Building, Buildings
 from state_object.state_object import StateObject
 from tile_selector import TileSelector
@@ -23,7 +22,7 @@ from tile_selector import TileSelector
 CustomBlue = (72, 218, 233)
 
 
-class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
+class Game(GameEventsMixin, GamePersistenceMixin, Application):
     BACKGROUND_COLORS = {"menu": "yellow", "settings": "yellow", "display_settings": "yellow", "audio_settings": "yellow",
                          "game_settings": "yellow", "developer": "yellow", "game": CustomBlue}
     TITLE = "2048 GAME"
@@ -52,6 +51,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         self.max_building_level = 6
         self.starting_money = 1000
 
+        self.audio = GameAudio()
         self.player = Player()
         self.old_music_volume = 1.0
         self.old_sfx_volume = 1.0
@@ -87,9 +87,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
 
         self.open_panel("menu")
         self.info_panel.close()
-        self.set_music_volume(SoundManager.get_volume(0))
-        self.set_sfx_volume(SoundManager.get_volume(1))
-        self.play_music(self.background_music_sound_path)
+        self.audio.set_music_volume(self.audio.music_volume())
+        self.audio.set_sfx_volume(self.audio.sfx_volume())
+        self.audio.play_music(str(self.background_music_sound_path))
 
         super().run()
 
@@ -159,7 +159,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         super().draw()
 
     def on_exit(self) -> None:
-        self.play_sfx(self.go_back_sound_path)
+        self.audio.play_sfx(self.go_back_sound_path)
         panel = self.panel_manager.current_panel
 
         if panel == "menu":
@@ -169,8 +169,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         elif panel in ("display_settings", "game_settings"):
             self.open_panel("settings")
         elif panel == "audio_settings":
-            self.set_music_volume(self.old_music_volume)
-            self.set_sfx_volume(self.old_sfx_volume)
+            self.audio.set_music_volume(self.old_music_volume)
+            self.audio.set_sfx_volume(self.old_sfx_volume)
             self.open_panel("settings")
         elif panel == "developer":
             self.open_panel("menu")
@@ -193,7 +193,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
             building.tile = self.tilemap[building.tile.row_number - 1][building.tile.column_number - 1]
 
         self.update_button_texts()
-        self.play_sfx(self.click_sound_path)
+        self.audio.play_sfx(self.click_sound_path)
 
     def add_building(self, level, row_number, column_number) -> None:
         new_building = Building(level, self.buildings.age_number, self.tilemap[row_number - 1][column_number - 1])
@@ -216,7 +216,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
             row_number, column_number = choice(empty_tiles)
             self.add_building(1, row_number, column_number)
             self.player.spend(self.buildings.get_build_cost())
-            self.play_sfx(self.click_sound_path)
+            self.audio.play_sfx(self.click_sound_path)
 
     def set_age(self, age_number) -> None:
         if age_number <= self.buildings.max_age_number:
@@ -229,7 +229,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
         if not self.player.spend(self.buildings.get_age_cost()):
             return
         self.set_age(self.buildings.age_number + 1)
-        self.play_sfx(self.click_sound_path)
+        self.audio.play_sfx(self.click_sound_path)
 
     def move_buildings(self, rotation: str) -> None:
         if self.tile_selector.is_active:
@@ -245,3 +245,16 @@ class Game(GameEventsMixin, GamePersistenceMixin, GameAudioMixin, Application):
             return
         self.panel_manager.open_panel(tab)
         self.cloud_animation.create_clouds()
+
+    # ── audio-settings UI labels (volume → "%NN" text on a panel widget) ──
+
+    def set_music_label(self, volume: float) -> None:
+        self._set_volume_label(volume, self.panel_manager["audio_settings"]["music_volume_entry"])
+
+    def set_sfx_label(self, volume: float) -> None:
+        self._set_volume_label(volume, self.panel_manager["audio_settings"]["sfx_volume_entry"])
+
+    @staticmethod
+    def _set_volume_label(volume: float, label) -> None:
+        volume = max(0.0, min(1.0, volume))
+        label.text.update_text("default", "%" + str(round(volume * 100)))

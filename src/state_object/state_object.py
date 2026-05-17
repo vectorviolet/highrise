@@ -1,10 +1,9 @@
 import pygame
 from pygame import Vector2
-from pygame_core.image import load_image
+from pygame_core.image import load_image, nine_slice_scale
 from pygame_core.utils import MouseInteractive
 from pygame_core.unity.components.rigidbody2d import Rigidbody2D
 from pygame_core.unity.gameobject import GameObject
-from image import nine_slice_scale
 
 
 class StateObject(GameObject, MouseInteractive):

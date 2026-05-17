@@ -1,8 +1,6 @@
 import pygame
 import webbrowser
 
-from sound_manager import SoundManager
-
 
 class GameEventsMixin:
     def handle_menu_events(self, event: pygame.event.Event) -> None:
@@ -19,7 +17,7 @@ class GameEventsMixin:
             if (button.is_clicked(event, self.mouse.position) or
                     (event.type == pygame.KEYUP and event.key == pygame.K_SPACE) and button.state == "hover"):
                 sound_path = self.go_back_sound_path if label == "EXIT" else self.click_sound_path
-                self.play_sfx(sound_path)
+                self.audio.play_sfx(sound_path)
                 self.open_panel(panel)
 
     def handle_settings_events(self, event: pygame.event.Event) -> None:
@@ -37,60 +35,60 @@ class GameEventsMixin:
                     (event.type == pygame.KEYUP and event.key == pygame.K_SPACE) and button.state == "hover"):
 
                 if label == "audio_settings":
-                    self.old_music_volume = SoundManager.get_volume(0)
-                    self.old_sfx_volume = SoundManager.get_volume(1)
+                    self.old_music_volume = self.audio.music_volume()
+                    self.old_sfx_volume = self.audio.sfx_volume()
 
-                self.play_sfx(self.click_sound_path)
+                self.audio.play_sfx(self.click_sound_path)
                 self.open_panel(panel)
 
     def handle_display_settings_events(self, event: pygame.event.Event) -> None:
         if self.panel_manager["display_settings"]["go_back_button"].is_clicked(event, self.mouse.position):
-            self.play_sfx(self.click_sound_path)
+            self.audio.play_sfx(self.click_sound_path)
             self.open_panel("settings")
 
     def handle_audio_settings_events(self, event: pygame.event.Event) -> None:
         panel = self.panel_manager["audio_settings"]
 
         if panel["music_volume_plus_button"].is_clicked(event, self.mouse.position):
-            new_vol = SoundManager.get_volume(0) + 0.1
-            self.set_music_volume(new_vol); self.set_music_label(new_vol)
+            new_vol = self.audio.music_volume() + 0.1
+            self.audio.set_music_volume(new_vol); self.set_music_label(new_vol)
         elif panel["music_volume_minus_button"].is_clicked(event, self.mouse.position):
-            new_vol = SoundManager.get_volume(0) - 0.1
-            self.set_music_volume(new_vol); self.set_music_label(new_vol)
+            new_vol = self.audio.music_volume() - 0.1
+            self.audio.set_music_volume(new_vol); self.set_music_label(new_vol)
         elif panel["sfx_volume_plus_button"].is_clicked(event, self.mouse.position):
-            new_vol = SoundManager.get_volume(1) + 0.1
-            self.set_sfx_volume(new_vol); self.set_sfx_label(new_vol)
+            new_vol = self.audio.sfx_volume() + 0.1
+            self.audio.set_sfx_volume(new_vol); self.set_sfx_label(new_vol)
         elif panel["sfx_volume_minus_button"].is_clicked(event, self.mouse.position):
-            new_vol = SoundManager.get_volume(1) - 0.1
-            self.set_sfx_volume(new_vol); self.set_sfx_label(new_vol)
+            new_vol = self.audio.sfx_volume() - 0.1
+            self.audio.set_sfx_volume(new_vol); self.set_sfx_label(new_vol)
         elif panel["cancel_button"].is_clicked(event, self.mouse.position):
-            self.set_music_volume(self.old_music_volume); self.set_music_label(self.old_music_volume)
-            self.set_sfx_volume(self.old_sfx_volume);   self.set_sfx_label(self.old_sfx_volume)
-            self.play_sfx(self.go_back_sound_path)
+            self.audio.set_music_volume(self.old_music_volume); self.set_music_label(self.old_music_volume)
+            self.audio.set_sfx_volume(self.old_sfx_volume);   self.set_sfx_label(self.old_sfx_volume)
+            self.audio.play_sfx(self.go_back_sound_path)
             self.open_panel("settings")
         elif panel["save_button"].is_clicked(event, self.mouse.position):
             self.save_audio_settings()
-            self.play_sfx(self.go_back_sound_path)
+            self.audio.play_sfx(self.go_back_sound_path)
             self.open_panel("settings")
 
     def handle_game_settings_events(self, event: pygame.event.Event) -> None:
         panel = self.panel_manager["game_settings"]
         if panel["delete_data_button"].is_clicked(event, self.mouse.position):
             self.delete_data(); self.load_data(); self.add_objects()
-            self.play_sfx(self.click_sound_path); self.open_panel("menu")
+            self.audio.play_sfx(self.click_sound_path); self.open_panel("menu")
         elif panel["go_back_button"].is_clicked(event, self.mouse.position):
-            self.play_sfx(self.click_sound_path); self.open_panel("settings")
+            self.audio.play_sfx(self.click_sound_path); self.open_panel("settings")
 
     def handle_developer_events(self, event: pygame.event.Event) -> None:
         panel = self.panel_manager["developer"]
         if panel["github"].is_clicked(event, self.mouse.position):
-            self.play_sfx(self.click_sound_path)
+            self.audio.play_sfx(self.click_sound_path)
             webbrowser.open("https://www.github.com/umutcanekinci/")
         elif panel["linkedin"].is_clicked(event, self.mouse.position):
-            self.play_sfx(self.click_sound_path)
+            self.audio.play_sfx(self.click_sound_path)
             webbrowser.open("https://www.linkedin.com/in/umutcanekinci/")
         elif panel["go_back_button"].is_clicked(event, self.mouse.position):
-            self.play_sfx(self.click_sound_path); self.open_panel("menu")
+            self.audio.play_sfx(self.click_sound_path); self.open_panel("menu")
 
     def handle_game_events(self, event: pygame.event.Event) -> None:
         panel = self.panel_manager["game"]
@@ -103,25 +101,25 @@ class GameEventsMixin:
                 self.buildings.remove(self.info_panel.building)
                 self.player.earn(self.info_panel.building.sell_price)
                 self.info_panel.close()
-                self.play_sfx(self.go_back_sound_path)
+                self.audio.play_sfx(self.go_back_sound_path)
                 self.update_button_texts()
             elif panel["close_button"].is_clicked(event, self.mouse.position):
                 self.info_panel.close()
-                self.play_sfx(self.go_back_sound_path)
+                self.audio.play_sfx(self.go_back_sound_path)
             return
 
         info_button = panel["selection_mode_button"]
         if info_button.is_clicked(event, self.mouse.position):
             self.tile_selector.is_active = not self.tile_selector.is_active
             info_button.set_base_state("on" if self.tile_selector.is_active else "off")
-            self.play_sfx(self.click_sound_path)
+            self.audio.play_sfx(self.click_sound_path)
 
         if self.tile_selector.is_active and event.type == pygame.MOUSEBUTTONUP:
             building = self.tile_selector.get_selected_building()
             if building:
                 self.info_panel.refresh(building)
                 self.info_panel.open()
-                self.play_sfx(self.click_sound_path)
+                self.audio.play_sfx(self.click_sound_path)
 
         if panel["expand_button"].is_clicked(event, self.mouse.position):
             self.expand()
