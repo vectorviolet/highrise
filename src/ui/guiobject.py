@@ -9,11 +9,12 @@ class GuiObject(StateObject):
                  size=(0, 0),
                  image_path: PathLike = None,
                  nine_slice: int = 0,
-                 hover_image_path: PathLike = None) -> None:
+                 hover_image_path: PathLike = None,
+                 anchor: str = "top-left") -> None:
 
         if not isinstance(size, tuple) or not all(isinstance(v, (int, float)) for v in size):
             size = (0, 0)
-        super().__init__(pos, size, None, parent, True, nine_slice)
+        super().__init__(pos, size, None, parent, True, nine_slice, anchor)
         if image_path is not None:
             self.add_image(None, image_path)
         if hover_image_path is not None:

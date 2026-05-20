@@ -17,8 +17,9 @@ def make_factory(assets):
         hover        = cfg.get("hover")
         extra_states = cfg.get("states", {})
         nine_slice   = cfg.get("nine_slice", 0)
+        anchor       = cfg.get("anchor", "top-left")
 
-        obj = GuiObject(parent, pos, size, asset, nine_slice, hover_image_path=hover)
+        obj = GuiObject(parent, pos, size, asset, nine_slice, hover_image_path=hover, anchor=anchor)
         for state_key, state_cfg in extra_states.items():
             state_hover = assets.image_path(state_cfg["hover"]) if state_cfg.get("hover") else None
             obj.add_state(state_key, assets.image_path(state_cfg["asset"]), state_hover)
@@ -40,6 +41,7 @@ def make_text_factory(assets):
             settings.font,
             settings.color,
             settings.background_color,
+            anchor=cfg.get("anchor", "top-left"),
         )
     return make_text_object
 

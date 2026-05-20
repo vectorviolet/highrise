@@ -19,9 +19,10 @@ class StateObject(HoverableStateObject):
                  image_paths: dict | None = None,
                  parent=None,
                  visible: bool = True,
-                 nine_slice: int = 0):
+                 nine_slice: int = 0,
+                 anchor: str = "top-left"):
         super().__init__(parent=parent, pos=position, size=size,
-                         image_path=None, nine_slice=nine_slice)
+                         image_path=None, nine_slice=nine_slice, anchor=anchor)
 
         self.states = self.images                # alias
         self._hover_states = self._hover_images  # alias

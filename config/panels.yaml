@@ -72,7 +72,8 @@ panels:
         title: "2048 GAME"
         buttons: ["START", "SETTINGS", "DEVELOPER", "EXIT"]
       kenney_logo:
-        position: [1751, 999]
+        anchor: bottom-right
+        position: [-25, -25]
         size: [144, 56]
         asset: kenney_logo
 
