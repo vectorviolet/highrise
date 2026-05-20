@@ -1,7 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\user\\\\PycharmProjects\\\\2048-idle-evolution\\\\src\" -Depth 2 -Recurse -Force | Where-Object { -not $_.FullName.Contains\\('.git'\\) -and -not $_.FullName.Contains\\('.venv'\\) -and -not $_.FullName.Contains\\('build\\\\lib'\\) -and -not $_.FullName.Contains\\('.idea'\\) } | Select-Object @{Name=\"Path\"; Expression={$_.FullName.Replace\\(\"C:\\\\Users\\\\user\\\\PycharmProjects\\\\2048-idle-evolution\\\\\", \"\"\\)}}, @{Name=\"Type\"; Expression={if \\($_.PSIsContainer\\) {\"DIR\"} else {\"FILE\"}}} | Format-Table -AutoSize)"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\user\\\\PycharmProjects\\\\2048-idle-evolution\\\\src\" -Depth 2 -Recurse -Force | Where-Object { -not $_.FullName.Contains\\('.git'\\) -and -not $_.FullName.Contains\\('.venv'\\) -and -not $_.FullName.Contains\\('build\\\\lib'\\) -and -not $_.FullName.Contains\\('.idea'\\) } | Select-Object @{Name=\"Path\"; Expression={$_.FullName.Replace\\(\"C:\\\\Users\\\\user\\\\PycharmProjects\\\\2048-idle-evolution\\\\\", \"\"\\)}}, @{Name=\"Type\"; Expression={if \\($_.PSIsContainer\\) {\"DIR\"} else {\"FILE\"}}} | Format-Table -AutoSize)",
+      "Bash(git -C \"C:\\\\Users\\\\user\\\\PycharmProjects\\\\tower-defense\\\\src\\\\pygame_core\" log -1 --format=\"%H %s\")",
+      "Bash(git -C \"C:\\\\Users\\\\user\\\\PycharmProjects\\\\2048-idle-evolution\\\\src\\\\pygame_core\" log -1 --format=\"%H %s\")",
+      "Bash(git -C \"C:\\\\Users\\\\user\\\\PycharmProjects\\\\2048-idle-evolution\\\\src\\\\pygame_core\" remote -v)",
+      "Bash(git -C \"C:\\\\Users\\\\user\\\\PycharmProjects\\\\2048-idle-evolution\\\\src\\\\pygame_core\" status)",
+      "Bash(findstr /i \"debug math\")",
+      "Bash(git -C \"C:\\\\Users\\\\user\\\\PycharmProjects\\\\tower-defense\" status)",
+      "Bash(git -C \"C:\\\\Users\\\\user\\\\PycharmProjects\\\\2048-idle-evolution\" status)",
+      "Bash(git -C \"C:\\\\Users\\\\user\\\\PycharmProjects\\\\2048-idle-evolution\\\\src\\\\pygame_core\" branch -a)",
+      "Bash(git -C \"C:\\\\Users\\\\user\\\\PycharmProjects\\\\2048-idle-evolution\\\\src\\\\pygame_core\" log --oneline -5)",
+      "Bash(git -C \"C:\\\\Users\\\\user\\\\PycharmProjects\\\\2048-idle-evolution\\\\src\\\\pygame_core\" log -5 --format=\"%s\")",
+      "Bash(git *)"
     ]
   }
 }
