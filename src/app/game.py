@@ -66,7 +66,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.tile_selector = TileSelector(self.tilemap, self.mouse, self.buildings)
         self.cloud_animation = OneShotCloudAnimation(self.size)
         self.splash = SplashScreen(
-            ["assets/images/others/pygame_logo.png"],
+            [self.assets.image_path("pygame_logo")],
             fade_ms=splash["fade_ms"], hold_ms=splash["hold_ms"],
         )
 
