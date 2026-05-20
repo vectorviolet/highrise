@@ -1,6 +1,8 @@
+from pathlib import Path
 from random import choice
 
 import pygame
+import yaml
 
 import panel_factory
 from game_events import GameEventsMixin
@@ -20,19 +22,18 @@ from state_object.building import Building, Buildings
 from state_object.state_object import StateObject
 from tile_selector import TileSelector
 
-CustomBlue = (72, 218, 233)
-
-
 class Game(GameEventsMixin, GamePersistenceMixin, Application):
-    BACKGROUND_COLORS = {"menu": "yellow", "settings": "yellow", "display_settings": "yellow", "audio_settings": "yellow",
-                         "game_settings": "yellow", "developer": "yellow", "game": CustomBlue}
-    TITLE = "2048 GAME"
-    WINDOW_SIZE = (1920, 1080)
-    FPS = 165
-    CURSOR_SIZE = (25, 25)
 
     def __init__(self) -> None:
-        super().__init__(Game.WINDOW_SIZE, Game.TITLE, Game.FPS)
+        self.settings = yaml.safe_load(Path("config/settings.yaml").read_text())
+        window   = self.settings["window"]
+        gameplay = self.settings["gameplay"]
+        splash   = self.settings["splash"]
+        ui       = self.settings["ui"]
+
+        self.cursor_size = tuple(ui["cursor_size"])
+
+        super().__init__(tuple(window["size"]), window["title"], window["fps"])
 
         self.assets = AssetManager()
         self.assets.load_manifest("config/assets.yaml")
@@ -42,15 +43,15 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         self._last_displayed_money = None
         self.tilemap = None
-        self.window_transform = Transform((0, 0), Game.WINDOW_SIZE)
-        self.panel_manager = PanelManager(Game.BACKGROUND_COLORS)
+        self.window_transform = Transform((0, 0), self.size)
+        self.panel_manager = PanelManager(ui["background_colors"])
         self.database = Database("database")
 
         self.buildings = Buildings(self.assets)
-        self.cloud_count = 30
-        self.max_size = 7
-        self.max_building_level = 6
-        self.starting_money = 1000
+        self.cloud_count = gameplay["cloud_count"]
+        self.max_size = gameplay["max_map_size"]
+        self.max_building_level = gameplay["max_building_level"]
+        self.starting_money = gameplay["starting_money"]
 
         self.audio = GameAudio()
         self.player = Player()
@@ -66,7 +67,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.cloud_animation = OneShotCloudAnimation(self.size)
         self.splash = SplashScreen(
             ["assets/images/others/pygame_logo.png"],
-            fade_ms=1500, hold_ms=1000,
+            fade_ms=splash["fade_ms"], hold_ms=splash["hold_ms"],
         )
 
         self.handlers = {
@@ -82,7 +83,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def run(self) -> None:
         self.splash.run(self.window, self.clock, self._fps)
         self.mouse.set_cursor_visible(False)
-        self.mouse.set_cursor_image(StateObject((0, 0), Game.CURSOR_SIZE, {"default": self.assets.image_path("cursor")}))
+        self.mouse.set_cursor_image(StateObject((0, 0), self.cursor_size, {"default": self.assets.image_path("cursor")}))
 
         self.load_data()
         self.tile_selector.tilemap = self.tilemap

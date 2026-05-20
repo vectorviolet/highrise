@@ -1,0 +1,25 @@
+window:
+  size: [1920, 1080]
+  fps: 165
+  title: "2048 GAME"
+
+gameplay:
+  starting_money: 1000
+  max_map_size: 7
+  max_building_level: 6
+  cloud_count: 30
+
+splash:
+  fade_ms: 1500
+  hold_ms: 1000
+
+ui:
+  cursor_size: [25, 25]
+  background_colors:
+    menu: yellow
+    settings: yellow
+    display_settings: yellow
+    audio_settings: yellow
+    game_settings: yellow
+    developer: yellow
+    game: [72, 218, 233]
