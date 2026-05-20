@@ -1,5 +1,5 @@
-from gameobject.tile import Tile
-from state_object.building import Building, Buildings
+from gameplay.buildings.building import Building, Buildings
+from gameplay.tiles.tile import Tile
 
 
 class TileSelector:

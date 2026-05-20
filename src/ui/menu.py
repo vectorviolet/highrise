@@ -3,8 +3,8 @@ import pygame
 from pygame_core.asset_manager import AssetManager
 from unity.sound_manager import SoundManager
 from pygame_core.asset_path import SoundPath
-from state_object.state_object import StateObject
-from state_object.button import Button
+from ui.button import Button
+from ui.state_object import StateObject
 from unity.gameobject import GameObject
 
 

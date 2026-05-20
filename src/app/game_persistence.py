@@ -1,4 +1,4 @@
-from tilemap import Tilemap
+from gameplay.tilemap import Tilemap
 
 
 class GamePersistenceMixin:

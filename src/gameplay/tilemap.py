@@ -1,6 +1,6 @@
 from pygame import Surface
 
-from gameobject.tile import Tile
+from gameplay.tiles.tile import Tile
 
 
 class Tilemap(list[list[Tile]]):

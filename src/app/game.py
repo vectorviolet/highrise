@@ -4,12 +4,12 @@ from random import choice
 import pygame
 import yaml
 
-import panel_factory
-from game_events import GameEventsMixin
-from game_persistence import GamePersistenceMixin
-from gameobject.cloud_container import OneShotCloudAnimation, LoopingCloudAnimation
-from info_panel import InfoPanel
-from player import Player
+from app.game_events import GameEventsMixin
+from app.game_persistence import GamePersistenceMixin
+from domain.player import Player
+from gameplay.buildings.building import Building, Buildings
+from gameplay.clouds.cloud_container import OneShotCloudAnimation, LoopingCloudAnimation
+from gameplay.tile_selector import TileSelector
 from pygame_core.application import Application
 from pygame_core.asset_manager import AssetManager
 from pygame_core.database import Database
@@ -18,9 +18,9 @@ from pygame_core.panel_manager import PanelManager
 from pygame_core.splash_screen import SplashScreen
 from pygame_core.unity.components.transform import Transform
 from pygame_core.unity.game_audio import GameAudio
-from state_object.building import Building, Buildings
-from state_object.state_object import StateObject
-from tile_selector import TileSelector
+from ui import panel_factory
+from ui.info_panel import InfoPanel
+from ui.state_object import StateObject
 
 class Game(GameEventsMixin, GamePersistenceMixin, Application):
 

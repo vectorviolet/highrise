@@ -1,6 +1,6 @@
 from pygame_core.image import load_image
 from pygame_core.unity.gameobject import GameObject
-from state_object.building import Building
+from gameplay.buildings.building import Building
 
 
 class InfoPanel:

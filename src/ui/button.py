@@ -1,5 +1,5 @@
 import pygame
-from state_object.state_object import StateObject
+from ui.state_object import StateObject
 
 
 class ButtonText(StateObject):

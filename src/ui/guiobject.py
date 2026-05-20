@@ -1,6 +1,6 @@
 from pygame_core.asset_path import PathLike
 from pygame_core.unity.components.transform import Transform
-from state_object.state_object import StateObject
+from ui.state_object import StateObject
 
 
 class GuiObject(StateObject):

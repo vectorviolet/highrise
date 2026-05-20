@@ -1,12 +1,12 @@
 import pygame
 
-from state_object.button import Button
 from pygame_core.font import load_font
+from pygame_core.ui_widgets.text_object import TextObject
 from pygame_core.unity.components.transform import Transform
-from ui_widgets.text_object import TextObject
 
-from guiobject import GuiObject
-from widget_settings import TextSettings, ButtonSettings, TitleSettings, MenuSettings
+from ui.button import Button
+from ui.guiobject import GuiObject
+from ui.widget_settings import TextSettings, ButtonSettings, TitleSettings, MenuSettings
 
 
 def make_factory(assets):
@@ -69,8 +69,8 @@ def make_button_factory(assets):
 
 
 def make_menu_factory(assets, screen_size):
-    from menu import Menu
-    from menu_builder import MenuBuilder
+    from ui.menu import Menu
+    from ui.menu_builder import MenuBuilder
 
     def make_menu(cfg: dict, parent) -> Menu:
         settings = MenuSettings(

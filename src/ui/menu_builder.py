@@ -1,9 +1,9 @@
 import pygame
-from menu import Menu
 from pygame_core.asset_manager import AssetManager
-from state_object.button import Button
-from state_object.state_object import StateObject
-from widget_settings import MenuSettings
+from ui.button import Button
+from ui.menu import Menu
+from ui.state_object import StateObject
+from ui.widget_settings import MenuSettings
 
 
 class MenuBuilder:
