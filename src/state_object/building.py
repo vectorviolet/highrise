@@ -35,7 +35,7 @@ class Building(StateObject):
         self.__set_size()
         self.set_position_from_tile(self.tile)
         super().__init__(self.unselected_position, self.size, {"default" : self.get_image_path()})
-        self.get_component(Rigidbody2D).set_velocity((0, 0))
+        self.add_component(Rigidbody2D).set_velocity((0, 0))
         self.on_payout: Callable[[int], None] | None = None
         self.invoke_repeating(self._payout, delay=self.cooldown, interval=self.cooldown)
 
