@@ -24,6 +24,8 @@ images:
     plus_icon:      {folder: gui/others, name: plus}
     info_icon:      {folder: gui/others, name: info}
 
+    kenney_logo:    {folder: others, name: kenney_logo}
+
 sounds:
     bg:             {folder: "", name: music, extension: mp3}
     click:          {folder: "", name: click-a}

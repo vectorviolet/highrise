@@ -13,6 +13,7 @@ from pygame_core.asset_manager import AssetManager
 from pygame_core.database import Database
 from pygame_core.panel_loader_ext import PanelLoaderExt
 from pygame_core.panel_manager import PanelManager
+from pygame_core.splash_screen import SplashScreen
 from pygame_core.unity.components.transform import Transform
 from pygame_core.unity.game_audio import GameAudio
 from state_object.building import Building, Buildings
@@ -63,6 +64,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.info_panel = InfoPanel(self.panel_manager)
         self.tile_selector = TileSelector(self.tilemap, self.mouse, self.buildings)
         self.cloud_animation = OneShotCloudAnimation(self.size)
+        self.splash = SplashScreen(
+            ["assets/images/others/pygame_logo.png"],
+            fade_ms=1500, hold_ms=1000,
+        )
 
         self.handlers = {
             "menu":             self.handle_menu_events,
@@ -75,6 +80,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         }
 
     def run(self) -> None:
+        self.splash.run(self.window, self.clock, self._fps)
         self.mouse.set_cursor_visible(False)
         self.mouse.set_cursor_image(StateObject((0, 0), Game.CURSOR_SIZE, {"default": self.assets.image_path("cursor")}))
 
