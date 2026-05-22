@@ -53,6 +53,15 @@ class MenuController:
         focused_i = self._focused_index()
         if focused_i is not None and 0 <= focused_i + delta < len(self.buttons):
             self._swap_focus(focused_i, focused_i + delta, sound)
+            self._clear_stale_hover()
+
+    def _clear_stale_hover(self) -> None:
+        """When keyboard takes focus, drop any mouse-hover still set on
+        non-focused buttons — they un-freeze the next time MOUSEMOTION fires."""
+        for b in self.buttons:
+            if not b.focused and b._hovered:
+                b._hovered = False
+                b._renderer.set_image(b._active_surface)
 
     def handle_event(self, event, mouse_position) -> None:
         if event.type == pygame.MOUSEMOTION:
