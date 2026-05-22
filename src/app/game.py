@@ -20,8 +20,8 @@ from pygame_core.ecs.components.transform import Transform
 from pygame_core.ecs.game_audio import GameAudio
 from pygame_core.ecs.state_object import StateObject
 from pygame_core import panel_factory
+from pygame_core.ui_widgets.menu_controller import MenuController
 from ui.info_panel import InfoPanel
-from ui.menu_controller import MenuController
 
 class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
