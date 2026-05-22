@@ -42,7 +42,6 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         if missing:
             raise RuntimeError("Missing assets:\n" + "\n".join(missing))
 
-        self._last_displayed_money = None
         self.tilemap = None
         self.window_transform = Transform((0, 0), self.size)
         self.panel_manager = PanelManager(ui["background_colors"])
@@ -136,6 +135,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             "settings": MenuController(settings_buttons, self.audio, switch_up, switch_down),
         }
 
+        money_text = self.panel_manager["game"]["money_text"]
+        self.player.add_money_listener(lambda m: money_text.set_text(f"{m}$"))
+        money_text.set_text(f"{self.player.money}$")
+
     def update_button_texts(self) -> None:
         panel = self.panel_manager["game"]
 
@@ -170,9 +173,6 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             if building.on_payout is None:
                 building.on_payout = self._on_building_payout
         self.cloud_animation.update()
-        if self.panel_manager.current_panel == "game" and self.player.money != self._last_displayed_money:
-            self._last_displayed_money = self.player.money
-            self.panel_manager["game"]["money_text"].set_text(f"{self.player.money}$")
 
     def draw(self) -> None:
         self.panel_manager.draw(self.window)
