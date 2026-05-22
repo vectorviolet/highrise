@@ -151,8 +151,8 @@ panels:
         asset: green_button
         hover: yellow_button
         states:
-          on:  { asset: green_button, hover: yellow_button }
-          off: { asset: red_button,   hover: yellow_button }
+          "on":  { asset: green_button, hover: yellow_button }
+          "off": { asset: red_button,   hover: yellow_button }
       selection_mode_button_image:
         position: [345, 990]
         size: [50, 50]
