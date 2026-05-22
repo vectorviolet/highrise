@@ -27,8 +27,6 @@ object_templates:
     font_size: 30
     color: [251, 254, 255]
     position: [CENTER, CENTER]
-    states:
-      hover: ""    # overridden per-button when needed
   title_btn:
     asset: blue_button
   title_btn_text:

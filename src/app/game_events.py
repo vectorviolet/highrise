@@ -5,7 +5,7 @@ import webbrowser
 def _activate_on_click_or_space(button, event, mouse_position) -> bool:
     if button.is_clicked(event, mouse_position):
         return True
-    if event.type == pygame.KEYUP and event.key == pygame.K_SPACE and button.state == "hover":
+    if event.type == pygame.KEYUP and event.key == pygame.K_SPACE and getattr(button, "_focused", False):
         return True
     return False
 

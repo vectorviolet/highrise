@@ -28,6 +28,7 @@ class StateObject(HoverableStateObject):
         self._hover_states = self._hover_images  # alias
 
         self._base_state: str | None = None
+        self._focused: bool = False
         self.visible = visible
         self.state: str | None = None
         self.image_paths = image_paths if image_paths is not None else {}
@@ -98,7 +99,7 @@ class StateObject(HoverableStateObject):
             return
         if not (self.visible and self.state in self.states):
             return
-        if self._hovered and self.state in self._hover_states:
+        if (self._hovered or self._focused) and self.state in self._hover_states:
             surface.blit(self._hover_states[self.state], self.rect)
         else:
             surface.blit(self.states[self.state], self.rect)
