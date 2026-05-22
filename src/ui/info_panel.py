@@ -18,6 +18,7 @@ class InfoPanel:
         panel["sell_price_text"].set_text("Sell Price: " + str(building.sell_price))
         panel["sell_button_text"].set_text(str(building.sell_price) + "$", state="hover")
         panel["info_panel_building_image"].add_surface("default", load_image(building.get_image_path(), (65, 89)))
+        panel["info_panel_building_image"].set_state("default")
 
     def open(self) -> None:
         self.root.active = True

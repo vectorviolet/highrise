@@ -21,10 +21,10 @@ class MenuController:
             self._focus(self.buttons[0])
 
     def _focus(self, button) -> None:
-        button._focused = True
+        button.focused = True
 
     def _unfocus(self, button) -> None:
-        button._focused = False
+        button.focused = False
 
     def _swap_focus(self, from_i: int, to_i: int, sound_path) -> None:
         self.audio.play_sfx(sound_path)
@@ -32,11 +32,11 @@ class MenuController:
         self._focus(self.buttons[to_i])
 
     def _focused_index(self) -> int | None:
-        return next((i for i, b in enumerate(self.buttons) if b._focused), None)
+        return next((i for i, b in enumerate(self.buttons) if b.focused), None)
 
     def _handle_mouse_motion(self, mouse_position) -> None:
         target_i = next((i for i, b in enumerate(self.buttons)
-                         if b.is_mouse_over(mouse_position) and not b._focused), None)
+                         if b.is_mouse_over(mouse_position) and not b.focused), None)
         focused_i = self._focused_index()
         if target_i is None or focused_i is None:
             return
@@ -62,4 +62,4 @@ class MenuController:
 
     @property
     def focused(self):
-        return next((b for b in self.buttons if b._focused), None)
+        return next((b for b in self.buttons if b.focused), None)

@@ -1,4 +1,7 @@
 object_templates:
+  menu_panel:
+    asset: grey_panel
+    nine_slice: 10
   minus_icon_template:
     asset: minus_icon
     size: [16, 16]
@@ -21,6 +24,7 @@ object_templates:
   menu_btn:
     asset: blue_button
     hover: yellow_button
+    nine_slice: 20
   menu_btn_text:
     type: text
     font: kenvector_future
@@ -83,9 +87,9 @@ panels:
         color: white
         position: [CENTER, CENTER]
       menu_panel:
+        extends: menu_panel
         position: [740, 380]
         size: [440, 380]
-        asset: grey_panel
       menu_buttons:
         parent: menu_panel
         layout: { direction: vertical, start: [20, 30], spacing: 80 }
@@ -107,7 +111,7 @@ panels:
   settings:
     objects:
       settings_title:
-        position: [740, 260]
+        position: [740, 320]
         size: [440, 70]
         asset: blue_button
       settings_title_text:
@@ -119,9 +123,9 @@ panels:
         color: white
         position: [CENTER, CENTER]
       settings_panel:
-        position: [740, 320]
-        size: [440, 500]
-        asset: grey_panel
+        extends: menu_panel
+        position: [740, 380]
+        size: [440, 370]
       settings_buttons:
         parent: settings_panel
         layout: { direction: vertical, start: [20, 30], spacing: 80 }
@@ -140,7 +144,7 @@ panels:
       game_panel:
         position: [0, 965]
         size: [1920, 100]
-        asset: grey_panel
+        extends: menu_panel
       selection_mode_button:
         position: [340, 985]
         size: [60, 60]
@@ -201,7 +205,7 @@ panels:
       info_panel:
         position: [CENTER, CENTER]
         size: [250, 400]
-        asset: grey_panel
+        extends: menu_panel
       info_panel_building_image:
         position: [855, 360]
         size: [65, 89]
@@ -247,7 +251,7 @@ panels:
       display_settings_panel:
         position: [740, 470]
         size: [440, 200]
-        asset: grey_panel
+        extends: menu_panel
       coming_soon_text:
         type: text
         font: kenvector_future
@@ -279,8 +283,7 @@ panels:
       audio_settings_panel:
         position: [740, 320]
         size: [440, 500]
-        asset: grey_panel
-
+        extends: menu_panel
       music_volume_text:
         extends: settings_text
         position: [CENTER, 380]
@@ -372,7 +375,7 @@ panels:
       game_settings_panel:
         position: [740, 470]
         size: [440, 200]
-        asset: grey_panel
+        extends: menu_panel
       delete_data_button:
         position: [810, 500]
         size: [315, 60]
@@ -398,7 +401,7 @@ panels:
       developer_panel:
         position: [CENTER, CENTER]
         size: [300, 380]
-        asset: grey_panel
+        extends: menu_panel
       profile_image:
         position: [CENTER, 370]
         size: [100, 100]

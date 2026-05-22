@@ -6,7 +6,7 @@ from ecs.sound_manager import SoundManager
 from pygame import Vector2
 from gameplay.tiles.tile import Tile
 from pygame_core.asset_path import ImagePath, SoundPath
-from ui.state_object import StateObject
+from pygame_core.ecs.state_object import StateObject
 from pygame_core.ecs.components.rigidbody2d import Rigidbody2D
 
 ages = ["wood", "rock", "sand", "stone"]
@@ -34,7 +34,7 @@ class Building(StateObject):
         self.sell_price = self.level*(self.age_number+1)*70
         self.__set_size()
         self.set_position_from_tile(self.tile)
-        super().__init__(self.unselected_position, self.size, {"default" : self.get_image_path()})
+        super().__init__(pos=self.unselected_position, size=self.size, image_path=self.get_image_path())
         self.add_component(Rigidbody2D).set_velocity((0, 0))
         self.on_payout: Callable[[int], None] | None = None
         self.invoke_repeating(self._payout, delay=self.cooldown, interval=self.cooldown)

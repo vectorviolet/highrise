@@ -18,10 +18,10 @@ from pygame_core.panel_manager import PanelManager
 from pygame_core.splash_screen import SplashScreen
 from pygame_core.ecs.components.transform import Transform
 from pygame_core.ecs.game_audio import GameAudio
-from ui import panel_factory
+from pygame_core.ecs.state_object import StateObject
+from pygame_core import panel_factory
 from ui.info_panel import InfoPanel
 from ui.menu_controller import MenuController
-from ui.state_object import StateObject
 
 class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
@@ -85,7 +85,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def run(self) -> None:
         self.splash.run(self.window, self.clock, self._fps)
         self.mouse.set_cursor_visible(False)
-        self.mouse.set_cursor_image(StateObject((0, 0), self.cursor_size, {"default": self.assets.image_path("cursor")}))
+        self.mouse.set_cursor_image(StateObject(pos=(0, 0), size=self.cursor_size, image_path=self.assets.image_path("cursor")))
 
         self.load_data()
         self.tile_selector.tilemap = self.tilemap
@@ -111,6 +111,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         loader = PanelLoaderExt(self.panel_manager, self.window_transform, self.assets)
         loader.register("object", panel_factory.make_factory(self.assets), default=True)
         loader.register("text", panel_factory.make_text_factory(self.assets))
+        loader.register("animated", panel_factory.make_animated_factory(self.assets))
         loader.load("config/panels.yaml")
 
         panel = self.panel_manager["game"]
