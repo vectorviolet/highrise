@@ -1,5 +1,5 @@
 """2048's StateObject — preserves the dict-init / auto-resolve / public-state API
-on top of the shared pygame_core.unity.state_object.HoverableStateObject base.
+on top of the shared pygame_core.ecs.state_object.HoverableStateObject base.
 
 Aliases the base's `images`/`_hover_images` dicts as `states`/`_hover_states` so
 existing Button/ButtonText/GuiObject code keeps working. Overrides handle_event
@@ -9,7 +9,7 @@ SpriteRenderer2D component is unused for this subclass.
 """
 import pygame
 from pygame_core.image import load_image
-from pygame_core.unity.state_object import HoverableStateObject
+from pygame_core.ecs.state_object import HoverableStateObject
 
 
 class StateObject(HoverableStateObject):
@@ -105,9 +105,3 @@ class StateObject(HoverableStateObject):
 
     def on_disable(self):
         self._hovered = False
-
-    def show(self):
-        self.visible = True
-
-    def hide(self):
-        self.visible = False

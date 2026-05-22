@@ -2,10 +2,10 @@ import random
 
 from pygame_core.image import load_image
 from pygame_core.asset_path import ImagePath, AssetPath
-from pygame_core.unity.game_object_list import GameObjectList
-from pygame_core.unity.gameobject import GameObject
-from pygame_core.unity.components.rigidbody2d import Rigidbody2D
-from pygame_core.unity.components.sprite_renderer2d import SpriteRenderer2D
+from pygame_core.ecs.game_object_list import GameObjectList
+from pygame_core.ecs.game_object import GameObject
+from pygame_core.ecs.components.rigidbody2d import Rigidbody2D
+from pygame_core.ecs.components.sprite_renderer2d import SpriteRenderer2D
 
 
 class Cloud(GameObject):

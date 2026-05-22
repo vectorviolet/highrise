@@ -1,7 +1,7 @@
 from gameplay.clouds.cloud import Cloud
 from pygame_core.asset_path import ImagePath
-from unity.components.rigidbody2d import Rigidbody2D
-from unity.game_object_list import GameObjectList
+from ecs.components.rigidbody2d import Rigidbody2D
+from ecs.game_object_list import GameObjectList
 
 
 class CloudContainer(GameObjectList):

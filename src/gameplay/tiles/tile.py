@@ -5,8 +5,8 @@ from pygame.draw import polygon
 from pygame_core.asset_path import ImagePath
 from pygame_core.image import load_image
 
-from unity.components.sprite_renderer2d import SpriteRenderer2D
-from unity.gameobject import GameObject
+from ecs.components.sprite_renderer2d import SpriteRenderer2D
+from ecs.game_object import GameObject
 
 
 class Tile(GameObject):

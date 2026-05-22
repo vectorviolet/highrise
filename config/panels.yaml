@@ -16,61 +16,90 @@ object_templates:
     font_size: 15
     color: Black
     text: ""
-  volume_entry:
-    type: button
-    size: [150, 35]
-    text: "%100"
-    font_size: 25
-    font: kenvector_future_thin
-    text_color: Gray
-    paths:
-      default: grey8
-  volume_button:
-    type: button
-    size: [36, 36]
-    paths:
-      default: blue_circle
-      hover: yellow_circle
-  go_back_template:
-    type: button
-    text: "GO BACK"
-    selected_text: ""
-    font_size: 28
-    text_color: White
-    selected_text_color: [128, 128, 128]
-    paths:
-      default: red_button
-      hover: yellow_button
+
+  # ── Button image templates (image-only — pair with a child text object) ──
+  menu_btn:
+    asset: blue_button
+    hover: yellow_button
+  menu_btn_text:
+    type: text
     font: kenvector_future
-  bottom_panel_button:
-    type: button
-    size: [200, 60]
-    selected_text: ""
+    font_size: 30
+    color: [251, 254, 255]
+    position: [CENTER, CENTER]
+    states:
+      hover: ""    # overridden per-button when needed
+  title_btn:
+    asset: blue_button
+  title_btn_text:
+    type: text
+    font: kenvector_future
+    font_size: 30
+    color: white
+    position: [CENTER, CENTER]
+  bottom_panel_btn_text:
+    type: text
+    font: kenvector_future
     font_size: 27
-    text_color: White
-    selected_text_color: [128, 128, 128]
+    color: White
+    position: [CENTER, CENTER]
+  go_back_btn:
+    size: [315, 60]
+    asset: red_button
+    hover: yellow_button
+  go_back_btn_text:
+    type: text
+    text: "GO BACK"
     font: kenvector_future
-  menu_template:
-    title_image: blue_button
-    title_text_size: 30
-    title_text_color: white
-    title_font: kenvector_future
-    panel_image: grey_panel
-    button_size: [400, 60]
-    button_image: blue_button
-    button_hover_image: yellow_button
-    button_text_size: 30
-    button_text_color: [251, 254, 255]
-    button_selected_text_color: [128, 128, 128]
-    button_font: kenvector_future
+    font_size: 28
+    color: White
+    position: [CENTER, CENTER]
+  volume_entry:
+    size: [150, 35]
+    asset: grey8
+  volume_entry_text:
+    type: text
+    font: kenvector_future_thin
+    font_size: 25
+    color: Gray
+    text: "%100"
+    position: [CENTER, CENTER]
+  volume_button:
+    size: [36, 36]
+    asset: blue_circle
+    hover: yellow_circle
+
 panels:
   menu:
     objects:
-      menu:
-        extends: menu_template
-        type: menu
-        title: "2048 GAME"
-        buttons: ["START", "SETTINGS", "DEVELOPER", "EXIT"]
+      menu_title:
+        position: [740, 320]
+        size: [440, 70]
+        asset: blue_button
+      menu_title_text:
+        parent: menu_title
+        type: text
+        text: "2048 GAME"
+        font: kenvector_future
+        font_size: 30
+        color: white
+        position: [CENTER, CENTER]
+      menu_panel:
+        position: [740, 380]
+        size: [440, 380]
+        asset: grey_panel
+      menu_buttons:
+        parent: menu_panel
+        layout: { direction: vertical, start: [20, 30], spacing: 80 }
+        objects:
+          start_button:     { extends: menu_btn, size: [400, 60] }
+          settings_button:  { extends: menu_btn, size: [400, 60] }
+          developer_button: { extends: menu_btn, size: [400, 60] }
+          exit_button:      { extends: menu_btn, size: [400, 60] }
+      start_button_text:     { extends: menu_btn_text, parent: start_button,     text: "START" }
+      settings_button_text:  { extends: menu_btn_text, parent: settings_button,  text: "SETTINGS" }
+      developer_button_text: { extends: menu_btn_text, parent: developer_button, text: "DEVELOPER" }
+      exit_button_text:      { extends: menu_btn_text, parent: exit_button,      text: "EXIT" }
       kenney_logo:
         anchor: bottom-right
         position: [-25, -25]
@@ -79,62 +108,98 @@ panels:
 
   settings:
     objects:
-      menu:
-        extends: menu_template
-        type: menu
-        title: "SETTINGS"
-        buttons: ["display_settings", "audio_settings", "game_settings", "GO BACK"]
+      settings_title:
+        position: [740, 260]
+        size: [440, 70]
+        asset: blue_button
+      settings_title_text:
+        parent: settings_title
+        type: text
+        text: "SETTINGS"
+        font: kenvector_future
+        font_size: 30
+        color: white
+        position: [CENTER, CENTER]
+      settings_panel:
+        position: [740, 320]
+        size: [440, 500]
+        asset: grey_panel
+      settings_buttons:
+        parent: settings_panel
+        layout: { direction: vertical, start: [20, 30], spacing: 80 }
+        objects:
+          display_settings_button: { extends: menu_btn, size: [400, 60] }
+          audio_settings_button:   { extends: menu_btn, size: [400, 60] }
+          game_settings_button:    { extends: menu_btn, size: [400, 60] }
+          settings_back_button:    { extends: menu_btn, size: [400, 60] }
+      display_settings_button_text: { extends: menu_btn_text, parent: display_settings_button, text: "DISPLAY" }
+      audio_settings_button_text:   { extends: menu_btn_text, parent: audio_settings_button,   text: "AUDIO" }
+      game_settings_button_text:    { extends: menu_btn_text, parent: game_settings_button,    text: "GAME" }
+      settings_back_button_text:    { extends: menu_btn_text, parent: settings_back_button,    text: "GO BACK" }
 
   game:
     objects:
-      # Bottom panel
       game_panel:
-        position: [ 0, 965 ]
-        size: [ 1920, 100 ]
+        position: [0, 965]
+        size: [1920, 100]
         asset: grey_panel
       selection_mode_button:
-        type: button
-        position: [ 340, 985 ]
-        size: [ 60, 60 ]
-        paths:
-          on: green_button
-          off: red_button
-          default: green_button
-          hover: yellow_button
-      expand_button:
-        extends: bottom_panel_button
-        position: [560, 985]
-        text: "EXPAND"
-        paths:
-          default: blue_button
-          hover: yellow_button
+        position: [340, 985]
+        size: [60, 60]
+        asset: green_button
+        hover: yellow_button
+        states:
+          on:  { asset: green_button, hover: yellow_button }
+          off: { asset: red_button,   hover: yellow_button }
+      selection_mode_button_image:
+        position: [345, 990]
+        size: [50, 50]
+        asset: info_icon
 
+      expand_button:
+        position: [560, 985]
+        size: [200, 60]
+        asset: blue_button
+        hover: yellow_button
+      expand_button_text:
+        extends: bottom_panel_btn_text
+        parent: expand_button
+        text: "EXPAND"
+        states:
+          hover: "0$"
       build_button:
-        extends: bottom_panel_button
         position: [860, 985]
+        size: [200, 60]
+        asset: green_button
+        hover: yellow_button
+      build_button_text:
+        extends: bottom_panel_btn_text
+        parent: build_button
         text: "BUILD"
-        paths:
-          default: green_button
-          hover: yellow_button
+        states:
+          hover: "0$"
       next_age_button:
-        extends: bottom_panel_button
         position: [1160, 985]
+        size: [200, 60]
+        asset: green_button
+        hover: yellow_button
+      next_age_button_text:
+        extends: bottom_panel_btn_text
+        parent: next_age_button
         text: "NEXT AGE"
-        paths:
-          default: green_button
-          hover: yellow_button
+        states:
+          hover: "0$"
+
       money_text:
         type: text
         font: freesansbold
         font_size: 35
         color: Green
         background_color: Black
-        position: [ 1450, 995 ]
+        padding: [6, 16]
+        position: [1450, 995]
         text: ""
-      selection_mode_button_image:
-        position: [345, 990]
-        size: [50, 50]
-        asset: info_icon
+
       info_panel_building_image:
         position: [855, 360]
         size: [65, 89]
@@ -143,66 +208,81 @@ panels:
         size: [250, 400]
         asset: grey_panel
       sell_button:
-        type: button
         position: [CENTER, 660]
         size: [210, 50]
-        text: "SELL"
-        selected_text: ""
-        font_size: 28
-        text_color: White
-        selected_text_color: [128, 128, 128]
-        paths:
-          default: green_button
-          hover: red_button
+        asset: green_button
+        hover: red_button
+      sell_button_text:
+        type: text
         font: kenvector_future
+        font_size: 28
+        color: White
+        position: [CENTER, CENTER]
+        parent: sell_button
+        text: "SELL"
+        states:
+          hover: "0$"
       close_button:
-        type: button
         position: [1070, 335]
         size: [38, 38]
-        paths:
-          default: red_button
-          hover: yellow_button
-        font: kenvector_future
-      level_text:
-        extends: panel_text
-        position: [930, 370]
-      speed_text:
-        extends: panel_text
-        position: [930, 390]
-      cooldown_text:
-        extends: panel_text
-        position: [930, 410]
-      sell_price_text:
-        extends: panel_text
-        position: [930, 430]
+        asset: red_button
+        hover: yellow_button
+      level_text:        { extends: panel_text, position: [930, 370] }
+      speed_text:        { extends: panel_text, position: [930, 390] }
+      cooldown_text:     { extends: panel_text, position: [930, 410] }
+      sell_price_text:   { extends: panel_text, position: [930, 430] }
 
   display_settings:
     objects:
-      menu:
-        extends: menu_template
-        type: menu
-        title: "display_settings"
-        panel_height: 200
+      display_settings_title:
+        position: [740, 410]
+        size: [440, 70]
+        asset: blue_button
+      display_settings_title_text:
+        parent: display_settings_title
+        type: text
+        text: "DISPLAY SETTINGS"
+        font: kenvector_future
+        font_size: 30
+        color: white
+        position: [CENTER, CENTER]
+      display_settings_panel:
+        position: [740, 470]
+        size: [440, 200]
+        asset: grey_panel
       coming_soon_text:
         type: text
         font: kenvector_future
         font_size: 18
         color: Green
-        position: [ CENTER, 500 ]
+        position: [CENTER, 500]
         text: "THIS PAGE WILL COMING SOON..."
-      go_back_button:
-        extends: go_back_template
+      display_back_button:
+        extends: go_back_btn
         position: [810, 580]
-        size: [315, 60]
-        font_size: 28
+      display_back_button_text:
+        extends: go_back_btn_text
+        parent: display_back_button
 
   audio_settings:
     objects:
-      menu:
-        extends: menu_template
-        type: menu
-        title: "audio_settings"
-        panel_height: 500
+      audio_settings_title:
+        position: [740, 260]
+        size: [440, 70]
+        asset: blue_button
+      audio_settings_title_text:
+        parent: audio_settings_title
+        type: text
+        text: "AUDIO SETTINGS"
+        font: kenvector_future
+        font_size: 30
+        color: white
+        position: [CENTER, CENTER]
+      audio_settings_panel:
+        position: [740, 320]
+        size: [440, 500]
+        asset: grey_panel
+
       music_volume_text:
         extends: settings_text
         position: [CENTER, 380]
@@ -211,6 +291,7 @@ panels:
         extends: settings_text
         position: [CENTER, 550]
         text: "SFX VOLUME"
+
       music_volume_minus_button:
         extends: volume_button
         position: [840, 430]
@@ -220,12 +301,16 @@ panels:
       music_volume_entry:
         extends: volume_entry
         position: [885, 430]
+      music_volume_entry_text:
+        extends: volume_entry_text
+        parent: music_volume_entry
       music_volume_minus_icon:
         extends: minus_icon_template
-        position: [ 850, 440 ]
+        position: [850, 440]
       music_volume_plus_icon:
         extends: plus_icon_template
-        position: [ 1064, 440 ]
+        position: [1064, 440]
+
       sfx_volume_minus_button:
         extends: volume_button
         position: [840, 600]
@@ -235,67 +320,84 @@ panels:
       sfx_volume_entry:
         extends: volume_entry
         position: [885, 600]
+      sfx_volume_entry_text:
+        extends: volume_entry_text
+        parent: sfx_volume_entry
       sfx_volume_minus_icon:
         extends: minus_icon_template
         position: [850, 610]
       sfx_volume_plus_icon:
         extends: plus_icon_template
         position: [1064, 610]
+
       cancel_button:
-        type: button
         position: [810, 710]
         size: [150, 60]
-        text: "CANCEL"
-        selected_text: ""
-        font_size: 28
-        text_color: White
-        selected_text_color: [128, 128, 128]
-        paths:
-          default: red_button
-          hover: yellow_button
+        asset: red_button
+        hover: yellow_button
+      cancel_button_text:
+        type: text
         font: kenvector_future
+        font_size: 28
+        color: White
+        position: [CENTER, CENTER]
+        parent: cancel_button
+        text: "CANCEL"
       save_button:
-        type: button
         position: [975, 710]
         size: [150, 60]
-        text: "SAVE"
-        selected_text: ""
-        font_size: 28
-        text_color: White
-        selected_text_color: [128, 128, 128]
-        paths:
-          default: green_button
-          hover: yellow_button
+        asset: green_button
+        hover: yellow_button
+      save_button_text:
+        type: text
         font: kenvector_future
+        font_size: 28
+        color: White
+        position: [CENTER, CENTER]
+        parent: save_button
+        text: "SAVE"
 
   game_settings:
     objects:
-      menu:
-        extends: menu_template
-        type: menu
-        title: "game_settings"
-        panel_height: 200
+      game_settings_title:
+        position: [740, 410]
+        size: [440, 70]
+        asset: blue_button
+      game_settings_title_text:
+        parent: game_settings_title
+        type: text
+        text: "GAME SETTINGS"
+        font: kenvector_future
+        font_size: 30
+        color: white
+        position: [CENTER, CENTER]
+      game_settings_panel:
+        position: [740, 470]
+        size: [440, 200]
+        asset: grey_panel
       delete_data_button:
-        type: button
         position: [810, 500]
         size: [315, 60]
-        text: "DELETE DATA"
-        selected_text: ""
-        font_size: 28
-        text_color: White
-        selected_text_color: [128, 128, 128]
-        paths:
-          default: red_button
-          hover: yellow_button
+        asset: red_button
+        hover: yellow_button
+      delete_data_button_text:
+        type: text
         font: kenvector_future
-      go_back_button:
-        extends: go_back_template
+        font_size: 28
+        color: White
+        position: [CENTER, CENTER]
+        parent: delete_data_button
+        text: "DELETE DATA"
+      game_settings_back_button:
+        extends: go_back_btn
         position: [810, 580]
-        size: [315, 60]
+      game_settings_back_button_text:
+        extends: go_back_btn_text
+        parent: game_settings_back_button
 
   developer:
     objects:
-      panel:
+      developer_panel:
         position: [CENTER, CENTER]
         size: [300, 380]
         asset: grey_panel
@@ -317,39 +419,50 @@ panels:
         font_size: 17
         position: [CENTER, 500]
         text: "Software Engineer"
-      github:
-        type: button
+      github_button:
         position: [CENTER, 550]
         size: [250, 40]
-        selected_text: "github.com/umutcanekinci"
+        asset: grey_button
+        hover: yellow_button
+      github_button_text:
+        type: text
+        font: kenvector_future
         font_size: 28
-        text_color: Black
-        selected_text_color: [128, 128, 128]
-        paths:
-          default: grey_button
-          hover: yellow_button
+        color: Black
+        position: [CENTER, CENTER]
+        parent: github_button
+        text: ""
+        states:
+          hover: "github.com/umutcanekinci"
       github_icon:
         position: [940, 555]
         size: [16, 16]
         asset: github_icon
-      linkedin:
-        type: button
+      linkedin_button:
         position: [CENTER, 600]
         size: [250, 40]
-        selected_text: "linkedin.com/in/umutcanekinci"
+        asset: grey_button
+        hover: yellow_button
+      linkedin_button_text:
+        type: text
+        font: kenvector_future
         font_size: 28
-        text_color: Black
-        selected_text_color: [128, 128, 128]
-        paths:
-          default: grey_button
-          hover: yellow_button
+        color: Black
+        position: [CENTER, CENTER]
+        parent: linkedin_button
+        text: ""
+        states:
+          hover: "linkedin.com/in/umutcanekinci"
       linkedin_icon:
         position: [940, 605]
         size: [16, 16]
         asset: linkedin_icon
-      go_back_button:
-        extends: go_back_template
-        position: [CENTER, 650]
+      developer_back_button:
+        extends: go_back_btn
         size: [250, 40]
+        position: [CENTER, 650]
+      developer_back_button_text:
+        extends: go_back_btn_text
+        parent: developer_back_button
         font_size: 28
-        text_color: Black
+        color: Black

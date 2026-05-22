@@ -16,10 +16,11 @@ from pygame_core.database import Database
 from pygame_core.panel_loader_ext import PanelLoaderExt
 from pygame_core.panel_manager import PanelManager
 from pygame_core.splash_screen import SplashScreen
-from pygame_core.unity.components.transform import Transform
-from pygame_core.unity.game_audio import GameAudio
+from pygame_core.ecs.components.transform import Transform
+from pygame_core.ecs.game_audio import GameAudio
 from ui import panel_factory
 from ui.info_panel import InfoPanel
+from ui.menu_controller import MenuController
 from ui.state_object import StateObject
 
 class Game(GameEventsMixin, GamePersistenceMixin, Application):
@@ -79,6 +80,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             "developer":        self.handle_developer_events,
             "game":             self.handle_game_events,
         }
+        self.menu_controllers: dict = {}
 
     def run(self) -> None:
         self.splash.run(self.window, self.clock, self._fps)
@@ -109,43 +111,54 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         loader = PanelLoaderExt(self.panel_manager, self.window_transform, self.assets)
         loader.register("object", panel_factory.make_factory(self.assets), default=True)
         loader.register("text", panel_factory.make_text_factory(self.assets))
-        loader.register("button", panel_factory.make_button_factory(self.assets))
-        loader.register("menu", panel_factory.make_menu_factory(self.assets, self.size))
         loader.load("config/panels.yaml")
 
         panel = self.panel_manager["game"]
         for name in ("info_panel", "level_text", "speed_text", "cooldown_text",
-                     "sell_price_text", "close_button", "sell_button", "info_panel_building_image"):
+                     "sell_price_text", "close_button", "sell_button", "sell_button_text",
+                     "info_panel_building_image"):
             panel[name].set_parent(self.info_panel.root)
 
         panel["selection_mode_button"].set_base_state("off")
-        panel["close_button"].states["default"].blit(self.assets.get_image("cross_white"), (9, 9))
-        panel["close_button"].states["hover"].blit(self.assets.get_image("cross_grey"), (9, 9))
+        panel["close_button"].images[None].blit(self.assets.get_image("cross_white"), (9, 9))
+        panel["close_button"]._hover_images[None].blit(self.assets.get_image("cross_grey"), (9, 9))
+
+        switch_up = self.assets.sound_path("switch_up")
+        switch_down = self.assets.sound_path("switch_down")
+        menu_buttons = [self.panel_manager["menu"][n] for n in
+                        ("start_button", "settings_button", "developer_button", "exit_button")]
+        settings_buttons = [self.panel_manager["settings"][n] for n in
+                            ("display_settings_button", "audio_settings_button",
+                             "game_settings_button", "settings_back_button")]
+        self.menu_controllers = {
+            "menu":     MenuController(menu_buttons,     self.audio, switch_up, switch_down),
+            "settings": MenuController(settings_buttons, self.audio, switch_up, switch_down),
+        }
 
     def update_button_texts(self) -> None:
         panel = self.panel_manager["game"]
 
         if self.tilemap.is_max_size():
-            panel["expand_button"].text.update_text("hover", "MAX SIZE")
+            panel["expand_button_text"].set_text("MAX SIZE", state="hover")
         else:
-            panel["expand_button"].text.update_text("hover", f"{self.tilemap.get_expand_cost()}$")
+            panel["expand_button_text"].set_text(f"{self.tilemap.get_expand_cost()}$", state="hover")
 
         if len(self.buildings) == self.tilemap.row_count * self.tilemap.column_count:
-            panel["build_button"].text.update_text("hover", "TILES ARE FULL")
-            panel["build_button"].text.update_size("hover", 17)
+            panel["build_button_text"].set_text("TILES FULL", state="hover")
         else:
-            panel["build_button"].text.update_text("hover", str(self.buildings.get_build_cost()) + "$")
-            panel["build_button"].text.update_size("hover", 27)
+            panel["build_button_text"].set_text(f"{self.buildings.get_build_cost()}$", state="hover")
 
         if self.buildings.age_number == self.buildings.max_age_number:
-            panel["next_age_button"].text.update_text("hover", "MAX AGE")
+            panel["next_age_button_text"].set_text("MAX AGE", state="hover")
         else:
-            panel["next_age_button"].text.update_text("hover", str(self.buildings.get_age_cost()) + "$")
+            panel["next_age_button_text"].set_text(f"{self.buildings.get_age_cost()}$", state="hover")
 
     def handle_event(self, event: pygame.Event) -> None:
         super().handle_event(event)
         self.panel_manager.handle_event(event, self.mouse.position)
 
+        if controller := self.menu_controllers.get(self.panel_manager.current_panel):
+            controller.handle_event(event, self.mouse.position)
         if handler := self.handlers.get(self.panel_manager.current_panel):
             handler(event)
 
@@ -207,9 +220,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.buildings.append(new_building)
         self.buildings.sort(key=lambda b: b.tile.column_number)
 
-        if len(self.buildings) == self.tilemap.row_count * self.tilemap.column_count and "game" in self.panel_manager and "build_button" in self.panel_manager["game"]:
-            self.panel_manager["game"]["build_button"].text.update_text("hover", "TILES ARE FULL")
-            self.panel_manager["game"]["build_button"].text.update_size("hover", 17)
+        if len(self.buildings) == self.tilemap.row_count * self.tilemap.column_count and "game" in self.panel_manager and "build_button_text" in self.panel_manager["game"]:
+            self.panel_manager["game"]["build_button_text"].set_text("TILES FULL", state="hover")
 
     def create_building(self) -> None:
         if self.buildings.is_moving() or not self.player.can_afford(self.buildings.get_build_cost()):
@@ -256,12 +268,12 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     # ── audio-settings UI labels (volume → "%NN" text on a panel widget) ──
 
     def set_music_label(self, volume: float) -> None:
-        self._set_volume_label(volume, self.panel_manager["audio_settings"]["music_volume_entry"])
+        self._set_volume_label(volume, self.panel_manager["audio_settings"]["music_volume_entry_text"])
 
     def set_sfx_label(self, volume: float) -> None:
-        self._set_volume_label(volume, self.panel_manager["audio_settings"]["sfx_volume_entry"])
+        self._set_volume_label(volume, self.panel_manager["audio_settings"]["sfx_volume_entry_text"])
 
     @staticmethod
-    def _set_volume_label(volume: float, label) -> None:
+    def _set_volume_label(volume: float, text_obj) -> None:
         volume = max(0.0, min(1.0, volume))
-        label.text.update_text("default", "%" + str(round(volume * 100)))
+        text_obj.set_text("%" + str(round(volume * 100)))

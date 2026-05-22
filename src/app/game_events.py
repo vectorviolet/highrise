@@ -2,47 +2,49 @@ import pygame
 import webbrowser
 
 
+def _activate_on_click_or_space(button, event, mouse_position) -> bool:
+    if button.is_clicked(event, mouse_position):
+        return True
+    if event.type == pygame.KEYUP and event.key == pygame.K_SPACE and button.state == "hover":
+        return True
+    return False
+
+
 class GameEventsMixin:
     def handle_menu_events(self, event: pygame.event.Event) -> None:
-        buttons = self.panel_manager["menu"]["menu"].buttons
-        navigations = {
-            "START":     "game",
-            "SETTINGS":  "settings",
-            "DEVELOPER": "developer",
-            "EXIT":      "exit",
-        }
-
-        for label, panel in navigations.items():
-            button = buttons[label]
-            if (button.is_clicked(event, self.mouse.position) or
-                    (event.type == pygame.KEYUP and event.key == pygame.K_SPACE) and button.state == "hover"):
-                sound_path = self.go_back_sound_path if label == "EXIT" else self.click_sound_path
+        panel = self.panel_manager["menu"]
+        navigations = (
+            ("start_button",     "game"),
+            ("settings_button",  "settings"),
+            ("developer_button", "developer"),
+            ("exit_button",      "exit"),
+        )
+        for button_name, dest in navigations:
+            button = panel[button_name]
+            if _activate_on_click_or_space(button, event, self.mouse.position):
+                sound_path = self.go_back_sound_path if dest == "exit" else self.click_sound_path
                 self.audio.play_sfx(sound_path)
-                self.open_panel(panel)
+                self.open_panel(dest)
 
     def handle_settings_events(self, event: pygame.event.Event) -> None:
-        buttons = self.panel_manager["settings"]["menu"].buttons
-        navigations = {
-            "display_settings": "display_settings",
-            "audio_settings":   "audio_settings",
-            "game_settings":    "game_settings",
-            "GO BACK":          "menu",
-        }
-
-        for label, panel in navigations.items():
-            button = buttons[label]
-            if (button.is_clicked(event, self.mouse.position) or
-                    (event.type == pygame.KEYUP and event.key == pygame.K_SPACE) and button.state == "hover"):
-
-                if label == "audio_settings":
+        panel = self.panel_manager["settings"]
+        navigations = (
+            ("display_settings_button", "display_settings"),
+            ("audio_settings_button",   "audio_settings"),
+            ("game_settings_button",    "game_settings"),
+            ("settings_back_button",    "menu"),
+        )
+        for button_name, dest in navigations:
+            button = panel[button_name]
+            if _activate_on_click_or_space(button, event, self.mouse.position):
+                if dest == "audio_settings":
                     self.old_music_volume = self.audio.music_volume()
                     self.old_sfx_volume = self.audio.sfx_volume()
-
                 self.audio.play_sfx(self.click_sound_path)
-                self.open_panel(panel)
+                self.open_panel(dest)
 
     def handle_display_settings_events(self, event: pygame.event.Event) -> None:
-        if self.panel_manager["display_settings"]["go_back_button"].is_clicked(event, self.mouse.position):
+        if self.panel_manager["display_settings"]["display_back_button"].is_clicked(event, self.mouse.position):
             self.audio.play_sfx(self.click_sound_path)
             self.open_panel("settings")
 
@@ -76,18 +78,18 @@ class GameEventsMixin:
         if panel["delete_data_button"].is_clicked(event, self.mouse.position):
             self.delete_data(); self.load_data(); self.add_objects()
             self.audio.play_sfx(self.click_sound_path); self.open_panel("menu")
-        elif panel["go_back_button"].is_clicked(event, self.mouse.position):
+        elif panel["game_settings_back_button"].is_clicked(event, self.mouse.position):
             self.audio.play_sfx(self.click_sound_path); self.open_panel("settings")
 
     def handle_developer_events(self, event: pygame.event.Event) -> None:
         panel = self.panel_manager["developer"]
-        if panel["github"].is_clicked(event, self.mouse.position):
+        if panel["github_button"].is_clicked(event, self.mouse.position):
             self.audio.play_sfx(self.click_sound_path)
             webbrowser.open("https://www.github.com/umutcanekinci/")
-        elif panel["linkedin"].is_clicked(event, self.mouse.position):
+        elif panel["linkedin_button"].is_clicked(event, self.mouse.position):
             self.audio.play_sfx(self.click_sound_path)
             webbrowser.open("https://www.linkedin.com/in/umutcanekinci/")
-        elif panel["go_back_button"].is_clicked(event, self.mouse.position):
+        elif panel["developer_back_button"].is_clicked(event, self.mouse.position):
             self.audio.play_sfx(self.click_sound_path); self.open_panel("menu")
 
     def handle_game_events(self, event: pygame.event.Event) -> None:

@@ -1,5 +1,5 @@
 from pygame_core.asset_path import PathLike
-from pygame_core.unity.components.transform import Transform
+from pygame_core.ecs.components.transform import Transform
 from ui.state_object import StateObject
 
 

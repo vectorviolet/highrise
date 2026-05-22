@@ -1,5 +1,5 @@
 from pygame_core.image import load_image
-from pygame_core.unity.gameobject import GameObject
+from pygame_core.ecs.game_object import GameObject
 from gameplay.buildings.building import Building
 
 
@@ -16,7 +16,7 @@ class InfoPanel:
         panel["speed_text"].set_text("Speed: " + str(building.speed) + " $/sec")
         panel["cooldown_text"].set_text("Cooldown: " + str(building.cooldown) + " sec")
         panel["sell_price_text"].set_text("Sell Price: " + str(building.sell_price))
-        panel["sell_button"].text.update_text("hover", str(building.sell_price) + "$")
+        panel["sell_button_text"].set_text(str(building.sell_price) + "$", state="hover")
         panel["info_panel_building_image"].add_surface("default", load_image(building.get_image_path(), (65, 89)))
 
     def open(self) -> None:
