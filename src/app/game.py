@@ -179,7 +179,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.cloud_animation.draw(self.window)
         super().draw()
 
-    def on_exit(self) -> None:
+    def on_exit_request(self) -> None:
         self.audio.play_sfx(self.go_back_sound_path)
         panel = self.panel_manager.current_panel
 
