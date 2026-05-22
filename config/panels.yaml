@@ -97,7 +97,7 @@ panels:
           start_button:     { extends: menu_btn, size: [400, 60] }
           settings_button:  { extends: menu_btn, size: [400, 60] }
           developer_button: { extends: menu_btn, size: [400, 60] }
-          exit_button:      { extends: menu_btn, size: [400, 60] }
+          exit_button:      { extends: menu_btn, size: [400, 60], on_click_sound: back }
       start_button_text:     { extends: menu_btn_text, parent: start_button,     text: "START" }
       settings_button_text:  { extends: menu_btn_text, parent: settings_button,  text: "SETTINGS" }
       developer_button_text: { extends: menu_btn_text, parent: developer_button, text: "DEVELOPER" }
@@ -214,6 +214,7 @@ panels:
         size: [210, 50]
         asset: green_button
         hover: red_button
+        on_click_sound: back
       sell_button_text:
         type: text
         font: kenvector_future
@@ -229,6 +230,7 @@ panels:
         size: [38, 38]
         asset: red_button
         hover: yellow_button
+        on_click_sound: back
       level_text:        { extends: panel_text, position: [930, 370] }
       speed_text:        { extends: panel_text, position: [930, 390] }
       cooldown_text:     { extends: panel_text, position: [930, 410] }
@@ -336,6 +338,7 @@ panels:
         size: [150, 60]
         asset: red_button
         hover: yellow_button
+        on_click_sound: back
       cancel_button_text:
         type: text
         font: kenvector_future
@@ -349,6 +352,7 @@ panels:
         size: [150, 60]
         asset: green_button
         hover: yellow_button
+        on_click_sound: back
       save_button_text:
         type: text
         font: kenvector_future
