@@ -20,8 +20,10 @@ class GameEventsMixin:
 
     def handle_menu_events(self, event: pygame.event.Event) -> None:
         panel = self.panel_manager["menu"]
+        if self._activate(panel["play_button"], event):
+            self.play()
+            return
         navigations = (
-            ("start_button",     "game"),
             ("settings_button",  "settings"),
             ("developer_button", "developer"),
             ("exit_button",      "exit"),
@@ -29,6 +31,15 @@ class GameEventsMixin:
         for button_name, dest in navigations:
             if self._activate(panel[button_name], event):
                 self.open_panel(dest)
+
+    def handle_play_events(self, event: pygame.event.Event) -> None:
+        panel = self.panel_manager["play"]
+        if self._activate(panel["new_game_button"], event):
+            self.new_game()
+        elif self._activate(panel["continue_button"], event):
+            self.open_panel("game")
+        elif self._activate(panel["play_back_button"], event):
+            self.open_panel("menu")
 
     def handle_settings_events(self, event: pygame.event.Event) -> None:
         panel = self.panel_manager["settings"]
@@ -74,10 +85,7 @@ class GameEventsMixin:
 
     def handle_game_settings_events(self, event: pygame.event.Event) -> None:
         panel = self.panel_manager["game_settings"]
-        if self._activate(panel["delete_data_button"], event):
-            self.delete_data(); self.load_data(); self.add_objects()
-            self.open_panel("menu")
-        elif self._activate(panel["game_settings_back_button"], event):
+        if self._activate(panel["game_settings_back_button"], event):
             self.open_panel("settings")
 
     def handle_developer_events(self, event: pygame.event.Event) -> None:

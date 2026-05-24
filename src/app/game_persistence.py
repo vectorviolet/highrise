@@ -27,13 +27,24 @@ class GamePersistenceMixin:
         self.audio.set_music_volume(music_volume)
         self.audio.set_sfx_volume(sfx_volume)
         self.tilemap = Tilemap(size, self.max_size)
+        self.tile_selector.tilemap = self.tilemap
         self.buildings.age_number = age_number
 
     def load_buildings(self) -> None:
+        self.buildings.clear()
         buildings = self.database.execute_safely("SELECT * FROM buildings", True)
-        if buildings:
-            for building in buildings:
-                self.add_building(*building)
+        if not buildings:
+            return
+        rows = self.tilemap.row_count
+        cols = self.tilemap.column_count
+        for level, row, column in buildings:
+            if 1 <= row <= rows and 1 <= column <= cols:
+                self.add_building(level, row, column)
+            else:
+                self.database.execute_safely(
+                    "DELETE FROM buildings WHERE level=? AND row=? AND column=?",
+                    params=(level, row, column),
+                )
 
     def save_audio_settings(self) -> None:
         self.database.execute_safely("UPDATE game SET music_volume=?, sfx_volume=?",
@@ -49,5 +60,6 @@ class GamePersistenceMixin:
                                          params=(building.level, building.tile.row_number, building.tile.column_number))
 
     def delete_data(self) -> None:
-        self.database.execute_safely("DELETE FROM game")
+        self.database.execute_safely("UPDATE game SET age_number=?, size=?, money=?",
+                                     params=(0, 2, self.starting_money))
         self.database.execute_safely("DELETE FROM buildings")

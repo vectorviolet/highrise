@@ -9,6 +9,10 @@ gameplay:
   max_building_level: 6
   cloud_count: 30
 
+audio:
+  default_music_volume: 1.0
+  default_sfx_volume: 1.0
+
 splash:
   fade_ms: 1500
   hold_ms: 1000
@@ -17,6 +21,7 @@ ui:
   cursor_size: [25, 25]
   background_colors:
     menu: yellow
+    play: yellow
     settings: yellow
     display_settings: yellow
     audio_settings: yellow

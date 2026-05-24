@@ -94,11 +94,11 @@ panels:
         parent: menu_panel
         layout: { direction: vertical, start: [20, 30], spacing: 80 }
         objects:
-          start_button:     { extends: menu_btn, size: [400, 60] }
+          play_button:      { extends: menu_btn, size: [400, 60] }
           settings_button:  { extends: menu_btn, size: [400, 60] }
           developer_button: { extends: menu_btn, size: [400, 60] }
           exit_button:      { extends: menu_btn, size: [400, 60], on_click_sound: back }
-      start_button_text:     { extends: menu_btn_text, parent: start_button,     text: "START" }
+      play_button_text:      { extends: menu_btn_text, parent: play_button,      text: "PLAY" }
       settings_button_text:  { extends: menu_btn_text, parent: settings_button,  text: "SETTINGS" }
       developer_button_text: { extends: menu_btn_text, parent: developer_button, text: "DEVELOPER" }
       exit_button_text:      { extends: menu_btn_text, parent: exit_button,      text: "EXIT" }
@@ -138,6 +138,35 @@ panels:
       audio_settings_button_text:   { extends: menu_btn_text, parent: audio_settings_button,   text: "AUDIO" }
       game_settings_button_text:    { extends: menu_btn_text, parent: game_settings_button,    text: "GAME" }
       settings_back_button_text:    { extends: menu_btn_text, parent: settings_back_button,    text: "GO BACK" }
+
+  play:
+    objects:
+      play_title:
+        position: [740, 320]
+        size: [440, 70]
+        asset: blue_button
+      play_title_text:
+        parent: play_title
+        type: text
+        text: "PLAY"
+        font: kenvector_future
+        font_size: 30
+        color: white
+        position: [CENTER, CENTER]
+      play_panel:
+        extends: menu_panel
+        position: [740, 380]
+        size: [440, 290]
+      play_buttons:
+        parent: play_panel
+        layout: { direction: vertical, start: [20, 30], spacing: 80 }
+        objects:
+          new_game_button: { extends: menu_btn, size: [400, 60] }
+          continue_button: { extends: menu_btn, size: [400, 60] }
+          play_back_button: { extends: menu_btn, size: [400, 60] }
+      new_game_button_text:  { extends: menu_btn_text, parent: new_game_button,  text: "NEW GAME" }
+      continue_button_text:  { extends: menu_btn_text, parent: continue_button,  text: "CONTINUE" }
+      play_back_button_text: { extends: menu_btn_text, parent: play_back_button, text: "GO BACK" }
 
   game:
     objects:
@@ -204,13 +233,13 @@ panels:
 
       info_panel:
         position: [CENTER, CENTER]
-        size: [250, 400]
+        size: [300, 460]
         extends: menu_panel
       info_panel_building_image:
-        position: [855, 360]
+        position: [830, 340]
         size: [65, 89]
       sell_button:
-        position: [CENTER, 660]
+        position: [CENTER, 690]
         size: [210, 50]
         asset: green_button
         hover: red_button
@@ -226,15 +255,15 @@ panels:
         states:
           hover: "0$"
       close_button:
-        position: [1070, 335]
+        position: [1070, 315]
         size: [38, 38]
         asset: red_button
         hover: yellow_button
         on_click_sound: back
-      level_text:        { extends: panel_text, position: [930, 370] }
-      speed_text:        { extends: panel_text, position: [930, 390] }
-      cooldown_text:     { extends: panel_text, position: [930, 410] }
-      sell_price_text:   { extends: panel_text, position: [930, 430] }
+      level_text:        { extends: panel_text, position: [925, 390] }
+      speed_text:        { extends: panel_text, position: [925, 410] }
+      cooldown_text:     { extends: panel_text, position: [925, 430] }
+      sell_price_text:   { extends: panel_text, position: [925, 450] }
 
   display_settings:
     objects:
@@ -380,19 +409,13 @@ panels:
         position: [740, 470]
         size: [440, 200]
         extends: menu_panel
-      delete_data_button:
-        position: [810, 500]
-        size: [315, 60]
-        asset: red_button
-        hover: yellow_button
-      delete_data_button_text:
+      game_settings_coming_soon_text:
         type: text
         font: kenvector_future
-        font_size: 28
-        color: White
-        position: [CENTER, CENTER]
-        parent: delete_data_button
-        text: "DELETE DATA"
+        font_size: 18
+        color: Green
+        position: [CENTER, 500]
+        text: "THIS PAGE WILL COMING SOON..."
       game_settings_back_button:
         extends: go_back_btn
         position: [810, 580]
@@ -432,7 +455,7 @@ panels:
       github_button_text:
         type: text
         font: kenvector_future
-        font_size: 28
+        font_size: 20
         color: Black
         position: [CENTER, CENTER]
         parent: github_button
@@ -451,7 +474,7 @@ panels:
       linkedin_button_text:
         type: text
         font: kenvector_future
-        font_size: 28
+        font_size: 20
         color: Black
         position: [CENTER, CENTER]
         parent: linkedin_button

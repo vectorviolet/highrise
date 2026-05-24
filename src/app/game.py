@@ -29,6 +29,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.settings = yaml.safe_load(Path("config/settings.yaml").read_text())
         window   = self.settings["window"]
         gameplay = self.settings["gameplay"]
+        audio    = self.settings["audio"]
         splash   = self.settings["splash"]
         ui       = self.settings["ui"]
 
@@ -55,8 +56,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         self.audio = GameAudio()
         self.player = Player()
-        self.old_music_volume = 1.0
-        self.old_sfx_volume = 1.0
+        self.default_music_volume = audio["default_music_volume"]
+        self.default_sfx_volume = audio["default_sfx_volume"]
+        self.old_music_volume = self.default_music_volume
+        self.old_sfx_volume = self.default_sfx_volume
 
         self.background_music_sound_path = self.assets.sound_path("bg")
         self.click_sound_path = self.assets.sound_path("click")
@@ -72,6 +75,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         self.handlers = {
             "menu":             self.handle_menu_events,
+            "play":             self.handle_play_events,
             "settings":         self.handle_settings_events,
             "display_settings": self.handle_display_settings_events,
             "audio_settings":   self.handle_audio_settings_events,
@@ -95,8 +99,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         self.open_panel("menu")
         self.info_panel.close()
-        self.audio.set_music_volume(self.audio.music_volume())
-        self.audio.set_sfx_volume(self.audio.sfx_volume())
+        self.set_music_label(self.audio.music_volume())
+        self.set_sfx_label(self.audio.sfx_volume())
         self.audio.play_music(str(self.background_music_sound_path))
 
         super().run()
@@ -126,12 +130,15 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         switch_up = self.assets.sound_path("switch_up")
         switch_down = self.assets.sound_path("switch_down")
         menu_buttons = [self.panel_manager["menu"][n] for n in
-                        ("start_button", "settings_button", "developer_button", "exit_button")]
+                        ("play_button", "settings_button", "developer_button", "exit_button")]
+        play_buttons = [self.panel_manager["play"][n] for n in
+                        ("new_game_button", "continue_button", "play_back_button")]
         settings_buttons = [self.panel_manager["settings"][n] for n in
                             ("display_settings_button", "audio_settings_button",
                              "game_settings_button", "settings_back_button")]
         self.menu_controllers = {
             "menu":     MenuController(menu_buttons,     self.audio, switch_up, switch_down),
+            "play":     MenuController(play_buttons,     self.audio, switch_up, switch_down),
             "settings": MenuController(settings_buttons, self.audio, switch_up, switch_down),
         }
 
@@ -185,13 +192,15 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         if panel == "menu":
             self.exit()
+        elif panel == "play":
+            self.open_panel("menu")
         elif panel == "settings":
             self.open_panel("menu")
         elif panel in ("display_settings", "game_settings"):
             self.open_panel("settings")
         elif panel == "audio_settings":
-            self.audio.set_music_volume(self.old_music_volume)
-            self.audio.set_sfx_volume(self.old_sfx_volume)
+            self.audio.set_music_volume(self.old_music_volume); self.set_music_label(self.old_music_volume)
+            self.audio.set_sfx_volume(self.old_sfx_volume);     self.set_sfx_label(self.old_sfx_volume)
             self.open_panel("settings")
         elif panel == "developer":
             self.open_panel("menu")
@@ -265,6 +274,27 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             return
         self.panel_manager.open_panel(tab)
         self.cloud_animation.create_clouds()
+
+    def new_game(self) -> None:
+        self.delete_data()
+        self.load_data()
+        self.add_objects()
+        self.set_age(self.buildings.age_number)
+        self.update_button_texts()
+        self.info_panel.close()
+        self.tile_selector.is_active = False
+        self.set_music_label(self.audio.music_volume())
+        self.set_sfx_label(self.audio.sfx_volume())
+        self.open_panel("game")
+
+    def has_save_data(self) -> bool:
+        return len(self.buildings) > 0 or self.buildings.age_number > 0
+
+    def play(self) -> None:
+        if self.has_save_data():
+            self.open_panel("play")
+        else:
+            self.new_game()
 
     # ── audio-settings UI labels (volume → "%NN" text on a panel widget) ──
 
