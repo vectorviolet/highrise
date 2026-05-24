@@ -10,6 +10,7 @@ from domain.player import Player
 from gameplay.buildings.building import Building, Buildings
 from gameplay.clouds.cloud_container import OneShotCloudAnimation, LoopingCloudAnimation
 from gameplay.tile_selector import TileSelector
+from gameplay.tilemap import Tilemap
 from pygame_core.application import Application
 from pygame_core.asset_manager import AssetManager
 from pygame_core.database import Database
@@ -43,7 +44,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         if missing:
             raise RuntimeError("Missing assets:\n" + "\n".join(missing))
 
-        self.tilemap = None
+        self.tilemap: Tilemap | None = None
         self.window_transform = Transform((0, 0), self.size)
         self.panel_manager = PanelManager(ui["background_colors"])
         self.database = Database("database")
@@ -146,15 +147,21 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.player.add_money_listener(lambda m: money_text.set_text(f"{m}$"))
         money_text.set_text(f"{self.player.money}$")
 
+    @property
+    def _tilemap(self) -> Tilemap:
+        assert self.tilemap is not None, "tilemap not loaded yet"
+        return self.tilemap
+
     def update_button_texts(self) -> None:
         panel = self.panel_manager["game"]
+        tilemap = self._tilemap
 
-        if self.tilemap.is_max_size():
+        if tilemap.is_max_size():
             panel["expand_button_text"].set_text("MAX SIZE", state="hover")
         else:
-            panel["expand_button_text"].set_text(f"{self.tilemap.get_expand_cost()}$", state="hover")
+            panel["expand_button_text"].set_text(f"{tilemap.get_expand_cost()}$", state="hover")
 
-        if len(self.buildings) == self.tilemap.row_count * self.tilemap.column_count:
+        if len(self.buildings) == tilemap.row_count * tilemap.column_count:
             panel["build_button_text"].set_text("TILES FULL", state="hover")
         else:
             panel["build_button_text"].set_text(f"{self.buildings.get_build_cost()}$", state="hover")
@@ -214,30 +221,33 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     # ── Game mechanics ────────────────────────────────────────────────────────
 
     def expand(self) -> None:
-        if self.tilemap.is_max_size() or not self.player.spend(self.tilemap.get_expand_cost()):
+        tilemap = self._tilemap
+        if tilemap.is_max_size() or not self.player.spend(tilemap.get_expand_cost()):
             return
 
-        self.tilemap.expand()
+        tilemap.expand()
 
         for building in self.buildings:
-            building.tile = self.tilemap[building.tile.row_number - 1][building.tile.column_number - 1]
+            building.tile = tilemap[building.tile.row_number - 1][building.tile.column_number - 1]
 
         self.update_button_texts()
         self.audio.play_sfx(self.click_sound_path)
 
     def add_building(self, level, row_number, column_number) -> None:
-        new_building = Building(level, self.buildings.age_number, self.tilemap[row_number - 1][column_number - 1])
+        tilemap = self._tilemap
+        new_building = Building(level, self.buildings.age_number, tilemap[row_number - 1][column_number - 1])
         self.buildings.append(new_building)
         self.buildings.sort(key=lambda b: b.tile.column_number)
 
-        if len(self.buildings) == self.tilemap.row_count * self.tilemap.column_count and "game" in self.panel_manager and "build_button_text" in self.panel_manager["game"]:
+        if len(self.buildings) == tilemap.row_count * tilemap.column_count and "game" in self.panel_manager and "build_button_text" in self.panel_manager["game"]:
             self.panel_manager["game"]["build_button_text"].set_text("TILES FULL", state="hover")
 
     def create_building(self) -> None:
         if self.buildings.is_moving() or not self.player.can_afford(self.buildings.get_build_cost()):
             return
 
-        all_tiles = {(r + 1, c + 1) for r in range(self.tilemap.row_count) for c in range(self.tilemap.column_count)}
+        tilemap = self._tilemap
+        all_tiles = {(r + 1, c + 1) for r in range(tilemap.row_count) for c in range(tilemap.column_count)}
         occupied  = {(b.tile.row_number, b.tile.column_number) for b in self.buildings}
         empty_tiles = list(all_tiles - occupied)
 
@@ -263,7 +273,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def move_buildings(self, rotation: str) -> None:
         if self.tile_selector.is_active:
             return
-        self.buildings.move(rotation, self.tilemap, self.max_building_level)
+        self.buildings.move(rotation, self._tilemap, self.max_building_level)
 
     def _on_building_payout(self, amount: int) -> None:
         self.player.earn(amount)

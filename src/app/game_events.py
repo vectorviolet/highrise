@@ -1,8 +1,14 @@
+from typing import TYPE_CHECKING, Any
+
 import pygame
 import webbrowser
 
 
 class GameEventsMixin:
+    if TYPE_CHECKING:
+        # Attributes / methods supplied by the host class (Game).
+        def __getattr__(self, name: str) -> Any: ...
+
     def _activate(self, button, event) -> bool:
         """True when the button was activated (click or focused-Space/Enter).
         Plays the button's `on_click_sound` (or the default click) on success."""

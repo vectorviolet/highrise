@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 from pygame_core.asset_manager import AssetManager
-from ecs.sound_manager import SoundManager
+from pygame_core.ecs.sound_manager import SoundManager
 from pygame import Vector2
 from gameplay.tiles.tile import Tile
 from pygame_core.asset_path import ImagePath, SoundPath
@@ -43,7 +43,13 @@ class Building(StateObject):
         if self.on_payout:
             self.on_payout(self.cooldown * self.speed)
 
-    def get_image_path(self) -> str:
+    @property
+    def rigidbody(self) -> Rigidbody2D:
+        rb = self.get_component(Rigidbody2D)
+        assert rb is not None, "Building requires a Rigidbody2D"
+        return rb
+
+    def get_image_path(self) -> ImagePath:
         return ImagePath("level" + str(self.level), "buildings/" + self.age)
 
     def __set_size(self) -> None:
@@ -60,7 +66,7 @@ class Building(StateObject):
         self.set_position_from_tile(target_tile)
         self.target_position = self.unselected_position
         direction = self.target_position - Vector2(self.rect.topleft)
-        self.get_component(Rigidbody2D).set_velocity(direction.normalize() * 8)
+        self.rigidbody.set_velocity(direction.normalize() * 8)
 
     def level_up(self, sacrificial_building) -> None:
         sacrificial_building.set_target_tile(self.tile)
@@ -85,7 +91,7 @@ class Buildings(list[Building]):
                 self[i] = Building(building.level, self.age_number, building.tile)
 
     def is_moving(self) -> bool:
-        return any(b.get_component(Rigidbody2D).velocity != Vector2(0, 0) for b in self)
+        return any(b.rigidbody.velocity != Vector2(0, 0) for b in self)
 
     def get_age_cost(self):
         return (self.age_number + 1) * 1000
@@ -95,7 +101,7 @@ class Buildings(list[Building]):
 
     def control_moving(self):
         for building in self:
-            if building.get_component(Rigidbody2D).velocity == Vector2(0, 0):
+            if building.rigidbody.velocity == Vector2(0, 0):
                 if building.should_destroy:
                     self.remove(building)
                     self.remove(building.new_building)
@@ -112,11 +118,11 @@ class Buildings(list[Building]):
             else:
                 tp = building.target_position
                 p = Vector2(building.rect.topleft)
-                v = building.get_component(Rigidbody2D).velocity
+                v = building.rigidbody.velocity
                 x_done = v.x == 0 or (v.x > 0 and p.x >= tp.x) or (v.x < 0 and p.x <= tp.x)
                 y_done = v.y == 0 or (v.y > 0 and p.y >= tp.y) or (v.y < 0 and p.y <= tp.y)
                 if x_done and y_done:
-                    building.get_component(Rigidbody2D).set_velocity(Vector2(0, 0))
+                    building.rigidbody.set_velocity(Vector2(0, 0))
                     building.rect.topleft = (int(building.target_position.x), int(building.target_position.y))
 
     def update(self):
@@ -175,7 +181,7 @@ class Buildings(list[Building]):
         previous: Building | None = None
         target = 0
         for building in line_buildings:
-            if self._can_merge(previous, building, max_level):
+            if previous is not None and self._can_merge(previous, building, max_level):
                 previous.level_up(building)
                 previous = None
                 continue

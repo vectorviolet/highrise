@@ -12,7 +12,20 @@
       "Bash(git -C \"C:\\\\Users\\\\user\\\\PycharmProjects\\\\2048-idle-evolution\\\\src\\\\pygame_core\" branch -a)",
       "Bash(git -C \"C:\\\\Users\\\\user\\\\PycharmProjects\\\\2048-idle-evolution\\\\src\\\\pygame_core\" log --oneline -5)",
       "Bash(git -C \"C:\\\\Users\\\\user\\\\PycharmProjects\\\\2048-idle-evolution\\\\src\\\\pygame_core\" log -5 --format=\"%s\")",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(uv --version)",
+      "mcp__ide__getDiagnostics",
+      "Bash(python -c \"import mypy\")",
+      "Bash(.venv\\\\Scripts\\\\python.exe -m pip install mypy)",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe -m mypy --ignore-missing-imports __main__.py src 2>$null)",
+      "PowerShell(Out-File *)",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe -m mypy --ignore-missing-imports --check-untyped-defs __main__.py src 2>$null)",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe -c \"import sys; sys.path.insert\\(0, 'src'\\); from app.game import Game; print\\('OK'\\)\" 2>&1 | Select-Object -Last 10)",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe -c \"import pygame_core; print\\(pygame_core.__file__\\); from pygame_core import asset_path; print\\(asset_path.__file__\\)\")",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe -m pip install -e src/pygame_core 2>&1 | Select-Object -Last 5)",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe -c \"import sys; sys.path.insert\\(0, 'src'\\); from app.game import Game; print\\('IMPORT OK'\\)\")",
+      "Bash(python -c \"import sys; sys.path.insert\\(0, 'src'\\); sys.path.insert\\(0, 'src/pygame_core'\\); from app.game import Game; print\\('PRE-CHANGE IMPORT OK'\\)\")",
+      "Bash(echo \"exit=$?\")"
     ]
   }
 }

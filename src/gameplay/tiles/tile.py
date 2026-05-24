@@ -5,8 +5,8 @@ from pygame.draw import polygon
 from pygame_core.asset_path import ImagePath
 from pygame_core.image import load_image
 
-from ecs.components.sprite_renderer2d import SpriteRenderer2D
-from ecs.game_object import GameObject
+from pygame_core.ecs.components.sprite_renderer2d import SpriteRenderer2D
+from pygame_core.ecs.game_object import GameObject
 
 
 class Tile(GameObject):
@@ -22,6 +22,7 @@ class Tile(GameObject):
 		self.row_number, self.column_number = row_number, column_number
 		renderer = self.add_component(SpriteRenderer2D)
 		renderer.set_image(load_image(ImagePath("tile")))
+		assert renderer.image is not None
 
 		self.rect.size = renderer.image.get_size()
 		self.rect.set_position(self.get_position(row_number, column_number))

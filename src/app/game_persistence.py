@@ -1,7 +1,13 @@
+from typing import TYPE_CHECKING, Any
+
 from gameplay.tilemap import Tilemap
 
 
 class GamePersistenceMixin:
+    if TYPE_CHECKING:
+        # Attributes / methods supplied by the host class (Game).
+        def __getattr__(self, name: str) -> Any: ...
+
     def load_data(self) -> None:
         self.init_database()
         self.load_game_data(self.get_game_data())

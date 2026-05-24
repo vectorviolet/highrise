@@ -1,7 +1,7 @@
 from gameplay.clouds.cloud import Cloud
 from pygame_core.asset_path import ImagePath
-from ecs.components.rigidbody2d import Rigidbody2D
-from ecs.game_object_list import GameObjectList
+from pygame_core.ecs.components.rigidbody2d import Rigidbody2D
+from pygame_core.ecs.game_object_list import GameObjectList
 
 
 class CloudContainer(GameObjectList):
@@ -20,12 +20,12 @@ class LoopingCloudAnimation(CloudContainer):
 
     def __init__(self, count: int, surface_size: tuple) -> None:
         super().__init__(surface_size)
-        self.count = count
+        self._cloud_count = count
         self._companions: set[int] = set()
         self.create_clouds()
 
     def create_clouds(self) -> None:
-        for _ in range(self.count):
+        for _ in range(self._cloud_count):
             self.append(self._new_cloud())
 
     def _new_cloud(self) -> Cloud:
@@ -43,6 +43,7 @@ class LoopingCloudAnimation(CloudContainer):
 
         for cloud in self:
             rb = cloud.get_component(Rigidbody2D)
+            assert rb is not None
             velocity = rb.velocity
             xvel = velocity.x
             x = cloud.rect.x
