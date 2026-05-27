@@ -8,10 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Install dependencies (pygame-ce, pyyaml)
 pip install -r requirements.txt
 
-# Install the shared pygame_core library in editable mode (required once)
-pip install -e src/pygame_core
-
-# Run the game
+# Run the game (__main__.py adds src/ and src/pygame_core/ to sys.path)
 python __main__.py
 ```
 
