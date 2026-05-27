@@ -5,8 +5,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Running the Game
 
 ```bash
-# Install dependencies (pygame-ce, pyyaml)
-pip install -r requirements.txt
+# Install dependencies (resolved from pyproject.toml / uv.lock)
+uv sync             # preferred — installs the locked dep set
+# or for users without uv:
+pip install .       # installs pygame-ce + pyyaml from pyproject.toml
 
 # Run the game (__main__.py adds src/ and src/pygame_core/ to sys.path)
 python __main__.py
