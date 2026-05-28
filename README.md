@@ -1,4 +1,4 @@
-# 2048 Idle Evolution
+# Highrise
 
 An isometric city-builder where same-level buildings merge `2048`-style. Build, merge, expand, and advance through ages — Python + [pygame-ce](https://github.com/pygame-community/pygame-ce).
 
@@ -35,8 +35,8 @@ Place buildings on the isometric grid, then slide them with WASD/arrows to merge
 ## Running
 
 ```bash
-git clone --recurse-submodules https://github.com/umutcanekinci/2048-idle-evolution.git
-cd 2048-idle-evolution
+git clone --recurse-submodules https://github.com/umutcanekinci/highrise.git
+cd highrise
 uv sync
 uv run python __main__.py
 ```
@@ -64,7 +64,7 @@ See [CLAUDE.md](CLAUDE.md) for the full architecture overview.
 ## Contributing
 
 1. Fork this repository.
-2. Clone your fork: `git clone --recurse-submodules https://github.com/<you>/2048-idle-evolution.git`
+2. Clone your fork: `git clone --recurse-submodules https://github.com/<you>/highrise.git`
 3. Create a branch: `git checkout -b feature/<your-feature>`
 4. Commit + push: `git commit -am "<message>" && git push origin feature/<your-feature>`
 5. Open a pull request.
@@ -73,7 +73,7 @@ See [CLAUDE.md](CLAUDE.md) for the full architecture overview.
 
 Umutcan Ekinci — [umutcannekinci@gmail.com](mailto:umutcannekinci@gmail.com)
 
-See also the [contributors](https://github.com/umutcanekinci/2048-idle-evolution/contributors).
+See also the [contributors](https://github.com/umutcanekinci/highrise/contributors).
 
 ## License
 

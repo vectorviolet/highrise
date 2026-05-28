@@ -81,7 +81,7 @@ panels:
       menu_title_text:
         parent: menu_title
         type: text
-        text: "2048 GAME"
+        text: "Highrise"
         font: kenvector_future
         font_size: 30
         color: white
