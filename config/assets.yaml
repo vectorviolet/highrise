@@ -24,7 +24,6 @@ images:
     plus_icon:      {folder: gui/icons, name: plus}
     info_icon:      {folder: gui/icons, name: info}
 
-    pygame_logo:    {folder: branding, name: pygame_logo}
     kenney_logo:    {folder: branding, name: kenney_logo}
 
 sounds:
