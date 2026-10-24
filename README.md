@@ -1,6 +1,6 @@
 # Highrise
 
-![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/umutcanekinci/highrise/main/.github/badges/coverage.json)
+![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/vectorviolet/highrise/main/.github/badges/coverage.json)
 
 An isometric city-builder where same-level buildings merge `2048`-style. Build, merge, expand, and advance through ages — Python + [pygame-ce](https://github.com/pygame-community/pygame-ce).
 
@@ -32,7 +32,7 @@ Place buildings on the isometric grid, then slide them with WASD/arrows to merge
 
 [![Available on itch.io](https://jessemillar.github.io/available-on-itchio-badge/badge-color.png)](https://umutcanekinci.itch.io/highrise)
 
-Grab a ready-to-play build for your OS from [itch.io](https://umutcanekinci.itch.io/highrise) or the [latest GitHub release](https://github.com/umutcanekinci/highrise/releases/latest) — no Python required. Unzip and run:
+Grab a ready-to-play build for your OS from [itch.io](https://umutcanekinci.itch.io/highrise) or the [latest GitHub release](https://github.com/vectorviolet/highrise/releases/latest) — no Python required. Unzip and run:
 
 | OS | Run |
 |----|-----|
@@ -53,7 +53,7 @@ Grab a ready-to-play build for your OS from [itch.io](https://umutcanekinci.itch
 ## Running
 
 ```bash
-git clone --recurse-submodules https://github.com/umutcanekinci/highrise.git
+git clone --recurse-submodules https://github.com/vectorviolet/highrise.git
 cd highrise
 uv sync
 uv run python __main__.py
@@ -118,7 +118,7 @@ Art and UI from [Kenney](https://www.kenney.nl/) — [Hexagon Buildings](https:/
 
 Umutcan Ekinci — [umutcannekinci@gmail.com](mailto:umutcannekinci@gmail.com)
 
-See also the [contributors](https://github.com/umutcanekinci/highrise/contributors).
+See also the [contributors](https://github.com/vectorviolet/highrise/contributors).
 
 ## License
 
