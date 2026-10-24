@@ -102,11 +102,6 @@ panels:
       settings_button_text:  { extends: menu_btn_text, parent: settings_button,  text: "SETTINGS" }
       developer_button_text: { extends: menu_btn_text, parent: developer_button, text: "DEVELOPER" }
       exit_button_text:      { extends: menu_btn_text, parent: exit_button,      text: "EXIT" }
-      kenney_logo:
-        anchor: bottom-right
-        position: [-25, -25]
-        size: [144, 56]
-        asset: kenney_logo
 
   settings:
     objects:
