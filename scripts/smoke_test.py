@@ -52,11 +52,23 @@ def boot_game() -> None:
         print(f"  {panel}: OK")
 
 
+def run_game_briefly() -> None:
+    # The path the steps above never touch: the splash, any run() override
+    # and the hand-off into the main loop (a crash there once shipped unseen).
+    from app.game import Game
+    from pygamine.devtools.smoke import run_briefly
+
+    frames = run_briefly(Game())
+    print(f"  splash + {frames} main-loop frames via the real run(): OK")
+
+
 def main() -> None:
     print("Validating config/*.yaml...")
     check_config_yaml()
     print("Booting Game() and rendering every panel...")
     boot_game()
+    print("Running the real run() -- splash and main loop -- briefly...")
+    run_game_briefly()
     print("Smoke test passed.")
 
 
