@@ -16,7 +16,7 @@ from pygamine import AssetManager
 from pygamine import Database
 from pygamine import PanelLoaderExt
 from pygamine import PanelManager
-from pygamine import SplashScreen
+from pygamine import SplashScreen, ImageMedia
 from pygamine import Transform
 from pygamine import GameAudio
 from pygamine import StateObject
@@ -81,10 +81,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.info_panel = InfoPanel(self.panel_manager)
         self.tile_selector = TileSelector(self.tilemap, self.mouse, self.buildings)
         self.cloud_animation = OneShotCloudAnimation(self.size)
-        self.splash = SplashScreen(
-            [self.assets.image_path("pygame_logo")],
-            fade_ms=splash["fade_ms"], hold_ms=splash["hold_ms"],
-        )
+        self.splash = SplashScreen([
+            ImageMedia(self.assets.image_path("pygame_logo"), fade_ms=splash["fade_ms"], hold_ms=splash["hold_ms"]),
+        ])
 
         self.handlers = {
             "menu":             self.handle_menu_events,
