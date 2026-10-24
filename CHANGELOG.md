@@ -5,6 +5,19 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project aims to
 follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] – 2026-10-24
+
+### Added
+
+- Tests for the modules that had no coverage.
+
+### Changed
+
+- Startup now opens with the shared splash all the sibling games use: the publisher clip, then
+  the pygame logo.
+- pygamine updated to 0.19.0, now at `vectorviolet/pygamine`; repo links point at `vectorviolet`.
+- The smoke test now runs the game's real `run()`, splash included, instead of stepping frames by hand.
+
 ## [0.2.0] – 2026-08-12
 
 ### Added
