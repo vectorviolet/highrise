@@ -5,6 +5,18 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project aims to
 follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] – 2026-10-25
+
+### Removed
+
+- The Kenney logo from the main menu. It isn't covered by the CC0 license of Kenney's asset
+  packs; the packs themselves stay credited by name and link.
+
+### Changed
+
+- The startup splash shows pygame-ce's "powered" logo instead of the original pygame logo.
+- pygamine updated to 0.20.1.
+
 ## [0.2.1] – 2026-10-24
 
 ### Added
