@@ -1,5 +1,5 @@
 [submodule "src/pygamine"]
 	path = src/pygamine
-	url = https://github.com/umutcanekinci/pygamine.git
+	url = https://github.com/vectorviolet/pygamine.git
 	branch = main
 	update = merge
