@@ -14,7 +14,11 @@ class TileSelector:
         for row in self.tilemap:
             for tile in row:
                 tile.selected = tile is hovered
-                tile.rect = tile.selected_rect if tile.selected and self.is_active else tile.unselected_rect
+                tile.rect = (
+                    tile.selected_rect
+                    if tile.selected and self.is_active
+                    else tile.unselected_rect
+                )
 
     def get_hovered_tile(self) -> Tile | None:
         for row in self.tilemap:

@@ -2,6 +2,7 @@
 (the previous track was unlicensed and removed). A real Game() boots and runs
 through run() cleanly -- no crash, no warnings, no missing asset -- plays no
 music, and hides the music volume control that would control nothing."""
+
 from __future__ import annotations
 
 import warnings
@@ -61,6 +62,8 @@ def test_clicks_where_the_hidden_music_buttons_sit_change_nothing(game, monkeypa
     monkeypatch.setattr(game.mouse, "position", button.rect.center, raising=False)
 
     for kind in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP):
-        game.handle_audio_settings_events(pygame.event.Event(kind, button=1, pos=button.rect.center))
+        game.handle_audio_settings_events(
+            pygame.event.Event(kind, button=1, pos=button.rect.center)
+        )
 
     assert game.audio.music_volume() == volume

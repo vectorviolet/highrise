@@ -21,6 +21,7 @@ class _MoveAxis:
     get_tile: Callable
     reverse: bool
 
+
 class Building(StateObject):
     def __init__(self, level, age_number, tile: Tile) -> None:
         self.tile = tile
@@ -31,10 +32,14 @@ class Building(StateObject):
         self.cooldown = 2
         self.level = level
         self.speed = (self.level * 2 * (age_number + 1)) - 1
-        self.sell_price = self.level*(self.age_number+1)*70
+        self.sell_price = self.level * (self.age_number + 1) * 70
         self.__set_size()
         self.set_position_from_tile(self.tile)
-        super().__init__(pos=self.unselected_position, size=self.size, image_path=self.get_image_path())
+        super().__init__(
+            pos=self.unselected_position,
+            size=self.size,
+            image_path=self.get_image_path(),
+        )
         self.add_component(Rigidbody2D).set_velocity((0, 0))
         self.on_payout: Callable[[int], None] | None = None
         self.invoke_repeating(self._payout, delay=self.cooldown, interval=self.cooldown)
@@ -76,6 +81,7 @@ class Building(StateObject):
         self.new_building = new_building
         self.should_destroy = True
 
+
 class Buildings(list[Building]):
     def __init__(self, assets: AssetManager) -> None:
         super().__init__()
@@ -105,25 +111,43 @@ class Buildings(list[Building]):
                 if building.should_destroy:
                     self.remove(building)
                     self.remove(building.new_building)
-                    self.append(Building(building.level + 1, building.age_number, building.tile))
+                    self.append(
+                        Building(building.level + 1, building.age_number, building.tile)
+                    )
                     self.sort(key=lambda b: b.tile.column_number)
 
                     sound = self.assets.sound_path("merge")
                     GameAudio.play_sfx(sound)
                 else:
-                    if building.tile.selected and building.tile.rect == building.tile.selected_rect:
-                        building.rect.topleft = (int(building.selected_position.x), int(building.selected_position.y))
+                    if (
+                        building.tile.selected
+                        and building.tile.rect == building.tile.selected_rect
+                    ):
+                        building.rect.topleft = (
+                            int(building.selected_position.x),
+                            int(building.selected_position.y),
+                        )
                     else:
-                        building.rect.topleft = (int(building.unselected_position.x), int(building.unselected_position.y))
+                        building.rect.topleft = (
+                            int(building.unselected_position.x),
+                            int(building.unselected_position.y),
+                        )
             else:
                 tp = building.target_position
                 p = Vector2(building.rect.topleft)
                 v = building.rigidbody.velocity
-                x_done = v.x == 0 or (v.x > 0 and p.x >= tp.x) or (v.x < 0 and p.x <= tp.x)
-                y_done = v.y == 0 or (v.y > 0 and p.y >= tp.y) or (v.y < 0 and p.y <= tp.y)
+                x_done = (
+                    v.x == 0 or (v.x > 0 and p.x >= tp.x) or (v.x < 0 and p.x <= tp.x)
+                )
+                y_done = (
+                    v.y == 0 or (v.y > 0 and p.y >= tp.y) or (v.y < 0 and p.y <= tp.y)
+                )
                 if x_done and y_done:
                     building.rigidbody.set_velocity(Vector2(0, 0))
-                    building.rect.topleft = (int(building.target_position.x), int(building.target_position.y))
+                    building.rect.topleft = (
+                        int(building.target_position.x),
+                        int(building.target_position.y),
+                    )
 
     def update(self):
         for building in self:
@@ -147,27 +171,31 @@ class Buildings(list[Building]):
         reverse = rotation in ("down", "right")
         if rotation in ("up", "down"):
             return _MoveAxis(
-                line_count  = tilemap.column_count,
-                line_length = tilemap.row_count,
-                get_line    = lambda b: b.tile.column_number - 1,
-                get_pos     = lambda b: b.tile.row_number - 1,
-                get_tile    = lambda line, pos: tilemap[pos][line],
-                reverse     = reverse,
+                line_count=tilemap.column_count,
+                line_length=tilemap.row_count,
+                get_line=lambda b: b.tile.column_number - 1,
+                get_pos=lambda b: b.tile.row_number - 1,
+                get_tile=lambda line, pos: tilemap[pos][line],
+                reverse=reverse,
             )
         return _MoveAxis(
-            line_count  = tilemap.row_count,
-            line_length = tilemap.column_count,
-            get_line    = lambda b: b.tile.row_number - 1,
-            get_pos     = lambda b: b.tile.column_number - 1,
-            get_tile    = lambda line, pos: tilemap[line][pos],
-            reverse     = reverse,
+            line_count=tilemap.row_count,
+            line_length=tilemap.column_count,
+            get_line=lambda b: b.tile.row_number - 1,
+            get_pos=lambda b: b.tile.column_number - 1,
+            get_tile=lambda line, pos: tilemap[line][pos],
+            reverse=reverse,
         )
 
     @staticmethod
-    def _can_merge(previous: "Building | None", building: "Building", max_level: int) -> bool:
-        return (previous is not None
-                and previous.level == building.level
-                and previous.level < max_level)
+    def _can_merge(
+        previous: "Building | None", building: "Building", max_level: int
+    ) -> bool:
+        return (
+            previous is not None
+            and previous.level == building.level
+            and previous.level < max_level
+        )
 
     def _resolve_line(self, line: int, axis: _MoveAxis, max_level: int) -> None:
         line_buildings = sorted(

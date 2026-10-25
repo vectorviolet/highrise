@@ -9,6 +9,7 @@ Read-only with respect to databases/database.db: load_data() only inserts a
 fresh row when the table is empty and never calls save_game()/delete_data(),
 so an existing save is left untouched.
 """
+
 import sys
 from pathlib import Path
 
@@ -18,9 +19,14 @@ sys.path.insert(0, "src")
 sys.path.insert(0, "src/pygamine")
 
 PANELS = (
-    "menu", "play", "settings",
-    "display_settings", "audio_settings", "game_settings",
-    "developer", "game",
+    "menu",
+    "play",
+    "settings",
+    "display_settings",
+    "audio_settings",
+    "game_settings",
+    "developer",
+    "game",
 )
 
 

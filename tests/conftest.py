@@ -38,5 +38,7 @@ def assets() -> AssetManager:
 def saves_in_tmp(tmp_path, monkeypatch):
     """Every test's Database (the game's save, databases/database.db) and
     SaveStore default to a temporary folder, never the repo's real ones."""
-    monkeypatch.setattr(Database.__init__, "__defaults__", (str(tmp_path / "databases"),))
+    monkeypatch.setattr(
+        Database.__init__, "__defaults__", (str(tmp_path / "databases"),)
+    )
     monkeypatch.setattr(SaveStore.__init__, "__defaults__", (str(tmp_path / "saves"),))

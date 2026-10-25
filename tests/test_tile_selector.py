@@ -41,7 +41,9 @@ def test_update_selection_marks_only_the_hovered_tile_selected(assets):
     assert all(t.rect == t.unselected_rect for t in others)
 
 
-def test_update_selection_keeps_the_unselected_rect_when_the_selector_is_inactive(assets):
+def test_update_selection_keeps_the_unselected_rect_when_the_selector_is_inactive(
+    assets,
+):
     selector, tilemap, mouse, _ = make_selector(assets, active=False)
     target = tilemap[0][0]
     mouse.position = target.unselected_rect.center

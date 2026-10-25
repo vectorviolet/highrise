@@ -65,7 +65,7 @@ def test_payout_is_a_no_op_without_a_listener(assets):
 
 
 def test_level_up_moves_the_sacrificial_building_and_marks_it_for_destruction(assets):
-    survivor    = make_building(level=2, row=1, col=1)
+    survivor = make_building(level=2, row=1, col=1)
     sacrificial = make_building(level=2, row=2, col=2)
 
     survivor.level_up(sacrificial)

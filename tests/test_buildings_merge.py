@@ -17,7 +17,9 @@ def make_grid(assets, size=3):
     return Buildings(assets), Tilemap(size=size, max_size=size)
 
 
-def place(buildings: Buildings, tilemap: Tilemap, level: int, row: int, col: int) -> Building:
+def place(
+    buildings: Buildings, tilemap: Tilemap, level: int, row: int, col: int
+) -> Building:
     b = Building(level, 0, tilemap[row - 1][col - 1])
     buildings.append(b)
     return b
@@ -62,7 +64,7 @@ def test_move_down_slides_a_lone_building_to_the_last_row(assets):
 
 def test_equal_level_buildings_merge_on_collision(assets):
     buildings, tilemap = make_grid(assets)
-    survivor    = place(buildings, tilemap, level=1, row=1, col=1)
+    survivor = place(buildings, tilemap, level=1, row=1, col=1)
     sacrificial = place(buildings, tilemap, level=1, row=1, col=2)
 
     buildings.move("left", tilemap, MAX_LEVEL)
@@ -76,7 +78,7 @@ def test_equal_level_buildings_merge_on_collision(assets):
 
 def test_different_level_buildings_pack_adjacent_without_merging(assets):
     buildings, tilemap = make_grid(assets)
-    low  = place(buildings, tilemap, level=1, row=1, col=1)
+    low = place(buildings, tilemap, level=1, row=1, col=1)
     high = place(buildings, tilemap, level=2, row=1, col=3)
 
     buildings.move("left", tilemap, MAX_LEVEL)
@@ -115,7 +117,7 @@ def test_move_is_a_no_op_while_a_previous_move_is_still_animating(assets):
 def test_control_moving_finalizes_a_settled_merge_into_a_leveled_up_building(assets):
     buildings, tilemap = make_grid(assets)
     tile = tilemap[0][0]
-    survivor    = Building(2, 0, tile)
+    survivor = Building(2, 0, tile)
     sacrificial = Building(2, 0, tile)
     sacrificial.should_destroy = True
     sacrificial.new_building = survivor

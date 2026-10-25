@@ -92,42 +92,57 @@ class FakePanelManager(dict):
 
 
 def make_panels():
-    return FakePanelManager({
-        "menu": {
-            "play_button": FakeButton(), "settings_button": FakeButton(),
-            "developer_button": FakeButton(), "exit_button": FakeButton(),
-        },
-        "play": {
-            "new_game_button": FakeButton(), "continue_button": FakeButton(),
-            "play_back_button": FakeButton(),
-        },
-        "settings": {
-            "display_settings_button": FakeButton(), "audio_settings_button": FakeButton(),
-            "game_settings_button": FakeButton(), "settings_back_button": FakeButton(),
-        },
-        "display_settings": {
-            "window_mode_minus_button": FakeButton(), "window_mode_plus_button": FakeButton(),
-            "window_size_minus_button": FakeButton(), "window_size_plus_button": FakeButton(),
-            "display_back_button": FakeButton(),
-        },
-        "audio_settings": {
-            "music_volume_plus_button": FakeButton(), "music_volume_minus_button": FakeButton(),
-            "sfx_volume_plus_button": FakeButton(), "sfx_volume_minus_button": FakeButton(),
-            "cancel_button": FakeButton(), "save_button": FakeButton(),
-        },
-        "game_settings": {"game_settings_back_button": FakeButton()},
-        "developer": {
-            "github_button": FakeButton(), "linkedin_button": FakeButton(),
-            "developer_back_button": FakeButton(),
-        },
-        "game": {
-            "info_panel": FakeGuiObject(active=False),
-            "sell_button": FakeButton(), "close_button": FakeButton(),
-            "selection_mode_button": FakeButton(),
-            "expand_button": FakeButton(), "build_button": FakeButton(),
-            "next_age_button": FakeButton(),
-        },
-    })
+    return FakePanelManager(
+        {
+            "menu": {
+                "play_button": FakeButton(),
+                "settings_button": FakeButton(),
+                "developer_button": FakeButton(),
+                "exit_button": FakeButton(),
+            },
+            "play": {
+                "new_game_button": FakeButton(),
+                "continue_button": FakeButton(),
+                "play_back_button": FakeButton(),
+            },
+            "settings": {
+                "display_settings_button": FakeButton(),
+                "audio_settings_button": FakeButton(),
+                "game_settings_button": FakeButton(),
+                "settings_back_button": FakeButton(),
+            },
+            "display_settings": {
+                "window_mode_minus_button": FakeButton(),
+                "window_mode_plus_button": FakeButton(),
+                "window_size_minus_button": FakeButton(),
+                "window_size_plus_button": FakeButton(),
+                "display_back_button": FakeButton(),
+            },
+            "audio_settings": {
+                "music_volume_plus_button": FakeButton(),
+                "music_volume_minus_button": FakeButton(),
+                "sfx_volume_plus_button": FakeButton(),
+                "sfx_volume_minus_button": FakeButton(),
+                "cancel_button": FakeButton(),
+                "save_button": FakeButton(),
+            },
+            "game_settings": {"game_settings_back_button": FakeButton()},
+            "developer": {
+                "github_button": FakeButton(),
+                "linkedin_button": FakeButton(),
+                "developer_back_button": FakeButton(),
+            },
+            "game": {
+                "info_panel": FakeGuiObject(active=False),
+                "sell_button": FakeButton(),
+                "close_button": FakeButton(),
+                "selection_mode_button": FakeButton(),
+                "expand_button": FakeButton(),
+                "build_button": FakeButton(),
+                "next_age_button": FakeButton(),
+            },
+        }
+    )
 
 
 class FakeGame(GameEventsMixin):
@@ -136,30 +151,63 @@ class FakeGame(GameEventsMixin):
         self.mouse = SimpleNamespace(position=(0, 0))
         self.audio = FakeAudio()
         self.click_sound_path = "assets/sfx/click.ogg"
-        self.background_music_sound_path = "assets/sounds/music.ogg"  # a game with music: its controls work
+        self.background_music_sound_path = (
+            "assets/sounds/music.ogg"  # a game with music: its controls work
+        )
         self.old_music_volume = 0.5
         self.old_sfx_volume = 0.5
         self.tile_selector = FakeTileSelector()
         self.info_panel = FakeInfoPanel()
-        self.buildings = SimpleNamespace(remove=lambda b: self.calls.append(("remove", b)))
+        self.buildings = SimpleNamespace(
+            remove=lambda b: self.calls.append(("remove", b))
+        )
         self.player = SimpleNamespace(earn=lambda a: self.calls.append(("earn", a)))
         self.calls: list = []
 
-    def play(self):                       self.calls.append("play")
-    def new_game(self):                   self.calls.append("new_game")
-    def open_panel(self, tab):            self.calls.append(("open_panel", tab))
-    def cycle_window_mode(self, step):    self.calls.append(("cycle_window_mode", step))
-    def cycle_resolution(self, step):     self.calls.append(("cycle_resolution", step))
-    def set_window_mode_label(self):      self.calls.append("set_window_mode_label")
-    def set_window_size_label(self):      self.calls.append("set_window_size_label")
-    def set_music_label(self, v):         self.calls.append(("set_music_label", v))
-    def set_sfx_label(self, v):           self.calls.append(("set_sfx_label", v))
-    def save_audio_settings(self):        self.calls.append("save_audio_settings")
-    def expand(self):                     self.calls.append("expand")
-    def create_building(self):            self.calls.append("create_building")
-    def next_age(self):                   self.calls.append("next_age")
-    def move_buildings(self, rotation):   self.calls.append(("move_buildings", rotation))
-    def update_button_texts(self):        self.calls.append("update_button_texts")
+    def play(self):
+        self.calls.append("play")
+
+    def new_game(self):
+        self.calls.append("new_game")
+
+    def open_panel(self, tab):
+        self.calls.append(("open_panel", tab))
+
+    def cycle_window_mode(self, step):
+        self.calls.append(("cycle_window_mode", step))
+
+    def cycle_resolution(self, step):
+        self.calls.append(("cycle_resolution", step))
+
+    def set_window_mode_label(self):
+        self.calls.append("set_window_mode_label")
+
+    def set_window_size_label(self):
+        self.calls.append("set_window_size_label")
+
+    def set_music_label(self, v):
+        self.calls.append(("set_music_label", v))
+
+    def set_sfx_label(self, v):
+        self.calls.append(("set_sfx_label", v))
+
+    def save_audio_settings(self):
+        self.calls.append("save_audio_settings")
+
+    def expand(self):
+        self.calls.append("expand")
+
+    def create_building(self):
+        self.calls.append("create_building")
+
+    def next_age(self):
+        self.calls.append("next_age")
+
+    def move_buildings(self, rotation):
+        self.calls.append(("move_buildings", rotation))
+
+    def update_button_texts(self):
+        self.calls.append("update_button_texts")
 
 
 def click_up():
@@ -167,6 +215,7 @@ def click_up():
 
 
 # ── _activate ────────────────────────────────────────────────────────────────
+
 
 def test_activate_true_on_click_plays_the_click_sound():
     game = FakeGame()
@@ -177,6 +226,7 @@ def test_activate_true_on_click_plays_the_click_sound():
 
 
 # ── menu ─────────────────────────────────────────────────────────────────────
+
 
 def test_menu_play_button_calls_play():
     game = FakeGame()
@@ -189,7 +239,9 @@ def test_menu_play_button_calls_play():
 
 def test_menu_navigation_buttons():
     for button_name, dest in (
-        ("settings_button", "settings"), ("developer_button", "developer"), ("exit_button", "exit"),
+        ("settings_button", "settings"),
+        ("developer_button", "developer"),
+        ("exit_button", "exit"),
     ):
         game = FakeGame()
         game.panel_manager["menu"][button_name].clicked = True
@@ -198,6 +250,7 @@ def test_menu_navigation_buttons():
 
 
 # ── play ─────────────────────────────────────────────────────────────────────
+
 
 def test_play_panel_buttons():
     game = FakeGame()
@@ -217,6 +270,7 @@ def test_play_panel_buttons():
 
 
 # ── settings ─────────────────────────────────────────────────────────────────
+
 
 def test_settings_navigation():
     for button_name, dest in (
@@ -243,6 +297,7 @@ def test_settings_audio_settings_button_snapshots_the_current_volumes():
 
 
 # ── display settings ─────────────────────────────────────────────────────────
+
 
 def test_display_settings_window_mode_buttons():
     game = FakeGame()
@@ -281,6 +336,7 @@ def test_display_settings_back_button():
 
 
 # ── audio settings ───────────────────────────────────────────────────────────
+
 
 def test_audio_settings_volume_buttons_adjust_by_a_tenth():
     game = FakeGame()
@@ -321,6 +377,7 @@ def test_audio_settings_save_persists_and_returns_to_settings():
 
 # ── game settings / developer ────────────────────────────────────────────────
 
+
 def test_game_settings_back_button():
     game = FakeGame()
     game.panel_manager["game_settings"]["game_settings_back_button"].clicked = True
@@ -332,8 +389,11 @@ def test_game_settings_back_button():
 
 def test_developer_links_open_in_a_browser(monkeypatch):
     import app.game_events as game_events_module
+
     opened = []
-    monkeypatch.setattr(game_events_module.webbrowser, "open", lambda url: opened.append(url))
+    monkeypatch.setattr(
+        game_events_module.webbrowser, "open", lambda url: opened.append(url)
+    )
 
     game = FakeGame()
     game.panel_manager["developer"]["github_button"].clicked = True
@@ -343,7 +403,10 @@ def test_developer_links_open_in_a_browser(monkeypatch):
     game2 = FakeGame()
     game2.panel_manager["developer"]["linkedin_button"].clicked = True
     game2.handle_developer_events(click_up())
-    assert opened == ["https://www.github.com/umutcanekinci/", "https://www.linkedin.com/in/umutcanekinci/"]
+    assert opened == [
+        "https://www.github.com/umutcanekinci/",
+        "https://www.linkedin.com/in/umutcanekinci/",
+    ]
 
 
 def test_developer_back_button():
@@ -356,6 +419,7 @@ def test_developer_back_button():
 
 
 # ── game panel ───────────────────────────────────────────────────────────────
+
 
 def test_game_events_updates_selection_while_the_selector_is_active():
     game = FakeGame()
@@ -394,7 +458,9 @@ def test_game_events_info_panel_open_close_button_just_closes_it():
 def test_game_events_info_panel_open_ignores_expand_build_and_hotkeys():
     game = FakeGame()
     game.panel_manager["game"]["info_panel"].active = True
-    game.panel_manager["game"]["expand_button"].clicked = True  # should be ignored -- info panel owns input
+    game.panel_manager["game"][
+        "expand_button"
+    ].clicked = True  # should be ignored -- info panel owns input
 
     game.handle_game_events(click_up())
 

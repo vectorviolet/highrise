@@ -29,25 +29,29 @@ from ui.info_panel import InfoPanel
 # the splash plays before the saved volumes are applied).
 MUSIC_KEY = "bg"
 MUSIC_VOLUME_OBJECTS = (
-    "music_volume_text", "music_volume_minus_button", "music_volume_plus_button",
-    "music_volume_entry", "music_volume_entry_text",
-    "music_volume_minus_icon", "music_volume_plus_icon",
+    "music_volume_text",
+    "music_volume_minus_button",
+    "music_volume_plus_button",
+    "music_volume_entry",
+    "music_volume_entry_text",
+    "music_volume_minus_icon",
+    "music_volume_plus_icon",
 )
 
 WINDOW_MODE_LABELS = {
     "fullscreen": "FULLSCREEN",
     "borderless": "BORDERLESS",
-    "windowed":   "WINDOWED",
+    "windowed": "WINDOWED",
 }
 
-class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
+class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def __init__(self) -> None:
         self.settings = yaml.safe_load(Path("config/settings.yaml").read_text())
-        window   = self.settings["window"]
+        window = self.settings["window"]
         gameplay = self.settings["gameplay"]
-        audio    = self.settings["audio"]
-        ui       = self.settings["ui"]
+        audio = self.settings["audio"]
+        ui = self.settings["ui"]
 
         self.cursor_size = tuple(ui["cursor_size"])
 
@@ -84,7 +88,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.old_sfx_volume = self.default_sfx_volume
 
         self.background_music_sound_path = (
-            self.assets.sound_path(MUSIC_KEY) if self.has_music_asset(self.assets) else None
+            self.assets.sound_path(MUSIC_KEY)
+            if self.has_music_asset(self.assets)
+            else None
         )
         self.click_sound_path = self.assets.sound_path("click")
         self.go_back_sound_path = self.assets.sound_path("back")
@@ -92,17 +98,19 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.info_panel = InfoPanel(self.panel_manager)
         self.tile_selector = TileSelector(self.tilemap, self.mouse, self.buildings)
         self.cloud_animation = OneShotCloudAnimation(self.size)
-        self.splash = SplashScreen(standard_splash_media(self.audio), skip_completely=True)
+        self.splash = SplashScreen(
+            standard_splash_media(self.audio), skip_completely=True
+        )
 
         self.handlers = {
-            "menu":             self.handle_menu_events,
-            "play":             self.handle_play_events,
-            "settings":         self.handle_settings_events,
+            "menu": self.handle_menu_events,
+            "play": self.handle_play_events,
+            "settings": self.handle_settings_events,
             "display_settings": self.handle_display_settings_events,
-            "audio_settings":   self.handle_audio_settings_events,
-            "game_settings":    self.handle_game_settings_events,
-            "developer":        self.handle_developer_events,
-            "game":             self.handle_game_events,
+            "audio_settings": self.handle_audio_settings_events,
+            "game_settings": self.handle_game_settings_events,
+            "developer": self.handle_developer_events,
+            "game": self.handle_game_events,
         }
         self.menu_controllers: dict = {}
 
@@ -130,7 +138,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             self._authored_size[0] / display_w, self._authored_size[1] / display_h
         )
         if abs(target_scale - self.render_scale) > 1e-9:
-            self.set_render_scale(target_scale)  # re-enters this method with the corrected size
+            self.set_render_scale(
+                target_scale
+            )  # re-enters this method with the corrected size
 
     def run(self) -> None:
         # Application.run() would call this itself, but this project needs
@@ -139,7 +149,13 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         # delegating the splash part instead of duplicating it.
         self.show_splash()
         self.mouse.set_cursor_visible(False)
-        self.mouse.set_cursor_image(StateObject(pos=(0, 0), size=self.cursor_size, image_path=self.assets.image_path("cursor")))
+        self.mouse.set_cursor_image(
+            StateObject(
+                pos=(0, 0),
+                size=self.cursor_size,
+                image_path=self.assets.image_path("cursor"),
+            )
+        )
 
         self.load_data()
         self.tile_selector.tilemap = self.tilemap
@@ -174,7 +190,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def add_objects(self) -> None:
         # Game
-        self.panel_manager.add_object("game", "clouds", LoopingCloudAnimation(self.cloud_count, self.size))
+        self.panel_manager.add_object(
+            "game", "clouds", LoopingCloudAnimation(self.cloud_count, self.size)
+        )
         self.panel_manager.add_object("game", "tiles", self.tilemap)
         self.panel_manager.add_object("game", "buildings", self.buildings)
 
@@ -186,28 +204,57 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self._show_music_controls(self.background_music_sound_path is not None)
 
         panel = self.panel_manager["game"]
-        for name in ("info_panel", "level_text", "speed_text", "cooldown_text",
-                     "sell_price_text", "close_button", "sell_button", "sell_button_text",
-                     "info_panel_building_image"):
+        for name in (
+            "info_panel",
+            "level_text",
+            "speed_text",
+            "cooldown_text",
+            "sell_price_text",
+            "close_button",
+            "sell_button",
+            "sell_button_text",
+            "info_panel_building_image",
+        ):
             panel[name].set_parent(self.info_panel.root)
 
         panel["selection_mode_button"].set_base_state("off")
-        panel["close_button"].images[None].blit(self.assets.get_image("cross_white"), (9, 9))
-        panel["close_button"]._hover_images[None].blit(self.assets.get_image("cross_grey"), (9, 9))
+        panel["close_button"].images[None].blit(
+            self.assets.get_image("cross_white"), (9, 9)
+        )
+        panel["close_button"]._hover_images[None].blit(
+            self.assets.get_image("cross_grey"), (9, 9)
+        )
 
         switch_up = self.assets.sound_path("switch_up")
         switch_down = self.assets.sound_path("switch_down")
-        menu_buttons = [self.panel_manager["menu"][n] for n in
-                        ("play_button", "settings_button", "developer_button", "exit_button")]
-        play_buttons = [self.panel_manager["play"][n] for n in
-                        ("new_game_button", "continue_button", "play_back_button")]
-        settings_buttons = [self.panel_manager["settings"][n] for n in
-                            ("display_settings_button", "audio_settings_button",
-                             "game_settings_button", "settings_back_button")]
+        menu_buttons = [
+            self.panel_manager["menu"][n]
+            for n in (
+                "play_button",
+                "settings_button",
+                "developer_button",
+                "exit_button",
+            )
+        ]
+        play_buttons = [
+            self.panel_manager["play"][n]
+            for n in ("new_game_button", "continue_button", "play_back_button")
+        ]
+        settings_buttons = [
+            self.panel_manager["settings"][n]
+            for n in (
+                "display_settings_button",
+                "audio_settings_button",
+                "game_settings_button",
+                "settings_back_button",
+            )
+        ]
         self.menu_controllers = {
-            "menu":     MenuController(menu_buttons,     self.audio, switch_up, switch_down),
-            "play":     MenuController(play_buttons,     self.audio, switch_up, switch_down),
-            "settings": MenuController(settings_buttons, self.audio, switch_up, switch_down),
+            "menu": MenuController(menu_buttons, self.audio, switch_up, switch_down),
+            "play": MenuController(play_buttons, self.audio, switch_up, switch_down),
+            "settings": MenuController(
+                settings_buttons, self.audio, switch_up, switch_down
+            ),
         }
 
         money_text = self.panel_manager["game"]["money_text"]
@@ -226,17 +273,23 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         if tilemap.is_max_size():
             panel["expand_button_text"].set_text("MAX SIZE", state="hover")
         else:
-            panel["expand_button_text"].set_text(f"{tilemap.get_expand_cost()}$", state="hover")
+            panel["expand_button_text"].set_text(
+                f"{tilemap.get_expand_cost()}$", state="hover"
+            )
 
         if len(self.buildings) == tilemap.row_count * tilemap.column_count:
             panel["build_button_text"].set_text("TILES FULL", state="hover")
         else:
-            panel["build_button_text"].set_text(f"{self.buildings.get_build_cost()}$", state="hover")
+            panel["build_button_text"].set_text(
+                f"{self.buildings.get_build_cost()}$", state="hover"
+            )
 
         if self.buildings.age_number == self.buildings.max_age_number:
             panel["next_age_button_text"].set_text("MAX AGE", state="hover")
         else:
-            panel["next_age_button_text"].set_text(f"{self.buildings.get_age_cost()}$", state="hover")
+            panel["next_age_button_text"].set_text(
+                f"{self.buildings.get_age_cost()}$", state="hover"
+            )
 
     def handle_event(self, event: pygame.Event) -> None:
         super().handle_event(event)
@@ -273,8 +326,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         elif panel in ("display_settings", "game_settings"):
             self.open_panel("settings")
         elif panel == "audio_settings":
-            self.audio.set_music_volume(self.old_music_volume); self.set_music_label(self.old_music_volume)
-            self.audio.set_sfx_volume(self.old_sfx_volume);     self.set_sfx_label(self.old_sfx_volume)
+            self.audio.set_music_volume(self.old_music_volume)
+            self.set_music_label(self.old_music_volume)
+            self.audio.set_sfx_volume(self.old_sfx_volume)
+            self.set_sfx_label(self.old_sfx_volume)
             self.open_panel("settings")
         elif panel == "developer":
             self.open_panel("menu")
@@ -295,27 +350,43 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         tilemap.expand()
 
         for building in self.buildings:
-            building.tile = tilemap[building.tile.row_number - 1][building.tile.column_number - 1]
+            building.tile = tilemap[building.tile.row_number - 1][
+                building.tile.column_number - 1
+            ]
 
         self.update_button_texts()
         self.audio.play_sfx(self.click_sound_path)
 
     def add_building(self, level, row_number, column_number) -> None:
         tilemap = self._tilemap
-        new_building = Building(level, self.buildings.age_number, tilemap[row_number - 1][column_number - 1])
+        new_building = Building(
+            level, self.buildings.age_number, tilemap[row_number - 1][column_number - 1]
+        )
         self.buildings.append(new_building)
         self.buildings.sort(key=lambda b: b.tile.column_number)
 
-        if len(self.buildings) == tilemap.row_count * tilemap.column_count and "game" in self.panel_manager and "build_button_text" in self.panel_manager["game"]:
-            self.panel_manager["game"]["build_button_text"].set_text("TILES FULL", state="hover")
+        if (
+            len(self.buildings) == tilemap.row_count * tilemap.column_count
+            and "game" in self.panel_manager
+            and "build_button_text" in self.panel_manager["game"]
+        ):
+            self.panel_manager["game"]["build_button_text"].set_text(
+                "TILES FULL", state="hover"
+            )
 
     def create_building(self) -> None:
-        if self.buildings.is_moving() or not self.player.can_afford(self.buildings.get_build_cost()):
+        if self.buildings.is_moving() or not self.player.can_afford(
+            self.buildings.get_build_cost()
+        ):
             return
 
         tilemap = self._tilemap
-        all_tiles = {(r + 1, c + 1) for r in range(tilemap.row_count) for c in range(tilemap.column_count)}
-        occupied  = {(b.tile.row_number, b.tile.column_number) for b in self.buildings}
+        all_tiles = {
+            (r + 1, c + 1)
+            for r in range(tilemap.row_count)
+            for c in range(tilemap.column_count)
+        }
+        occupied = {(b.tile.row_number, b.tile.column_number) for b in self.buildings}
         empty_tiles = list(all_tiles - occupied)
 
         if empty_tiles:
@@ -376,10 +447,14 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     # ── audio-settings UI labels (volume → "%NN" text on a panel widget) ──
 
     def set_music_label(self, volume: float) -> None:
-        self._set_volume_label(volume, self.panel_manager["audio_settings"]["music_volume_entry_text"])
+        self._set_volume_label(
+            volume, self.panel_manager["audio_settings"]["music_volume_entry_text"]
+        )
 
     def set_sfx_label(self, volume: float) -> None:
-        self._set_volume_label(volume, self.panel_manager["audio_settings"]["sfx_volume_entry_text"])
+        self._set_volume_label(
+            volume, self.panel_manager["audio_settings"]["sfx_volume_entry_text"]
+        )
 
     @staticmethod
     def _set_volume_label(volume: float, text_obj) -> None:
@@ -388,7 +463,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def set_window_size_label(self) -> None:
         w, h = self.resolution
-        self.panel_manager["display_settings"]["window_size_entry_text"].set_text(f"{w}x{h}")
+        self.panel_manager["display_settings"]["window_size_entry_text"].set_text(
+            f"{w}x{h}"
+        )
 
     def set_window_mode_label(self) -> None:
         self.panel_manager["display_settings"]["window_mode_entry_text"].set_text(

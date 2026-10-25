@@ -33,15 +33,17 @@ def test_is_point_in_triangle(assets):
     tile = Tile(1, 1)
 
     assert tile.is_point_in_triangle(TRIANGLE, (2, 2)) is True
-    assert tile.is_point_in_triangle(TRIANGLE, (9, 9)) is False  # outside the hypotenuse
+    assert (
+        tile.is_point_in_triangle(TRIANGLE, (9, 9)) is False
+    )  # outside the hypotenuse
     assert tile.is_point_in_triangle(TRIANGLE, (-1, -1)) is False
 
 
 def test_is_point_in_quadrangle_covers_both_halves(assets):
     tile = Tile(1, 1)
 
-    assert tile.is_point_in_quadrangle(SQUARE, (5, 5)) is True   # center
-    assert tile.is_point_in_quadrangle(SQUARE, (1, 9)) is True   # near a far corner
+    assert tile.is_point_in_quadrangle(SQUARE, (5, 5)) is True  # center
+    assert tile.is_point_in_quadrangle(SQUARE, (1, 9)) is True  # near a far corner
     assert tile.is_point_in_quadrangle(SQUARE, (20, 20)) is False
 
 

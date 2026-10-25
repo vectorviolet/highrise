@@ -32,8 +32,16 @@ class FakeAudio:
 
 
 class FakeGame(GamePersistenceMixin):
-    def __init__(self, tmp_path, assets, *, starting_money=500,
-                 default_music=0.5, default_sfx=0.5, max_size=7):
+    def __init__(
+        self,
+        tmp_path,
+        assets,
+        *,
+        starting_money=500,
+        default_music=0.5,
+        default_sfx=0.5,
+        max_size=7,
+    ):
         self.database = Database("test_persistence", directory=str(tmp_path))
         self.starting_money = starting_money
         self.default_music_volume = default_music
@@ -60,6 +68,7 @@ def insert_building_row(game, level, row, column):
 
 
 # ── init / seed ──────────────────────────────────────────────────────────────
+
 
 def test_init_database_creates_empty_tables(tmp_path, assets):
     game = FakeGame(tmp_path, assets)
@@ -91,6 +100,7 @@ def test_get_game_data_returns_the_existing_row_on_later_calls(tmp_path, assets)
 
 # ── load_data (top-level orchestrator) ──────────────────────────────────────
 
+
 def test_load_data_bootstraps_a_brand_new_database_end_to_end(tmp_path, assets):
     game = FakeGame(tmp_path, assets, starting_money=250)
 
@@ -121,6 +131,7 @@ def test_load_data_restores_a_previously_saved_game(tmp_path, assets):
 
 # ── load_game_data ───────────────────────────────────────────────────────────
 
+
 def test_load_game_data_applies_saved_values(tmp_path, assets):
     game = FakeGame(tmp_path, assets, max_size=7)
 
@@ -147,6 +158,7 @@ def test_load_game_data_is_a_no_op_with_no_rows(tmp_path, assets):
 
 # ── load_buildings ───────────────────────────────────────────────────────────
 
+
 def test_load_buildings_restores_valid_rows_within_the_grid(tmp_path, assets):
     game = FakeGame(tmp_path, assets)
     game.init_database()
@@ -161,7 +173,9 @@ def test_load_buildings_restores_valid_rows_within_the_grid(tmp_path, assets):
     assert ("add_building", 1, 3, 3) in game.calls
 
 
-def test_load_buildings_deletes_out_of_bounds_rows_instead_of_restoring_them(tmp_path, assets):
+def test_load_buildings_deletes_out_of_bounds_rows_instead_of_restoring_them(
+    tmp_path, assets
+):
     game = FakeGame(tmp_path, assets)
     game.init_database()
     game.load_game_data([(0, 3, 0, 0.5, 0.5)])  # 3x3 grid -- row/col must be 1..3
@@ -188,6 +202,7 @@ def test_load_buildings_clears_any_existing_in_memory_buildings_first(tmp_path, 
 
 # ── save / delete ────────────────────────────────────────────────────────────
 
+
 def test_save_audio_settings_persists_current_volumes(tmp_path, assets):
     game = FakeGame(tmp_path, assets)
     game.init_database()
@@ -197,7 +212,9 @@ def test_save_audio_settings_persists_current_volumes(tmp_path, assets):
 
     game.save_audio_settings()
 
-    row = game.database.execute_safely("SELECT music_volume, sfx_volume FROM game", True)
+    row = game.database.execute_safely(
+        "SELECT music_volume, sfx_volume FROM game", True
+    )
     assert row == [(0.42, 0.13)]
 
 
@@ -212,9 +229,13 @@ def test_save_game_persists_state_and_buildings(tmp_path, assets):
 
     game.save_game()
 
-    game_row = game.database.execute_safely("SELECT age_number, size, money FROM game", True)
+    game_row = game.database.execute_safely(
+        "SELECT age_number, size, money FROM game", True
+    )
     assert game_row == [(2, 3, 900)]
-    building_rows = game.database.execute_safely("SELECT level, row, column FROM buildings", True)
+    building_rows = game.database.execute_safely(
+        "SELECT level, row, column FROM buildings", True
+    )
     assert building_rows == [(3, 2, 2)]
 
 
@@ -230,7 +251,9 @@ def test_save_game_replaces_rather_than_accumulates_building_rows(tmp_path, asse
     game.buildings.append(Building(2, 0, game.tilemap[2][2]))
     game.save_game()
 
-    building_rows = game.database.execute_safely("SELECT level, row, column FROM buildings", True)
+    building_rows = game.database.execute_safely(
+        "SELECT level, row, column FROM buildings", True
+    )
     assert building_rows == [(2, 3, 3)]
 
 
@@ -244,7 +267,9 @@ def test_delete_data_resets_the_game_row_and_clears_buildings(tmp_path, assets):
 
     game.delete_data()
 
-    game_row = game.database.execute_safely("SELECT age_number, size, money FROM game", True)
+    game_row = game.database.execute_safely(
+        "SELECT age_number, size, money FROM game", True
+    )
     assert game_row == [(0, 2, 500)]
     building_rows = game.database.execute_safely("SELECT * FROM buildings", True)
     assert building_rows == []

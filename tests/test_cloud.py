@@ -1,7 +1,11 @@
 from pygamine import ImagePath, Rigidbody2D
 
 from gameplay.clouds.cloud import Cloud
-from gameplay.clouds.cloud_container import CloudContainer, LoopingCloudAnimation, OneShotCloudAnimation
+from gameplay.clouds.cloud_container import (
+    CloudContainer,
+    LoopingCloudAnimation,
+    OneShotCloudAnimation,
+)
 
 SURFACE_SIZE = (800, 600)
 
@@ -13,7 +17,7 @@ def test_cloud_spawns_within_bounds_and_gets_a_horizontal_only_velocity():
     assert 0 <= cloud.rect.y <= SURFACE_SIZE[1] - 101
     rb = cloud.get_component(Rigidbody2D)
     assert rb.velocity.y == 0
-    assert abs(rb.velocity.x) in (1/6, 1/7, 1/8, 1/9, 1/10, 1/11, 1/12)
+    assert abs(rb.velocity.x) in (1 / 6, 1 / 7, 1 / 8, 1 / 9, 1 / 10, 1 / 11, 1 / 12)
 
 
 def test_cloud_uses_the_requested_size():
@@ -22,6 +26,7 @@ def test_cloud_uses_the_requested_size():
 
 
 # ── CloudContainer ───────────────────────────────────────────────────────────
+
 
 def test_remove_offscreen_drops_clouds_past_either_edge():
     container = CloudContainer(SURFACE_SIZE)
@@ -39,6 +44,7 @@ def test_remove_offscreen_drops_clouds_past_either_edge():
 
 
 # ── LoopingCloudAnimation ────────────────────────────────────────────────────
+
 
 def test_create_clouds_populates_the_requested_count():
     anim = LoopingCloudAnimation(5, SURFACE_SIZE)
@@ -86,6 +92,7 @@ def test_remove_offscreen_also_forgets_the_companion_flag():
 
 # ── OneShotCloudAnimation ────────────────────────────────────────────────────
 
+
 def test_one_shot_creates_a_hundred_clouds_moving_away_from_center():
     # Unlike LoopingCloudAnimation, OneShotCloudAnimation.__init__ doesn't
     # call create_clouds() itself -- Game.open_panel() triggers it explicitly
@@ -109,7 +116,11 @@ def test_one_shot_update_eventually_empties_as_clouds_leave_the_screen():
     # screen -- update()'s own per-frame speed is realistically small, so
     # this pushes clouds out by hand rather than looping hundreds of frames.
     for cloud in anim:
-        cloud.rect.x = SURFACE_SIZE[0] + 10 if cloud.rect.x > SURFACE_SIZE[0] / 2 else -cloud.rect.width - 10
+        cloud.rect.x = (
+            SURFACE_SIZE[0] + 10
+            if cloud.rect.x > SURFACE_SIZE[0] / 2
+            else -cloud.rect.width - 10
+        )
 
     anim.update()
 

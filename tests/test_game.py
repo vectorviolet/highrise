@@ -6,6 +6,7 @@ skips __init__ entirely, then attach only what the method under test
 touches -- real Player/Buildings/Tilemap where the game logic itself is
 under test, small fakes for pure UI/plumbing (panel_manager, audio, ...).
 """
+
 from types import SimpleNamespace
 
 import pygame
@@ -82,11 +83,19 @@ class FakeAudio:
 
 
 def make_panels():
-    panel = FakePanelManager({
-        "game": {"build_button_text": FakeText()},
-        "audio_settings": {"music_volume_entry_text": FakeText(), "sfx_volume_entry_text": FakeText()},
-        "display_settings": {"window_size_entry_text": FakeText(), "window_mode_entry_text": FakeText()},
-    })
+    panel = FakePanelManager(
+        {
+            "game": {"build_button_text": FakeText()},
+            "audio_settings": {
+                "music_volume_entry_text": FakeText(),
+                "sfx_volume_entry_text": FakeText(),
+            },
+            "display_settings": {
+                "window_size_entry_text": FakeText(),
+                "window_mode_entry_text": FakeText(),
+            },
+        }
+    )
     return panel
 
 
@@ -105,7 +114,9 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500):
     game.click_sound_path = "assets/sfx/click.ogg"
     game.go_back_sound_path = "assets/sfx/back.ogg"
     game.panel_manager = make_panels()
-    game.cloud_animation = SimpleNamespace(create_clouds=Spy(), update=Spy(), draw=Spy())
+    game.cloud_animation = SimpleNamespace(
+        create_clouds=Spy(), update=Spy(), draw=Spy()
+    )
     game.info_panel = SimpleNamespace(is_active=False, close=Spy())
     game.old_music_volume = 0.5
     game.old_sfx_volume = 0.5
@@ -114,6 +125,7 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500):
 
 
 # ── expand ───────────────────────────────────────────────────────────────────
+
 
 def test_expand_grows_the_map_and_relocates_building_tiles(assets):
     game = make_game(assets, size=3, starting_money=100_000)
@@ -150,6 +162,7 @@ def test_expand_does_nothing_when_unaffordable(assets):
 
 # ── add_building ─────────────────────────────────────────────────────────────
 
+
 def test_add_building_appends_and_sorts_by_column(assets):
     game = make_game(assets, size=3)
 
@@ -169,6 +182,7 @@ def test_add_building_marks_tiles_full_once_the_grid_is_saturated(assets):
 
 # ── create_building ──────────────────────────────────────────────────────────
 
+
 def test_create_building_places_on_an_empty_tile_and_spends_money(assets, monkeypatch):
     game = make_game(assets, size=2, starting_money=100_000)
     monkeypatch.setattr("app.game.choice", lambda seq: sorted(seq)[0])
@@ -176,7 +190,10 @@ def test_create_building_places_on_an_empty_tile_and_spends_money(assets, monkey
     game.create_building()
 
     assert len(game.buildings) == 1
-    assert game.buildings[0].tile.row_number, game.buildings[0].tile.column_number == (1, 1)
+    assert game.buildings[0].tile.row_number, game.buildings[0].tile.column_number == (
+        1,
+        1,
+    )
     assert game.player.money == 100_000 - game.buildings.get_build_cost()
     assert game.audio.played == [game.click_sound_path]
 
@@ -191,7 +208,9 @@ def test_create_building_does_nothing_when_unaffordable(assets):
 
 def test_create_building_does_nothing_while_buildings_are_moving(assets, monkeypatch):
     game = make_game(assets, size=2, starting_money=100_000)
-    monkeypatch.setattr(type(game.buildings), "is_moving", lambda self: True, raising=False)
+    monkeypatch.setattr(
+        type(game.buildings), "is_moving", lambda self: True, raising=False
+    )
 
     game.create_building()
 
@@ -199,6 +218,7 @@ def test_create_building_does_nothing_while_buildings_are_moving(assets, monkeyp
 
 
 # ── age progression ──────────────────────────────────────────────────────────
+
 
 def test_set_age_within_range_updates_buildings_and_button_texts(assets):
     game = make_game(assets, size=3)
@@ -246,6 +266,7 @@ def test_next_age_does_nothing_at_max_age(assets):
 
 # ── move_buildings ───────────────────────────────────────────────────────────
 
+
 def test_move_buildings_forwards_to_buildings_move(assets):
     game = make_game(assets, size=3)
     game.buildings.move = Spy()
@@ -266,6 +287,7 @@ def test_move_buildings_is_a_no_op_while_the_tile_selector_is_active(assets):
 
 
 # ── payouts / panels ─────────────────────────────────────────────────────────
+
 
 def test_on_building_payout_credits_the_player(assets):
     game = make_game(assets, size=3)
@@ -331,6 +353,7 @@ def test_play_starts_a_new_game_with_no_save(assets):
 
 # ── volume / window labels ───────────────────────────────────────────────────
 
+
 def test_set_music_and_sfx_labels_round_to_a_percentage(assets):
     game = make_game(assets, size=3)
 
@@ -348,7 +371,9 @@ def test_set_music_label_clamps_out_of_range_values(assets):
     assert game.panel_manager["audio_settings"]["music_volume_entry_text"].text == "%0"
 
     game.set_music_label(1.5)
-    assert game.panel_manager["audio_settings"]["music_volume_entry_text"].text == "%100"
+    assert (
+        game.panel_manager["audio_settings"]["music_volume_entry_text"].text == "%100"
+    )
 
 
 def test_set_window_size_and_mode_labels(assets):
@@ -359,11 +384,18 @@ def test_set_window_size_and_mode_labels(assets):
     game.set_window_size_label()
     game.set_window_mode_label()
 
-    assert game.panel_manager["display_settings"]["window_size_entry_text"].text == "1280x720"
-    assert game.panel_manager["display_settings"]["window_mode_entry_text"].text == "WINDOWED"
+    assert (
+        game.panel_manager["display_settings"]["window_size_entry_text"].text
+        == "1280x720"
+    )
+    assert (
+        game.panel_manager["display_settings"]["window_mode_entry_text"].text
+        == "WINDOWED"
+    )
 
 
 # ── event / update / draw dispatch ───────────────────────────────────────────
+
 
 def test_handle_event_dispatches_to_the_current_panels_handler(assets):
     game = make_game(assets, size=3)
@@ -406,6 +438,7 @@ def test_draw_calls_panels_and_clouds(assets):
 
 # ── exit flow ────────────────────────────────────────────────────────────────
 
+
 def test_on_exit_request_from_menu_exits(assets):
     game = make_game(assets, size=3)
     game.panel_manager.current_panel = "menu"
@@ -417,11 +450,16 @@ def test_on_exit_request_from_menu_exits(assets):
     assert game.audio.played == [game.go_back_sound_path]
 
 
-@pytest.mark.parametrize("panel,expected", [
-    ("play", "menu"), ("settings", "menu"),
-    ("display_settings", "settings"), ("game_settings", "settings"),
-    ("developer", "menu"),
-])
+@pytest.mark.parametrize(
+    "panel,expected",
+    [
+        ("play", "menu"),
+        ("settings", "menu"),
+        ("display_settings", "settings"),
+        ("game_settings", "settings"),
+        ("developer", "menu"),
+    ],
+)
 def test_on_exit_request_navigates_back(assets, panel, expected):
     game = make_game(assets, size=3)
     game.panel_manager.current_panel = panel
@@ -453,7 +491,9 @@ def test_on_exit_request_from_game_closes_info_panel_instead_of_saving(assets):
 
     assert len(game.info_panel.close.calls) == 1
     assert len(game.save_game.calls) == 0
-    assert game.panel_manager.current_panel == "game"  # unchanged -- just closed the panel
+    assert (
+        game.panel_manager.current_panel == "game"
+    )  # unchanged -- just closed the panel
 
 
 def test_on_exit_request_from_game_saves_and_returns_to_menu(assets):

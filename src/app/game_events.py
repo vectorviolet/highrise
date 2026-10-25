@@ -12,11 +12,10 @@ class GameEventsMixin:
     def _activate(self, button, event) -> bool:
         """True when the button was activated (click or focused-Space/Enter).
         Plays the button's `on_click_sound` (or the default click) on success."""
-        activated = (
-            button.is_clicked(event, self.mouse.position)
-            or (event.type == pygame.KEYUP
-                and event.key in (pygame.K_SPACE, pygame.K_RETURN)
-                and getattr(button, "focused", False))
+        activated = button.is_clicked(event, self.mouse.position) or (
+            event.type == pygame.KEYUP
+            and event.key in (pygame.K_SPACE, pygame.K_RETURN)
+            and getattr(button, "focused", False)
         )
         if activated:
             sound = getattr(button, "on_click_sound", None) or self.click_sound_path
@@ -30,9 +29,9 @@ class GameEventsMixin:
             self.play()
             return
         navigations = (
-            ("settings_button",  "settings"),
+            ("settings_button", "settings"),
             ("developer_button", "developer"),
-            ("exit_button",      "exit"),
+            ("exit_button", "exit"),
         )
         for button_name, dest in navigations:
             if self._activate(panel[button_name], event):
@@ -51,9 +50,9 @@ class GameEventsMixin:
         panel = self.panel_manager["settings"]
         navigations = (
             ("display_settings_button", "display_settings"),
-            ("audio_settings_button",   "audio_settings"),
-            ("game_settings_button",    "game_settings"),
-            ("settings_back_button",    "menu"),
+            ("audio_settings_button", "audio_settings"),
+            ("game_settings_button", "game_settings"),
+            ("settings_back_button", "menu"),
         )
         for button_name, dest in navigations:
             if self._activate(panel[button_name], event):
@@ -85,22 +84,34 @@ class GameEventsMixin:
     def handle_audio_settings_events(self, event: pygame.event.Event) -> None:
         panel = self.panel_manager["audio_settings"]
 
-        has_music = self.background_music_sound_path is not None  # its controls are hidden otherwise
-        if has_music and panel["music_volume_plus_button"].is_clicked(event, self.mouse.position):
+        has_music = (
+            self.background_music_sound_path is not None
+        )  # its controls are hidden otherwise
+        if has_music and panel["music_volume_plus_button"].is_clicked(
+            event, self.mouse.position
+        ):
             new_vol = self.audio.music_volume() + 0.1
-            self.audio.set_music_volume(new_vol); self.set_music_label(new_vol)
-        elif has_music and panel["music_volume_minus_button"].is_clicked(event, self.mouse.position):
+            self.audio.set_music_volume(new_vol)
+            self.set_music_label(new_vol)
+        elif has_music and panel["music_volume_minus_button"].is_clicked(
+            event, self.mouse.position
+        ):
             new_vol = self.audio.music_volume() - 0.1
-            self.audio.set_music_volume(new_vol); self.set_music_label(new_vol)
+            self.audio.set_music_volume(new_vol)
+            self.set_music_label(new_vol)
         elif panel["sfx_volume_plus_button"].is_clicked(event, self.mouse.position):
             new_vol = self.audio.sfx_volume() + 0.1
-            self.audio.set_sfx_volume(new_vol); self.set_sfx_label(new_vol)
+            self.audio.set_sfx_volume(new_vol)
+            self.set_sfx_label(new_vol)
         elif panel["sfx_volume_minus_button"].is_clicked(event, self.mouse.position):
             new_vol = self.audio.sfx_volume() - 0.1
-            self.audio.set_sfx_volume(new_vol); self.set_sfx_label(new_vol)
+            self.audio.set_sfx_volume(new_vol)
+            self.set_sfx_label(new_vol)
         elif self._activate(panel["cancel_button"], event):
-            self.audio.set_music_volume(self.old_music_volume); self.set_music_label(self.old_music_volume)
-            self.audio.set_sfx_volume(self.old_sfx_volume);   self.set_sfx_label(self.old_sfx_volume)
+            self.audio.set_music_volume(self.old_music_volume)
+            self.set_music_label(self.old_music_volume)
+            self.audio.set_sfx_volume(self.old_sfx_volume)
+            self.set_sfx_label(self.old_sfx_volume)
             self.open_panel("settings")
         elif self._activate(panel["save_button"], event):
             self.save_audio_settings()
