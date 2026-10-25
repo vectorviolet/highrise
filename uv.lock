@@ -121,7 +121,7 @@ build = [{ name = "pyinstaller", specifier = ">=6.0" }]
 dev = [
     { name = "pytest", specifier = ">=8" },
     { name = "pytest-cov", specifier = ">=5" },
-    { name = "ruff", specifier = ">=0.16" },
+    { name = "ruff", specifier = "==0.17.2" },
 ]
 
 [[package]]

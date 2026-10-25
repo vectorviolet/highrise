@@ -13,7 +13,7 @@ dependencies = [
 build = [
     "pyinstaller>=6.0",
 ]
-dev = ["pytest>=8", "pytest-cov>=5", "ruff>=0.16"]
+dev = ["pytest>=8", "pytest-cov>=5", "ruff==0.17.2"]
 
 [tool.ruff]
 # ruff's own default, written out: both `ruff check` and `ruff format` use it.
