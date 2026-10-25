@@ -104,7 +104,7 @@ See [CLAUDE.md](CLAUDE.md) for the full architecture overview.
 
 ## Credits
 
-Art and UI from [Kenney](https://www.kenney.nl/) — [Hexagon Buildings](https://www.kenney.nl/assets/hexagon-buildings) and [UI Pack](https://www.kenney.nl/assets/ui-pack).
+Art, UI, sounds and fonts from [Kenney](https://www.kenney.nl/) — [Hexagon Buildings](https://www.kenney.nl/assets/hexagon-buildings) and [UI Pack](https://www.kenney.nl/assets/ui-pack) (CC0). See [CREDITS.md](CREDITS.md) for every asset, font and library with its license; it also ships with the game.
 
 ## Contributing
 

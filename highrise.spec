@@ -23,6 +23,9 @@ ROOT = Path(SPECPATH)  # noqa: F821 — injected by PyInstaller
 datas = [
     (str(ROOT / "assets"), "assets"),
     (str(ROOT / "config"), "config"),
+    # Attribution and license texts travel with every build.
+    (str(ROOT / "CREDITS.md"), "."),
+    (str(ROOT / "LICENSE"), "."),
     # pygamine's shared splash (standard_splash_media), resolved next to the
     # pygamine package rather than the game's assets/
     (str(ROOT / "src" / "pygamine" / "pygamine" / "branding"), "pygamine/branding"),
@@ -77,8 +80,10 @@ coll = COLLECT(
 # src/pygamine/pygamine/licenses/README.md) next to the executable, where
 # players look -- the datas copy above sits inside _internal/.
 import shutil  # noqa: E402
-shutil.copytree(ROOT / "src" / "pygamine" / "pygamine" / "licenses",
-                Path(DISTPATH) / "highrise" / "licenses", dirs_exist_ok=True)  # noqa: F821 -- injected by PyInstaller
+_top = Path(DISTPATH) / "highrise"  # noqa: F821 -- injected by PyInstaller
+for doc in ("CREDITS.md", "LICENSE"):
+    shutil.copy2(ROOT / doc, _top / doc)
+shutil.copytree(ROOT / "src" / "pygamine" / "pygamine" / "licenses", _top / "licenses", dirs_exist_ok=True)
 
 # On macOS, also wrap the onedir bundle as a .app for a native double-click.
 if sys.platform == "darwin":
