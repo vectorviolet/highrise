@@ -7,7 +7,6 @@ constructs, close enough to the real thing for persistence-level assertions."""
 
 from types import SimpleNamespace
 
-import pytest
 
 from app.game_persistence import GamePersistenceMixin
 from gameplay.buildings.building import Building, Buildings

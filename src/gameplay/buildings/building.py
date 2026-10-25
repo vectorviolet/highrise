@@ -5,7 +5,7 @@ from pygamine import AssetManager
 from pygamine import GameAudio
 from pygame import Vector2
 from gameplay.tiles.tile import Tile
-from pygamine import ImagePath, SoundPath
+from pygamine import ImagePath
 from pygamine import StateObject
 from pygamine import Rigidbody2D
 

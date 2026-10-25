@@ -1,8 +1,7 @@
 import random
 
 from pygamine import load_image
-from pygamine import ImagePath, AssetPath
-from pygamine import GameObjectList
+from pygamine import AssetPath
 from pygamine import GameObject
 from pygamine import Rigidbody2D
 from pygamine import SpriteRenderer2D
