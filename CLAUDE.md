@@ -21,6 +21,12 @@ uv run --group dev pytest tests/ -q                      # this app's own logic 
 uv run --group dev pytest tests/ --cov --cov-report=term  # with coverage
 ```
 
+**Asset sources:** every file under `assets/` must be listed in `assets/SOURCES.yaml` with its
+source pack (or `own`) and its original file name. Each pack needs its license text in
+`licenses/assets/<slug>.txt`. CREDITS.md's asset section is generated from `SOURCES.yaml` by
+`scripts/gen_credits.py`; don't edit it by hand. `tests/test_sources.py` enforces all of this.
+Never add an asset whose origin and license you can't state. See README's "Asset sources".
+
 **Code style:** run `uv run --group dev ruff format .` and `uv run --group dev ruff check .`
 before every commit. Formatting is Black-compatible (`[tool.ruff.format]` in `pyproject.toml`);
 lint is pyflakes-only (`[tool.ruff.lint]`). CI fails on `ruff format --check .` and on lint

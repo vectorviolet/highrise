@@ -1,0 +1,2791 @@
+# Where every file under assets/ comes from -- see README.md ("Asset sources").
+# tests/test_sources.py keeps this complete, and scripts/gen_credits.py builds
+# CREDITS.md's asset section from it. A pack's license text is in
+# licenses/assets/<pack>.txt.
+#
+# source: a pack slug from `packs`, or "own" (made for this game).
+# original: the file's path inside that pack.
+# composited_from: pack tiles combined into one image (instead of `original`).
+# modified: what was changed, for edited pack files.
+
+packs:
+  kenney-background-elements-remastered:
+    name: "Background Elements Remastered"
+    author: Kenney
+    url: https://kenney.nl/assets/background-elements-remastered
+    license: CC0-1.0
+    used_for: "clouds"
+  kenney-cursor-pack:
+    name: "Cursor Pack"
+    author: Kenney
+    url: https://kenney.nl/assets/cursor-pack
+    license: CC0-1.0
+    used_for: "mouse cursor"
+  kenney-game-icons:
+    name: "Game Icons"
+    author: Kenney
+    url: https://kenney.nl/assets/game-icons
+    license: CC0-1.0
+    used_for: "info, plus and minus icons"
+  kenney-hexagon-buildings:
+    name: "Hexagon Buildings"
+    author: Kenney
+    url: https://kenney.nl/assets/hexagon-buildings
+    license: CC0-1.0
+    used_for: "buildings"
+  kenney-isometric-landscape:
+    name: "Isometric Landscape"
+    author: Kenney
+    url: https://kenney.nl/assets/isometric-tiles-landscape
+    license: CC0-1.0
+    used_for: "ground tile"
+  kenney-ui-pack:
+    name: "UI Pack"
+    author: Kenney
+    url: https://kenney.nl/assets/ui-pack
+    license: CC0-1.0
+    used_for: "buttons, sounds, fonts"
+  kenney-ui-pack-v1:
+    name: "UI Pack (version 1)"
+    author: Kenney
+    url: https://opengameart.org/content/ui-pack
+    license: CC0-1.0
+    used_for: "panel backgrounds"
+
+files:
+  "fonts/Kenney Future Narrow.ttf":
+    source: kenney-ui-pack
+    original: "Font/Kenney Future Narrow.ttf"
+  "fonts/Kenney Future.ttf":
+    source: kenney-ui-pack
+    original: "Font/Kenney Future.ttf"
+  "images/buildings/rock/level1.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/redRoofShort.png"]
+  "images/buildings/rock/level2.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/redRoofShort.png"]
+  "images/buildings/rock/level3.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/redRoofTall.png"]
+  "images/buildings/rock/level4.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/redRoofTall.png"]
+  "images/buildings/rock/level5.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/redRoofShort.png"]
+  "images/buildings/rock/level6.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/redRoofShort.png"]
+  "images/buildings/sand/level1.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/sandRoofShort.png"]
+  "images/buildings/sand/level2.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/sandRoofShort.png"]
+  "images/buildings/sand/level3.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/sandRoofTall.png"]
+  "images/buildings/sand/level4.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/sandRoofTall.png"]
+  "images/buildings/sand/level5.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/sandRoofPointy.png"]
+  "images/buildings/sand/level6.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/sandRoofPointy.png"]
+  "images/buildings/stone/level1.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/stoneRoofShort.png"]
+  "images/buildings/stone/level2.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/stoneRoofShort.png"]
+  "images/buildings/stone/level3.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/stoneRoofTall.png"]
+  "images/buildings/stone/level4.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/stoneRoofTall.png"]
+  "images/buildings/stone/level5.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/stoneRoofPointy.png"]
+  "images/buildings/stone/level6.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/stoneRoofPointy.png"]
+  "images/buildings/wood/level1.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/woodRoofShort.png"]
+  "images/buildings/wood/level2.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/woodRoofShort.png"]
+  "images/buildings/wood/level3.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/woodRoofTall.png"]
+  "images/buildings/wood/level4.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/woodRoofTall.png"]
+  "images/buildings/wood/level5.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/woodRoofShort.png"]
+  "images/buildings/wood/level6.png":
+    source: kenney-hexagon-buildings
+    composited_from: ["Tiles/woodRoofShort.png"]
+  "images/cloud.png":
+    source: kenney-background-elements-remastered
+    original: "PNG/Retina/cloud4.png"
+    modified: "scaled onto a 539x463 canvas, in the box the previous cloud occupied"
+  "images/gui/Blue/Default/arrow_basic_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/arrow_basic_e.png"
+  "images/gui/Blue/Default/arrow_basic_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/arrow_basic_e_small.png"
+  "images/gui/Blue/Default/arrow_basic_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/arrow_basic_n.png"
+  "images/gui/Blue/Default/arrow_basic_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/arrow_basic_n_small.png"
+  "images/gui/Blue/Default/arrow_basic_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/arrow_basic_s.png"
+  "images/gui/Blue/Default/arrow_basic_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/arrow_basic_s_small.png"
+  "images/gui/Blue/Default/arrow_basic_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/arrow_basic_w.png"
+  "images/gui/Blue/Default/arrow_basic_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/arrow_basic_w_small.png"
+  "images/gui/Blue/Default/arrow_decorative_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/arrow_decorative_e.png"
+  "images/gui/Blue/Default/arrow_decorative_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/arrow_decorative_e_small.png"
+  "images/gui/Blue/Default/arrow_decorative_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/arrow_decorative_n.png"
+  "images/gui/Blue/Default/arrow_decorative_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/arrow_decorative_n_small.png"
+  "images/gui/Blue/Default/arrow_decorative_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/arrow_decorative_s.png"
+  "images/gui/Blue/Default/arrow_decorative_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/arrow_decorative_s_small.png"
+  "images/gui/Blue/Default/arrow_decorative_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/arrow_decorative_w.png"
+  "images/gui/Blue/Default/arrow_decorative_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/arrow_decorative_w_small.png"
+  "images/gui/Blue/Default/button_rectangle_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_rectangle_border.png"
+  "images/gui/Blue/Default/button_rectangle_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_rectangle_depth_border.png"
+  "images/gui/Blue/Default/button_rectangle_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_rectangle_depth_flat.png"
+  "images/gui/Blue/Default/button_rectangle_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_rectangle_depth_gloss.png"
+  "images/gui/Blue/Default/button_rectangle_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_rectangle_depth_gradient.png"
+  "images/gui/Blue/Default/button_rectangle_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_rectangle_depth_line.png"
+  "images/gui/Blue/Default/button_rectangle_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_rectangle_flat.png"
+  "images/gui/Blue/Default/button_rectangle_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_rectangle_gloss.png"
+  "images/gui/Blue/Default/button_rectangle_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_rectangle_gradient.png"
+  "images/gui/Blue/Default/button_rectangle_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_rectangle_line.png"
+  "images/gui/Blue/Default/button_round_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_round_border.png"
+  "images/gui/Blue/Default/button_round_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_round_depth_border.png"
+  "images/gui/Blue/Default/button_round_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_round_depth_flat.png"
+  "images/gui/Blue/Default/button_round_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_round_depth_gloss.png"
+  "images/gui/Blue/Default/button_round_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_round_depth_gradient.png"
+  "images/gui/Blue/Default/button_round_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_round_depth_line.png"
+  "images/gui/Blue/Default/button_round_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_round_flat.png"
+  "images/gui/Blue/Default/button_round_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_round_gloss.png"
+  "images/gui/Blue/Default/button_round_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_round_gradient.png"
+  "images/gui/Blue/Default/button_round_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_round_line.png"
+  "images/gui/Blue/Default/button_square_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_square_border.png"
+  "images/gui/Blue/Default/button_square_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_square_depth_border.png"
+  "images/gui/Blue/Default/button_square_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_square_depth_flat.png"
+  "images/gui/Blue/Default/button_square_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_square_depth_gloss.png"
+  "images/gui/Blue/Default/button_square_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_square_depth_gradient.png"
+  "images/gui/Blue/Default/button_square_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_square_depth_line.png"
+  "images/gui/Blue/Default/button_square_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_square_flat.png"
+  "images/gui/Blue/Default/button_square_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_square_gloss.png"
+  "images/gui/Blue/Default/button_square_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_square_gradient.png"
+  "images/gui/Blue/Default/button_square_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_square_line.png"
+  "images/gui/Blue/Default/check_round_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_round_color.png"
+  "images/gui/Blue/Default/check_round_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_round_grey.png"
+  "images/gui/Blue/Default/check_round_grey_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_round_grey_circle.png"
+  "images/gui/Blue/Default/check_round_round_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_round_round_circle.png"
+  "images/gui/Blue/Default/check_square_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_square_color.png"
+  "images/gui/Blue/Default/check_square_color_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_square_color_checkmark.png"
+  "images/gui/Blue/Default/check_square_color_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_square_color_cross.png"
+  "images/gui/Blue/Default/check_square_color_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_square_color_square.png"
+  "images/gui/Blue/Default/check_square_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_square_grey.png"
+  "images/gui/Blue/Default/check_square_grey_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_square_grey_checkmark.png"
+  "images/gui/Blue/Default/check_square_grey_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_square_grey_cross.png"
+  "images/gui/Blue/Default/check_square_grey_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_square_grey_square.png"
+  "images/gui/Blue/Default/icon_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/icon_checkmark.png"
+  "images/gui/Blue/Default/icon_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/icon_circle.png"
+  "images/gui/Blue/Default/icon_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/icon_cross.png"
+  "images/gui/Blue/Default/icon_outline_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/icon_outline_checkmark.png"
+  "images/gui/Blue/Default/icon_outline_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/icon_outline_circle.png"
+  "images/gui/Blue/Default/icon_outline_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/icon_outline_cross.png"
+  "images/gui/Blue/Default/icon_outline_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/icon_outline_square.png"
+  "images/gui/Blue/Default/icon_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/icon_square.png"
+  "images/gui/Blue/Default/slide_hangle.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_hangle.png"
+  "images/gui/Blue/Default/slide_horizontal_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_color.png"
+  "images/gui/Blue/Default/slide_horizontal_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_color_section.png"
+  "images/gui/Blue/Default/slide_horizontal_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_color_section_wide.png"
+  "images/gui/Blue/Default/slide_horizontal_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_grey.png"
+  "images/gui/Blue/Default/slide_horizontal_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_grey_section.png"
+  "images/gui/Blue/Default/slide_horizontal_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_grey_section_wide.png"
+  "images/gui/Blue/Default/slide_vertical_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_color.png"
+  "images/gui/Blue/Default/slide_vertical_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_color_section.png"
+  "images/gui/Blue/Default/slide_vertical_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_color_section_wide.png"
+  "images/gui/Blue/Default/slide_vertical_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_grey.png"
+  "images/gui/Blue/Default/slide_vertical_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_grey_section.png"
+  "images/gui/Blue/Default/slide_vertical_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_grey_section_wide.png"
+  "images/gui/Blue/Default/star.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/star.png"
+  "images/gui/Blue/Default/star_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/star_outline.png"
+  "images/gui/Blue/Default/star_outline_depth.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/star_outline_depth.png"
+  "images/gui/Blue/Double/arrow_basic_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/arrow_basic_e.png"
+  "images/gui/Blue/Double/arrow_basic_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/arrow_basic_e_small.png"
+  "images/gui/Blue/Double/arrow_basic_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/arrow_basic_n.png"
+  "images/gui/Blue/Double/arrow_basic_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/arrow_basic_n_small.png"
+  "images/gui/Blue/Double/arrow_basic_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/arrow_basic_s.png"
+  "images/gui/Blue/Double/arrow_basic_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/arrow_basic_s_small.png"
+  "images/gui/Blue/Double/arrow_basic_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/arrow_basic_w.png"
+  "images/gui/Blue/Double/arrow_basic_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/arrow_basic_w_small.png"
+  "images/gui/Blue/Double/arrow_decorative_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/arrow_decorative_e.png"
+  "images/gui/Blue/Double/arrow_decorative_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/arrow_decorative_e_small.png"
+  "images/gui/Blue/Double/arrow_decorative_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/arrow_decorative_n.png"
+  "images/gui/Blue/Double/arrow_decorative_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/arrow_decorative_n_small.png"
+  "images/gui/Blue/Double/arrow_decorative_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/arrow_decorative_s.png"
+  "images/gui/Blue/Double/arrow_decorative_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/arrow_decorative_s_small.png"
+  "images/gui/Blue/Double/arrow_decorative_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/arrow_decorative_w.png"
+  "images/gui/Blue/Double/arrow_decorative_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/arrow_decorative_w_small.png"
+  "images/gui/Blue/Double/button_rectangle_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_rectangle_border.png"
+  "images/gui/Blue/Double/button_rectangle_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_rectangle_depth_border.png"
+  "images/gui/Blue/Double/button_rectangle_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_rectangle_depth_flat.png"
+  "images/gui/Blue/Double/button_rectangle_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_rectangle_depth_gloss.png"
+  "images/gui/Blue/Double/button_rectangle_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_rectangle_depth_gradient.png"
+  "images/gui/Blue/Double/button_rectangle_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_rectangle_depth_line.png"
+  "images/gui/Blue/Double/button_rectangle_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_rectangle_flat.png"
+  "images/gui/Blue/Double/button_rectangle_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_rectangle_gloss.png"
+  "images/gui/Blue/Double/button_rectangle_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_rectangle_gradient.png"
+  "images/gui/Blue/Double/button_rectangle_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_rectangle_line.png"
+  "images/gui/Blue/Double/button_round_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_round_border.png"
+  "images/gui/Blue/Double/button_round_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_round_depth_border.png"
+  "images/gui/Blue/Double/button_round_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_round_depth_flat.png"
+  "images/gui/Blue/Double/button_round_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_round_depth_gloss.png"
+  "images/gui/Blue/Double/button_round_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_round_depth_gradient.png"
+  "images/gui/Blue/Double/button_round_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_round_depth_line.png"
+  "images/gui/Blue/Double/button_round_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_round_flat.png"
+  "images/gui/Blue/Double/button_round_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_round_gloss.png"
+  "images/gui/Blue/Double/button_round_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_round_gradient.png"
+  "images/gui/Blue/Double/button_round_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_round_line.png"
+  "images/gui/Blue/Double/button_square_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_square_border.png"
+  "images/gui/Blue/Double/button_square_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_square_depth_border.png"
+  "images/gui/Blue/Double/button_square_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_square_depth_flat.png"
+  "images/gui/Blue/Double/button_square_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_square_depth_gloss.png"
+  "images/gui/Blue/Double/button_square_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_square_depth_gradient.png"
+  "images/gui/Blue/Double/button_square_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_square_depth_line.png"
+  "images/gui/Blue/Double/button_square_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_square_flat.png"
+  "images/gui/Blue/Double/button_square_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_square_gloss.png"
+  "images/gui/Blue/Double/button_square_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_square_gradient.png"
+  "images/gui/Blue/Double/button_square_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/button_square_line.png"
+  "images/gui/Blue/Double/check_round_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_round_color.png"
+  "images/gui/Blue/Double/check_round_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_round_grey.png"
+  "images/gui/Blue/Double/check_round_grey_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_round_grey_circle.png"
+  "images/gui/Blue/Double/check_round_round_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_round_round_circle.png"
+  "images/gui/Blue/Double/check_square_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_square_color.png"
+  "images/gui/Blue/Double/check_square_color_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_square_color_checkmark.png"
+  "images/gui/Blue/Double/check_square_color_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_square_color_cross.png"
+  "images/gui/Blue/Double/check_square_color_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_square_color_square.png"
+  "images/gui/Blue/Double/check_square_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_square_grey.png"
+  "images/gui/Blue/Double/check_square_grey_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_square_grey_checkmark.png"
+  "images/gui/Blue/Double/check_square_grey_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_square_grey_cross.png"
+  "images/gui/Blue/Double/check_square_grey_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_square_grey_square.png"
+  "images/gui/Blue/Double/icon_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/icon_checkmark.png"
+  "images/gui/Blue/Double/icon_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/icon_circle.png"
+  "images/gui/Blue/Double/icon_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/icon_cross.png"
+  "images/gui/Blue/Double/icon_outline_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/icon_outline_checkmark.png"
+  "images/gui/Blue/Double/icon_outline_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/icon_outline_circle.png"
+  "images/gui/Blue/Double/icon_outline_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/icon_outline_cross.png"
+  "images/gui/Blue/Double/icon_outline_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/icon_outline_square.png"
+  "images/gui/Blue/Double/icon_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/icon_square.png"
+  "images/gui/Blue/Double/slide_hangle.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_hangle.png"
+  "images/gui/Blue/Double/slide_horizontal_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_color.png"
+  "images/gui/Blue/Double/slide_horizontal_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_color_section.png"
+  "images/gui/Blue/Double/slide_horizontal_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_color_section_wide.png"
+  "images/gui/Blue/Double/slide_horizontal_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_grey.png"
+  "images/gui/Blue/Double/slide_horizontal_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_grey_section.png"
+  "images/gui/Blue/Double/slide_horizontal_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_grey_section_wide.png"
+  "images/gui/Blue/Double/slide_vertical_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_color.png"
+  "images/gui/Blue/Double/slide_vertical_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_color_section.png"
+  "images/gui/Blue/Double/slide_vertical_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_color_section_wide.png"
+  "images/gui/Blue/Double/slide_vertical_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_grey.png"
+  "images/gui/Blue/Double/slide_vertical_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_grey_section.png"
+  "images/gui/Blue/Double/slide_vertical_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_grey_section_wide.png"
+  "images/gui/Blue/Double/star.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/star.png"
+  "images/gui/Blue/Double/star_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/star_outline.png"
+  "images/gui/Blue/Double/star_outline_depth.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/star_outline_depth.png"
+  "images/gui/developer/cursor.png":
+    source: kenney-cursor-pack
+    original: "PNG/Outline/Default/pointer_c.png"
+  "images/gui/developer/cv.png":
+    source: own
+  "images/gui/Extra/Default/button_rectangle_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/button_rectangle_depth_line.png"
+  "images/gui/Extra/Default/button_rectangle_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/button_rectangle_line.png"
+  "images/gui/Extra/Default/button_round_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/button_round_depth_line.png"
+  "images/gui/Extra/Default/button_round_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/button_round_line.png"
+  "images/gui/Extra/Default/button_square_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/button_square_depth_line.png"
+  "images/gui/Extra/Default/button_square_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/button_square_line.png"
+  "images/gui/Extra/Default/divider.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/divider.png"
+  "images/gui/Extra/Default/divider_edges.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/divider_edges.png"
+  "images/gui/Extra/Default/icon_arrow_down_dark.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/icon_arrow_down_dark.png"
+  "images/gui/Extra/Default/icon_arrow_down_light.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/icon_arrow_down_light.png"
+  "images/gui/Extra/Default/icon_arrow_down_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/icon_arrow_down_outline.png"
+  "images/gui/Extra/Default/icon_arrow_up_dark.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/icon_arrow_up_dark.png"
+  "images/gui/Extra/Default/icon_arrow_up_light.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/icon_arrow_up_light.png"
+  "images/gui/Extra/Default/icon_arrow_up_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/icon_arrow_up_outline.png"
+  "images/gui/Extra/Default/icon_play_dark.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/icon_play_dark.png"
+  "images/gui/Extra/Default/icon_play_light.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/icon_play_light.png"
+  "images/gui/Extra/Default/icon_play_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/icon_play_outline.png"
+  "images/gui/Extra/Default/icon_repeat_dark.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/icon_repeat_dark.png"
+  "images/gui/Extra/Default/icon_repeat_light.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/icon_repeat_light.png"
+  "images/gui/Extra/Default/icon_repeat_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/icon_repeat_outline.png"
+  "images/gui/Extra/Default/input_outline_rectangle.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/input_outline_rectangle.png"
+  "images/gui/Extra/Default/input_outline_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/input_outline_square.png"
+  "images/gui/Extra/Default/input_rectangle.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/input_rectangle.png"
+  "images/gui/Extra/Default/input_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Default/input_square.png"
+  "images/gui/Extra/Double/button_rectangle_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/button_rectangle_depth_line.png"
+  "images/gui/Extra/Double/button_rectangle_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/button_rectangle_line.png"
+  "images/gui/Extra/Double/button_round_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/button_round_depth_line.png"
+  "images/gui/Extra/Double/button_round_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/button_round_line.png"
+  "images/gui/Extra/Double/button_square_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/button_square_depth_line.png"
+  "images/gui/Extra/Double/button_square_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/button_square_line.png"
+  "images/gui/Extra/Double/divider.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/divider.png"
+  "images/gui/Extra/Double/divider_edges.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/divider_edges.png"
+  "images/gui/Extra/Double/icon_arrow_down_dark.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/icon_arrow_down_dark.png"
+  "images/gui/Extra/Double/icon_arrow_down_light.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/icon_arrow_down_light.png"
+  "images/gui/Extra/Double/icon_arrow_down_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/icon_arrow_down_outline.png"
+  "images/gui/Extra/Double/icon_arrow_up_dark.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/icon_arrow_up_dark.png"
+  "images/gui/Extra/Double/icon_arrow_up_light.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/icon_arrow_up_light.png"
+  "images/gui/Extra/Double/icon_arrow_up_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/icon_arrow_up_outline.png"
+  "images/gui/Extra/Double/icon_play_dark.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/icon_play_dark.png"
+  "images/gui/Extra/Double/icon_play_light.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/icon_play_light.png"
+  "images/gui/Extra/Double/icon_play_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/icon_play_outline.png"
+  "images/gui/Extra/Double/icon_repeat_dark.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/icon_repeat_dark.png"
+  "images/gui/Extra/Double/icon_repeat_light.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/icon_repeat_light.png"
+  "images/gui/Extra/Double/icon_repeat_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/icon_repeat_outline.png"
+  "images/gui/Extra/Double/input_outline_rectangle.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/input_outline_rectangle.png"
+  "images/gui/Extra/Double/input_outline_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/input_outline_square.png"
+  "images/gui/Extra/Double/input_rectangle.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/input_rectangle.png"
+  "images/gui/Extra/Double/input_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Extra/Double/input_square.png"
+  "images/gui/Green/Default/arrow_basic_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/arrow_basic_e.png"
+  "images/gui/Green/Default/arrow_basic_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/arrow_basic_e_small.png"
+  "images/gui/Green/Default/arrow_basic_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/arrow_basic_n.png"
+  "images/gui/Green/Default/arrow_basic_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/arrow_basic_n_small.png"
+  "images/gui/Green/Default/arrow_basic_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/arrow_basic_s.png"
+  "images/gui/Green/Default/arrow_basic_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/arrow_basic_s_small.png"
+  "images/gui/Green/Default/arrow_basic_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/arrow_basic_w.png"
+  "images/gui/Green/Default/arrow_basic_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/arrow_basic_w_small.png"
+  "images/gui/Green/Default/arrow_decorative_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/arrow_decorative_e.png"
+  "images/gui/Green/Default/arrow_decorative_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/arrow_decorative_e_small.png"
+  "images/gui/Green/Default/arrow_decorative_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/arrow_decorative_n.png"
+  "images/gui/Green/Default/arrow_decorative_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/arrow_decorative_n_small.png"
+  "images/gui/Green/Default/arrow_decorative_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/arrow_decorative_s.png"
+  "images/gui/Green/Default/arrow_decorative_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/arrow_decorative_s_small.png"
+  "images/gui/Green/Default/arrow_decorative_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/arrow_decorative_w.png"
+  "images/gui/Green/Default/arrow_decorative_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/arrow_decorative_w_small.png"
+  "images/gui/Green/Default/button_rectangle_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_rectangle_border.png"
+  "images/gui/Green/Default/button_rectangle_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_rectangle_depth_border.png"
+  "images/gui/Green/Default/button_rectangle_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_rectangle_depth_flat.png"
+  "images/gui/Green/Default/button_rectangle_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_rectangle_depth_gloss.png"
+  "images/gui/Green/Default/button_rectangle_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_rectangle_depth_gradient.png"
+  "images/gui/Green/Default/button_rectangle_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_rectangle_depth_line.png"
+  "images/gui/Green/Default/button_rectangle_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_rectangle_flat.png"
+  "images/gui/Green/Default/button_rectangle_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_rectangle_gloss.png"
+  "images/gui/Green/Default/button_rectangle_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_rectangle_gradient.png"
+  "images/gui/Green/Default/button_rectangle_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_rectangle_line.png"
+  "images/gui/Green/Default/button_round_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_round_border.png"
+  "images/gui/Green/Default/button_round_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_round_depth_border.png"
+  "images/gui/Green/Default/button_round_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_round_depth_flat.png"
+  "images/gui/Green/Default/button_round_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_round_depth_gloss.png"
+  "images/gui/Green/Default/button_round_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_round_depth_gradient.png"
+  "images/gui/Green/Default/button_round_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_round_depth_line.png"
+  "images/gui/Green/Default/button_round_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_round_flat.png"
+  "images/gui/Green/Default/button_round_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_round_gloss.png"
+  "images/gui/Green/Default/button_round_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_round_gradient.png"
+  "images/gui/Green/Default/button_round_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_round_line.png"
+  "images/gui/Green/Default/button_square_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_square_border.png"
+  "images/gui/Green/Default/button_square_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_square_depth_border.png"
+  "images/gui/Green/Default/button_square_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_square_depth_flat.png"
+  "images/gui/Green/Default/button_square_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_square_depth_gloss.png"
+  "images/gui/Green/Default/button_square_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_square_depth_gradient.png"
+  "images/gui/Green/Default/button_square_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_square_depth_line.png"
+  "images/gui/Green/Default/button_square_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_square_flat.png"
+  "images/gui/Green/Default/button_square_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_square_gloss.png"
+  "images/gui/Green/Default/button_square_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_square_gradient.png"
+  "images/gui/Green/Default/button_square_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_square_line.png"
+  "images/gui/Green/Default/check_round_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/check_round_color.png"
+  "images/gui/Green/Default/check_round_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_round_grey.png"
+  "images/gui/Green/Default/check_round_grey_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/check_round_grey_circle.png"
+  "images/gui/Green/Default/check_round_round_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/check_round_round_circle.png"
+  "images/gui/Green/Default/check_square_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/check_square_color.png"
+  "images/gui/Green/Default/check_square_color_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/check_square_color_checkmark.png"
+  "images/gui/Green/Default/check_square_color_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/check_square_color_cross.png"
+  "images/gui/Green/Default/check_square_color_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/check_square_color_square.png"
+  "images/gui/Green/Default/check_square_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_square_grey.png"
+  "images/gui/Green/Default/check_square_grey_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/check_square_grey_checkmark.png"
+  "images/gui/Green/Default/check_square_grey_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/check_square_grey_cross.png"
+  "images/gui/Green/Default/check_square_grey_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/check_square_grey_square.png"
+  "images/gui/Green/Default/icon_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/icon_checkmark.png"
+  "images/gui/Green/Default/icon_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/icon_circle.png"
+  "images/gui/Green/Default/icon_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/icon_cross.png"
+  "images/gui/Green/Default/icon_outline_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/icon_outline_checkmark.png"
+  "images/gui/Green/Default/icon_outline_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/icon_outline_circle.png"
+  "images/gui/Green/Default/icon_outline_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/icon_outline_cross.png"
+  "images/gui/Green/Default/icon_outline_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/icon_outline_square.png"
+  "images/gui/Green/Default/icon_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/icon_square.png"
+  "images/gui/Green/Default/slide_hangle.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/slide_hangle.png"
+  "images/gui/Green/Default/slide_horizontal_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/slide_horizontal_color.png"
+  "images/gui/Green/Default/slide_horizontal_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/slide_horizontal_color_section.png"
+  "images/gui/Green/Default/slide_horizontal_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/slide_horizontal_color_section_wide.png"
+  "images/gui/Green/Default/slide_horizontal_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_grey.png"
+  "images/gui/Green/Default/slide_horizontal_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_grey_section.png"
+  "images/gui/Green/Default/slide_horizontal_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_grey_section_wide.png"
+  "images/gui/Green/Default/slide_vertical_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/slide_vertical_color.png"
+  "images/gui/Green/Default/slide_vertical_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/slide_vertical_color_section.png"
+  "images/gui/Green/Default/slide_vertical_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/slide_vertical_color_section_wide.png"
+  "images/gui/Green/Default/slide_vertical_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_grey.png"
+  "images/gui/Green/Default/slide_vertical_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_grey_section.png"
+  "images/gui/Green/Default/slide_vertical_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_grey_section_wide.png"
+  "images/gui/Green/Default/star.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/star.png"
+  "images/gui/Green/Default/star_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/star_outline.png"
+  "images/gui/Green/Default/star_outline_depth.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/star_outline_depth.png"
+  "images/gui/Green/Double/arrow_basic_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/arrow_basic_e.png"
+  "images/gui/Green/Double/arrow_basic_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/arrow_basic_e_small.png"
+  "images/gui/Green/Double/arrow_basic_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/arrow_basic_n.png"
+  "images/gui/Green/Double/arrow_basic_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/arrow_basic_n_small.png"
+  "images/gui/Green/Double/arrow_basic_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/arrow_basic_s.png"
+  "images/gui/Green/Double/arrow_basic_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/arrow_basic_s_small.png"
+  "images/gui/Green/Double/arrow_basic_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/arrow_basic_w.png"
+  "images/gui/Green/Double/arrow_basic_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/arrow_basic_w_small.png"
+  "images/gui/Green/Double/arrow_decorative_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/arrow_decorative_e.png"
+  "images/gui/Green/Double/arrow_decorative_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/arrow_decorative_e_small.png"
+  "images/gui/Green/Double/arrow_decorative_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/arrow_decorative_n.png"
+  "images/gui/Green/Double/arrow_decorative_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/arrow_decorative_n_small.png"
+  "images/gui/Green/Double/arrow_decorative_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/arrow_decorative_s.png"
+  "images/gui/Green/Double/arrow_decorative_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/arrow_decorative_s_small.png"
+  "images/gui/Green/Double/arrow_decorative_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/arrow_decorative_w.png"
+  "images/gui/Green/Double/arrow_decorative_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/arrow_decorative_w_small.png"
+  "images/gui/Green/Double/button_rectangle_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_rectangle_border.png"
+  "images/gui/Green/Double/button_rectangle_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_rectangle_depth_border.png"
+  "images/gui/Green/Double/button_rectangle_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_rectangle_depth_flat.png"
+  "images/gui/Green/Double/button_rectangle_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_rectangle_depth_gloss.png"
+  "images/gui/Green/Double/button_rectangle_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_rectangle_depth_gradient.png"
+  "images/gui/Green/Double/button_rectangle_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_rectangle_depth_line.png"
+  "images/gui/Green/Double/button_rectangle_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_rectangle_flat.png"
+  "images/gui/Green/Double/button_rectangle_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_rectangle_gloss.png"
+  "images/gui/Green/Double/button_rectangle_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_rectangle_gradient.png"
+  "images/gui/Green/Double/button_rectangle_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_rectangle_line.png"
+  "images/gui/Green/Double/button_round_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_round_border.png"
+  "images/gui/Green/Double/button_round_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_round_depth_border.png"
+  "images/gui/Green/Double/button_round_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_round_depth_flat.png"
+  "images/gui/Green/Double/button_round_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_round_depth_gloss.png"
+  "images/gui/Green/Double/button_round_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_round_depth_gradient.png"
+  "images/gui/Green/Double/button_round_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_round_depth_line.png"
+  "images/gui/Green/Double/button_round_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_round_flat.png"
+  "images/gui/Green/Double/button_round_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_round_gloss.png"
+  "images/gui/Green/Double/button_round_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_round_gradient.png"
+  "images/gui/Green/Double/button_round_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_round_line.png"
+  "images/gui/Green/Double/button_square_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_square_border.png"
+  "images/gui/Green/Double/button_square_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_square_depth_border.png"
+  "images/gui/Green/Double/button_square_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_square_depth_flat.png"
+  "images/gui/Green/Double/button_square_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_square_depth_gloss.png"
+  "images/gui/Green/Double/button_square_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_square_depth_gradient.png"
+  "images/gui/Green/Double/button_square_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_square_depth_line.png"
+  "images/gui/Green/Double/button_square_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_square_flat.png"
+  "images/gui/Green/Double/button_square_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_square_gloss.png"
+  "images/gui/Green/Double/button_square_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_square_gradient.png"
+  "images/gui/Green/Double/button_square_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/button_square_line.png"
+  "images/gui/Green/Double/check_round_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/check_round_color.png"
+  "images/gui/Green/Double/check_round_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_round_grey.png"
+  "images/gui/Green/Double/check_round_grey_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/check_round_grey_circle.png"
+  "images/gui/Green/Double/check_round_round_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/check_round_round_circle.png"
+  "images/gui/Green/Double/check_square_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/check_square_color.png"
+  "images/gui/Green/Double/check_square_color_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/check_square_color_checkmark.png"
+  "images/gui/Green/Double/check_square_color_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/check_square_color_cross.png"
+  "images/gui/Green/Double/check_square_color_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/check_square_color_square.png"
+  "images/gui/Green/Double/check_square_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_square_grey.png"
+  "images/gui/Green/Double/check_square_grey_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/check_square_grey_checkmark.png"
+  "images/gui/Green/Double/check_square_grey_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/check_square_grey_cross.png"
+  "images/gui/Green/Double/check_square_grey_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/check_square_grey_square.png"
+  "images/gui/Green/Double/icon_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/icon_checkmark.png"
+  "images/gui/Green/Double/icon_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/icon_circle.png"
+  "images/gui/Green/Double/icon_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/icon_cross.png"
+  "images/gui/Green/Double/icon_outline_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/icon_outline_checkmark.png"
+  "images/gui/Green/Double/icon_outline_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/icon_outline_circle.png"
+  "images/gui/Green/Double/icon_outline_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/icon_outline_cross.png"
+  "images/gui/Green/Double/icon_outline_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/icon_outline_square.png"
+  "images/gui/Green/Double/icon_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/icon_square.png"
+  "images/gui/Green/Double/slide_hangle.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/slide_hangle.png"
+  "images/gui/Green/Double/slide_horizontal_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/slide_horizontal_color.png"
+  "images/gui/Green/Double/slide_horizontal_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/slide_horizontal_color_section.png"
+  "images/gui/Green/Double/slide_horizontal_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/slide_horizontal_color_section_wide.png"
+  "images/gui/Green/Double/slide_horizontal_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_grey.png"
+  "images/gui/Green/Double/slide_horizontal_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_grey_section.png"
+  "images/gui/Green/Double/slide_horizontal_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_grey_section_wide.png"
+  "images/gui/Green/Double/slide_vertical_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/slide_vertical_color.png"
+  "images/gui/Green/Double/slide_vertical_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/slide_vertical_color_section.png"
+  "images/gui/Green/Double/slide_vertical_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/slide_vertical_color_section_wide.png"
+  "images/gui/Green/Double/slide_vertical_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_grey.png"
+  "images/gui/Green/Double/slide_vertical_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_grey_section.png"
+  "images/gui/Green/Double/slide_vertical_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_grey_section_wide.png"
+  "images/gui/Green/Double/star.png":
+    source: kenney-ui-pack
+    original: "PNG/Green/Double/star.png"
+  "images/gui/Green/Double/star_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/star_outline.png"
+  "images/gui/Green/Double/star_outline_depth.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/star_outline_depth.png"
+  "images/gui/Grey/Default/arrow_basic_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/arrow_basic_e.png"
+  "images/gui/Grey/Default/arrow_basic_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/arrow_basic_e_small.png"
+  "images/gui/Grey/Default/arrow_basic_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/arrow_basic_n.png"
+  "images/gui/Grey/Default/arrow_basic_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/arrow_basic_n_small.png"
+  "images/gui/Grey/Default/arrow_basic_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/arrow_basic_s.png"
+  "images/gui/Grey/Default/arrow_basic_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/arrow_basic_s_small.png"
+  "images/gui/Grey/Default/arrow_basic_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/arrow_basic_w.png"
+  "images/gui/Grey/Default/arrow_basic_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/arrow_basic_w_small.png"
+  "images/gui/Grey/Default/arrow_decorative_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/arrow_decorative_e.png"
+  "images/gui/Grey/Default/arrow_decorative_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/arrow_decorative_e_small.png"
+  "images/gui/Grey/Default/arrow_decorative_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/arrow_decorative_n.png"
+  "images/gui/Grey/Default/arrow_decorative_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/arrow_decorative_n_small.png"
+  "images/gui/Grey/Default/arrow_decorative_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/arrow_decorative_s.png"
+  "images/gui/Grey/Default/arrow_decorative_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/arrow_decorative_s_small.png"
+  "images/gui/Grey/Default/arrow_decorative_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/arrow_decorative_w.png"
+  "images/gui/Grey/Default/arrow_decorative_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/arrow_decorative_w_small.png"
+  "images/gui/Grey/Default/button_rectangle_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_rectangle_border.png"
+  "images/gui/Grey/Default/button_rectangle_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_rectangle_depth_border.png"
+  "images/gui/Grey/Default/button_rectangle_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_rectangle_depth_flat.png"
+  "images/gui/Grey/Default/button_rectangle_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_rectangle_depth_gloss.png"
+  "images/gui/Grey/Default/button_rectangle_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_rectangle_depth_gradient.png"
+  "images/gui/Grey/Default/button_rectangle_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_rectangle_depth_line.png"
+  "images/gui/Grey/Default/button_rectangle_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_rectangle_flat.png"
+  "images/gui/Grey/Default/button_rectangle_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_rectangle_gloss.png"
+  "images/gui/Grey/Default/button_rectangle_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_rectangle_gradient.png"
+  "images/gui/Grey/Default/button_rectangle_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_rectangle_line.png"
+  "images/gui/Grey/Default/button_round_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_round_border.png"
+  "images/gui/Grey/Default/button_round_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_round_depth_border.png"
+  "images/gui/Grey/Default/button_round_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_round_depth_flat.png"
+  "images/gui/Grey/Default/button_round_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_round_depth_gloss.png"
+  "images/gui/Grey/Default/button_round_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_round_depth_gradient.png"
+  "images/gui/Grey/Default/button_round_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_round_depth_line.png"
+  "images/gui/Grey/Default/button_round_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_round_flat.png"
+  "images/gui/Grey/Default/button_round_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_round_gloss.png"
+  "images/gui/Grey/Default/button_round_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_round_gradient.png"
+  "images/gui/Grey/Default/button_round_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_round_line.png"
+  "images/gui/Grey/Default/button_square_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_square_border.png"
+  "images/gui/Grey/Default/button_square_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_square_depth_border.png"
+  "images/gui/Grey/Default/button_square_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_square_depth_flat.png"
+  "images/gui/Grey/Default/button_square_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_square_depth_gloss.png"
+  "images/gui/Grey/Default/button_square_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_square_depth_gradient.png"
+  "images/gui/Grey/Default/button_square_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_square_depth_line.png"
+  "images/gui/Grey/Default/button_square_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_square_flat.png"
+  "images/gui/Grey/Default/button_square_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_square_gloss.png"
+  "images/gui/Grey/Default/button_square_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_square_gradient.png"
+  "images/gui/Grey/Default/button_square_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_square_line.png"
+  "images/gui/Grey/Default/check_round_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/check_round_color.png"
+  "images/gui/Grey/Default/check_round_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_round_grey.png"
+  "images/gui/Grey/Default/check_round_grey_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/check_round_grey_circle.png"
+  "images/gui/Grey/Default/check_round_round_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/check_round_round_circle.png"
+  "images/gui/Grey/Default/check_square_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/check_square_color.png"
+  "images/gui/Grey/Default/check_square_color_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/check_square_color_checkmark.png"
+  "images/gui/Grey/Default/check_square_color_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/check_square_color_cross.png"
+  "images/gui/Grey/Default/check_square_color_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/check_square_color_square.png"
+  "images/gui/Grey/Default/check_square_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_square_grey.png"
+  "images/gui/Grey/Default/check_square_grey_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/check_square_grey_checkmark.png"
+  "images/gui/Grey/Default/check_square_grey_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/check_square_grey_cross.png"
+  "images/gui/Grey/Default/check_square_grey_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/check_square_grey_square.png"
+  "images/gui/Grey/Default/icon_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/icon_checkmark.png"
+  "images/gui/Grey/Default/icon_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/icon_circle.png"
+  "images/gui/Grey/Default/icon_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/icon_cross.png"
+  "images/gui/Grey/Default/icon_outline_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/icon_outline_checkmark.png"
+  "images/gui/Grey/Default/icon_outline_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/icon_outline_circle.png"
+  "images/gui/Grey/Default/icon_outline_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/icon_outline_cross.png"
+  "images/gui/Grey/Default/icon_outline_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/icon_outline_square.png"
+  "images/gui/Grey/Default/icon_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/icon_square.png"
+  "images/gui/Grey/Default/slide_hangle.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/slide_hangle.png"
+  "images/gui/Grey/Default/slide_horizontal_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/slide_horizontal_color.png"
+  "images/gui/Grey/Default/slide_horizontal_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/slide_horizontal_color_section.png"
+  "images/gui/Grey/Default/slide_horizontal_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/slide_horizontal_color_section_wide.png"
+  "images/gui/Grey/Default/slide_horizontal_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_grey.png"
+  "images/gui/Grey/Default/slide_horizontal_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_grey_section.png"
+  "images/gui/Grey/Default/slide_horizontal_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_grey_section_wide.png"
+  "images/gui/Grey/Default/slide_vertical_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/slide_vertical_color.png"
+  "images/gui/Grey/Default/slide_vertical_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/slide_vertical_color_section.png"
+  "images/gui/Grey/Default/slide_vertical_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/slide_vertical_color_section_wide.png"
+  "images/gui/Grey/Default/slide_vertical_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_grey.png"
+  "images/gui/Grey/Default/slide_vertical_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_grey_section.png"
+  "images/gui/Grey/Default/slide_vertical_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_grey_section_wide.png"
+  "images/gui/Grey/Default/star.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/star.png"
+  "images/gui/Grey/Default/star_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/star_outline.png"
+  "images/gui/Grey/Default/star_outline_depth.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/star_outline_depth.png"
+  "images/gui/Grey/Double/arrow_basic_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/arrow_basic_e.png"
+  "images/gui/Grey/Double/arrow_basic_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/arrow_basic_e_small.png"
+  "images/gui/Grey/Double/arrow_basic_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/arrow_basic_n.png"
+  "images/gui/Grey/Double/arrow_basic_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/arrow_basic_n_small.png"
+  "images/gui/Grey/Double/arrow_basic_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/arrow_basic_s.png"
+  "images/gui/Grey/Double/arrow_basic_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/arrow_basic_s_small.png"
+  "images/gui/Grey/Double/arrow_basic_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/arrow_basic_w.png"
+  "images/gui/Grey/Double/arrow_basic_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/arrow_basic_w_small.png"
+  "images/gui/Grey/Double/arrow_decorative_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/arrow_decorative_e.png"
+  "images/gui/Grey/Double/arrow_decorative_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/arrow_decorative_e_small.png"
+  "images/gui/Grey/Double/arrow_decorative_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/arrow_decorative_n.png"
+  "images/gui/Grey/Double/arrow_decorative_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/arrow_decorative_n_small.png"
+  "images/gui/Grey/Double/arrow_decorative_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/arrow_decorative_s.png"
+  "images/gui/Grey/Double/arrow_decorative_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/arrow_decorative_s_small.png"
+  "images/gui/Grey/Double/arrow_decorative_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/arrow_decorative_w.png"
+  "images/gui/Grey/Double/arrow_decorative_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/arrow_decorative_w_small.png"
+  "images/gui/Grey/Double/button_rectangle_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_rectangle_border.png"
+  "images/gui/Grey/Double/button_rectangle_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_rectangle_depth_border.png"
+  "images/gui/Grey/Double/button_rectangle_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_rectangle_depth_flat.png"
+  "images/gui/Grey/Double/button_rectangle_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_rectangle_depth_gloss.png"
+  "images/gui/Grey/Double/button_rectangle_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_rectangle_depth_gradient.png"
+  "images/gui/Grey/Double/button_rectangle_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_rectangle_depth_line.png"
+  "images/gui/Grey/Double/button_rectangle_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_rectangle_flat.png"
+  "images/gui/Grey/Double/button_rectangle_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_rectangle_gloss.png"
+  "images/gui/Grey/Double/button_rectangle_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_rectangle_gradient.png"
+  "images/gui/Grey/Double/button_rectangle_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_rectangle_line.png"
+  "images/gui/Grey/Double/button_round_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_round_border.png"
+  "images/gui/Grey/Double/button_round_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_round_depth_border.png"
+  "images/gui/Grey/Double/button_round_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_round_depth_flat.png"
+  "images/gui/Grey/Double/button_round_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_round_depth_gloss.png"
+  "images/gui/Grey/Double/button_round_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_round_depth_gradient.png"
+  "images/gui/Grey/Double/button_round_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_round_depth_line.png"
+  "images/gui/Grey/Double/button_round_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_round_flat.png"
+  "images/gui/Grey/Double/button_round_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_round_gloss.png"
+  "images/gui/Grey/Double/button_round_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_round_gradient.png"
+  "images/gui/Grey/Double/button_round_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_round_line.png"
+  "images/gui/Grey/Double/button_square_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_square_border.png"
+  "images/gui/Grey/Double/button_square_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_square_depth_border.png"
+  "images/gui/Grey/Double/button_square_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_square_depth_flat.png"
+  "images/gui/Grey/Double/button_square_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_square_depth_gloss.png"
+  "images/gui/Grey/Double/button_square_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_square_depth_gradient.png"
+  "images/gui/Grey/Double/button_square_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_square_depth_line.png"
+  "images/gui/Grey/Double/button_square_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_square_flat.png"
+  "images/gui/Grey/Double/button_square_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_square_gloss.png"
+  "images/gui/Grey/Double/button_square_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_square_gradient.png"
+  "images/gui/Grey/Double/button_square_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/button_square_line.png"
+  "images/gui/Grey/Double/check_round_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/check_round_color.png"
+  "images/gui/Grey/Double/check_round_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_round_grey.png"
+  "images/gui/Grey/Double/check_round_grey_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/check_round_grey_circle.png"
+  "images/gui/Grey/Double/check_round_round_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/check_round_round_circle.png"
+  "images/gui/Grey/Double/check_square_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/check_square_color.png"
+  "images/gui/Grey/Double/check_square_color_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/check_square_color_checkmark.png"
+  "images/gui/Grey/Double/check_square_color_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/check_square_color_cross.png"
+  "images/gui/Grey/Double/check_square_color_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/check_square_color_square.png"
+  "images/gui/Grey/Double/check_square_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_square_grey.png"
+  "images/gui/Grey/Double/check_square_grey_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/check_square_grey_checkmark.png"
+  "images/gui/Grey/Double/check_square_grey_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/check_square_grey_cross.png"
+  "images/gui/Grey/Double/check_square_grey_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/check_square_grey_square.png"
+  "images/gui/Grey/Double/icon_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/icon_checkmark.png"
+  "images/gui/Grey/Double/icon_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/icon_circle.png"
+  "images/gui/Grey/Double/icon_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/icon_cross.png"
+  "images/gui/Grey/Double/icon_outline_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/icon_outline_checkmark.png"
+  "images/gui/Grey/Double/icon_outline_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/icon_outline_circle.png"
+  "images/gui/Grey/Double/icon_outline_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/icon_outline_cross.png"
+  "images/gui/Grey/Double/icon_outline_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/icon_outline_square.png"
+  "images/gui/Grey/Double/icon_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/icon_square.png"
+  "images/gui/Grey/Double/slide_hangle.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/slide_hangle.png"
+  "images/gui/Grey/Double/slide_horizontal_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/slide_horizontal_color.png"
+  "images/gui/Grey/Double/slide_horizontal_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/slide_horizontal_color_section.png"
+  "images/gui/Grey/Double/slide_horizontal_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/slide_horizontal_color_section_wide.png"
+  "images/gui/Grey/Double/slide_horizontal_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_grey.png"
+  "images/gui/Grey/Double/slide_horizontal_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_grey_section.png"
+  "images/gui/Grey/Double/slide_horizontal_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_grey_section_wide.png"
+  "images/gui/Grey/Double/slide_vertical_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/slide_vertical_color.png"
+  "images/gui/Grey/Double/slide_vertical_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/slide_vertical_color_section.png"
+  "images/gui/Grey/Double/slide_vertical_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/slide_vertical_color_section_wide.png"
+  "images/gui/Grey/Double/slide_vertical_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_grey.png"
+  "images/gui/Grey/Double/slide_vertical_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_grey_section.png"
+  "images/gui/Grey/Double/slide_vertical_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_grey_section_wide.png"
+  "images/gui/Grey/Double/star.png":
+    source: kenney-ui-pack
+    original: "PNG/Grey/Double/star.png"
+  "images/gui/Grey/Double/star_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/star_outline.png"
+  "images/gui/Grey/Double/star_outline_depth.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/star_outline_depth.png"
+  "images/gui/icons/info.png":
+    source: kenney-game-icons
+    original: "PNG/White/2x/information.png"
+  "images/gui/icons/minus.png":
+    source: kenney-game-icons
+    original: "PNG/White/2x/minus.png"
+  "images/gui/icons/plus.png":
+    source: kenney-game-icons
+    original: "PNG/White/2x/plus.png"
+  "images/gui/panels/blue.png":
+    source: kenney-ui-pack-v1
+    original: "PNG/blue_panel.png"
+  "images/gui/panels/green.png":
+    source: kenney-ui-pack-v1
+    original: "PNG/green_panel.png"
+  "images/gui/panels/grey.png":
+    source: kenney-ui-pack-v1
+    original: "PNG/grey_panel.png"
+  "images/gui/panels/red.png":
+    source: kenney-ui-pack-v1
+    original: "PNG/red_panel.png"
+  "images/gui/panels/yellow.png":
+    source: kenney-ui-pack-v1
+    original: "PNG/yellow_panel.png"
+  "images/gui/Red/Default/arrow_basic_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/arrow_basic_e.png"
+  "images/gui/Red/Default/arrow_basic_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/arrow_basic_e_small.png"
+  "images/gui/Red/Default/arrow_basic_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/arrow_basic_n.png"
+  "images/gui/Red/Default/arrow_basic_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/arrow_basic_n_small.png"
+  "images/gui/Red/Default/arrow_basic_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/arrow_basic_s.png"
+  "images/gui/Red/Default/arrow_basic_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/arrow_basic_s_small.png"
+  "images/gui/Red/Default/arrow_basic_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/arrow_basic_w.png"
+  "images/gui/Red/Default/arrow_basic_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/arrow_basic_w_small.png"
+  "images/gui/Red/Default/arrow_decorative_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/arrow_decorative_e.png"
+  "images/gui/Red/Default/arrow_decorative_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/arrow_decorative_e_small.png"
+  "images/gui/Red/Default/arrow_decorative_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/arrow_decorative_n.png"
+  "images/gui/Red/Default/arrow_decorative_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/arrow_decorative_n_small.png"
+  "images/gui/Red/Default/arrow_decorative_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/arrow_decorative_s.png"
+  "images/gui/Red/Default/arrow_decorative_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/arrow_decorative_s_small.png"
+  "images/gui/Red/Default/arrow_decorative_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/arrow_decorative_w.png"
+  "images/gui/Red/Default/arrow_decorative_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/arrow_decorative_w_small.png"
+  "images/gui/Red/Default/button_rectangle_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_rectangle_border.png"
+  "images/gui/Red/Default/button_rectangle_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_rectangle_depth_border.png"
+  "images/gui/Red/Default/button_rectangle_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_rectangle_depth_flat.png"
+  "images/gui/Red/Default/button_rectangle_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_rectangle_depth_gloss.png"
+  "images/gui/Red/Default/button_rectangle_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_rectangle_depth_gradient.png"
+  "images/gui/Red/Default/button_rectangle_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_rectangle_depth_line.png"
+  "images/gui/Red/Default/button_rectangle_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_rectangle_flat.png"
+  "images/gui/Red/Default/button_rectangle_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_rectangle_gloss.png"
+  "images/gui/Red/Default/button_rectangle_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_rectangle_gradient.png"
+  "images/gui/Red/Default/button_rectangle_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_rectangle_line.png"
+  "images/gui/Red/Default/button_round_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_round_border.png"
+  "images/gui/Red/Default/button_round_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_round_depth_border.png"
+  "images/gui/Red/Default/button_round_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_round_depth_flat.png"
+  "images/gui/Red/Default/button_round_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_round_depth_gloss.png"
+  "images/gui/Red/Default/button_round_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_round_depth_gradient.png"
+  "images/gui/Red/Default/button_round_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_round_depth_line.png"
+  "images/gui/Red/Default/button_round_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_round_flat.png"
+  "images/gui/Red/Default/button_round_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_round_gloss.png"
+  "images/gui/Red/Default/button_round_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_round_gradient.png"
+  "images/gui/Red/Default/button_round_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_round_line.png"
+  "images/gui/Red/Default/button_square_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_square_border.png"
+  "images/gui/Red/Default/button_square_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_square_depth_border.png"
+  "images/gui/Red/Default/button_square_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_square_depth_flat.png"
+  "images/gui/Red/Default/button_square_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_square_depth_gloss.png"
+  "images/gui/Red/Default/button_square_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_square_depth_gradient.png"
+  "images/gui/Red/Default/button_square_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_square_depth_line.png"
+  "images/gui/Red/Default/button_square_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_square_flat.png"
+  "images/gui/Red/Default/button_square_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_square_gloss.png"
+  "images/gui/Red/Default/button_square_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_square_gradient.png"
+  "images/gui/Red/Default/button_square_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_square_line.png"
+  "images/gui/Red/Default/check_round_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/check_round_color.png"
+  "images/gui/Red/Default/check_round_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_round_grey.png"
+  "images/gui/Red/Default/check_round_grey_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/check_round_grey_circle.png"
+  "images/gui/Red/Default/check_round_round_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/check_round_round_circle.png"
+  "images/gui/Red/Default/check_square_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/check_square_color.png"
+  "images/gui/Red/Default/check_square_color_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/check_square_color_checkmark.png"
+  "images/gui/Red/Default/check_square_color_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/check_square_color_cross.png"
+  "images/gui/Red/Default/check_square_color_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/check_square_color_square.png"
+  "images/gui/Red/Default/check_square_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_square_grey.png"
+  "images/gui/Red/Default/check_square_grey_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/check_square_grey_checkmark.png"
+  "images/gui/Red/Default/check_square_grey_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/check_square_grey_cross.png"
+  "images/gui/Red/Default/check_square_grey_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/check_square_grey_square.png"
+  "images/gui/Red/Default/icon_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/icon_checkmark.png"
+  "images/gui/Red/Default/icon_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/icon_circle.png"
+  "images/gui/Red/Default/icon_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/icon_cross.png"
+  "images/gui/Red/Default/icon_outline_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/icon_outline_checkmark.png"
+  "images/gui/Red/Default/icon_outline_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/icon_outline_circle.png"
+  "images/gui/Red/Default/icon_outline_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/icon_outline_cross.png"
+  "images/gui/Red/Default/icon_outline_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/icon_outline_square.png"
+  "images/gui/Red/Default/icon_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/icon_square.png"
+  "images/gui/Red/Default/slide_hangle.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/slide_hangle.png"
+  "images/gui/Red/Default/slide_horizontal_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/slide_horizontal_color.png"
+  "images/gui/Red/Default/slide_horizontal_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/slide_horizontal_color_section.png"
+  "images/gui/Red/Default/slide_horizontal_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/slide_horizontal_color_section_wide.png"
+  "images/gui/Red/Default/slide_horizontal_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_grey.png"
+  "images/gui/Red/Default/slide_horizontal_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_grey_section.png"
+  "images/gui/Red/Default/slide_horizontal_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_grey_section_wide.png"
+  "images/gui/Red/Default/slide_vertical_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/slide_vertical_color.png"
+  "images/gui/Red/Default/slide_vertical_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/slide_vertical_color_section.png"
+  "images/gui/Red/Default/slide_vertical_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/slide_vertical_color_section_wide.png"
+  "images/gui/Red/Default/slide_vertical_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_grey.png"
+  "images/gui/Red/Default/slide_vertical_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_grey_section.png"
+  "images/gui/Red/Default/slide_vertical_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_grey_section_wide.png"
+  "images/gui/Red/Default/star.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/star.png"
+  "images/gui/Red/Default/star_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/star_outline.png"
+  "images/gui/Red/Default/star_outline_depth.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/star_outline_depth.png"
+  "images/gui/Red/Double/arrow_basic_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/arrow_basic_e.png"
+  "images/gui/Red/Double/arrow_basic_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/arrow_basic_e_small.png"
+  "images/gui/Red/Double/arrow_basic_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/arrow_basic_n.png"
+  "images/gui/Red/Double/arrow_basic_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/arrow_basic_n_small.png"
+  "images/gui/Red/Double/arrow_basic_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/arrow_basic_s.png"
+  "images/gui/Red/Double/arrow_basic_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/arrow_basic_s_small.png"
+  "images/gui/Red/Double/arrow_basic_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/arrow_basic_w.png"
+  "images/gui/Red/Double/arrow_basic_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/arrow_basic_w_small.png"
+  "images/gui/Red/Double/arrow_decorative_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/arrow_decorative_e.png"
+  "images/gui/Red/Double/arrow_decorative_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/arrow_decorative_e_small.png"
+  "images/gui/Red/Double/arrow_decorative_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/arrow_decorative_n.png"
+  "images/gui/Red/Double/arrow_decorative_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/arrow_decorative_n_small.png"
+  "images/gui/Red/Double/arrow_decorative_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/arrow_decorative_s.png"
+  "images/gui/Red/Double/arrow_decorative_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/arrow_decorative_s_small.png"
+  "images/gui/Red/Double/arrow_decorative_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/arrow_decorative_w.png"
+  "images/gui/Red/Double/arrow_decorative_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/arrow_decorative_w_small.png"
+  "images/gui/Red/Double/button_rectangle_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_rectangle_border.png"
+  "images/gui/Red/Double/button_rectangle_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_rectangle_depth_border.png"
+  "images/gui/Red/Double/button_rectangle_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_rectangle_depth_flat.png"
+  "images/gui/Red/Double/button_rectangle_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_rectangle_depth_gloss.png"
+  "images/gui/Red/Double/button_rectangle_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_rectangle_depth_gradient.png"
+  "images/gui/Red/Double/button_rectangle_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_rectangle_depth_line.png"
+  "images/gui/Red/Double/button_rectangle_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_rectangle_flat.png"
+  "images/gui/Red/Double/button_rectangle_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_rectangle_gloss.png"
+  "images/gui/Red/Double/button_rectangle_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_rectangle_gradient.png"
+  "images/gui/Red/Double/button_rectangle_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_rectangle_line.png"
+  "images/gui/Red/Double/button_round_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_round_border.png"
+  "images/gui/Red/Double/button_round_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_round_depth_border.png"
+  "images/gui/Red/Double/button_round_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_round_depth_flat.png"
+  "images/gui/Red/Double/button_round_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_round_depth_gloss.png"
+  "images/gui/Red/Double/button_round_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_round_depth_gradient.png"
+  "images/gui/Red/Double/button_round_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_round_depth_line.png"
+  "images/gui/Red/Double/button_round_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_round_flat.png"
+  "images/gui/Red/Double/button_round_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_round_gloss.png"
+  "images/gui/Red/Double/button_round_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_round_gradient.png"
+  "images/gui/Red/Double/button_round_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_round_line.png"
+  "images/gui/Red/Double/button_square_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_square_border.png"
+  "images/gui/Red/Double/button_square_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_square_depth_border.png"
+  "images/gui/Red/Double/button_square_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_square_depth_flat.png"
+  "images/gui/Red/Double/button_square_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_square_depth_gloss.png"
+  "images/gui/Red/Double/button_square_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_square_depth_gradient.png"
+  "images/gui/Red/Double/button_square_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_square_depth_line.png"
+  "images/gui/Red/Double/button_square_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_square_flat.png"
+  "images/gui/Red/Double/button_square_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_square_gloss.png"
+  "images/gui/Red/Double/button_square_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_square_gradient.png"
+  "images/gui/Red/Double/button_square_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/button_square_line.png"
+  "images/gui/Red/Double/check_round_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/check_round_color.png"
+  "images/gui/Red/Double/check_round_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_round_grey.png"
+  "images/gui/Red/Double/check_round_grey_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/check_round_grey_circle.png"
+  "images/gui/Red/Double/check_round_round_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/check_round_round_circle.png"
+  "images/gui/Red/Double/check_square_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/check_square_color.png"
+  "images/gui/Red/Double/check_square_color_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/check_square_color_checkmark.png"
+  "images/gui/Red/Double/check_square_color_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/check_square_color_cross.png"
+  "images/gui/Red/Double/check_square_color_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/check_square_color_square.png"
+  "images/gui/Red/Double/check_square_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_square_grey.png"
+  "images/gui/Red/Double/check_square_grey_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/check_square_grey_checkmark.png"
+  "images/gui/Red/Double/check_square_grey_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/check_square_grey_cross.png"
+  "images/gui/Red/Double/check_square_grey_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/check_square_grey_square.png"
+  "images/gui/Red/Double/icon_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/icon_checkmark.png"
+  "images/gui/Red/Double/icon_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/icon_circle.png"
+  "images/gui/Red/Double/icon_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/icon_cross.png"
+  "images/gui/Red/Double/icon_outline_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/icon_outline_checkmark.png"
+  "images/gui/Red/Double/icon_outline_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/icon_outline_circle.png"
+  "images/gui/Red/Double/icon_outline_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/icon_outline_cross.png"
+  "images/gui/Red/Double/icon_outline_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/icon_outline_square.png"
+  "images/gui/Red/Double/icon_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/icon_square.png"
+  "images/gui/Red/Double/slide_hangle.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/slide_hangle.png"
+  "images/gui/Red/Double/slide_horizontal_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/slide_horizontal_color.png"
+  "images/gui/Red/Double/slide_horizontal_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/slide_horizontal_color_section.png"
+  "images/gui/Red/Double/slide_horizontal_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/slide_horizontal_color_section_wide.png"
+  "images/gui/Red/Double/slide_horizontal_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_grey.png"
+  "images/gui/Red/Double/slide_horizontal_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_grey_section.png"
+  "images/gui/Red/Double/slide_horizontal_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_grey_section_wide.png"
+  "images/gui/Red/Double/slide_vertical_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/slide_vertical_color.png"
+  "images/gui/Red/Double/slide_vertical_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/slide_vertical_color_section.png"
+  "images/gui/Red/Double/slide_vertical_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/slide_vertical_color_section_wide.png"
+  "images/gui/Red/Double/slide_vertical_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_grey.png"
+  "images/gui/Red/Double/slide_vertical_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_grey_section.png"
+  "images/gui/Red/Double/slide_vertical_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_grey_section_wide.png"
+  "images/gui/Red/Double/star.png":
+    source: kenney-ui-pack
+    original: "PNG/Red/Double/star.png"
+  "images/gui/Red/Double/star_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/star_outline.png"
+  "images/gui/Red/Double/star_outline_depth.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/star_outline_depth.png"
+  "images/gui/Yellow/Default/arrow_basic_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/arrow_basic_e.png"
+  "images/gui/Yellow/Default/arrow_basic_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/arrow_basic_e_small.png"
+  "images/gui/Yellow/Default/arrow_basic_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/arrow_basic_n.png"
+  "images/gui/Yellow/Default/arrow_basic_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/arrow_basic_n_small.png"
+  "images/gui/Yellow/Default/arrow_basic_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/arrow_basic_s.png"
+  "images/gui/Yellow/Default/arrow_basic_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/arrow_basic_s_small.png"
+  "images/gui/Yellow/Default/arrow_basic_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/arrow_basic_w.png"
+  "images/gui/Yellow/Default/arrow_basic_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/arrow_basic_w_small.png"
+  "images/gui/Yellow/Default/arrow_decorative_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/arrow_decorative_e.png"
+  "images/gui/Yellow/Default/arrow_decorative_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/arrow_decorative_e_small.png"
+  "images/gui/Yellow/Default/arrow_decorative_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/arrow_decorative_n.png"
+  "images/gui/Yellow/Default/arrow_decorative_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/arrow_decorative_n_small.png"
+  "images/gui/Yellow/Default/arrow_decorative_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/arrow_decorative_s.png"
+  "images/gui/Yellow/Default/arrow_decorative_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/arrow_decorative_s_small.png"
+  "images/gui/Yellow/Default/arrow_decorative_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/arrow_decorative_w.png"
+  "images/gui/Yellow/Default/arrow_decorative_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/arrow_decorative_w_small.png"
+  "images/gui/Yellow/Default/button_rectangle_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_rectangle_border.png"
+  "images/gui/Yellow/Default/button_rectangle_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_rectangle_depth_border.png"
+  "images/gui/Yellow/Default/button_rectangle_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_rectangle_depth_flat.png"
+  "images/gui/Yellow/Default/button_rectangle_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_rectangle_depth_gloss.png"
+  "images/gui/Yellow/Default/button_rectangle_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_rectangle_depth_gradient.png"
+  "images/gui/Yellow/Default/button_rectangle_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_rectangle_depth_line.png"
+  "images/gui/Yellow/Default/button_rectangle_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_rectangle_flat.png"
+  "images/gui/Yellow/Default/button_rectangle_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_rectangle_gloss.png"
+  "images/gui/Yellow/Default/button_rectangle_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_rectangle_gradient.png"
+  "images/gui/Yellow/Default/button_rectangle_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_rectangle_line.png"
+  "images/gui/Yellow/Default/button_round_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_round_border.png"
+  "images/gui/Yellow/Default/button_round_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_round_depth_border.png"
+  "images/gui/Yellow/Default/button_round_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_round_depth_flat.png"
+  "images/gui/Yellow/Default/button_round_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_round_depth_gloss.png"
+  "images/gui/Yellow/Default/button_round_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_round_depth_gradient.png"
+  "images/gui/Yellow/Default/button_round_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_round_depth_line.png"
+  "images/gui/Yellow/Default/button_round_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_round_flat.png"
+  "images/gui/Yellow/Default/button_round_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_round_gloss.png"
+  "images/gui/Yellow/Default/button_round_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_round_gradient.png"
+  "images/gui/Yellow/Default/button_round_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_round_line.png"
+  "images/gui/Yellow/Default/button_square_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_square_border.png"
+  "images/gui/Yellow/Default/button_square_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_square_depth_border.png"
+  "images/gui/Yellow/Default/button_square_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_square_depth_flat.png"
+  "images/gui/Yellow/Default/button_square_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_square_depth_gloss.png"
+  "images/gui/Yellow/Default/button_square_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_square_depth_gradient.png"
+  "images/gui/Yellow/Default/button_square_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_square_depth_line.png"
+  "images/gui/Yellow/Default/button_square_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_square_flat.png"
+  "images/gui/Yellow/Default/button_square_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_square_gloss.png"
+  "images/gui/Yellow/Default/button_square_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_square_gradient.png"
+  "images/gui/Yellow/Default/button_square_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_square_line.png"
+  "images/gui/Yellow/Default/check_round_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/check_round_color.png"
+  "images/gui/Yellow/Default/check_round_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_round_grey.png"
+  "images/gui/Yellow/Default/check_round_grey_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/check_round_grey_circle.png"
+  "images/gui/Yellow/Default/check_round_round_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/check_round_round_circle.png"
+  "images/gui/Yellow/Default/check_square_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/check_square_color.png"
+  "images/gui/Yellow/Default/check_square_color_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/check_square_color_checkmark.png"
+  "images/gui/Yellow/Default/check_square_color_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/check_square_color_cross.png"
+  "images/gui/Yellow/Default/check_square_color_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/check_square_color_square.png"
+  "images/gui/Yellow/Default/check_square_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/check_square_grey.png"
+  "images/gui/Yellow/Default/check_square_grey_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/check_square_grey_checkmark.png"
+  "images/gui/Yellow/Default/check_square_grey_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/check_square_grey_cross.png"
+  "images/gui/Yellow/Default/check_square_grey_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/check_square_grey_square.png"
+  "images/gui/Yellow/Default/icon_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/icon_checkmark.png"
+  "images/gui/Yellow/Default/icon_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/icon_circle.png"
+  "images/gui/Yellow/Default/icon_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/icon_cross.png"
+  "images/gui/Yellow/Default/icon_outline_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/icon_outline_checkmark.png"
+  "images/gui/Yellow/Default/icon_outline_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/icon_outline_circle.png"
+  "images/gui/Yellow/Default/icon_outline_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/icon_outline_cross.png"
+  "images/gui/Yellow/Default/icon_outline_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/icon_outline_square.png"
+  "images/gui/Yellow/Default/icon_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/icon_square.png"
+  "images/gui/Yellow/Default/slide_hangle.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/slide_hangle.png"
+  "images/gui/Yellow/Default/slide_horizontal_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/slide_horizontal_color.png"
+  "images/gui/Yellow/Default/slide_horizontal_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/slide_horizontal_color_section.png"
+  "images/gui/Yellow/Default/slide_horizontal_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/slide_horizontal_color_section_wide.png"
+  "images/gui/Yellow/Default/slide_horizontal_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_grey.png"
+  "images/gui/Yellow/Default/slide_horizontal_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_grey_section.png"
+  "images/gui/Yellow/Default/slide_horizontal_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_horizontal_grey_section_wide.png"
+  "images/gui/Yellow/Default/slide_vertical_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/slide_vertical_color.png"
+  "images/gui/Yellow/Default/slide_vertical_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/slide_vertical_color_section.png"
+  "images/gui/Yellow/Default/slide_vertical_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/slide_vertical_color_section_wide.png"
+  "images/gui/Yellow/Default/slide_vertical_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_grey.png"
+  "images/gui/Yellow/Default/slide_vertical_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_grey_section.png"
+  "images/gui/Yellow/Default/slide_vertical_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/slide_vertical_grey_section_wide.png"
+  "images/gui/Yellow/Default/star.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/star.png"
+  "images/gui/Yellow/Default/star_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/star_outline.png"
+  "images/gui/Yellow/Default/star_outline_depth.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/star_outline_depth.png"
+  "images/gui/Yellow/Double/arrow_basic_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/arrow_basic_e.png"
+  "images/gui/Yellow/Double/arrow_basic_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/arrow_basic_e_small.png"
+  "images/gui/Yellow/Double/arrow_basic_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/arrow_basic_n.png"
+  "images/gui/Yellow/Double/arrow_basic_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/arrow_basic_n_small.png"
+  "images/gui/Yellow/Double/arrow_basic_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/arrow_basic_s.png"
+  "images/gui/Yellow/Double/arrow_basic_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/arrow_basic_s_small.png"
+  "images/gui/Yellow/Double/arrow_basic_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/arrow_basic_w.png"
+  "images/gui/Yellow/Double/arrow_basic_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/arrow_basic_w_small.png"
+  "images/gui/Yellow/Double/arrow_decorative_e.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/arrow_decorative_e.png"
+  "images/gui/Yellow/Double/arrow_decorative_e_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/arrow_decorative_e_small.png"
+  "images/gui/Yellow/Double/arrow_decorative_n.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/arrow_decorative_n.png"
+  "images/gui/Yellow/Double/arrow_decorative_n_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/arrow_decorative_n_small.png"
+  "images/gui/Yellow/Double/arrow_decorative_s.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/arrow_decorative_s.png"
+  "images/gui/Yellow/Double/arrow_decorative_s_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/arrow_decorative_s_small.png"
+  "images/gui/Yellow/Double/arrow_decorative_w.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/arrow_decorative_w.png"
+  "images/gui/Yellow/Double/arrow_decorative_w_small.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/arrow_decorative_w_small.png"
+  "images/gui/Yellow/Double/button_rectangle_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_rectangle_border.png"
+  "images/gui/Yellow/Double/button_rectangle_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_rectangle_depth_border.png"
+  "images/gui/Yellow/Double/button_rectangle_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_rectangle_depth_flat.png"
+  "images/gui/Yellow/Double/button_rectangle_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_rectangle_depth_gloss.png"
+  "images/gui/Yellow/Double/button_rectangle_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_rectangle_depth_gradient.png"
+  "images/gui/Yellow/Double/button_rectangle_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_rectangle_depth_line.png"
+  "images/gui/Yellow/Double/button_rectangle_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_rectangle_flat.png"
+  "images/gui/Yellow/Double/button_rectangle_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_rectangle_gloss.png"
+  "images/gui/Yellow/Double/button_rectangle_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_rectangle_gradient.png"
+  "images/gui/Yellow/Double/button_rectangle_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_rectangle_line.png"
+  "images/gui/Yellow/Double/button_round_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_round_border.png"
+  "images/gui/Yellow/Double/button_round_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_round_depth_border.png"
+  "images/gui/Yellow/Double/button_round_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_round_depth_flat.png"
+  "images/gui/Yellow/Double/button_round_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_round_depth_gloss.png"
+  "images/gui/Yellow/Double/button_round_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_round_depth_gradient.png"
+  "images/gui/Yellow/Double/button_round_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_round_depth_line.png"
+  "images/gui/Yellow/Double/button_round_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_round_flat.png"
+  "images/gui/Yellow/Double/button_round_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_round_gloss.png"
+  "images/gui/Yellow/Double/button_round_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_round_gradient.png"
+  "images/gui/Yellow/Double/button_round_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_round_line.png"
+  "images/gui/Yellow/Double/button_square_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_square_border.png"
+  "images/gui/Yellow/Double/button_square_depth_border.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_square_depth_border.png"
+  "images/gui/Yellow/Double/button_square_depth_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_square_depth_flat.png"
+  "images/gui/Yellow/Double/button_square_depth_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_square_depth_gloss.png"
+  "images/gui/Yellow/Double/button_square_depth_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_square_depth_gradient.png"
+  "images/gui/Yellow/Double/button_square_depth_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_square_depth_line.png"
+  "images/gui/Yellow/Double/button_square_flat.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_square_flat.png"
+  "images/gui/Yellow/Double/button_square_gloss.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_square_gloss.png"
+  "images/gui/Yellow/Double/button_square_gradient.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_square_gradient.png"
+  "images/gui/Yellow/Double/button_square_line.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/button_square_line.png"
+  "images/gui/Yellow/Double/check_round_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/check_round_color.png"
+  "images/gui/Yellow/Double/check_round_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_round_grey.png"
+  "images/gui/Yellow/Double/check_round_grey_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/check_round_grey_circle.png"
+  "images/gui/Yellow/Double/check_round_round_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/check_round_round_circle.png"
+  "images/gui/Yellow/Double/check_square_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/check_square_color.png"
+  "images/gui/Yellow/Double/check_square_color_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/check_square_color_checkmark.png"
+  "images/gui/Yellow/Double/check_square_color_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/check_square_color_cross.png"
+  "images/gui/Yellow/Double/check_square_color_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/check_square_color_square.png"
+  "images/gui/Yellow/Double/check_square_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/check_square_grey.png"
+  "images/gui/Yellow/Double/check_square_grey_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/check_square_grey_checkmark.png"
+  "images/gui/Yellow/Double/check_square_grey_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/check_square_grey_cross.png"
+  "images/gui/Yellow/Double/check_square_grey_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/check_square_grey_square.png"
+  "images/gui/Yellow/Double/icon_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/icon_checkmark.png"
+  "images/gui/Yellow/Double/icon_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/icon_circle.png"
+  "images/gui/Yellow/Double/icon_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/icon_cross.png"
+  "images/gui/Yellow/Double/icon_outline_checkmark.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/icon_outline_checkmark.png"
+  "images/gui/Yellow/Double/icon_outline_circle.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/icon_outline_circle.png"
+  "images/gui/Yellow/Double/icon_outline_cross.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/icon_outline_cross.png"
+  "images/gui/Yellow/Double/icon_outline_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/icon_outline_square.png"
+  "images/gui/Yellow/Double/icon_square.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/icon_square.png"
+  "images/gui/Yellow/Double/slide_hangle.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/slide_hangle.png"
+  "images/gui/Yellow/Double/slide_horizontal_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/slide_horizontal_color.png"
+  "images/gui/Yellow/Double/slide_horizontal_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/slide_horizontal_color_section.png"
+  "images/gui/Yellow/Double/slide_horizontal_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/slide_horizontal_color_section_wide.png"
+  "images/gui/Yellow/Double/slide_horizontal_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_grey.png"
+  "images/gui/Yellow/Double/slide_horizontal_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_grey_section.png"
+  "images/gui/Yellow/Double/slide_horizontal_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_horizontal_grey_section_wide.png"
+  "images/gui/Yellow/Double/slide_vertical_color.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/slide_vertical_color.png"
+  "images/gui/Yellow/Double/slide_vertical_color_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/slide_vertical_color_section.png"
+  "images/gui/Yellow/Double/slide_vertical_color_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/slide_vertical_color_section_wide.png"
+  "images/gui/Yellow/Double/slide_vertical_grey.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_grey.png"
+  "images/gui/Yellow/Double/slide_vertical_grey_section.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_grey_section.png"
+  "images/gui/Yellow/Double/slide_vertical_grey_section_wide.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/slide_vertical_grey_section_wide.png"
+  "images/gui/Yellow/Double/star.png":
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Double/star.png"
+  "images/gui/Yellow/Double/star_outline.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/star_outline.png"
+  "images/gui/Yellow/Double/star_outline_depth.png":
+    source: kenney-ui-pack
+    original: "PNG/Blue/Double/star_outline_depth.png"
+  "images/tile.png":
+    source: kenney-isometric-landscape
+    original: "PNG/landscapeTiles_067.png"
+  "sounds/click-a.ogg":
+    source: kenney-ui-pack
+    original: "Sounds/click-a.ogg"
+  "sounds/click-b.ogg":
+    source: kenney-ui-pack
+    original: "Sounds/click-b.ogg"
+  "sounds/switch-a.ogg":
+    source: kenney-ui-pack
+    original: "Sounds/switch-a.ogg"
+  "sounds/switch-b.ogg":
+    source: kenney-ui-pack
+    original: "Sounds/switch-b.ogg"
+  "sounds/tap-a.ogg":
+    source: kenney-ui-pack
+    original: "Sounds/tap-a.ogg"
+  "sounds/tap-b.ogg":
+    source: kenney-ui-pack
+    original: "Sounds/tap-b.ogg"
