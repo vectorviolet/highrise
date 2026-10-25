@@ -26,6 +26,9 @@ datas = [
     # pygamine's shared splash (standard_splash_media), resolved next to the
     # pygamine package rather than the game's assets/
     (str(ROOT / "src" / "pygamine" / "pygamine" / "branding"), "pygamine/branding"),
+    # License texts of pygame-ce and the native libraries it bundles: inside
+    # the bundle (on macOS, inside the .app) and, below, next to the executable.
+    (str(ROOT / "src" / "pygamine" / "pygamine" / "licenses"), "licenses"),
 ]
 
 a = Analysis(
@@ -69,6 +72,13 @@ coll = COLLECT(
     upx_exclude=[],
     name="highrise",
 )
+
+# Third-party license texts (pygame-ce and the libraries it bundles; see
+# src/pygamine/pygamine/licenses/README.md) next to the executable, where
+# players look -- the datas copy above sits inside _internal/.
+import shutil  # noqa: E402
+shutil.copytree(ROOT / "src" / "pygamine" / "pygamine" / "licenses",
+                Path(DISTPATH) / "highrise" / "licenses", dirs_exist_ok=True)  # noqa: F821 -- injected by PyInstaller
 
 # On macOS, also wrap the onedir bundle as a .app for a native double-click.
 if sys.platform == "darwin":
