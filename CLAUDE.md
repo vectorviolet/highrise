@@ -21,7 +21,13 @@ uv run --group dev pytest tests/ -q                      # this app's own logic 
 uv run --group dev pytest tests/ --cov --cov-report=term  # with coverage
 ```
 
-No lint configuration in this project. Note: several paths in this file (`src/game.py`,
+**Code style:** run `uv run --group dev ruff format .` and `uv run --group dev ruff check .`
+before every commit. Formatting is Black-compatible (`[tool.ruff.format]` in `pyproject.toml`);
+lint is pyflakes-only (`[tool.ruff.lint]`). CI fails on `ruff format --check .` and on lint
+errors. Keep pure reformatting out of feature commits; a repo-wide reformat goes in its own
+commit, with its hash added to `.git-blame-ignore-revs`.
+
+Note: several paths in this file (`src/game.py`,
 `src/game_events.py`, `src/game_audio.py`, `src/building.py`, `src/cloud.py`, `src/tile.py`,
 `src/ext/guiobject.py`) are stale — the actual layout has since moved to `src/app/`,
 `src/domain/`, `src/gameplay/{buildings,clouds,tiles}/`, and `src/ui/` (see the test suite's

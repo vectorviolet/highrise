@@ -13,7 +13,22 @@ dependencies = [
 build = [
     "pyinstaller>=6.0",
 ]
-dev = ["pytest>=8", "pytest-cov>=5"]
+dev = ["pytest>=8", "pytest-cov>=5", "ruff>=0.16"]
+
+[tool.ruff]
+# ruff's own default, written out: both `ruff check` and `ruff format` use it.
+line-length = 88
+# The pygamine submodule has its own ruff configuration and CI.
+extend-exclude = ["src/pygamine"]
+
+[tool.ruff.format]
+# Black-compatible formatting; Black's defaults throughout.
+quote-style = "double"
+
+[tool.ruff.lint]
+# Deliberately narrow, like pygamine's: F (pyflakes -- real bugs such as
+# unused imports or undefined names), not pycodestyle's style rules.
+select = ["F"]
 
 [tool.uv.sources]
 pygamine = { path = "src/pygamine", editable = true }

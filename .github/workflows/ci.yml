@@ -18,6 +18,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    name: Lint and format (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up uv + Python
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Lint (ruff check)
+        run: uv run --group dev ruff check .
+
+      - name: Format (ruff, Black-compatible)
+        run: uv run --group dev ruff format --check .
+
   engine-tests:
     name: pygamine test suite
     runs-on: ubuntu-latest

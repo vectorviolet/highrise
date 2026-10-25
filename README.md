@@ -106,6 +106,28 @@ See [CLAUDE.md](CLAUDE.md) for the full architecture overview.
 
 Art, UI, sounds and fonts from [Kenney](https://www.kenney.nl/) — [Hexagon Buildings](https://www.kenney.nl/assets/hexagon-buildings) and [UI Pack](https://www.kenney.nl/assets/ui-pack) (CC0). See [CREDITS.md](CREDITS.md) for every asset, font and library with its license; it also ships with the game.
 
+## Code style
+
+- **Formatting:** Black-compatible, enforced by `ruff format` (line length 88, double quotes,
+  otherwise Black's defaults; see `[tool.ruff.format]` in `pyproject.toml`).
+- **Lint:** `ruff check`, deliberately narrow (pyflakes rules only).
+- **CI:** runs both. The `src/pygamine` submodule is excluded; it has its own setup.
+
+Run both locally before committing:
+
+```bash
+uv run --group dev ruff format .          # reformat
+uv run --group dev ruff check .           # lint
+uv run --group dev ruff format --check .  # what CI runs: fails if anything would be reformatted
+```
+
+The commit that first applied the formatter is listed in `.git-blame-ignore-revs`. To have
+`git blame` skip it and show the real author of each line:
+
+```bash
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
 ## Contributing
 
 1. Fork this repository.
