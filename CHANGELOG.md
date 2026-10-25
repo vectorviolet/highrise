@@ -5,6 +5,27 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project aims to
 follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] – 2026-10-25
+
+### Changed
+
+- Every asset now has a known source and a license that allows shipping it. Files of unknown
+  origin were replaced with Kenney CC0 art:
+  - the clouds, from Background Elements Remastered;
+  - the info, plus and minus icons, from Game Icons;
+  - the mouse cursor, from Cursor Pack's outlined pointer, now drawn at its native 32×32.
+- The developer screen links to GitHub and itch.io, using the official logos that ship with
+  pygamine. The LinkedIn link is removed.
+- `CREDITS.md` lists every asset pack, generated from the new `assets/SOURCES.yaml`. Each
+  pack's own license text ships in `licenses/assets/`.
+
+### Added
+
+- `assets/SOURCES.yaml`: the source pack and original file name of every file under `assets/`,
+  checked by the test suite.
+- Code style: Black-compatible formatting with `ruff format` and linting with `ruff check`, both
+  enforced in CI.
+
 ## [0.2.3] – 2026-10-25
 
 ### Removed
