@@ -14,7 +14,7 @@ audio:
   default_sfx_volume: 1.0
 
 ui:
-  cursor_size: [25, 25]
+  cursor_size: [32, 32]  # the Kenney Cursor Pack sprite's native size: crisp pixel art
   background_colors:
     menu: yellow
     play: yellow
