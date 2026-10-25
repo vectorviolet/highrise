@@ -71,6 +71,7 @@ jobs:
           name: ${{ matrix.asset }}
           path: ${{ matrix.asset }}
           if-no-files-found: error
+          retention-days: 7  # the GitHub Release keeps the builds; artifacts only hand them to the release job
 
   release:
     name: Publish GitHub Release
