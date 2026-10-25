@@ -24,6 +24,16 @@ from pygamine import make_factory, make_text_factory, make_animated_factory
 from pygamine import MenuController
 from ui.info_panel import InfoPanel
 
+# Manifest key of the background music. Optional: without it the game plays
+# no music and hides the music volume control (it would control nothing --
+# the splash plays before the saved volumes are applied).
+MUSIC_KEY = "bg"
+MUSIC_VOLUME_OBJECTS = (
+    "music_volume_text", "music_volume_minus_button", "music_volume_plus_button",
+    "music_volume_entry", "music_volume_entry_text",
+    "music_volume_minus_icon", "music_volume_plus_icon",
+)
+
 WINDOW_MODE_LABELS = {
     "fullscreen": "FULLSCREEN",
     "borderless": "BORDERLESS",
@@ -73,7 +83,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.old_music_volume = self.default_music_volume
         self.old_sfx_volume = self.default_sfx_volume
 
-        self.background_music_sound_path = self.assets.sound_path("bg")
+        self.background_music_sound_path = (
+            self.assets.sound_path(MUSIC_KEY) if self.has_music_asset(self.assets) else None
+        )
         self.click_sound_path = self.assets.sound_path("click")
         self.go_back_sound_path = self.assets.sound_path("back")
 
@@ -142,9 +154,23 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.set_sfx_label(self.audio.sfx_volume())
         self.set_window_size_label()
         self.set_window_mode_label()
-        self.audio.play_music(str(self.background_music_sound_path))
+        if self.background_music_sound_path is not None:
+            self.audio.play_music(str(self.background_music_sound_path))
 
         super().run()
+
+    @staticmethod
+    def has_music_asset(assets: AssetManager) -> bool:
+        try:
+            assets.sound_path(MUSIC_KEY)
+        except KeyError:
+            return False
+        return True
+
+    def _show_music_controls(self, shown: bool) -> None:
+        panel = self.panel_manager["audio_settings"]
+        for name in MUSIC_VOLUME_OBJECTS:
+            panel[name].active = shown
 
     def add_objects(self) -> None:
         # Game
@@ -157,6 +183,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         loader.register("text", make_text_factory(self.assets))
         loader.register("animated", make_animated_factory(self.assets))
         loader.load("config/panels.yaml")
+        self._show_music_controls(self.background_music_sound_path is not None)
 
         panel = self.panel_manager["game"]
         for name in ("info_panel", "level_text", "speed_text", "cooldown_text",

@@ -136,6 +136,7 @@ class FakeGame(GameEventsMixin):
         self.mouse = SimpleNamespace(position=(0, 0))
         self.audio = FakeAudio()
         self.click_sound_path = "assets/sfx/click.ogg"
+        self.background_music_sound_path = "assets/sounds/music.ogg"  # a game with music: its controls work
         self.old_music_volume = 0.5
         self.old_sfx_volume = 0.5
         self.tile_selector = FakeTileSelector()

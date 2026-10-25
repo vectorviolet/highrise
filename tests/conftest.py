@@ -15,7 +15,7 @@ os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 import pygame
 import pytest
 
-from pygamine import AssetManager
+from pygamine import AssetManager, Database, SaveStore
 
 pygame.init()
 # Tile/Building load images via convert_alpha(), which raises without a
@@ -32,3 +32,11 @@ def assets() -> AssetManager:
     missing = manager.validate()
     assert not missing, f"Missing assets: {missing}"
     return manager
+
+
+@pytest.fixture(autouse=True)
+def saves_in_tmp(tmp_path, monkeypatch):
+    """Every test's Database (the game's save, databases/database.db) and
+    SaveStore default to a temporary folder, never the repo's real ones."""
+    monkeypatch.setattr(Database.__init__, "__defaults__", (str(tmp_path / "databases"),))
+    monkeypatch.setattr(SaveStore.__init__, "__defaults__", (str(tmp_path / "saves"),))

@@ -85,10 +85,11 @@ class GameEventsMixin:
     def handle_audio_settings_events(self, event: pygame.event.Event) -> None:
         panel = self.panel_manager["audio_settings"]
 
-        if panel["music_volume_plus_button"].is_clicked(event, self.mouse.position):
+        has_music = self.background_music_sound_path is not None  # its controls are hidden otherwise
+        if has_music and panel["music_volume_plus_button"].is_clicked(event, self.mouse.position):
             new_vol = self.audio.music_volume() + 0.1
             self.audio.set_music_volume(new_vol); self.set_music_label(new_vol)
-        elif panel["music_volume_minus_button"].is_clicked(event, self.mouse.position):
+        elif has_music and panel["music_volume_minus_button"].is_clicked(event, self.mouse.position):
             new_vol = self.audio.music_volume() - 0.1
             self.audio.set_music_volume(new_vol); self.set_music_label(new_vol)
         elif panel["sfx_volume_plus_button"].is_clicked(event, self.mouse.position):

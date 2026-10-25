@@ -26,7 +26,9 @@ images:
 
 
 sounds:
-    bg:             {folder: "", name: music, extension: mp3}
+    # No background music for now: the previous track was unlicensed. Add a
+    # licensed one here as `bg` and the game plays it, and shows the music
+    # volume control again.
     click:          {folder: "", name: click-a}
     back:           {folder: "", name: click-b}
     switch_up:      {folder: "", name: switch-b}
