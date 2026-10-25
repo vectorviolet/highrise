@@ -505,25 +505,25 @@ panels:
         position: [940, 555]
         size: [16, 16]
         asset: github_icon
-      linkedin_button:
+      itch_button:
         position: [CENTER, 600]
         size: [250, 40]
         asset: grey_button
         hover: yellow_button
-      linkedin_button_text:
+      itch_button_text:
         type: text
         font: kenvector_future
         font_size: 20
         color: Black
         position: [CENTER, CENTER]
-        parent: linkedin_button
+        parent: itch_button
         text: ""
         states:
-          hover: "linkedin.com/in/umutcanekinci"
-      linkedin_icon:
-        position: [940, 605]
-        size: [16, 16]
-        asset: linkedin_icon
+          hover: "umutcanekinci.itch.io"
+      itch_icon:
+        position: [939, 605]
+        size: [18, 16]
+        asset: itch_icon
       developer_back_button:
         extends: go_back_btn
         size: [250, 40]

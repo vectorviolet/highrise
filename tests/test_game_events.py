@@ -129,7 +129,7 @@ def make_panels():
             "game_settings": {"game_settings_back_button": FakeButton()},
             "developer": {
                 "github_button": FakeButton(),
-                "linkedin_button": FakeButton(),
+                "itch_button": FakeButton(),
                 "developer_back_button": FakeButton(),
             },
             "game": {
@@ -401,11 +401,11 @@ def test_developer_links_open_in_a_browser(monkeypatch):
     assert opened == ["https://www.github.com/umutcanekinci/"]
 
     game2 = FakeGame()
-    game2.panel_manager["developer"]["linkedin_button"].clicked = True
+    game2.panel_manager["developer"]["itch_button"].clicked = True
     game2.handle_developer_events(click_up())
     assert opened == [
         "https://www.github.com/umutcanekinci/",
-        "https://www.linkedin.com/in/umutcanekinci/",
+        "https://umutcanekinci.itch.io/",
     ]
 
 

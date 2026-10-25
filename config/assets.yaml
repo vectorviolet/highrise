@@ -6,8 +6,9 @@ images:
     cursor:         { folder: gui/developer, name: cursor }
     profile_image:  { folder: gui/developer, name: cv }
     grey_panel:     { folder: gui/panels, name: grey }
-    github_icon:    { folder: gui/developer, name: github }
-    linkedin_icon:  { folder: gui/developer, name: linkedin }
+    # Platform logos shipped with pygamine (src/pygamine/pygamine/branding)
+    github_icon:    { source: branding, folder: github, name: GitHub_Invertocat_Black }
+    itch_icon:      { source: branding, folder: itchio/logos, name: itchio-logo-textless-black }
 
     blue_button:    {folder: gui/Blue/Default, name: button_rectangle_depth_gloss}
     green_button:   {folder: gui/Green/Default, name: button_rectangle_depth_gloss}

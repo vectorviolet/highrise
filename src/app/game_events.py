@@ -126,8 +126,8 @@ class GameEventsMixin:
         panel = self.panel_manager["developer"]
         if self._activate(panel["github_button"], event):
             webbrowser.open("https://www.github.com/umutcanekinci/")
-        elif self._activate(panel["linkedin_button"], event):
-            webbrowser.open("https://www.linkedin.com/in/umutcanekinci/")
+        elif self._activate(panel["itch_button"], event):
+            webbrowser.open("https://umutcanekinci.itch.io/")
         elif self._activate(panel["developer_back_button"], event):
             self.open_panel("menu")
 
