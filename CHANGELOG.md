@@ -5,6 +5,14 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project aims to
 follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Sound effects can overlap: pygamine 0.26.0 plays each one on a free mixer channel, so a new
+  click, menu or merge sound no longer cuts off the one before it. The SFX volume setting
+  applies to all of them.
+
 ## [0.2.4] – 2026-10-25
 
 ### Changed
