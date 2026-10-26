@@ -15,7 +15,7 @@ from app.game import MUSIC_KEY, MUSIC_VOLUME_OBJECTS, Game
 
 
 @pytest.fixture
-def game(monkeypatch):
+def game(monkeypatch) -> Game:
     # The real window loop and splash don't apply headlessly; everything
     # else in run() does.
     monkeypatch.setattr(pygamine.Application, "run", lambda self: None)

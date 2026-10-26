@@ -31,7 +31,7 @@ class FakePanelManager(dict):
         self.current_panel = "game"
 
 
-def make_panel_manager():
+def make_panel_manager() -> tuple[FakePanelManager, dict[str, FakeText | FakeImage]]:
     panel = {
         "level_text": FakeText(),
         "speed_text": FakeText(),

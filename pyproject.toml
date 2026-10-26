@@ -28,7 +28,13 @@ quote-style = "double"
 [tool.ruff.lint]
 # Deliberately narrow, like pygamine's: F (pyflakes -- real bugs such as
 # unused imports or undefined names), not pycodestyle's style rules.
-select = ["F"]
+select = ["F", "ANN201", "ANN202", "ANN204", "ANN205", "ANN206"]
+
+[tool.ruff.lint.per-file-ignores]
+# Every function and method in the source code declares its return type (the
+# ANN rules above). Test functions don't: pytest calls them and no type checker
+# runs here. Fixtures and helpers in tests that return a value still get one.
+"tests/**" = ["ANN201", "ANN202", "ANN204", "ANN205", "ANN206"]
 
 [tool.uv.sources]
 pygamine = { path = "src/pygamine", editable = true }

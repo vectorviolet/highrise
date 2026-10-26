@@ -66,7 +66,7 @@ class FakeTileSelector:
     def update_selection(self) -> None:
         self.update_calls += 1
 
-    def get_selected_building(self):
+    def get_selected_building(self) -> object | None:
         return self._selected_building
 
 
@@ -91,7 +91,7 @@ class FakePanelManager(dict):
     pass
 
 
-def make_panels():
+def make_panels() -> FakePanelManager:
     return FakePanelManager(
         {
             "menu": {
@@ -210,7 +210,7 @@ class FakeGame(GameEventsMixin):
         self.calls.append("update_button_texts")
 
 
-def click_up():
+def click_up() -> pygame.event.Event:
     return pygame.event.Event(pygame.MOUSEBUTTONUP, button=1)
 
 

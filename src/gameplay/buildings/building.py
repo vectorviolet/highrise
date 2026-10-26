@@ -89,7 +89,7 @@ class Buildings(list[Building]):
         self.age_number = 0
         self.assets = assets
 
-    def set_age(self, age_number):
+    def set_age(self, age_number) -> None:
         if age_number <= self.max_age_number:
             self.age_number = age_number
 
@@ -99,13 +99,13 @@ class Buildings(list[Building]):
     def is_moving(self) -> bool:
         return any(b.rigidbody.velocity != Vector2(0, 0) for b in self)
 
-    def get_age_cost(self):
+    def get_age_cost(self) -> int:
         return (self.age_number + 1) * 1000
 
-    def get_build_cost(self):
+    def get_build_cost(self) -> int:
         return (self.age_number + 1) * 100
 
-    def control_moving(self):
+    def control_moving(self) -> None:
         for building in self:
             if building.rigidbody.velocity == Vector2(0, 0):
                 if building.should_destroy:
@@ -149,12 +149,12 @@ class Buildings(list[Building]):
                         int(building.target_position.y),
                     )
 
-    def update(self):
+    def update(self) -> None:
         for building in self:
             building.update()
         self.control_moving()
 
-    def draw(self, surface):
+    def draw(self, surface) -> None:
         for building in self:
             building.draw(surface)
 

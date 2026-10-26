@@ -13,7 +13,7 @@ from gameplay.tilemap import Tilemap
 MAX_LEVEL = 6
 
 
-def make_grid(assets, size=3):
+def make_grid(assets, size=3) -> tuple[Buildings, Tilemap]:
     return Buildings(assets), Tilemap(size=size, max_size=size)
 
 

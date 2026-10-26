@@ -14,7 +14,7 @@ class Tile(GameObject):
     GRID_HOVER_COLOR = "yellow"
     HOVER_SHIFT_Y = 10
 
-    def __init__(self, row_number, column_number):
+    def __init__(self, row_number, column_number) -> None:
         super().__init__()
         self.selected = False
         self.is_empty = True
@@ -52,7 +52,7 @@ class Tile(GameObject):
         ]
 
     @staticmethod
-    def get_position(row, column) -> tuple:
+    def get_position(row, column) -> tuple[int, int]:
         x = (column - row) * 65 + 655 + 240
         y = (column + row) * 32 + 200 + 90
 

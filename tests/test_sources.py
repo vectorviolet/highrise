@@ -22,11 +22,11 @@ _spec.loader.exec_module(gen_credits)
 
 
 @pytest.fixture(scope="module")
-def sources():
+def sources() -> dict:
     return gen_credits.load_sources()
 
 
-def _asset_files():
+def _asset_files() -> set[str]:
     return {
         p.relative_to(ASSETS).as_posix()
         for p in ASSETS.rglob("*")
