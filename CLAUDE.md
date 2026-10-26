@@ -84,6 +84,6 @@ SQLite database at `databases/database.db`. Two tables: `game` (age, map size, m
 
 ### Audio
 
-Two mixer channels: channel 0 for looping music, channel 1 for SFX. Volumes are stored in the database and applied on load. All audio logic is in `GameAudioMixin`.
+Channel 0 plays the looping music. Each SFX plays on a free channel from pygamine's pool (channels 3 and up; 1 and 2 are reserved and unused here), so SFX overlap; if all are busy the new sound is dropped. The SFX volume applies to the whole pool. Volumes are stored in the database and applied on load. All audio logic is in `GameAudioMixin`.
 
 Background music is optional: the game plays the `bg` sound from `config/assets.yaml` if it's there. Without it, the game plays no music and hides the music volume row on the AUDIO settings screen (`MUSIC_KEY` / `MUSIC_VOLUME_OBJECTS` in `app/game.py`). There's no track right now; the previous one was unlicensed and was removed. Any new track needs a license that allows bundling it in the game.
