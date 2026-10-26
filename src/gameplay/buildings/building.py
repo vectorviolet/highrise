@@ -9,7 +9,7 @@ from pygamine import ImagePath
 from pygamine import StateObject
 from pygamine import Rigidbody2D
 
-ages = ["wood", "rock", "sand", "stone"]
+AGES = ["wood", "rock", "sand", "stone"]
 
 
 @dataclass
@@ -26,7 +26,7 @@ class Building(StateObject):
     def __init__(self, level, age_number, tile: Tile) -> None:
         self.tile = tile
         self.age_number = age_number
-        self.age = ages[age_number]
+        self.age = AGES[age_number]
         self.selected = False
         self.should_destroy = False
         self.cooldown = 2
@@ -75,17 +75,17 @@ class Building(StateObject):
 
     def level_up(self, sacrificial_building) -> None:
         sacrificial_building.set_target_tile(self.tile)
-        sacrificial_building.destroy(self)
+        sacrificial_building.merge_into(self)
 
-    def destroy(self, new_building) -> None:
-        self.new_building = new_building
+    def merge_into(self, target: "Building") -> None:
+        self.merge_target = target
         self.should_destroy = True
 
 
 class Buildings(list[Building]):
     def __init__(self, assets: AssetManager) -> None:
         super().__init__()
-        self.max_age_number = len(ages) - 1
+        self.max_age_number = len(AGES) - 1
         self.age_number = 0
         self.assets = assets
 
@@ -110,7 +110,7 @@ class Buildings(list[Building]):
             if building.rigidbody.velocity == Vector2(0, 0):
                 if building.should_destroy:
                     self.remove(building)
-                    self.remove(building.new_building)
+                    self.remove(building.merge_target)
                     self.append(
                         Building(building.level + 1, building.age_number, building.tile)
                     )
