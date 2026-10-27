@@ -522,3 +522,100 @@ def test_on_exit_request_from_game_saves_and_returns_to_menu(assets):
 
     assert len(game.save_game.calls) == 1
     assert game.panel_manager.current_panel == "menu"
+
+
+# ── characterization: exit flow and session reset ────────────────────────────
+
+
+def test_on_exit_request_from_an_unknown_panel_only_plays_the_back_sound(assets):
+    game = make_game(assets, size=3)
+    game.panel_manager.current_panel = "splash"
+    game.exit = Spy()
+    game.save_game = Spy()
+
+    game.on_exit_request()
+
+    assert game.audio.played == [game.go_back_sound_path]
+    assert game.panel_manager.current_panel == "splash"
+    assert game.exit.calls == []
+    assert game.save_game.calls == []
+    assert game.cloud_animation.create_clouds.calls == []
+
+
+@pytest.mark.parametrize(
+    "panel",
+    ["play", "settings", "display_settings", "game_settings", "developer"],
+)
+def test_on_exit_request_back_navigation_spawns_clouds_once(assets, panel):
+    game = make_game(assets, size=3)
+    game.panel_manager.current_panel = panel
+
+    game.on_exit_request()
+
+    assert len(game.cloud_animation.create_clouds.calls) == 1
+    assert game.audio.played == [game.go_back_sound_path]
+
+
+def test_on_exit_request_from_audio_settings_resets_the_labels(assets):
+    game = make_game(assets, size=3)
+    game.panel_manager.current_panel = "audio_settings"
+    game.old_music_volume, game.old_sfx_volume = 0.2, 0.3
+
+    game.on_exit_request()
+
+    labels = game.panel_manager["audio_settings"]
+    assert labels["music_volume_entry_text"].text == "%20"
+    assert labels["sfx_volume_entry_text"].text == "%30"
+
+
+def test_new_game_resets_the_session_ui(assets):
+    game = make_game(assets, size=3)
+    game.delete_data = Spy()
+    game.load_data = Spy()
+    game.add_objects = Spy()
+    game.tile_selector.is_active = True
+    game.audio._music, game.audio._sfx = 0.2, 0.7
+    game.buildings.set_age(1)
+
+    game.new_game()
+
+    assert len(game.delete_data.calls) == 1
+    assert len(game.add_objects.calls) == 1
+    assert game.buildings.age_number == 1
+    assert len(game.update_button_texts.calls) >= 1
+    assert len(game.info_panel.close.calls) == 1
+    assert game.tile_selector.is_active is False
+    labels = game.panel_manager["audio_settings"]
+    assert labels["music_volume_entry_text"].text == "%20"
+    assert labels["sfx_volume_entry_text"].text == "%70"
+    assert game.panel_manager.current_panel == "game"
+
+
+def test_run_resets_the_session_ui_and_opens_the_menu(assets, monkeypatch):
+    import pygamine
+
+    monkeypatch.setattr(pygamine.Application, "run", lambda self: None)
+    game = make_game(assets, size=3)
+    game.show_splash = Spy()
+    game.mouse = SimpleNamespace(
+        set_cursor_visible=Spy(), set_cursor_image=Spy(), position=(0, 0)
+    )
+    game.cursor_size = (10, 10)
+    game.load_data = Spy()
+    game.add_objects = Spy()
+    game.background_music_sound_path = None
+    game._resolution_override = (1280, 720)
+    game._window_mode = "windowed"
+    game.audio._music, game.audio._sfx = 0.2, 0.7
+
+    game.run()
+
+    assert len(game.update_button_texts.calls) >= 1
+    assert len(game.info_panel.close.calls) == 1
+    assert game.panel_manager.current_panel == "menu"
+    labels = game.panel_manager["audio_settings"]
+    assert labels["music_volume_entry_text"].text == "%20"
+    assert labels["sfx_volume_entry_text"].text == "%70"
+    display = game.panel_manager["display_settings"]
+    assert display["window_size_entry_text"].text == "1280x720"
+    assert display["window_mode_entry_text"].text == "WINDOWED"
