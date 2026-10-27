@@ -38,6 +38,16 @@ MUSIC_VOLUME_OBJECTS = (
     "music_volume_plus_icon",
 )
 
+# Escape (or the window's close request) on these panels goes back to the
+# panel given; "menu", "audio_settings" and "game" are handled separately.
+BACK_TARGETS = {
+    "play": "menu",
+    "settings": "menu",
+    "display_settings": "settings",
+    "game_settings": "settings",
+    "developer": "menu",
+}
+
 WINDOW_MODE_LABELS = {
     "fullscreen": "FULLSCREEN",
     "borderless": "BORDERLESS",
@@ -327,26 +337,17 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         if panel == "menu":
             self.exit()
-        elif panel == "play":
-            self.open_panel("menu")
-        elif panel == "settings":
-            self.open_panel("menu")
-        elif panel in ("display_settings", "game_settings"):
-            self.open_panel("settings")
         elif panel == "audio_settings":
-            self.audio.set_music_volume(self.old_music_volume)
-            self.set_music_label(self.old_music_volume)
-            self.audio.set_sfx_volume(self.old_sfx_volume)
-            self.set_sfx_label(self.old_sfx_volume)
+            self._revert_audio_settings()
             self.open_panel("settings")
-        elif panel == "developer":
-            self.open_panel("menu")
         elif panel == "game":
             if self.info_panel.is_active:
                 self.info_panel.close()
             else:
                 self.save_game()
                 self.open_panel("menu")
+        elif panel in BACK_TARGETS:
+            self.open_panel(BACK_TARGETS[panel])
 
     # ── Game mechanics ────────────────────────────────────────────────────────
 
