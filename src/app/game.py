@@ -187,13 +187,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.tile_selector.tilemap = self.tilemap
         self.add_objects()
 
-        self.set_age(self.buildings.age_number)
-        self.update_button_texts()
-
+        self._reset_session_ui()
         self.open_panel("menu")
-        self.info_panel.close()
-        self.set_music_label(self.audio.music_volume())
-        self.set_sfx_label(self.audio.sfx_volume())
         self.set_window_size_label()
         self.set_window_mode_label()
         if self.background_music_sound_path is not None:
@@ -436,13 +431,18 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.delete_data()
         self.load_data()
         self.add_objects()
+        self._reset_session_ui()
+        self.tile_selector.is_active = False
+        self.open_panel("game")
+
+    def _reset_session_ui(self) -> None:
+        """Brings the UI in line with a freshly loaded session: the age, the
+        toolbar hover texts, a closed info panel and the volume labels."""
         self.set_age(self.buildings.age_number)
         self.update_button_texts()
         self.info_panel.close()
-        self.tile_selector.is_active = False
         self.set_music_label(self.audio.music_volume())
         self.set_sfx_label(self.audio.sfx_volume())
-        self.open_panel("game")
 
     def has_save_data(self) -> bool:
         return len(self.buildings) > 0 or self.buildings.age_number > 0
