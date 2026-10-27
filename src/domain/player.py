@@ -21,6 +21,9 @@ class Player:
     def add_money_listener(self, cb: Callable[[int], None]) -> None:
         self._money_listeners.append(cb)
 
+    def remove_money_listener(self, cb: Callable[[int], None]) -> None:
+        self._money_listeners.remove(cb)
+
     def can_afford(self, cost: int) -> bool:
         return self._money >= cost
 
