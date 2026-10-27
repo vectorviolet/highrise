@@ -58,7 +58,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         # Every panel position in config/panels.yaml is an absolute pixel
         # coordinate authored against this size -- set before super().__init__()
         # since on_canvas_resized() (see below) can fire during construction
-        # (full_screen() there triggers the first _rebuild_window_surface()).
+        # (set_fullscreen() there triggers the first _rebuild_window_surface()).
         self._authored_size = tuple(window["size"])
 
         super().__init__(tuple(window["size"]), window["title"], window["fps"])
