@@ -45,6 +45,22 @@ WINDOW_MODE_LABELS = {
 }
 
 
+def has_sound(assets: AssetManager, key: str) -> bool:
+    """Whether the asset manifest declares the sound `key`."""
+    try:
+        assets.sound_path(key)
+    except KeyError:
+        return False
+    return True
+
+
+def format_volume(volume: float) -> str:
+    """A volume in [0, 1] as the settings label text, e.g. 0.5 -> "%50".
+    Values outside [0, 1] are clamped first."""
+    volume = max(0.0, min(1.0, volume))
+    return "%" + str(round(volume * 100))
+
+
 class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def __init__(self) -> None:
         self.settings = yaml.safe_load(Path("config/settings.yaml").read_text())
@@ -89,7 +105,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         self.background_music_sound_path = (
             self.assets.sound_path(MUSIC_KEY)
-            if self.has_music_asset(self.assets)
+            if has_sound(self.assets, MUSIC_KEY)
             else None
         )
         self.click_sound_path = self.assets.sound_path("click")
@@ -174,14 +190,6 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             self.audio.play_music(str(self.background_music_sound_path))
 
         super().run()
-
-    @staticmethod
-    def has_music_asset(assets: AssetManager) -> bool:
-        try:
-            assets.sound_path(MUSIC_KEY)
-        except KeyError:
-            return False
-        return True
 
     def _show_music_controls(self, shown: bool) -> None:
         panel = self.panel_manager["audio_settings"]
@@ -447,19 +455,14 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     # ── audio-settings UI labels (volume → "%NN" text on a panel widget) ──
 
     def set_music_label(self, volume: float) -> None:
-        self._set_volume_label(
-            volume, self.panel_manager["audio_settings"]["music_volume_entry_text"]
+        self.panel_manager["audio_settings"]["music_volume_entry_text"].set_text(
+            format_volume(volume)
         )
 
     def set_sfx_label(self, volume: float) -> None:
-        self._set_volume_label(
-            volume, self.panel_manager["audio_settings"]["sfx_volume_entry_text"]
+        self.panel_manager["audio_settings"]["sfx_volume_entry_text"].set_text(
+            format_volume(volume)
         )
-
-    @staticmethod
-    def _set_volume_label(volume: float, text_obj) -> None:
-        volume = max(0.0, min(1.0, volume))
-        text_obj.set_text("%" + str(round(volume * 100)))
 
     def set_window_size_label(self) -> None:
         w, h = self.resolution

@@ -13,7 +13,7 @@ from types import SimpleNamespace
 import pygame
 import pytest
 
-from app.game import Game
+from app.game import Game, format_volume
 from domain.player import Player
 from gameplay.buildings.building import Building, Buildings
 from gameplay.tilemap import Tilemap
@@ -353,6 +353,21 @@ def test_play_starts_a_new_game_with_no_save(assets):
 
 
 # ── volume / window labels ───────────────────────────────────────────────────
+
+
+@pytest.mark.parametrize(
+    ("volume", "text"),
+    [
+        (0.0, "%0"),
+        (0.5, "%50"),
+        (0.567, "%57"),
+        (1.0, "%100"),
+        (-0.5, "%0"),
+        (1.5, "%100"),
+    ],
+)
+def test_format_volume_is_a_clamped_rounded_percentage(volume, text):
+    assert format_volume(volume) == text
 
 
 def test_set_music_and_sfx_labels_round_to_a_percentage(assets):
