@@ -1,7 +1,7 @@
 """Buildings.move() is the core 2048-style slide/merge mechanic: buildings
 in a row or column slide toward the moved-toward edge, and equal-level
 adjacent buildings merge. move() resolves the grid assignment (.tile) and
-merge intent (.should_destroy/.new_building) synchronously; only the visual
+merge intent (.should_destroy/.merge_target) synchronously; only the visual
 glide is animated frame-by-frame via control_moving(), which is tested
 separately below without needing to simulate that animation."""
 
@@ -13,7 +13,7 @@ from gameplay.tilemap import Tilemap
 MAX_LEVEL = 6
 
 
-def make_grid(assets, size=3):
+def make_grid(assets, size=3) -> tuple[Buildings, Tilemap]:
     return Buildings(assets), Tilemap(size=size, max_size=size)
 
 
@@ -73,7 +73,7 @@ def test_equal_level_buildings_merge_on_collision(assets):
     assert survivor.should_destroy is False
     assert sacrificial.tile is survivor.tile  # slid onto the survivor's tile
     assert sacrificial.should_destroy is True
-    assert sacrificial.new_building is survivor
+    assert sacrificial.merge_target is survivor
 
 
 def test_different_level_buildings_pack_adjacent_without_merging(assets):
@@ -120,7 +120,7 @@ def test_control_moving_finalizes_a_settled_merge_into_a_leveled_up_building(ass
     survivor = Building(2, 0, tile)
     sacrificial = Building(2, 0, tile)
     sacrificial.should_destroy = True
-    sacrificial.new_building = survivor
+    sacrificial.merge_target = survivor
     # Both still have their construction-time (0, 0) velocity -- simulates
     # the glide animation having already reached its target.
     buildings.extend([survivor, sacrificial])

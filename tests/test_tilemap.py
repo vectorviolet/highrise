@@ -65,10 +65,10 @@ def test_expand_columns_only_grows_columns(assets):
 
 def test_no_tile_selected_on_a_fresh_tilemap(assets):
     tm = Tilemap(size=3, max_size=7)
-    assert tm.is_there_selected_tile() is False
+    assert tm.has_selected_tile() is False
 
 
-def test_is_there_selected_tile_detects_any_selected_tile(assets):
+def test_has_selected_tile_detects_any_selected_tile(assets):
     tm = Tilemap(size=2, max_size=7)
     tm[1][0].selected = True
-    assert tm.is_there_selected_tile() is True
+    assert tm.has_selected_tile() is True

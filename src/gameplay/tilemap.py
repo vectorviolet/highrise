@@ -19,7 +19,7 @@ class Tilemap(list[list[Tile]]):
 
             self.append(row)
 
-    def is_there_selected_tile(self) -> bool:
+    def has_selected_tile(self) -> bool:
 
         for row in self:
             for tile in row:
@@ -27,10 +27,10 @@ class Tilemap(list[list[Tile]]):
                     return True
         return False
 
-    def get_expand_cost(self):
+    def get_expand_cost(self) -> int:
         return (self.row_count + 1) * 100
 
-    def expand(self):
+    def expand(self) -> None:
         if self.is_max_size():
             return
 
@@ -46,7 +46,7 @@ class Tilemap(list[list[Tile]]):
             self.column_count == self.max_column_count
         )
 
-    def expand_rows(self):
+    def expand_rows(self) -> None:
         if self.row_count < self.max_row_count:
             self.size = self.row_count, self.column_count = (
                 self.row_count + 1,
@@ -54,7 +54,7 @@ class Tilemap(list[list[Tile]]):
             )
             self.create()
 
-    def expand_columns(self):
+    def expand_columns(self) -> None:
         if self.column_count < self.max_column_count:
             self.size = self.row_count, self.column_count = (
                 self.row_count,

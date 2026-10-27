@@ -8,7 +8,9 @@ from pygamine import SpriteRenderer2D
 
 
 class Cloud(GameObject):
-    def __init__(self, image_path: AssetPath, surface_size: tuple, size=(100, 100)):
+    def __init__(
+        self, image_path: AssetPath, surface_size: tuple, size=(100, 100)
+    ) -> None:
         super().__init__()
 
         x = random.randint(0, surface_size[0] - 101)

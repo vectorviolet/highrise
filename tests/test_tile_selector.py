@@ -5,7 +5,9 @@ from gameplay.tile_selector import TileSelector
 from gameplay.tilemap import Tilemap
 
 
-def make_selector(assets, *, active=False):
+def make_selector(
+    assets, *, active=False
+) -> tuple[TileSelector, Tilemap, SimpleNamespace, Buildings]:
     tilemap = Tilemap(size=3, max_size=7)
     mouse = SimpleNamespace(position=(-9999, -9999))
     buildings = Buildings(assets)

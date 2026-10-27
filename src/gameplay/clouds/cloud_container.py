@@ -10,8 +10,10 @@ class CloudContainer(GameObjectList):
         self.surface_size = surface_size
 
     def _remove_offscreen(self) -> None:
-        W = self.surface_size[0]
-        for cloud in [c for c in self if c.rect.x >= W or c.rect.x + c.rect.width <= 0]:
+        screen_width = self.surface_size[0]
+        for cloud in [
+            c for c in self if c.rect.x >= screen_width or c.rect.x + c.rect.width <= 0
+        ]:
             self.remove(cloud)
 
 
@@ -32,14 +34,16 @@ class LoopingCloudAnimation(CloudContainer):
         return Cloud(self._cloud_image, self.surface_size)
 
     def _remove_offscreen(self) -> None:
-        W = self.surface_size[0]
-        for cloud in [c for c in self if c.rect.x >= W or c.rect.x + c.rect.width <= 0]:
+        screen_width = self.surface_size[0]
+        for cloud in [
+            c for c in self if c.rect.x >= screen_width or c.rect.x + c.rect.width <= 0
+        ]:
             self._companions.discard(id(cloud))
             self.remove(cloud)
 
     def update(self) -> None:
         to_add = []
-        W = self.surface_size[0]
+        screen_width = self.surface_size[0]
 
         for cloud in self:
             rb = cloud.get_component(Rigidbody2D)
@@ -51,16 +55,16 @@ class LoopingCloudAnimation(CloudContainer):
             width = cloud.rect.width
 
             if id(cloud) not in self._companions:
-                if xvel > 0 and x + width > W:
+                if xvel > 0 and x + width > screen_width:
                     self._companions.add(id(cloud))
                     companion = self._new_cloud()
-                    companion.rect.topleft = (x - W, y)
+                    companion.rect.topleft = (x - screen_width, y)
                     companion.get_component(Rigidbody2D).set_velocity(velocity)
                     to_add.append(companion)
                 elif xvel < 0 and x < 0:
                     self._companions.add(id(cloud))
                     companion = self._new_cloud()
-                    companion.rect.topleft = (x + W, y)
+                    companion.rect.topleft = (x + screen_width, y)
                     companion.get_component(Rigidbody2D).set_velocity(velocity)
                     to_add.append(companion)
 

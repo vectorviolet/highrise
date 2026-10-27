@@ -7,6 +7,7 @@ touches -- real Player/Buildings/Tilemap where the game logic itself is
 under test, small fakes for pure UI/plumbing (panel_manager, audio, ...).
 """
 
+from collections.abc import KeysView
 from types import SimpleNamespace
 
 import pygame
@@ -44,7 +45,7 @@ class FakePanelManager(dict):
         super().__init__(*args, **kwargs)
         self.current_panel = "menu"
 
-    def keys(self):
+    def keys(self) -> KeysView[str]:
         return dict.keys(self)
 
     def update(self):
@@ -69,10 +70,10 @@ class FakeAudio:
     def play_sfx(self, path):
         self.played.append(path)
 
-    def music_volume(self):
+    def music_volume(self) -> float:
         return self._music
 
-    def sfx_volume(self):
+    def sfx_volume(self) -> float:
         return self._sfx
 
     def set_music_volume(self, v):
@@ -82,7 +83,7 @@ class FakeAudio:
         self._sfx = v
 
 
-def make_panels():
+def make_panels() -> FakePanelManager:
     panel = FakePanelManager(
         {
             "game": {"build_button_text": FakeText()},
@@ -99,7 +100,7 @@ def make_panels():
     return panel
 
 
-def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500):
+def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
     game = object.__new__(Game)
     game.assets = assets
     game.player = Player()

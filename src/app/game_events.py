@@ -147,10 +147,12 @@ class GameEventsMixin:
                 self.info_panel.close()
             return
 
-        info_button = panel["selection_mode_button"]
-        if self._activate(info_button, event):
+        selection_mode_button = panel["selection_mode_button"]
+        if self._activate(selection_mode_button, event):
             self.tile_selector.is_active = not self.tile_selector.is_active
-            info_button.set_base_state("on" if self.tile_selector.is_active else "off")
+            selection_mode_button.set_base_state(
+                "on" if self.tile_selector.is_active else "off"
+            )
 
         if self.tile_selector.is_active and event.type == pygame.MOUSEBUTTONUP:
             building = self.tile_selector.get_selected_building()

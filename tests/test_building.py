@@ -1,6 +1,6 @@
 from pygame import Vector2
 
-from gameplay.buildings.building import Building, ages
+from gameplay.buildings.building import AGES, Building
 from gameplay.tiles.tile import Tile
 from pygamine import ImagePath
 
@@ -25,7 +25,7 @@ def test_sell_price_scales_with_level_and_age(assets):
 
 
 def test_age_name_comes_from_the_ages_list(assets):
-    for age_number, name in enumerate(ages):
+    for age_number, name in enumerate(AGES):
         assert make_building(age_number=age_number).age == name
 
 
@@ -72,5 +72,5 @@ def test_level_up_moves_the_sacrificial_building_and_marks_it_for_destruction(as
 
     assert sacrificial.tile is survivor.tile
     assert sacrificial.should_destroy is True
-    assert sacrificial.new_building is survivor
+    assert sacrificial.merge_target is survivor
     assert sacrificial.rigidbody.velocity != Vector2(0, 0)
