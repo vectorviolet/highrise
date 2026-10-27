@@ -32,9 +32,30 @@ quote-style = "double"
 # method or a module-level function. It's a preview rule; `preview = true` with
 # `explicit-preview-rules = true` turns on only the preview rules selected by
 # their full code here, not every preview rule or preview behaviour.
-select = ["F", "ANN201", "ANN202", "ANN204", "ANN205", "ANN206", "PLR6301"]
+# C901, PLR0912 and PLR0915 cap a function's complexity, branches and
+# statements, at ruff's defaults for now (see [tool.ruff.lint.mccabe] and
+# [tool.ruff.lint.pylint]).
+select = [
+    "F",
+    "ANN201",
+    "ANN202",
+    "ANN204",
+    "ANN205",
+    "ANN206",
+    "PLR6301",
+    "C901",
+    "PLR0912",
+    "PLR0915",
+]
 preview = true
 explicit-preview-rules = true
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pylint]
+max-branches = 12
+max-statements = 50
 
 [tool.ruff.lint.per-file-ignores]
 # Every function and method in the source code declares its return type (the

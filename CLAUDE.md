@@ -29,7 +29,10 @@ Never add an asset whose origin and license you can't state. See README's "Asset
 
 **Code style:** run `uv run --group dev ruff format .` and `uv run --group dev ruff check .`
 before every commit. Formatting is Black-compatible (`[tool.ruff.format]` in `pyproject.toml`);
-lint is pyflakes-only (`[tool.ruff.lint]`). CI fails on `ruff format --check .` and on lint
+lint (`[tool.ruff.lint]`) runs pyflakes (F), return-type annotations on every function in
+`src/` (ANN201–ANN206; tests are exempt), no-self-use (PLR6301, a preview rule) and
+complexity limits at ruff's defaults (C901 complexity 10, PLR0912 12 branches, PLR0915 50
+statements). CI fails on `ruff format --check .` and on lint
 errors. Keep pure reformatting out of feature commits; a repo-wide reformat goes in its own
 commit, with its hash added to `.git-blame-ignore-revs`.
 
