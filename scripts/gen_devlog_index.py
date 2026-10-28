@@ -157,8 +157,10 @@ def render_adrs(entries: list[Entry]) -> str:
     return "\n".join(lines)
 
 
-def updated_readme(text: str, table: str) -> str:
-    start, end = text.index(BEGIN), text.index(END)
+def updated_readme(text: str, table: str, name: str = "README") -> str:
+    start, end = text.find(BEGIN), text.find(END)
+    if start == -1 or end == -1 or end < start:
+        raise EntryError(f"{name}: missing or misplaced index markers")
     return text[: start + len(BEGIN)] + "\n" + table + "\n" + text[end:]
 
 
@@ -180,7 +182,11 @@ def main() -> int:
     stale = []
     for readme, table in wanted:
         text = readme.read_text(encoding="utf-8")
-        new = updated_readme(text, table)
+        try:
+            new = updated_readme(text, table, readme.relative_to(ROOT).as_posix())
+        except EntryError as error:
+            print(f"error: {error}")
+            return 1
         if new == text:
             continue
         stale.append(readme.relative_to(ROOT).as_posix())

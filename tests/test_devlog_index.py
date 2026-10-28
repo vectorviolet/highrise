@@ -67,3 +67,8 @@ def test_rows_sort_by_date_and_number(tmp_path):
         "| [0001](0001-x.md) | T0001 | Superseded | 2026-01-01 | #0001 |",
         "| [0002](0002-x.md) | T0002 | Accepted | 2026-01-02 | #0002 |",
     ]
+
+
+def test_missing_markers_name_the_readme():
+    with pytest.raises(gen.EntryError, match="docs/devlog/README.md"):
+        gen.updated_readme("no markers here\n", "new", "docs/devlog/README.md")
