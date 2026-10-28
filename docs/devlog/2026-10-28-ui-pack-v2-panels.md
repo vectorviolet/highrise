@@ -1,4 +1,5 @@
 # Panels from UI Pack v2
+<!-- index | refs: #12, PR #13 -->
 
 **Date:** 2026-10-28 · **Area:** Art, UI · **Issue:** [#12](https://github.com/vectorviolet/highrise/issues/12) · **PR:** [#13](https://github.com/vectorviolet/highrise/pull/13)
 
