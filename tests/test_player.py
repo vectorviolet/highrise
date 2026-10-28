@@ -67,3 +67,17 @@ def test_setting_same_money_value_does_not_refire_listeners():
     p.money = 30  # explicit no-op set
 
     assert seen == []
+
+
+def test_removed_listener_is_no_longer_called():
+    player = Player()
+    kept, removed = [], []
+    removed_cb = removed.append
+    player.add_money_listener(kept.append)
+    player.add_money_listener(removed_cb)
+    player.remove_money_listener(removed_cb)
+
+    player.earn(5)
+
+    assert kept == [5]
+    assert removed == []

@@ -27,6 +27,13 @@ source pack (or `own`) and its original file name. Each pack needs its license t
 `scripts/gen_credits.py`; don't edit it by hand. `tests/test_sources.py` enforces all of this.
 Never add an asset whose origin and license you can't state. See README's "Asset sources".
 
+**Devlog and ADRs:** every feature or design-decision PR adds or updates an entry in
+`docs/devlog/` (`YYYY-MM-DD-short-title.md`); architecture choices get an ADR in
+`docs/decisions/` (`NNNN-short-title.md`). Each entry carries an `<!-- index | refs: #N, PR #M -->`
+comment right under its heading (see the READMEs' templates). The index tables in both READMEs are
+generated: add your entry file, run `uv run python scripts/gen_devlog_index.py`, and never edit
+the tables by hand. `tests/test_devlog_index.py` fails in CI if a table is out of date.
+
 **Code style:** run `uv run --group dev ruff format .` and `uv run --group dev ruff check .`
 before every commit. Formatting is Black-compatible (`[tool.ruff.format]` in `pyproject.toml`);
 lint (`[tool.ruff.lint]`) runs pyflakes (F), return-type annotations on every function in

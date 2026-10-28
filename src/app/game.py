@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from pathlib import Path
 from random import choice
 
@@ -84,7 +85,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         # Every panel position in config/panels.yaml is an absolute pixel
         # coordinate authored against this size -- set before super().__init__()
         # since on_canvas_resized() (see below) can fire during construction
-        # (full_screen() there triggers the first _rebuild_window_surface()).
+        # (set_fullscreen() there triggers the first _rebuild_window_surface()).
         self._authored_size = tuple(window["size"])
 
         super().__init__(tuple(window["size"]), window["title"], window["fps"])
@@ -108,6 +109,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         self.audio = GameAudio()
         self.player = Player()
+        # The listener add_objects() registered last; replaced on every
+        # rebuild so new games don't pile up listeners on the same player.
+        self.money_listener: Callable[[int], None] | None = None
         self.default_music_volume = audio["default_music_volume"]
         self.default_sfx_volume = audio["default_sfx_volume"]
         self.old_music_volume = self.default_music_volume
@@ -271,7 +275,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         }
 
         money_text = self.panel_manager["game"]["money_text"]
-        self.player.add_money_listener(lambda m: money_text.set_text(f"{m}$"))
+        if self.money_listener is not None:
+            self.player.remove_money_listener(self.money_listener)
+        self.money_listener = lambda m: money_text.set_text(f"{m}$")
+        self.player.add_money_listener(self.money_listener)
         money_text.set_text(f"{self.player.money}$")
 
     @property
