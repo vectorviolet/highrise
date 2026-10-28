@@ -106,18 +106,13 @@ class Buildings(list[Building]):
         return (self.age_number + 1) * 100
 
     def control_moving(self) -> None:
+        # Merges are collected and applied after the loop: removing from the
+        # list while iterating over it would skip the next building.
+        settled_merges: list[Building] = []
         for building in self:
             if building.rigidbody.velocity == Vector2(0, 0):
                 if building.should_destroy:
-                    self.remove(building)
-                    self.remove(building.merge_target)
-                    self.append(
-                        Building(building.level + 1, building.age_number, building.tile)
-                    )
-                    self.sort(key=lambda b: b.tile.column_number)
-
-                    sound = self.assets.sound_path("merge")
-                    GameAudio.play_sfx(sound)
+                    settled_merges.append(building)
                 else:
                     if (
                         building.tile.selected
@@ -148,6 +143,18 @@ class Buildings(list[Building]):
                         int(building.target_position.x),
                         int(building.target_position.y),
                     )
+
+        for building in settled_merges:
+            self.remove(building)
+            self.remove(building.merge_target)
+            self.append(
+                Building(building.level + 1, building.age_number, building.tile)
+            )
+
+            sound = self.assets.sound_path("merge")
+            GameAudio.play_sfx(sound)
+        if settled_merges:
+            self.sort(key=lambda b: b.tile.column_number)
 
     def update(self) -> None:
         for building in self:
