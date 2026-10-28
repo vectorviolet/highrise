@@ -11,7 +11,7 @@ import pygame
 import pytest
 
 import pygamine
-from app.game import MUSIC_KEY, MUSIC_VOLUME_OBJECTS, Game
+from app.game import MUSIC_KEY, MUSIC_VOLUME_OBJECTS, Game, has_sound
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def game(monkeypatch) -> Game:
 
 
 def test_the_manifest_has_no_music(game):
-    assert not Game.has_music_asset(game.assets)
+    assert not has_sound(game.assets, MUSIC_KEY)
     with pytest.raises(KeyError):
         game.assets.sound_path(MUSIC_KEY)
     assert game.assets.validate() == []
@@ -67,3 +67,7 @@ def test_clicks_where_the_hidden_music_buttons_sit_change_nothing(game, monkeypa
         )
 
     assert game.audio.music_volume() == volume
+
+
+def test_has_sound_finds_a_declared_sound(game):
+    assert has_sound(game.assets, "click")

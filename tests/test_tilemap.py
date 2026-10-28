@@ -72,3 +72,17 @@ def test_has_selected_tile_detects_any_selected_tile(assets):
     tm = Tilemap(size=2, max_size=7)
     tm[1][0].selected = True
     assert tm.has_selected_tile() is True
+
+
+def test_tiles_yields_every_tile_row_by_row(assets):
+    tm = Tilemap(size=3, max_size=7)
+
+    tiles = list(tm.tiles())
+
+    assert tiles == [tile for row in tm for tile in row]
+    assert [(t.row_number, t.column_number) for t in tiles[:4]] == [
+        (1, 1),
+        (1, 2),
+        (1, 3),
+        (2, 1),
+    ]

@@ -1,3 +1,5 @@
+from collections.abc import Iterator
+
 from pygame import Surface
 
 from gameplay.tiles.tile import Tile
@@ -19,13 +21,13 @@ class Tilemap(list[list[Tile]]):
 
             self.append(row)
 
-    def has_selected_tile(self) -> bool:
-
+    def tiles(self) -> Iterator[Tile]:
+        """Every tile, row by row (row 1 first, left to right within a row)."""
         for row in self:
-            for tile in row:
-                if tile.selected:
-                    return True
-        return False
+            yield from row
+
+    def has_selected_tile(self) -> bool:
+        return any(tile.selected for tile in self.tiles())
 
     def get_expand_cost(self) -> int:
         return (self.row_count + 1) * 100
@@ -63,6 +65,5 @@ class Tilemap(list[list[Tile]]):
             self.create()
 
     def draw(self, surface: Surface) -> None:
-        for row in self:
-            for tile in row:
-                tile.draw(surface)
+        for tile in self.tiles():
+            tile.draw(surface)

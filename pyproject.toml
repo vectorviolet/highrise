@@ -28,7 +28,13 @@ quote-style = "double"
 [tool.ruff.lint]
 # Deliberately narrow, like pygamine's: F (pyflakes -- real bugs such as
 # unused imports or undefined names), not pycodestyle's style rules.
-select = ["F", "ANN201", "ANN202", "ANN204", "ANN205", "ANN206"]
+# PLR6301 (no-self-use): a method that doesn't use `self` should be a static
+# method or a module-level function. It's a preview rule; `preview = true` with
+# `explicit-preview-rules = true` turns on only the preview rules selected by
+# their full code here, not every preview rule or preview behaviour.
+select = ["F", "ANN201", "ANN202", "ANN204", "ANN205", "ANN206", "PLR6301"]
+preview = true
+explicit-preview-rules = true
 
 [tool.ruff.lint.per-file-ignores]
 # Every function and method in the source code declares its return type (the
