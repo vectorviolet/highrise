@@ -13,9 +13,8 @@ freely available.
 
 | Pack | Author | License | Used for | Files |
 |---|---|---|---|---|
-| [UI Pack](https://kenney.nl/assets/ui-pack) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | buttons, sounds, fonts | 876 |
+| [UI Pack](https://kenney.nl/assets/ui-pack) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | buttons, panel backgrounds, sounds, fonts | 881 |
 | [Hexagon Buildings](https://kenney.nl/assets/hexagon-buildings) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | buildings | 24 |
-| [UI Pack (version 1)](https://opengameart.org/content/ui-pack) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | panel backgrounds | 5 |
 | [Game Icons](https://kenney.nl/assets/game-icons) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | info, plus and minus icons | 3 |
 | [Background Elements Remastered](https://kenney.nl/assets/background-elements-remastered) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | clouds | 1 |
 | [Cursor Pack](https://kenney.nl/assets/cursor-pack) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | mouse cursor | 1 |
@@ -24,7 +23,7 @@ freely available.
 Made for this game by its developer: cv.png (in assets/images/gui/developer).
 
 CC0 assets need no attribution; they are credited here anyway. Each pack's own
-license text ships with the game: `licenses/assets/kenney-background-elements-remastered.txt`, `licenses/assets/kenney-cursor-pack.txt`, `licenses/assets/kenney-game-icons.txt`, `licenses/assets/kenney-hexagon-buildings.txt`, `licenses/assets/kenney-isometric-landscape.txt`, `licenses/assets/kenney-ui-pack.txt`, `licenses/assets/kenney-ui-pack-v1.txt`.
+license text ships with the game: `licenses/assets/kenney-background-elements-remastered.txt`, `licenses/assets/kenney-cursor-pack.txt`, `licenses/assets/kenney-game-icons.txt`, `licenses/assets/kenney-hexagon-buildings.txt`, `licenses/assets/kenney-isometric-landscape.txt`, `licenses/assets/kenney-ui-pack.txt`.
 [assets/SOURCES.yaml](https://github.com/vectorviolet/highrise/blob/main/assets/SOURCES.yaml) in the source repository lists every asset
 file with its pack and its original file name there.
 <!-- assets:end -->
