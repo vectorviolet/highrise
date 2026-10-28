@@ -148,3 +148,67 @@ def test_control_moving_settles_a_building_that_reached_its_target(assets):
 
     assert b.rigidbody.velocity == Vector2(0, 0)
     assert tuple(b.rect.topleft) == (int(b.target_position.x), int(b.target_position.y))
+
+
+def _settled_merge(tile) -> tuple[Building, Building]:
+    """A survivor and a sacrificial building that already glided onto its tile."""
+    survivor = Building(1, 0, tile)
+    sacrificial = Building(1, 0, tile)
+    sacrificial.should_destroy = True
+    sacrificial.merge_target = survivor
+    return survivor, sacrificial
+
+
+def test_control_moving_applies_two_adjacent_merges_in_the_same_frame(
+    assets, monkeypatch
+):
+    played = []
+    monkeypatch.setattr("gameplay.buildings.building.GameAudio.play_sfx", played.append)
+    buildings, tilemap = make_grid(assets)
+    survivor_a, sacrificial_a = _settled_merge(tilemap[0][0])
+    survivor_b, sacrificial_b = _settled_merge(tilemap[0][1])
+    # Column order, as move() leaves it. Removing items mid-loop used to make
+    # the loop skip sacrificial_b, delaying the second merge by a frame.
+    buildings.extend([survivor_a, sacrificial_a, sacrificial_b, survivor_b])
+
+    buildings.control_moving()
+
+    assert len(buildings) == 2
+    assert [b.level for b in buildings] == [2, 2]
+    assert [b.tile for b in buildings] == [tilemap[0][0], tilemap[0][1]]
+    for old in (survivor_a, sacrificial_a, survivor_b, sacrificial_b):
+        assert all(b is not old for b in buildings)
+    assert played == [assets.sound_path("merge")] * 2
+
+
+def test_control_moving_does_not_skip_the_building_after_a_merge(assets, monkeypatch):
+    monkeypatch.setattr(
+        "gameplay.buildings.building.GameAudio.play_sfx", lambda path: None
+    )
+    buildings, tilemap = make_grid(assets)
+    survivor, sacrificial = _settled_merge(tilemap[0][0])
+    tile = tilemap[0][2]
+    tile.selected = True
+    tile.rect = tile.selected_rect
+    other = Building(1, 0, tile)
+    assert tuple(other.rect.topleft) != tuple(map(int, other.selected_position))
+    buildings.extend([survivor, sacrificial, other])
+
+    buildings.control_moving()
+
+    # `other` still gets its snap to the selected position in this frame.
+    assert tuple(other.rect.topleft) == tuple(map(int, other.selected_position))
+    assert other in buildings
+    assert [b.tile.column_number for b in buildings] == [1, 3]
+
+
+def test_control_moving_plays_the_merge_sound_once_per_merge(assets, monkeypatch):
+    played = []
+    monkeypatch.setattr("gameplay.buildings.building.GameAudio.play_sfx", played.append)
+    buildings, tilemap = make_grid(assets)
+    buildings.extend(_settled_merge(tilemap[0][0]))
+
+    buildings.control_moving()
+    buildings.control_moving()  # nothing left to merge on the next frame
+
+    assert played == [assets.sound_path("merge")]
