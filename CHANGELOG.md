@@ -14,6 +14,10 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Sound effects can overlap: pygamine 0.26.0 plays each one on a free mixer channel, so a new
   click, menu or merge sound no longer cuts off the one before it. The SFX volume setting
   applies to all of them.
+- pygamine 0.27.0: skipping the splash with Space, Enter or a click no longer also triggers the
+  first menu button.
+- The engine submodule no longer follows pygamine's `main` on its own (`update = merge` removed
+  from `.gitmodules`); it moves only through a reviewed bump PR.
 
 ## [0.2.4] – 2026-10-25
 

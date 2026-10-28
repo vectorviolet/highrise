@@ -2,4 +2,3 @@
 	path = src/pygamine
 	url = https://github.com/vectorviolet/pygamine.git
 	branch = main
-	update = merge
