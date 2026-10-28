@@ -1,7 +1,7 @@
 name: CI
 
 # Runs on GitHub's servers AFTER code arrives there:
-#   * every push to any branch
+#   * every push to any branch except the merge queue's own
 #   * every pull request targeting main
 #   * every merge-queue group (merge_group) before it lands on main
 # Runs the pygamine engine's own test suite (vendored as a submodule, but
@@ -11,6 +11,10 @@ name: CI
 # version tags.
 on:
   push:
+    # The merge queue's temporary branches already get a merge_group run; a
+    # second push run there duplicates (or, with a concurrency group, cancels)
+    # it, and the queue drops the PR for failed checks.
+    branches-ignore: ["gh-readonly-queue/**"]
   pull_request:
     branches: [main]
   # Required checks must also run on merge-queue groups.
