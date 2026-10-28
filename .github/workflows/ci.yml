@@ -21,6 +21,8 @@ on:
   merge_group:
 
 # Keyed on the event too, so a run for one event never cancels another's.
+# A new commit on a PR cancels that PR's older run (and a newer queue group
+# its older one), but never a run of another event.
 # Runs on main are never cancelled: each merged commit needs its own CI
 # status and badge publish, even when the queue merges PRs back to back.
 concurrency:
