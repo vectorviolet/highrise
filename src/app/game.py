@@ -39,6 +39,16 @@ MUSIC_VOLUME_OBJECTS = (
     "music_volume_plus_icon",
 )
 
+# Escape (or the window's close request) on these panels goes back to the
+# panel given; "menu", "audio_settings" and "game" are handled separately.
+BACK_TARGETS = {
+    "play": "menu",
+    "settings": "menu",
+    "display_settings": "settings",
+    "game_settings": "settings",
+    "developer": "menu",
+}
+
 WINDOW_MODE_LABELS = {
     "fullscreen": "FULLSCREEN",
     "borderless": "BORDERLESS",
@@ -181,13 +191,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.tile_selector.tilemap = self.tilemap
         self.add_objects()
 
-        self.set_age(self.buildings.age_number)
-        self.update_button_texts()
-
+        self._reset_session_ui()
         self.open_panel("menu")
-        self.info_panel.close()
-        self.set_music_label(self.audio.music_volume())
-        self.set_sfx_label(self.audio.sfx_volume())
         self.set_window_size_label()
         self.set_window_mode_label()
         if self.background_music_sound_path is not None:
@@ -334,26 +339,17 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         if panel == "menu":
             self.exit()
-        elif panel == "play":
-            self.open_panel("menu")
-        elif panel == "settings":
-            self.open_panel("menu")
-        elif panel in ("display_settings", "game_settings"):
-            self.open_panel("settings")
         elif panel == "audio_settings":
-            self.audio.set_music_volume(self.old_music_volume)
-            self.set_music_label(self.old_music_volume)
-            self.audio.set_sfx_volume(self.old_sfx_volume)
-            self.set_sfx_label(self.old_sfx_volume)
+            self._revert_audio_settings()
             self.open_panel("settings")
-        elif panel == "developer":
-            self.open_panel("menu")
         elif panel == "game":
             if self.info_panel.is_active:
                 self.info_panel.close()
             else:
                 self.save_game()
                 self.open_panel("menu")
+        elif panel in BACK_TARGETS:
+            self.open_panel(BACK_TARGETS[panel])
 
     # ── Game mechanics ────────────────────────────────────────────────────────
 
@@ -442,13 +438,18 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.delete_data()
         self.load_data()
         self.add_objects()
+        self._reset_session_ui()
+        self.tile_selector.is_active = False
+        self.open_panel("game")
+
+    def _reset_session_ui(self) -> None:
+        """Brings the UI in line with a freshly loaded session: the age, the
+        toolbar hover texts, a closed info panel and the volume labels."""
         self.set_age(self.buildings.age_number)
         self.update_button_texts()
         self.info_panel.close()
-        self.tile_selector.is_active = False
         self.set_music_label(self.audio.music_volume())
         self.set_sfx_label(self.audio.sfx_volume())
-        self.open_panel("game")
 
     def has_save_data(self) -> bool:
         return len(self.buildings) > 0 or self.buildings.age_number > 0

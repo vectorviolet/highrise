@@ -529,3 +529,346 @@ def test_game_events_keyboard_shortcuts():
         game = FakeGame()
         game.handle_game_events(pygame.event.Event(pygame.KEYUP, key=key))
         assert expected in game.calls
+
+
+# ── characterization: order and edge cases of the split handlers ─────────────
+
+
+def key_up(key) -> pygame.event.Event:
+    return pygame.event.Event(pygame.KEYUP, key=key)
+
+
+def test_game_events_hover_update_runs_even_while_the_info_panel_is_open():
+    game = FakeGame()
+    game.tile_selector.is_active = True
+    game.panel_manager["game"]["info_panel"].active = True
+
+    game.handle_game_events(click_up())
+
+    assert game.tile_selector.update_calls == 1
+    assert game.info_panel.opened is False  # no tile pick behind the panel
+
+
+def test_game_events_hover_update_uses_the_state_before_the_toggle():
+    game = FakeGame()
+    game.panel_manager["game"]["selection_mode_button"].clicked = True
+
+    game.handle_game_events(click_up())
+
+    assert game.tile_selector.is_active is True
+    assert game.tile_selector.update_calls == 0
+
+
+def test_game_events_info_panel_sell_wins_over_close():
+    game = FakeGame()
+    panel = game.panel_manager["game"]
+    panel["info_panel"].active = True
+    game.info_panel.building = SimpleNamespace(sell_price=5)
+    panel["sell_button"].clicked = True
+    panel["close_button"].clicked = True
+
+    game.handle_game_events(click_up())
+
+    assert game.calls == [
+        ("remove", game.info_panel.building),
+        ("earn", 5),
+        "update_button_texts",
+    ]
+    assert game.info_panel.close_calls == 1
+    assert game.audio.played == [game.click_sound_path]
+
+
+def test_game_events_info_panel_open_ignores_everything_else():
+    game = FakeGame()
+    panel = game.panel_manager["game"]
+    panel["info_panel"].active = True
+    for name in (
+        "selection_mode_button",
+        "expand_button",
+        "build_button",
+        "next_age_button",
+    ):
+        panel[name].clicked = True
+
+    game.handle_game_events(click_up())
+    game.handle_game_events(key_up(pygame.K_SPACE))
+    game.handle_game_events(key_up(pygame.K_RIGHT))
+
+    assert game.calls == []
+    assert game.tile_selector.is_active is False
+    assert panel["selection_mode_button"].base_state is None
+    assert game.audio.played == []
+
+
+def test_game_events_toggling_selection_on_picks_a_tile_in_the_same_click():
+    game = FakeGame()
+    building = SimpleNamespace(name="tower")
+    game.tile_selector._selected_building = building
+    game.panel_manager["game"]["selection_mode_button"].clicked = True
+
+    game.handle_game_events(click_up())
+
+    assert game.info_panel.building is building
+    assert game.info_panel.opened is True
+    # One click sound from the toggle button, one from the tile pick.
+    assert game.audio.played == [game.click_sound_path, str(game.click_sound_path)]
+
+
+def test_game_events_toggling_selection_off_does_not_pick_a_tile():
+    game = FakeGame()
+    game.tile_selector.is_active = True
+    game.tile_selector._selected_building = SimpleNamespace(name="tower")
+    game.panel_manager["game"]["selection_mode_button"].clicked = True
+
+    game.handle_game_events(click_up())
+
+    assert game.tile_selector.is_active is False
+    assert game.info_panel.opened is False
+
+
+def test_game_events_tile_pick_needs_a_mouse_up_and_a_building():
+    game = FakeGame()
+    game.tile_selector.is_active = True
+    game.tile_selector._selected_building = SimpleNamespace(name="tower")
+    game.handle_game_events(
+        pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(0, 0))
+    )
+    assert game.info_panel.opened is False
+
+    game2 = FakeGame()
+    game2.tile_selector.is_active = True
+    game2.handle_game_events(click_up())
+    assert game2.info_panel.opened is False
+    assert game2.audio.played == []
+
+
+def test_game_events_tile_pick_does_not_block_toolbar_or_keys():
+    game = FakeGame()
+    game.tile_selector.is_active = True
+    game.tile_selector._selected_building = SimpleNamespace(name="tower")
+    game.panel_manager["game"]["build_button"].clicked = True
+
+    game.handle_game_events(click_up())
+
+    assert game.info_panel.opened is True
+    assert game.calls == ["create_building"]
+
+
+def test_game_events_toolbar_checks_expand_then_build_then_next_age():
+    game = FakeGame()
+    panel = game.panel_manager["game"]
+    panel["expand_button"].clicked = True
+    panel["build_button"].clicked = True
+    panel["next_age_button"].clicked = True
+    game.handle_game_events(click_up())
+    assert game.calls == ["expand"]
+
+    game2 = FakeGame()
+    panel2 = game2.panel_manager["game"]
+    panel2["build_button"].clicked = True
+    panel2["next_age_button"].clicked = True
+    game2.handle_game_events(click_up())
+    assert game2.calls == ["create_building"]
+
+
+def test_game_events_toolbar_buttons_play_no_click_sound_themselves():
+    game = FakeGame()
+    game.panel_manager["game"]["expand_button"].clicked = True
+
+    game.handle_game_events(click_up())
+
+    assert game.audio.played == []
+
+
+def test_game_events_toolbar_click_and_key_both_apply():
+    game = FakeGame()
+    game.panel_manager["game"]["expand_button"].clicked = True
+
+    game.handle_game_events(key_up(pygame.K_LEFT))
+
+    assert game.calls == ["expand", ("move_buildings", "left")]
+
+
+def test_game_events_space_on_focused_selection_button_toggles_and_builds():
+    game = FakeGame()
+    game.panel_manager["game"]["selection_mode_button"].focused = True
+
+    game.handle_game_events(key_up(pygame.K_SPACE))
+
+    assert game.tile_selector.is_active is True
+    assert game.calls == ["create_building"]
+
+
+def test_game_events_keys_only_act_on_key_up():
+    game = FakeGame()
+    for key in (pygame.K_SPACE, pygame.K_RIGHT, pygame.K_w):
+        game.handle_game_events(pygame.event.Event(pygame.KEYDOWN, key=key))
+
+    assert game.calls == []
+
+
+def test_game_events_other_keys_do_nothing():
+    game = FakeGame()
+    for key in (pygame.K_q, pygame.K_RETURN, pygame.K_ESCAPE, pygame.K_e):
+        game.handle_game_events(key_up(key))
+
+    assert game.calls == []
+    assert game.audio.played == []
+
+
+# ── characterization: settings handlers ──────────────────────────────────────
+
+
+def test_display_settings_exact_calls_per_button():
+    cases = {
+        "window_mode_minus_button": [
+            ("cycle_window_mode", -1),
+            "set_window_mode_label",
+            "set_window_size_label",
+        ],
+        "window_mode_plus_button": [
+            ("cycle_window_mode", 1),
+            "set_window_mode_label",
+            "set_window_size_label",
+        ],
+        "window_size_minus_button": [
+            ("cycle_resolution", -1),
+            "set_window_size_label",
+        ],
+        "window_size_plus_button": [
+            ("cycle_resolution", 1),
+            "set_window_size_label",
+        ],
+    }
+    for name, expected in cases.items():
+        game = FakeGame()
+        game.panel_manager["display_settings"][name].clicked = True
+        game.handle_display_settings_events(click_up())
+        assert game.calls == expected, name
+        # The stepper buttons use raw is_clicked: no click sound of their own.
+        assert game.audio.played == [], name
+
+
+def test_display_settings_only_the_first_clicked_button_acts():
+    game = FakeGame()
+    for button in game.panel_manager["display_settings"].values():
+        button.clicked = True
+
+    game.handle_display_settings_events(click_up())
+
+    assert game.calls == [
+        ("cycle_window_mode", -1),
+        "set_window_mode_label",
+        "set_window_size_label",
+    ]
+
+
+def test_display_settings_back_button_plays_the_click_sound():
+    game = FakeGame()
+    game.panel_manager["display_settings"]["display_back_button"].clicked = True
+
+    game.handle_display_settings_events(click_up())
+
+    assert game.audio.played == [game.click_sound_path]
+
+
+def test_display_settings_focused_steppers_ignore_space():
+    game = FakeGame()
+    for name in ("window_mode_minus_button", "window_size_plus_button"):
+        game.panel_manager["display_settings"][name].focused = True
+
+    game.handle_display_settings_events(key_up(pygame.K_SPACE))
+
+    assert game.calls == []
+
+
+def test_audio_settings_exact_calls_per_volume_button():
+    cases = {
+        "music_volume_plus_button": ("music", 0.6),
+        "music_volume_minus_button": ("music", 0.4),
+        "sfx_volume_plus_button": ("sfx", 0.6),
+        "sfx_volume_minus_button": ("sfx", 0.4),
+    }
+    for name, (channel, expected) in cases.items():
+        game = FakeGame()
+        game.panel_manager["audio_settings"][name].clicked = True
+        game.handle_audio_settings_events(click_up())
+        assert game.calls == [(f"set_{channel}_label", pytest.approx(expected))]
+        volume = game.audio._music if channel == "music" else game.audio._sfx
+        other = game.audio._sfx if channel == "music" else game.audio._music
+        assert volume == pytest.approx(expected), name
+        assert other == 0.5, name
+        assert game.audio.played == [], name
+
+
+def test_audio_settings_volume_steps_are_unclamped_here():
+    # Clamping is done by the audio layer and the label, not the handler.
+    game = FakeGame()
+    game.audio._sfx = 1.0
+    game.panel_manager["audio_settings"]["sfx_volume_plus_button"].clicked = True
+
+    game.handle_audio_settings_events(click_up())
+
+    assert game.audio._sfx == pytest.approx(1.1)
+
+
+def test_audio_settings_only_the_first_clicked_button_acts():
+    game = FakeGame()
+    for button in game.panel_manager["audio_settings"].values():
+        button.clicked = True
+
+    game.handle_audio_settings_events(click_up())
+
+    assert game.calls == [("set_music_label", pytest.approx(0.6))]
+    assert game.audio._sfx == 0.5
+
+
+def test_audio_settings_without_music_ignores_music_buttons():
+    game = FakeGame()
+    game.background_music_sound_path = None
+    panel = game.panel_manager["audio_settings"]
+    panel["music_volume_plus_button"].clicked = True
+    panel["music_volume_minus_button"].clicked = True
+    panel["sfx_volume_minus_button"].clicked = True
+
+    game.handle_audio_settings_events(click_up())
+
+    assert game.audio._music == 0.5
+    assert game.calls == [("set_sfx_label", pytest.approx(0.4))]
+
+
+def test_audio_settings_cancel_exact_calls():
+    game = FakeGame()
+    game.old_music_volume, game.old_sfx_volume = 0.2, 0.3
+    game.panel_manager["audio_settings"]["cancel_button"].clicked = True
+
+    game.handle_audio_settings_events(click_up())
+
+    assert game.calls == [
+        ("set_music_label", 0.2),
+        ("set_sfx_label", 0.3),
+        ("open_panel", "settings"),
+    ]
+    assert game.audio.played == [game.click_sound_path]
+
+
+def test_audio_settings_cancel_wins_over_save():
+    game = FakeGame()
+    panel = game.panel_manager["audio_settings"]
+    panel["cancel_button"].clicked = True
+    panel["save_button"].clicked = True
+
+    game.handle_audio_settings_events(click_up())
+
+    assert "save_audio_settings" not in game.calls
+
+
+def test_settings_snapshot_happens_only_for_the_audio_button():
+    game = FakeGame()
+    game.audio._music, game.audio._sfx = 0.7, 0.3
+    game.old_music_volume, game.old_sfx_volume = 0.0, 0.0
+    game.panel_manager["settings"]["display_settings_button"].clicked = True
+
+    game.handle_settings_events(click_up())
+
+    assert (game.old_music_volume, game.old_sfx_volume) == (0.0, 0.0)
