@@ -44,13 +44,7 @@ packs:
     author: Kenney
     url: https://kenney.nl/assets/ui-pack
     license: CC0-1.0
-    used_for: "buttons, sounds, fonts"
-  kenney-ui-pack-v1:
-    name: "UI Pack (version 1)"
-    author: Kenney
-    url: https://opengameart.org/content/ui-pack
-    license: CC0-1.0
-    used_for: "panel backgrounds"
+    used_for: "buttons, panel backgrounds, sounds, fonts"
 
 files:
   "fonts/Kenney Future Narrow.ttf":
@@ -1770,20 +1764,20 @@ files:
     source: kenney-game-icons
     original: "PNG/White/2x/plus.png"
   "images/gui/panels/blue.png":
-    source: kenney-ui-pack-v1
-    original: "PNG/blue_panel.png"
+    source: kenney-ui-pack
+    original: "PNG/Blue/Default/button_square_flat.png"
   "images/gui/panels/green.png":
-    source: kenney-ui-pack-v1
-    original: "PNG/green_panel.png"
+    source: kenney-ui-pack
+    original: "PNG/Green/Default/button_square_gradient.png"
   "images/gui/panels/grey.png":
-    source: kenney-ui-pack-v1
-    original: "PNG/grey_panel.png"
+    source: kenney-ui-pack
+    original: "PNG/Grey/Default/button_square_gradient.png"
   "images/gui/panels/red.png":
-    source: kenney-ui-pack-v1
-    original: "PNG/red_panel.png"
+    source: kenney-ui-pack
+    original: "PNG/Red/Default/button_square_flat.png"
   "images/gui/panels/yellow.png":
-    source: kenney-ui-pack-v1
-    original: "PNG/yellow_panel.png"
+    source: kenney-ui-pack
+    original: "PNG/Yellow/Default/button_square_flat.png"
   "images/gui/Red/Default/arrow_basic_e.png":
     source: kenney-ui-pack
     original: "PNG/Red/Default/arrow_basic_e.png"
