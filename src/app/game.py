@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from pathlib import Path
 from random import choice
 
@@ -82,6 +83,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         self.audio = GameAudio()
         self.player = Player()
+        # The listener add_objects() registered last; replaced on every
+        # rebuild so new games don't pile up listeners on the same player.
+        self.money_listener: Callable[[int], None] | None = None
         self.default_music_volume = audio["default_music_volume"]
         self.default_sfx_volume = audio["default_sfx_volume"]
         self.old_music_volume = self.default_music_volume
@@ -258,7 +262,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         }
 
         money_text = self.panel_manager["game"]["money_text"]
-        self.player.add_money_listener(lambda m: money_text.set_text(f"{m}$"))
+        if self.money_listener is not None:
+            self.player.remove_money_listener(self.money_listener)
+        self.money_listener = lambda m: money_text.set_text(f"{m}$")
+        self.player.add_money_listener(self.money_listener)
         money_text.set_text(f"{self.player.money}$")
 
     @property
