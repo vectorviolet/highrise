@@ -1,7 +1,7 @@
 name: CI
 
 # Runs on GitHub's servers AFTER code arrives there:
-#   * every push to any branch except the merge queue's own
+#   * every push to main
 #   * every pull request targeting main
 #   * every merge-queue group (merge_group) before it lands on main
 # Runs the pygamine engine's own test suite (vendored as a submodule, but
@@ -10,17 +10,19 @@ name: CI
 # Deliberately separate from release.yml, which only builds/publishes on
 # version tags.
 on:
+  # Pushes to main only: a branch's commits already run as a pull_request,
+  # and the merge queue's own branches as a merge_group, so running every
+  # push too would test each commit twice.
   push:
-    # The merge queue's temporary branches already get a merge_group run; a
-    # second push run there duplicates (or, with a concurrency group, cancels)
-    # it, and the queue drops the PR for failed checks.
-    branches-ignore: ["gh-readonly-queue/**"]
+    branches: [main]
   pull_request:
     branches: [main]
   # Required checks must also run on merge-queue groups.
   merge_group:
 
 # Keyed on the event too, so a run for one event never cancels another's.
+# A new commit on a PR cancels that PR's older run (and a newer queue group
+# its older one), but never a run of another event.
 # Runs on main are never cancelled: each merged commit needs its own CI
 # status and badge publish, even when the queue merges PRs back to back.
 concurrency:

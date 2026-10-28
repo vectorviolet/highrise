@@ -59,7 +59,8 @@ uv sync
 uv run python __main__.py
 ```
 
-If you forgot `--recurse-submodules`: `git submodule update --init`.
+If you forgot `--recurse-submodules`, or the engine folder is out of step after a pull:
+`git submodule update --init` (on Windows, `scripts\sync-pygamine.bat` does the same).
 
 Without `uv`: `pip install .` then `python __main__.py`.
 
