@@ -15,6 +15,10 @@ class CloudContainer(GameObjectList):
             c for c in self if c.rect.x >= screen_width or c.rect.x + c.rect.width <= 0
         ]:
             self.remove(cloud)
+            self._on_removed(cloud)
+
+    def _on_removed(self, cloud: Cloud) -> None:
+        """Let subclasses release bookkeeping when an offscreen cloud leaves."""
 
 
 class LoopingCloudAnimation(CloudContainer):
@@ -33,13 +37,17 @@ class LoopingCloudAnimation(CloudContainer):
     def _new_cloud(self) -> Cloud:
         return Cloud(self._cloud_image, self.surface_size)
 
-    def _remove_offscreen(self) -> None:
-        screen_width = self.surface_size[0]
-        for cloud in [
-            c for c in self if c.rect.x >= screen_width or c.rect.x + c.rect.width <= 0
-        ]:
-            self._companions.discard(id(cloud))
-            self.remove(cloud)
+    def _on_removed(self, cloud: Cloud) -> None:
+        self._companions.discard(id(cloud))
+
+    def _spawn_companion(self, cloud: Cloud, dx: int) -> Cloud:
+        self._companions.add(id(cloud))
+        companion = self._new_cloud()
+        companion.rect.topleft = (cloud.rect.x + dx, cloud.rect.y)
+        companion.get_component(Rigidbody2D).set_velocity(
+            cloud.get_component(Rigidbody2D).velocity
+        )
+        return companion
 
     def update(self) -> None:
         to_add = []
@@ -51,22 +59,13 @@ class LoopingCloudAnimation(CloudContainer):
             velocity = rb.velocity
             xvel = velocity.x
             x = cloud.rect.x
-            y = cloud.rect.y
             width = cloud.rect.width
 
             if id(cloud) not in self._companions:
                 if xvel > 0 and x + width > screen_width:
-                    self._companions.add(id(cloud))
-                    companion = self._new_cloud()
-                    companion.rect.topleft = (x - screen_width, y)
-                    companion.get_component(Rigidbody2D).set_velocity(velocity)
-                    to_add.append(companion)
+                    to_add.append(self._spawn_companion(cloud, -screen_width))
                 elif xvel < 0 and x < 0:
-                    self._companions.add(id(cloud))
-                    companion = self._new_cloud()
-                    companion.rect.topleft = (x + screen_width, y)
-                    companion.get_component(Rigidbody2D).set_velocity(velocity)
-                    to_add.append(companion)
+                    to_add.append(self._spawn_companion(cloud, screen_width))
 
             cloud.update()
 
