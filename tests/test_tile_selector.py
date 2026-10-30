@@ -10,7 +10,7 @@ def make_selector(
 ) -> tuple[TileSelector, Tilemap, SimpleNamespace, Buildings]:
     tilemap = Tilemap(size=3, max_size=7)
     mouse = SimpleNamespace(position=(-9999, -9999))
-    buildings = Buildings(assets)
+    buildings = Buildings()
     selector = TileSelector(tilemap, mouse, buildings)
     selector.is_active = active
     return selector, tilemap, mouse, buildings

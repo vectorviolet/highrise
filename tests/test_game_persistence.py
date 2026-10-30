@@ -51,7 +51,7 @@ class FakeGame(GamePersistenceMixin):
         self.audio = FakeAudio(default_music, default_sfx)
         self.tilemap = None
         self.tile_selector = SimpleNamespace(tilemap=None)
-        self.buildings = Buildings(assets)
+        self.buildings = Buildings()
         self.calls: list = []
 
     def add_building(self, level, row, column) -> None:
