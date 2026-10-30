@@ -1,4 +1,5 @@
 from pygamine import ImagePath, Rigidbody2D
+import pytest
 
 from gameplay.clouds.cloud import Cloud
 from gameplay.clouds.cloud_container import (
@@ -88,6 +89,45 @@ def test_remove_offscreen_also_forgets_the_companion_flag():
 
     assert list(anim) == []
     assert id(cloud) not in anim._companions
+
+
+@pytest.mark.parametrize("direction", [-1, 1])
+def test_wrap_companion_keeps_position_velocity_and_waits_until_next_frame(direction):
+    anim = LoopingCloudAnimation(0, SURFACE_SIZE)
+    cloud = anim._new_cloud()
+    cloud.rect.topleft = (
+        -1 if direction < 0 else SURFACE_SIZE[0] - cloud.rect.width + 1,
+        123,
+    )
+    cloud.get_component(Rigidbody2D).set_velocity((direction, 0))
+    original_x = cloud.rect.x
+    anim.append(cloud)
+
+    anim.update()
+
+    original, companion = anim
+    assert original is cloud
+    assert companion.rect.topleft == (
+        original_x - direction * SURFACE_SIZE[0],
+        123,
+    )
+    assert companion.get_component(Rigidbody2D).velocity == (direction, 0)
+    assert id(companion) not in anim._companions
+
+
+def test_remove_offscreen_only_forgets_removed_clouds_companion_flags():
+    anim = LoopingCloudAnimation(0, SURFACE_SIZE)
+    leaving = anim._new_cloud()
+    leaving.rect.x = -leaving.rect.width
+    staying = anim._new_cloud()
+    staying.rect.x = 200
+    anim.extend([leaving, staying])
+    anim._companions.update([id(leaving), id(staying)])
+
+    anim._remove_offscreen()
+
+    assert list(anim) == [staying]
+    assert anim._companions == {id(staying)}
 
 
 # ── OneShotCloudAnimation ────────────────────────────────────────────────────
