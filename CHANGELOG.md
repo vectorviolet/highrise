@@ -9,6 +9,9 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Building movement is split into smaller methods; merge sounds and payout wiring
+  use callbacks attached at creation ([devlog](docs/devlog/2026-10-30-building-callbacks.md)).
+
 - The menu, settings and game panels use Kenney's current UI Pack instead of UI Pack version 1:
   the grey panel is now a white-to-grey gradient. The v1 pack and its license file are gone.
 - Sound effects can overlap: pygamine 0.26.0 plays each one on a free mixer channel, so a new
