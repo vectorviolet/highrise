@@ -13,6 +13,7 @@ PR. "Owner" is the project owner; "Claude" is the Claude Code session that imple
 | Date | Title | Area | Issues / PRs |
 |---|---|---|---|
 | 2026-10-28 | [Panels from UI Pack v2](2026-10-28-ui-pack-v2-panels.md) | Art, UI | #12, PR #13 |
+| 2026-10-30 | [Building movement and callback wiring](2026-10-30-building-callbacks.md) | Refactoring | #3, PR #20 |
 <!-- index:end -->
 
 ## Adding an entry

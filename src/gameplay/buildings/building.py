@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from typing import Callable
 
-from pygamine import AssetManager
-from pygamine import GameAudio
 from pygame import Vector2
 from gameplay.tiles.tile import Tile
 from pygamine import ImagePath
@@ -81,20 +79,51 @@ class Building(StateObject):
         self.merge_target = target
         self.should_destroy = True
 
+    def has_arrived(self) -> bool:
+        target = self.target_position
+        position = Vector2(self.rect.topleft)
+        velocity = self.rigidbody.velocity
+        x_done = (
+            velocity.x == 0
+            or (velocity.x > 0 and position.x >= target.x)
+            or (velocity.x < 0 and position.x <= target.x)
+        )
+        y_done = (
+            velocity.y == 0
+            or (velocity.y > 0 and position.y >= target.y)
+            or (velocity.y < 0 and position.y <= target.y)
+        )
+        return x_done and y_done
+
 
 class Buildings(list[Building]):
-    def __init__(self, assets: AssetManager) -> None:
+    def __init__(
+        self,
+        *,
+        on_merge: Callable[[], None] | None = None,
+        on_payout: Callable[[int], None] | None = None,
+    ) -> None:
         super().__init__()
         self.max_age_number = len(AGES) - 1
         self.age_number = 0
-        self.assets = assets
+        self.on_merge = on_merge
+        self.on_payout = on_payout
+
+    def create(
+        self, level: int, tile: Tile, *, age_number: int | None = None
+    ) -> Building:
+        """Construct a building with the collection's payout callback, without adding it."""
+        age = self.age_number if age_number is None else age_number
+        building = Building(level, age, tile)
+        building.on_payout = self.on_payout
+        return building
 
     def set_age(self, age_number) -> None:
         if age_number <= self.max_age_number:
             self.age_number = age_number
 
             for i, building in enumerate(self):
-                self[i] = Building(building.level, self.age_number, building.tile)
+                self[i] = self.create(building.level, building.tile)
 
     def is_moving(self) -> bool:
         return any(b.rigidbody.velocity != Vector2(0, 0) for b in self)
@@ -114,47 +143,39 @@ class Buildings(list[Building]):
                 if building.should_destroy:
                     settled_merges.append(building)
                 else:
-                    if (
-                        building.tile.selected
-                        and building.tile.rect == building.tile.selected_rect
-                    ):
-                        building.rect.topleft = (
-                            int(building.selected_position.x),
-                            int(building.selected_position.y),
-                        )
-                    else:
-                        building.rect.topleft = (
-                            int(building.unselected_position.x),
-                            int(building.unselected_position.y),
-                        )
-            else:
-                tp = building.target_position
-                p = Vector2(building.rect.topleft)
-                v = building.rigidbody.velocity
-                x_done = (
-                    v.x == 0 or (v.x > 0 and p.x >= tp.x) or (v.x < 0 and p.x <= tp.x)
+                    self._snap_idle(building)
+            elif building.has_arrived():
+                building.rigidbody.set_velocity(Vector2(0, 0))
+                building.rect.topleft = (
+                    int(building.target_position.x),
+                    int(building.target_position.y),
                 )
-                y_done = (
-                    v.y == 0 or (v.y > 0 and p.y >= tp.y) or (v.y < 0 and p.y <= tp.y)
-                )
-                if x_done and y_done:
-                    building.rigidbody.set_velocity(Vector2(0, 0))
-                    building.rect.topleft = (
-                        int(building.target_position.x),
-                        int(building.target_position.y),
-                    )
 
         for building in settled_merges:
-            self.remove(building)
-            self.remove(building.merge_target)
-            self.append(
-                Building(building.level + 1, building.age_number, building.tile)
-            )
-
-            sound = self.assets.sound_path("merge")
-            GameAudio.play_sfx(sound)
+            self._finish_merge(building)
         if settled_merges:
             self.sort(key=lambda b: b.tile.column_number)
+
+    @staticmethod
+    def _snap_idle(building: Building) -> None:
+        position = (
+            building.selected_position
+            if building.tile.selected
+            and building.tile.rect == building.tile.selected_rect
+            else building.unselected_position
+        )
+        building.rect.topleft = (int(position.x), int(position.y))
+
+    def _finish_merge(self, building: Building) -> None:
+        self.remove(building)
+        self.remove(building.merge_target)
+        self.append(
+            self.create(
+                building.level + 1, building.tile, age_number=building.age_number
+            )
+        )
+        if self.on_merge is not None:
+            self.on_merge()
 
     def update(self) -> None:
         for building in self:

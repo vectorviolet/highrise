@@ -105,7 +105,9 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
     game.assets = assets
     game.player = Player()
     game.player.money = starting_money
-    game.buildings = Buildings(assets)
+    game.buildings = Buildings(
+        on_merge=game._on_buildings_merged, on_payout=game._on_building_payout
+    )
     game.tilemap = Tilemap(size, max_size)
     game.max_size = max_size
     game.max_building_level = MAX_BUILDING_LEVEL
@@ -427,18 +429,44 @@ def test_handle_event_dispatches_to_the_current_panels_handler(assets):
     assert handler.calls == [(event,)]
 
 
-def test_update_assigns_a_payout_callback_to_buildings_missing_one(assets):
+def test_add_building_assigns_payout_before_the_first_update(assets):
     game = make_game(assets, size=3)
-    game.panel_manager.update = Spy()
-    building = Building(1, 0, game.tilemap[0][0])
-    game.buildings.append(building)
-    game.buildings.update = Spy()
-
-    game.update()
+    game.add_building(1, 1, 1)
+    building = game.buildings[0]
 
     # Bound-method identity isn't stable across separate attribute accesses
     # in Python -- == (same underlying function + instance) is the right check.
     assert building.on_payout == game._on_building_payout
+    money = game.player.money
+    building._payout()
+    assert game.player.money == money + building.cooldown * building.speed
+
+
+def test_game_plays_the_merge_sound_through_the_collection_callback(assets):
+    game = make_game(assets)
+    game.add_building(1, 1, 1)
+    game.add_building(1, 1, 2)
+    survivor, sacrificial = game.buildings
+    sacrificial.merge_into(survivor)
+
+    game.buildings.control_moving()
+
+    assert game.audio.played == [assets.sound_path("merge")]
+    assert game.buildings[0].on_payout == game._on_building_payout
+
+
+def test_loaded_buildings_have_payout_callbacks_without_an_update(assets):
+    game = make_game(assets)
+    game.database = SimpleNamespace(execute_safely=lambda *args: [(2, 1, 1)])
+
+    game.load_buildings()
+
+    assert len(game.buildings) == 1
+    building = game.buildings[0]
+    assert building.level == 2
+    money = game.player.money
+    building._payout()
+    assert game.player.money == money + building.cooldown * building.speed
 
 
 def test_draw_calls_panels_and_clouds(assets):

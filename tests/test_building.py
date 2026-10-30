@@ -1,4 +1,5 @@
 from pygame import Vector2
+import pytest
 
 from gameplay.buildings.building import AGES, Building
 from gameplay.tiles.tile import Tile
@@ -74,3 +75,31 @@ def test_level_up_moves_the_sacrificial_building_and_marks_it_for_destruction(as
     assert sacrificial.should_destroy is True
     assert sacrificial.merge_target is survivor
     assert sacrificial.rigidbody.velocity != Vector2(0, 0)
+
+
+@pytest.mark.parametrize(
+    "velocity, position, arrived",
+    [
+        ((1, 0), (99, 50), False),
+        ((1, 0), (100, 50), True),
+        ((1, 0), (101, 50), True),
+        ((-1, 0), (101, 50), False),
+        ((-1, 0), (100, 50), True),
+        ((-1, 0), (99, 50), True),
+        ((0, 1), (50, 99), False),
+        ((0, 1), (50, 100), True),
+        ((0, -1), (50, 101), False),
+        ((0, -1), (50, 100), True),
+        ((1, -1), (100, 101), False),
+        ((1, -1), (101, 99), True),
+    ],
+)
+def test_arrival_requires_each_moving_axis_to_reach_or_pass_target(
+    assets, velocity, position, arrived
+):
+    building = make_building()
+    building.target_position = Vector2(100, 100)
+    building.rect.topleft = position
+    building.rigidbody.set_velocity(velocity)
+
+    assert building.has_arrived() is arrived

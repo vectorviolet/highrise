@@ -8,7 +8,7 @@ import yaml
 from app.game_events import GameEventsMixin
 from app.game_persistence import GamePersistenceMixin
 from domain.player import Player
-from gameplay.buildings.building import Building, Buildings
+from gameplay.buildings.building import Buildings
 from gameplay.clouds.cloud_container import OneShotCloudAnimation, LoopingCloudAnimation
 from gameplay.tile_selector import TileSelector
 from gameplay.tilemap import Tilemap
@@ -101,7 +101,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.panel_manager = PanelManager(ui["background_colors"])
         self.database = Database("database")
 
-        self.buildings = Buildings(self.assets)
+        self.buildings = Buildings(
+            on_merge=self._on_buildings_merged, on_payout=self._on_building_payout
+        )
         self.cloud_count = gameplay["cloud_count"]
         self.max_size = gameplay["max_map_size"]
         self.max_building_level = gameplay["max_building_level"]
@@ -323,10 +325,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def update(self) -> None:
         self.panel_manager.update()
         self.buildings.update()
-        for building in self.buildings:
-            if building.on_payout is None:
-                building.on_payout = self._on_building_payout
         self.cloud_animation.update()
+
+    def _on_buildings_merged(self) -> None:
+        self.audio.play_sfx(self.assets.sound_path("merge"))
 
     def draw(self) -> None:
         self.panel_manager.draw(self.window)
@@ -370,8 +372,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def add_building(self, level, row_number, column_number) -> None:
         tilemap = self._tilemap
-        new_building = Building(
-            level, self.buildings.age_number, tilemap[row_number - 1][column_number - 1]
+        new_building = self.buildings.create(
+            level, tilemap[row_number - 1][column_number - 1]
         )
         self.buildings.append(new_building)
         self.buildings.sort(key=lambda b: b.tile.column_number)

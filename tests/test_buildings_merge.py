@@ -14,7 +14,7 @@ MAX_LEVEL = 6
 
 
 def make_grid(assets, size=3) -> tuple[Buildings, Tilemap]:
-    return Buildings(assets), Tilemap(size=size, max_size=size)
+    return Buildings(), Tilemap(size=size, max_size=size)
 
 
 def place(
@@ -159,12 +159,10 @@ def _settled_merge(tile) -> tuple[Building, Building]:
     return survivor, sacrificial
 
 
-def test_control_moving_applies_two_adjacent_merges_in_the_same_frame(
-    assets, monkeypatch
-):
+def test_control_moving_applies_two_adjacent_merges_in_the_same_frame(assets):
     played = []
-    monkeypatch.setattr("gameplay.buildings.building.GameAudio.play_sfx", played.append)
     buildings, tilemap = make_grid(assets)
+    buildings.on_merge = lambda: played.append("merge")
     survivor_a, sacrificial_a = _settled_merge(tilemap[0][0])
     survivor_b, sacrificial_b = _settled_merge(tilemap[0][1])
     # Column order, as move() leaves it. Removing items mid-loop used to make
@@ -178,13 +176,10 @@ def test_control_moving_applies_two_adjacent_merges_in_the_same_frame(
     assert [b.tile for b in buildings] == [tilemap[0][0], tilemap[0][1]]
     for old in (survivor_a, sacrificial_a, survivor_b, sacrificial_b):
         assert all(b is not old for b in buildings)
-    assert played == [assets.sound_path("merge")] * 2
+    assert played == ["merge", "merge"]
 
 
-def test_control_moving_does_not_skip_the_building_after_a_merge(assets, monkeypatch):
-    monkeypatch.setattr(
-        "gameplay.buildings.building.GameAudio.play_sfx", lambda path: None
-    )
+def test_control_moving_does_not_skip_the_building_after_a_merge(assets):
     buildings, tilemap = make_grid(assets)
     survivor, sacrificial = _settled_merge(tilemap[0][0])
     tile = tilemap[0][2]
@@ -202,13 +197,49 @@ def test_control_moving_does_not_skip_the_building_after_a_merge(assets, monkeyp
     assert [b.tile.column_number for b in buildings] == [1, 3]
 
 
-def test_control_moving_plays_the_merge_sound_once_per_merge(assets, monkeypatch):
+def test_control_moving_calls_the_merge_callback_once_per_merge(assets):
     played = []
-    monkeypatch.setattr("gameplay.buildings.building.GameAudio.play_sfx", played.append)
     buildings, tilemap = make_grid(assets)
+    buildings.on_merge = lambda: played.append("merge")
     buildings.extend(_settled_merge(tilemap[0][0]))
 
     buildings.control_moving()
     buildings.control_moving()  # nothing left to merge on the next frame
 
-    assert played == [assets.sound_path("merge")]
+    assert played == ["merge"]
+
+
+def test_payout_callback_is_ready_after_creation_age_change_and_merge(assets):
+    paid = []
+    buildings = Buildings(on_payout=paid.append)
+    tilemap = Tilemap(size=3, max_size=3)
+    buildings.append(buildings.create(1, tilemap[0][0]))
+    buildings[0]._payout()
+
+    buildings.set_age(1)
+    buildings[0]._payout()
+    sacrificial = buildings.create(1, tilemap[0][0])
+    sacrificial.merge_into(buildings[0])
+    buildings.append(sacrificial)
+    buildings.control_moving()
+    buildings[0]._payout()
+
+    assert paid == [2, 6, 14]
+    assert buildings[0].age_number == 1
+    assert buildings[0].level == 2
+
+
+def test_merge_still_waits_until_the_frame_after_arrival(assets):
+    buildings, tilemap = make_grid(assets)
+    survivor = place(buildings, tilemap, 1, 1, 1)
+    sacrificial = place(buildings, tilemap, 1, 1, 2)
+    survivor.level_up(sacrificial)
+    sacrificial.rect.topleft = tuple(map(int, sacrificial.target_position))
+
+    buildings.control_moving()
+    assert len(buildings) == 2
+    assert sacrificial.rigidbody.velocity == (0, 0)
+
+    buildings.control_moving()
+    assert len(buildings) == 1
+    assert buildings[0].level == 2
