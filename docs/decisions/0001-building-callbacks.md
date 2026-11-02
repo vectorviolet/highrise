@@ -23,6 +23,9 @@ handles the merge callback and plays the same asset through its audio instance.
 
 Keep the collection's existing two-phase merge process and column sort. Extract
 arrival detection and idle snapping without changing thresholds or frame order.
+Because a merge finishes a frame after arrival, board-changing input waits while
+Buildings.is_busy() (one guard in the game's event handling), and saving
+finishes pending merges first (#21).
 
 ## Consequences
 

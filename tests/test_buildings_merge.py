@@ -245,48 +245,36 @@ def test_merge_still_waits_until_the_frame_after_arrival(assets):
     assert buildings[0].level == 2
 
 
-def _sell(buildings: Buildings, building: Building) -> None:
-    """What the info panel's SELL button does to the collection."""
-    buildings.remove(building)
-
-
-def test_selling_the_survivor_mid_merge_cancels_the_merge(assets):
-    played = []
+def test_move_is_ignored_in_the_frame_after_a_merge_arrives(assets):
     buildings, tilemap = make_grid(assets)
-    buildings.on_merge = lambda: played.append("merge")
     survivor = place(buildings, tilemap, 1, 1, 1)
     sacrificial = place(buildings, tilemap, 1, 1, 2)
     buildings.move("left", tilemap, MAX_LEVEL)
-    assert sacrificial.merge_target is survivor
-
-    _sell(buildings, survivor)
     sacrificial.rect.topleft = tuple(map(int, sacrificial.target_position))
-    buildings.control_moving()  # arrives
-    buildings.control_moving()  # would finish the merge; must not raise
+    buildings.control_moving()  # arrived; the merge finishes next frame
+    assert not buildings.is_moving() and buildings.is_busy()
 
-    assert list(buildings) == [sacrificial]
-    assert sacrificial.level == 1
-    assert sacrificial.should_destroy is False
-    assert sacrificial.merge_target is None
-    assert sacrificial.tile is tilemap[0][0]
-    assert not buildings.is_busy()
-    assert played == []
+    buildings.move("right", tilemap, MAX_LEVEL)  # must not touch the merge
+
+    assert survivor.tile is tilemap[0][0] and sacrificial.tile is tilemap[0][0]
+    buildings.control_moving()
+    assert [(b.level, b.tile) for b in buildings] == [(2, tilemap[0][0])]
 
 
-def test_selling_the_sacrificial_building_mid_merge_leaves_the_survivor(assets):
+def test_finish_pending_merges_finishes_a_merge_that_is_still_sliding(assets):
     played = []
     buildings, tilemap = make_grid(assets)
     buildings.on_merge = lambda: played.append("merge")
-    survivor = place(buildings, tilemap, 1, 1, 1)
-    sacrificial = place(buildings, tilemap, 1, 1, 2)
+    place(buildings, tilemap, 1, 1, 1)
+    place(buildings, tilemap, 1, 1, 2)
+    other = place(buildings, tilemap, 2, 2, 3)
     buildings.move("left", tilemap, MAX_LEVEL)
 
-    _sell(buildings, sacrificial)
-    buildings.control_moving()
-    buildings.control_moving()
+    buildings.finish_pending_merges()
 
-    assert list(buildings) == [survivor]
-    assert survivor.level == 1
-    assert survivor.should_destroy is False
-    assert not buildings.is_busy()
-    assert played == []
+    assert len(buildings) == 2
+    assert other in buildings and other.tile is tilemap[1][0]
+    (merged,) = [b for b in buildings if b is not other]
+    assert (merged.level, merged.tile) == (2, tilemap[0][0])
+    assert not any(b.should_destroy for b in buildings)
+    assert played == ["merge"]

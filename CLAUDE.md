@@ -97,8 +97,9 @@ as a keyword-only argument (`None` for no income), so it can't be forgotten.
 `on_merge` delegates the merge sound to `Game`; the collection has no
 asset/audio dependency. Merges are collected during movement checks and applied
 after iteration, then sorted by column. Keep the existing next-frame merge after
-arrival. Anything that rebuilds or replaces buildings (like `next_age`) must
-wait while `Buildings.is_busy()`. See ADR 0001.
+arrival. Board-changing actions (moves, build, sell, NEXT AGE) wait while
+`Buildings.is_busy()`; the one guard is in `GameEventsMixin.handle_game_events`.
+Saving finishes pending merges first. See ADR 0001.
 
 ### Persistence
 

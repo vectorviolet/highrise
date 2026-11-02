@@ -16,7 +16,9 @@ import pytest
 from app.game import Game, format_volume
 from domain.player import Player
 from gameplay.buildings.building import Building, Buildings
+from gameplay.tile_selector import TileSelector
 from gameplay.tilemap import Tilemap
+from ui.info_panel import InfoPanel
 
 MAX_SIZE = 7
 MAX_BUILDING_LEVEL = 10
@@ -210,17 +212,6 @@ def test_create_building_does_nothing_when_unaffordable(assets):
     assert len(game.buildings) == 0
 
 
-def test_create_building_does_nothing_while_buildings_are_moving(assets, monkeypatch):
-    game = make_game(assets, size=2, starting_money=100_000)
-    monkeypatch.setattr(
-        type(game.buildings), "is_moving", lambda self: True, raising=False
-    )
-
-    game.create_building()
-
-    assert len(game.buildings) == 0
-
-
 # ── age progression ──────────────────────────────────────────────────────────
 
 
@@ -287,37 +278,6 @@ def _run_until_settled(game, max_frames=100):
             if building.rigidbody.velocity != (0, 0):
                 building.rect.topleft = tuple(map(int, building.target_position))
     raise AssertionError("buildings never settled")
-
-
-def test_next_age_does_nothing_while_a_merge_is_sliding(assets):
-    game = make_game(assets, size=3, starting_money=100_000)
-    survivor, sacrificial = _start_merge(game)
-    assert game.buildings.is_moving()
-    money = game.player.money
-
-    game.next_age()
-
-    assert game.buildings.age_number == 0
-    assert game.player.money == money
-    assert {id(b) for b in game.buildings} == {id(survivor), id(sacrificial)}
-    assert sacrificial.should_destroy and sacrificial.merge_target is survivor
-
-    _run_until_settled(game)
-    assert [b.level for b in game.buildings] == [2]
-
-
-def test_next_age_does_nothing_while_an_arrived_merge_waits_a_frame(assets):
-    game = make_game(assets, size=3, starting_money=100_000)
-    survivor, sacrificial = _start_merge(game)
-    sacrificial.rect.topleft = tuple(map(int, sacrificial.target_position))
-    game.buildings.control_moving()  # arrived; the merge finishes next frame
-    assert not game.buildings.is_moving()
-
-    game.next_age()
-
-    assert game.buildings.age_number == 0
-    game.buildings.control_moving()
-    assert [(b.level, b.tile) for b in game.buildings] == [(2, survivor.tile)]
 
 
 def test_next_age_works_again_once_the_merge_has_finished(assets):
@@ -739,3 +699,197 @@ def test_run_resets_the_session_ui_and_opens_the_menu(assets, monkeypatch):
     display = game.panel_manager["display_settings"]
     assert display["window_size_entry_text"].text == "1280x720"
     assert display["window_mode_entry_text"].text == "WINDOWED"
+
+
+# -- board-changing input while buildings are busy (real event path) --
+
+
+class FakeButton:
+    def __init__(self):
+        self.clicked = False
+
+    def is_clicked(self, event, mouse_pos) -> bool:
+        clicked, self.clicked = self.clicked, False
+        return clicked
+
+    def set_base_state(self, state) -> None:
+        self.base_state = state
+
+
+class FakeImage:
+    def add_surface(self, name, surface) -> None:
+        pass
+
+    def set_state(self, state) -> None:
+        pass
+
+
+class InfoPanelWidget:
+    """panel["info_panel"]: active while the InfoPanel's root is."""
+
+    def __init__(self, info_panel):
+        self._info_panel = info_panel
+
+    @property
+    def active(self) -> bool:
+        return self._info_panel.is_active
+
+
+def make_playable_game(assets) -> Game:
+    """make_game plus the real TileSelector, InfoPanel and handle_game_events."""
+    game = make_game(assets, size=3, starting_money=100_000)
+    game.mouse = SimpleNamespace(position=(-9999, -9999))
+    game.tile_selector = TileSelector(game.tilemap, game.mouse, game.buildings)
+    game.panel_manager.current_panel = "game"
+    game.info_panel = InfoPanel(game.panel_manager)
+    game.info_panel.close()
+    panel = game.panel_manager["game"]
+    for name in (
+        "level_text",
+        "speed_text",
+        "cooldown_text",
+        "sell_price_text",
+        "sell_button_text",
+    ):
+        panel[name] = FakeText()
+    panel["info_panel_building_image"] = FakeImage()
+    panel["info_panel"] = InfoPanelWidget(game.info_panel)
+    for name in (
+        "sell_button",
+        "close_button",
+        "selection_mode_button",
+        "expand_button",
+        "build_button",
+        "next_age_button",
+    ):
+        panel[name] = FakeButton()
+    return game
+
+
+def _click(game, button_name):
+    game.panel_manager["game"][button_name].clicked = True
+    game.handle_game_events(pygame.event.Event(pygame.MOUSEBUTTONUP, button=1))
+
+
+def _key(game, key):
+    game.handle_game_events(pygame.event.Event(pygame.KEYUP, key=key))
+
+
+def _arrive(game):
+    """Put sliding buildings on their targets; control_moving then settles them."""
+    for building in game.buildings:
+        if building.rigidbody.velocity != (0, 0):
+            building.rect.topleft = tuple(map(int, building.target_position))
+    game.buildings.control_moving()
+
+
+def _pick(game, tile):
+    """Turn on selection mode and click a tile, through the real TileSelector."""
+    game.tile_selector.is_active = True
+    game.mouse.position = tile.unselected_rect.center
+    game.handle_game_events(pygame.event.Event(pygame.MOUSEBUTTONUP, button=1))
+    game.tile_selector.is_active = False
+
+
+@pytest.mark.parametrize("frame", ["sliding", "arrived"])
+@pytest.mark.parametrize(
+    "action",
+    ["next_age_button", "build_button", pygame.K_SPACE, pygame.K_RIGHT, pygame.K_d],
+)
+def test_board_changing_input_is_ignored_while_a_merge_is_pending(
+    assets, frame, action
+):
+    game = make_playable_game(assets)
+    survivor, sacrificial = _start_merge(game)
+    if frame == "arrived":
+        _arrive(game)  # the merge finishes on the next frame
+        assert not game.buildings.is_moving()
+    money = game.player.money
+
+    if isinstance(action, str):
+        _click(game, action)
+    else:
+        _key(game, action)
+
+    assert game.buildings.age_number == 0
+    assert game.player.money == money
+    assert {id(b) for b in game.buildings} == {id(survivor), id(sacrificial)}
+    assert survivor.tile is game.tilemap[0][0]
+    assert sacrificial.tile is game.tilemap[0][0]
+    _run_until_settled(game)
+    assert [(b.level, b.tile) for b in game.buildings] == [(2, game.tilemap[0][0])]
+
+
+def test_board_changing_input_works_again_once_the_board_settles(assets):
+    game = make_playable_game(assets)
+    _start_merge(game)
+    _run_until_settled(game)
+
+    _click(game, "next_age_button")
+    _key(game, pygame.K_RIGHT)
+
+    assert game.buildings.age_number == 1
+    assert [b.tile for b in game.buildings] == [game.tilemap[0][2]]
+
+
+def test_sell_through_the_info_panel_is_ignored_mid_merge(assets):
+    game = make_playable_game(assets)
+    _start_merge(game)
+    _pick(game, game.tilemap[0][0])
+    assert game.info_panel.is_active
+    shown = game.info_panel.building
+    money = game.player.money
+
+    _click(game, "sell_button")
+
+    assert shown in game.buildings
+    assert len(game.buildings) == 2
+    assert game.player.money == money
+
+
+def test_info_panel_closes_when_a_merge_replaces_its_building(assets):
+    game = make_playable_game(assets)
+    _start_merge(game)
+    _pick(game, game.tilemap[0][0])
+    stale = game.info_panel.building
+    _arrive(game)
+
+    game.update()  # the merge finishes and replaces both buildings
+
+    assert stale not in game.buildings
+    assert not game.info_panel.is_active
+    money = game.player.money
+    _click(game, "sell_button")  # the panel is closed: nothing to sell
+    assert [b.level for b in game.buildings] == [2]
+    assert game.player.money == money
+
+
+def test_sell_never_removes_a_building_that_left_the_board(assets):
+    game = make_playable_game(assets)
+    _start_merge(game)
+    _pick(game, game.tilemap[0][0])
+    stale = game.info_panel.building
+    _arrive(game)
+    game.buildings.control_moving()  # merge done; no update() closed the panel
+    money = game.player.money
+
+    _click(game, "sell_button")  # was a list.remove ValueError
+
+    assert stale not in game.buildings
+    assert [b.level for b in game.buildings] == [2]
+    assert game.player.money == money
+    assert not game.info_panel.is_active
+
+
+def test_sell_through_the_info_panel_sells_a_settled_building(assets):
+    game = make_playable_game(assets)
+    game.add_building(2, 2, 2)
+    _pick(game, game.tilemap[1][1])
+    building = game.info_panel.building
+    money = game.player.money
+
+    _click(game, "sell_button")
+
+    assert len(game.buildings) == 0
+    assert game.player.money == money + building.sell_price
+    assert not game.info_panel.is_active

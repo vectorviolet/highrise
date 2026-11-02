@@ -172,9 +172,16 @@ class Buildings(list[Building]):
             elif building.has_arrived():
                 building.snap_to_target()
 
-        for building in settled_merges:
+        self._finish_merges(settled_merges)
+
+    def finish_pending_merges(self) -> None:
+        """Finish every pending merge now, as the animation would (used before saving)."""
+        self._finish_merges([b for b in self if b.should_destroy])
+
+    def _finish_merges(self, merges: list[Building]) -> None:
+        for building in merges:
             self._finish_merge(building)
-        if settled_merges:
+        if merges:
             self.sort_by_column()
 
     @staticmethod
@@ -187,18 +194,11 @@ class Buildings(list[Building]):
         )
         building.rect.topleft = (int(position.x), int(position.y))
 
-    def _contains(self, building: Building) -> bool:
-        return any(b is building for b in self)
-
     def _finish_merge(self, building: Building) -> None:
         target = building.merge_target
-        if target is None or not self._contains(target):
-            # The survivor was sold (or replaced) mid-merge: cancel the merge
-            # and keep this building as it is, rather than crash or duplicate.
-            building.should_destroy = False
-            building.merge_target = None
-            self._snap_idle(building)
-            return
+        # Board-changing actions wait while is_busy(), so nothing can remove
+        # the survivor before its merge finishes.
+        assert target is not None and target in self, "merge survivor left the board"
         self.remove(building)
         self.remove(target)
         self.append(
@@ -219,7 +219,7 @@ class Buildings(list[Building]):
             building.draw(surface)
 
     def move(self, rotation: str, tilemap, max_level: int) -> None:
-        if self.is_moving():
+        if self.is_busy():
             return
         axis = self._axis_for(rotation, tilemap)
         for line in range(axis.line_count):

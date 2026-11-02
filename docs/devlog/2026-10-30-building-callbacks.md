@@ -62,13 +62,21 @@ Regression tests check the affected timing, movement, callbacks and income.
 The post-merge review of PR #20 found an older bug and some loose ends:
 
 - NEXT AGE during a slide or merge rebuilt every building and dropped the
-  merge, leaving two level-N buildings stacked on one tile. `Game.next_age` now
-  does nothing (and costs nothing) until the board has settled: no building
-  moving and no arrived merge waiting for its next-frame finish
-  (`Buildings.is_busy`).
-- Selling the surviving building mid-merge crashed the merge finish. Now the
-  merge is cancelled: the other building stays at its level on that tile, no
-  level-up and no merge sound. Selling the sliding building just removes it.
+  merge, leaving two level-N buildings stacked on one tile. Selling, arrow keys
+  and building had the same kind of gap, at least in the frame between a
+  slider's arrival and its merge. Now one guard in the game's event handling
+  ignores every board-changing action (moves, build, sell, NEXT AGE) while
+  `Buildings.is_busy()`: a building is moving, or an arrived merge waits for
+  its next-frame finish. Merges take about 0.2 s, like the existing move
+  block. Per-action checks were rejected: the review found four actions that
+  had missed one.
+- An info panel opened on a building mid-merge kept pointing at it after the
+  merge replaced it, and SELL then crashed. The panel now closes when its
+  building leaves the board (simpler than rebinding it to the merge result),
+  and selling never removes a building that isn't on the board.
+- Saving mid-merge stored both buildings on one tile. Saving now finishes
+  pending merges first, as the animation would, so the save loads as the
+  finished result.
 - A directly built `Building` silently paid nothing. `on_payout` is now a
   required keyword-only constructor argument (`None` means no income), so
   forgetting it raises a `TypeError`; `Buildings.create` still passes the

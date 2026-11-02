@@ -241,6 +241,25 @@ def test_save_game_persists_state_and_buildings(tmp_path, assets):
     assert building_rows == [(3, 2, 2)]
 
 
+def test_save_mid_merge_saves_the_finished_merge(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    game.init_database()
+    game.get_game_data()
+    game.load_game_data([(0, 3, 0, 0.5, 0.5)])
+    game.add_building(1, 1, 1)
+    game.add_building(1, 1, 2)
+    game.buildings.move("left", game.tilemap, 10)
+    assert game.buildings.is_busy()
+
+    game.save_game()
+
+    building_rows = game.database.execute_safely(
+        "SELECT level, row, column FROM buildings", True
+    )
+    assert building_rows == [(2, 1, 1)]
+    assert [b.level for b in game.buildings] == [2]
+
+
 def test_save_game_replaces_rather_than_accumulates_building_rows(tmp_path, assets):
     game = FakeGame(tmp_path, assets)
     game.init_database()

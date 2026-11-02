@@ -145,6 +145,23 @@ def make_panels() -> FakePanelManager:
     )
 
 
+class FakeBuildings:
+    """Every building counts as on the board; `busy` mimics a slide or a pending merge."""
+
+    def __init__(self, game):
+        self._game = game
+        self.busy = False
+
+    def is_busy(self) -> bool:
+        return self.busy
+
+    def __contains__(self, building) -> bool:
+        return True
+
+    def remove(self, building) -> None:
+        self._game.calls.append(("remove", building))
+
+
 class FakeGame(GameEventsMixin):
     def __init__(self):
         self.panel_manager = make_panels()
@@ -158,9 +175,7 @@ class FakeGame(GameEventsMixin):
         self.old_sfx_volume = 0.5
         self.tile_selector = FakeTileSelector()
         self.info_panel = FakeInfoPanel()
-        self.buildings = SimpleNamespace(
-            remove=lambda b: self.calls.append(("remove", b))
-        )
+        self.buildings = FakeBuildings(self)
         self.player = SimpleNamespace(earn=lambda a: self.calls.append(("earn", a)))
         self.calls: list = []
 

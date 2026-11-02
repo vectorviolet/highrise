@@ -9,8 +9,9 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
-- NEXT AGE waits until buildings stop sliding and merging, so a merge can no longer leave two
-  buildings stacked on one tile; selling a building mid-merge no longer crashes the game.
+- Moves, building, selling and NEXT AGE wait until buildings stop sliding and merging, so a merge
+  can no longer leave two buildings stacked on one tile. Saving mid-merge saves the finished merge,
+  and selling from an info panel whose building just merged no longer crashes the game.
 
 ### Changed
 
