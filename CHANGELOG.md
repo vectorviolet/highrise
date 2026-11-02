@@ -7,6 +7,12 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Moves, building, selling and NEXT AGE wait until buildings stop sliding and merging, so a merge
+  can no longer leave two buildings stacked on one tile. Saving mid-merge saves the finished merge,
+  and selling from an info panel whose building just merged no longer crashes the game.
+
 ### Changed
 
 - Building movement is split into smaller methods; merge sounds and payout wiring

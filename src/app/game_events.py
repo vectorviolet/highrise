@@ -162,9 +162,13 @@ class GameEventsMixin:
         if self.tile_selector.is_active:
             self.tile_selector.update_selection()
 
+        # The one guard for board-changing actions (sell, build, NEXT AGE,
+        # moves): they wait while buildings slide or a merge is pending.
+        board_ready = not self.buildings.is_busy()
+
         # While the info panel is open it owns the input.
         if panel["info_panel"].active:
-            self._handle_info_panel_event(panel, event)
+            self._handle_info_panel_event(panel, event, board_ready)
             return
 
         if self._activate(panel["selection_mode_button"], event):
@@ -173,19 +177,25 @@ class GameEventsMixin:
         if self.tile_selector.is_active and event.type == pygame.MOUSEBUTTONUP:
             self._pick_tile()
 
-        self._handle_toolbar(panel, event)
+        self._handle_toolbar(panel, event, board_ready)
 
-        if event.type == pygame.KEYUP:
+        if event.type == pygame.KEYUP and board_ready:
             self._handle_move_keys(event.key)
 
-    def _handle_info_panel_event(self, panel, event: pygame.event.Event) -> None:
-        if self._activate(panel["sell_button"], event):
-            self.buildings.remove(self.info_panel.building)
-            self.player.earn(self.info_panel.building.sell_price)
-            self.info_panel.close()
-            self.update_button_texts()
+    def _handle_info_panel_event(
+        self, panel, event: pygame.event.Event, board_ready: bool
+    ) -> None:
+        if board_ready and self._activate(panel["sell_button"], event):
+            self._sell(self.info_panel.building)
         elif self._activate(panel["close_button"], event):
             self.info_panel.close()
+
+    def _sell(self, building) -> None:
+        if building in self.buildings:
+            self.buildings.remove(building)
+            self.player.earn(building.sell_price)
+        self.info_panel.close()
+        self.update_button_texts()
 
     def _toggle_selection_mode(self, button) -> None:
         self.tile_selector.is_active = not self.tile_selector.is_active
@@ -199,11 +209,15 @@ class GameEventsMixin:
             self.info_panel.open()
             self.audio.play_sfx(str(self.click_sound_path))
 
-    def _handle_toolbar(self, panel, event: pygame.event.Event) -> None:
+    def _handle_toolbar(
+        self, panel, event: pygame.event.Event, board_ready: bool
+    ) -> None:
         # expand/build/next_age call methods that play their own sfx, so
         # these use raw is_clicked (not _activate) to avoid double-playing.
         if panel["expand_button"].is_clicked(event, self.mouse.position):
             self.expand()
+        elif not board_ready:
+            return
         elif panel["build_button"].is_clicked(event, self.mouse.position):
             self.create_building()
         elif panel["next_age_button"].is_clicked(event, self.mouse.position):

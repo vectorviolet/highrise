@@ -86,14 +86,20 @@ All UI panels, buttons, and layout are declared in `config/panels.yaml`. Python 
 
 ### Isometric Tilemap
 
+`src/tile.py` renders an isometric diamond grid. Tile selection uses point-in-quadrangle collision. Selected tiles visually shift up by 10 px. Building movement (WASD/arrows) triggers 2048-style merge logic: same-level adjacent buildings merge and level up.
+
+### Buildings
+
 `Buildings` owns movement and replacement construction. Use `Buildings.create`
 for production building creation (purchase/load, merge and age change) so the
-collection's `on_payout` callback is attached immediately. `on_merge` delegates
-the merge sound to `Game`; the collection has no asset/audio dependency. Merges
-are collected during movement checks and applied after iteration, then sorted
-by column. Keep the existing next-frame merge after arrival. See ADR 0001.
-
-`src/tile.py` renders an isometric diamond grid. Tile selection uses point-in-quadrangle collision. Selected tiles visually shift up by 10 px. Building movement (WASD/arrows) triggers 2048-style merge logic: same-level adjacent buildings merge and level up.
+collection's `on_payout` callback is passed in. `Building` requires `on_payout`
+as a keyword-only argument (`None` for no income), so it can't be forgotten.
+`on_merge` delegates the merge sound to `Game`; the collection has no
+asset/audio dependency. Merges are collected during movement checks and applied
+after iteration, then sorted by column. Keep the existing next-frame merge after
+arrival. Board-changing actions (moves, build, sell, NEXT AGE) wait while
+`Buildings.is_busy()`; the one guard is in `GameEventsMixin.handle_game_events`.
+Saving finishes pending merges first. See ADR 0001.
 
 ### Persistence
 

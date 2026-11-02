@@ -20,8 +20,30 @@ class _MoveAxis:
     reverse: bool
 
 
+def _axis_arrived(velocity: float, position: float, target: float) -> bool:
+    """True once motion along one axis has reached or passed its target."""
+    return (
+        velocity == 0
+        or (velocity > 0 and position >= target)
+        or (velocity < 0 and position <= target)
+    )
+
+
+def _column(building: "Building") -> int:
+    return building.tile.column_number
+
+
 class Building(StateObject):
-    def __init__(self, level, age_number, tile: Tile) -> None:
+    def __init__(
+        self,
+        level,
+        age_number,
+        tile: Tile,
+        *,
+        on_payout: Callable[[int], None] | None,
+    ) -> None:
+        # on_payout is required (keyword-only) so a building can't be built
+        # without deciding where its income goes; pass None for no income.
         self.tile = tile
         self.age_number = age_number
         self.age = AGES[age_number]
@@ -39,7 +61,8 @@ class Building(StateObject):
             image_path=self.get_image_path(),
         )
         self.add_component(Rigidbody2D).set_velocity((0, 0))
-        self.on_payout: Callable[[int], None] | None = None
+        self.on_payout = on_payout
+        self.merge_target: Building | None = None
         self.invoke_repeating(self._payout, delay=self.cooldown, interval=self.cooldown)
 
     def _payout(self) -> None:
@@ -83,17 +106,14 @@ class Building(StateObject):
         target = self.target_position
         position = Vector2(self.rect.topleft)
         velocity = self.rigidbody.velocity
-        x_done = (
-            velocity.x == 0
-            or (velocity.x > 0 and position.x >= target.x)
-            or (velocity.x < 0 and position.x <= target.x)
+        return _axis_arrived(velocity.x, position.x, target.x) and _axis_arrived(
+            velocity.y, position.y, target.y
         )
-        y_done = (
-            velocity.y == 0
-            or (velocity.y > 0 and position.y >= target.y)
-            or (velocity.y < 0 and position.y <= target.y)
-        )
-        return x_done and y_done
+
+    def snap_to_target(self) -> None:
+        """Stop and place the building exactly on its target position."""
+        self.rigidbody.set_velocity(Vector2(0, 0))
+        self.rect.topleft = (int(self.target_position.x), int(self.target_position.y))
 
 
 class Buildings(list[Building]):
@@ -114,9 +134,7 @@ class Buildings(list[Building]):
     ) -> Building:
         """Construct a building with the collection's payout callback, without adding it."""
         age = self.age_number if age_number is None else age_number
-        building = Building(level, age, tile)
-        building.on_payout = self.on_payout
-        return building
+        return Building(level, age, tile, on_payout=self.on_payout)
 
     def set_age(self, age_number) -> None:
         if age_number <= self.max_age_number:
@@ -127,6 +145,13 @@ class Buildings(list[Building]):
 
     def is_moving(self) -> bool:
         return any(b.rigidbody.velocity != Vector2(0, 0) for b in self)
+
+    def is_busy(self) -> bool:
+        """Moving, or an arrived merge is still waiting for its next-frame finish."""
+        return self.is_moving() or any(b.should_destroy for b in self)
+
+    def sort_by_column(self) -> None:
+        self.sort(key=_column)
 
     def get_age_cost(self) -> int:
         return (self.age_number + 1) * 1000
@@ -145,16 +170,19 @@ class Buildings(list[Building]):
                 else:
                     self._snap_idle(building)
             elif building.has_arrived():
-                building.rigidbody.set_velocity(Vector2(0, 0))
-                building.rect.topleft = (
-                    int(building.target_position.x),
-                    int(building.target_position.y),
-                )
+                building.snap_to_target()
 
-        for building in settled_merges:
+        self._finish_merges(settled_merges)
+
+    def finish_pending_merges(self) -> None:
+        """Finish every pending merge now, as the animation would (used before saving)."""
+        self._finish_merges([b for b in self if b.should_destroy])
+
+    def _finish_merges(self, merges: list[Building]) -> None:
+        for building in merges:
             self._finish_merge(building)
-        if settled_merges:
-            self.sort(key=lambda b: b.tile.column_number)
+        if merges:
+            self.sort_by_column()
 
     @staticmethod
     def _snap_idle(building: Building) -> None:
@@ -167,8 +195,12 @@ class Buildings(list[Building]):
         building.rect.topleft = (int(position.x), int(position.y))
 
     def _finish_merge(self, building: Building) -> None:
+        target = building.merge_target
+        # Board-changing actions wait while is_busy(), so nothing can remove
+        # the survivor before its merge finishes.
+        assert target is not None and target in self, "merge survivor left the board"
         self.remove(building)
-        self.remove(building.merge_target)
+        self.remove(target)
         self.append(
             self.create(
                 building.level + 1, building.tile, age_number=building.age_number
@@ -187,12 +219,12 @@ class Buildings(list[Building]):
             building.draw(surface)
 
     def move(self, rotation: str, tilemap, max_level: int) -> None:
-        if self.is_moving():
+        if self.is_busy():
             return
         axis = self._axis_for(rotation, tilemap)
         for line in range(axis.line_count):
             self._resolve_line(line, axis, max_level)
-        self.sort(key=lambda b: b.tile.column_number)
+        self.sort_by_column()
 
     @staticmethod
     def _axis_for(rotation: str, tilemap) -> _MoveAxis:

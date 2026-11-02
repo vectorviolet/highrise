@@ -126,6 +126,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         )
         self.click_sound_path = self.assets.sound_path("click")
         self.go_back_sound_path = self.assets.sound_path("back")
+        self.merge_sound_path = self.assets.sound_path("merge")
 
         self.info_panel = InfoPanel(self.panel_manager)
         self.tile_selector = TileSelector(self.tilemap, self.mouse, self.buildings)
@@ -325,10 +326,17 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def update(self) -> None:
         self.panel_manager.update()
         self.buildings.update()
+        self._close_stale_info_panel()
         self.cloud_animation.update()
 
+    def _close_stale_info_panel(self) -> None:
+        # A finished merge replaces both buildings; don't keep showing (or
+        # selling) one that's no longer on the board.
+        if self.info_panel.is_active and self.info_panel.building not in self.buildings:
+            self.info_panel.close()
+
     def _on_buildings_merged(self) -> None:
-        self.audio.play_sfx(self.assets.sound_path("merge"))
+        self.audio.play_sfx(self.merge_sound_path)
 
     def draw(self) -> None:
         self.panel_manager.draw(self.window)
@@ -376,7 +384,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             level, tilemap[row_number - 1][column_number - 1]
         )
         self.buildings.append(new_building)
-        self.buildings.sort(key=lambda b: b.tile.column_number)
+        self.buildings.sort_by_column()
 
         if (
             len(self.buildings) == tilemap.row_count * tilemap.column_count
@@ -388,9 +396,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             )
 
     def create_building(self) -> None:
-        if self.buildings.is_moving() or not self.player.can_afford(
-            self.buildings.get_build_cost()
-        ):
+        if not self.player.can_afford(self.buildings.get_build_cost()):
             return
 
         tilemap = self._tilemap

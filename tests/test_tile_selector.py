@@ -72,7 +72,7 @@ def test_get_selected_building_returns_none_without_a_selected_tile(assets):
 def test_get_selected_building_matches_the_building_on_the_selected_tile(assets):
     selector, tilemap, mouse, buildings = make_selector(assets, active=True)
     tile = tilemap[1][1]
-    building = Building(1, 0, tile)
+    building = Building(1, 0, tile, on_payout=None)
     buildings.append(building)
     mouse.position = tile.unselected_rect.center
 
@@ -84,7 +84,7 @@ def test_get_selected_building_matches_the_building_on_the_selected_tile(assets)
 def test_get_selected_building_is_none_when_the_selected_tile_is_empty(assets):
     selector, tilemap, mouse, buildings = make_selector(assets, active=True)
     occupied_tile = tilemap[0][0]
-    buildings.append(Building(1, 0, occupied_tile))
+    buildings.append(Building(1, 0, occupied_tile, on_payout=None))
     empty_tile = tilemap[2][2]
     mouse.position = empty_tile.unselected_rect.center
 

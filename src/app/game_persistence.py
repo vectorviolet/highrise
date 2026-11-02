@@ -73,6 +73,9 @@ class GamePersistenceMixin:
         )
 
     def save_game(self) -> None:
+        # A merge in progress saves as its finished result, not as two
+        # buildings stacked on one tile.
+        self.buildings.finish_pending_merges()
         self.database.execute_safely(
             "UPDATE game SET age_number=?, size=?, money=?",
             params=(

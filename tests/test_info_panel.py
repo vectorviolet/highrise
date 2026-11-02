@@ -67,7 +67,7 @@ def test_open_and_close_toggle_is_active(assets):
 def test_refresh_writes_every_field_from_the_building(assets):
     manager, panel = make_panel_manager()
     info_panel = InfoPanel(manager)
-    building = Building(level=2, age_number=1, tile=Tile(1, 1))
+    building = Building(level=2, age_number=1, tile=Tile(1, 1), on_payout=None)
 
     info_panel.refresh(building)
 
@@ -88,7 +88,7 @@ def test_refresh_reads_from_whichever_panel_is_currently_open(assets):
     manager["other"] = other_panel
     manager.current_panel = "other"
     info_panel = InfoPanel(manager)
-    building = Building(level=1, age_number=0, tile=Tile(1, 1))
+    building = Building(level=1, age_number=0, tile=Tile(1, 1), on_payout=None)
 
     info_panel.refresh(building)
 

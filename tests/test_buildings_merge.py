@@ -20,7 +20,7 @@ def make_grid(assets, size=3) -> tuple[Buildings, Tilemap]:
 def place(
     buildings: Buildings, tilemap: Tilemap, level: int, row: int, col: int
 ) -> Building:
-    b = Building(level, 0, tilemap[row - 1][col - 1])
+    b = Building(level, 0, tilemap[row - 1][col - 1], on_payout=None)
     buildings.append(b)
     return b
 
@@ -117,8 +117,8 @@ def test_move_is_a_no_op_while_a_previous_move_is_still_animating(assets):
 def test_control_moving_finalizes_a_settled_merge_into_a_leveled_up_building(assets):
     buildings, tilemap = make_grid(assets)
     tile = tilemap[0][0]
-    survivor = Building(2, 0, tile)
-    sacrificial = Building(2, 0, tile)
+    survivor = Building(2, 0, tile, on_payout=None)
+    sacrificial = Building(2, 0, tile, on_payout=None)
     sacrificial.should_destroy = True
     sacrificial.merge_target = survivor
     # Both still have their construction-time (0, 0) velocity -- simulates
@@ -152,8 +152,8 @@ def test_control_moving_settles_a_building_that_reached_its_target(assets):
 
 def _settled_merge(tile) -> tuple[Building, Building]:
     """A survivor and a sacrificial building that already glided onto its tile."""
-    survivor = Building(1, 0, tile)
-    sacrificial = Building(1, 0, tile)
+    survivor = Building(1, 0, tile, on_payout=None)
+    sacrificial = Building(1, 0, tile, on_payout=None)
     sacrificial.should_destroy = True
     sacrificial.merge_target = survivor
     return survivor, sacrificial
@@ -185,7 +185,7 @@ def test_control_moving_does_not_skip_the_building_after_a_merge(assets):
     tile = tilemap[0][2]
     tile.selected = True
     tile.rect = tile.selected_rect
-    other = Building(1, 0, tile)
+    other = Building(1, 0, tile, on_payout=None)
     assert tuple(other.rect.topleft) != tuple(map(int, other.selected_position))
     buildings.extend([survivor, sacrificial, other])
 
@@ -243,3 +243,38 @@ def test_merge_still_waits_until_the_frame_after_arrival(assets):
     buildings.control_moving()
     assert len(buildings) == 1
     assert buildings[0].level == 2
+
+
+def test_move_is_ignored_in_the_frame_after_a_merge_arrives(assets):
+    buildings, tilemap = make_grid(assets)
+    survivor = place(buildings, tilemap, 1, 1, 1)
+    sacrificial = place(buildings, tilemap, 1, 1, 2)
+    buildings.move("left", tilemap, MAX_LEVEL)
+    sacrificial.rect.topleft = tuple(map(int, sacrificial.target_position))
+    buildings.control_moving()  # arrived; the merge finishes next frame
+    assert not buildings.is_moving() and buildings.is_busy()
+
+    buildings.move("right", tilemap, MAX_LEVEL)  # must not touch the merge
+
+    assert survivor.tile is tilemap[0][0] and sacrificial.tile is tilemap[0][0]
+    buildings.control_moving()
+    assert [(b.level, b.tile) for b in buildings] == [(2, tilemap[0][0])]
+
+
+def test_finish_pending_merges_finishes_a_merge_that_is_still_sliding(assets):
+    played = []
+    buildings, tilemap = make_grid(assets)
+    buildings.on_merge = lambda: played.append("merge")
+    place(buildings, tilemap, 1, 1, 1)
+    place(buildings, tilemap, 1, 1, 2)
+    other = place(buildings, tilemap, 2, 2, 3)
+    buildings.move("left", tilemap, MAX_LEVEL)
+
+    buildings.finish_pending_merges()
+
+    assert len(buildings) == 2
+    assert other in buildings and other.tile is tilemap[1][0]
+    (merged,) = [b for b in buildings if b is not other]
+    assert (merged.level, merged.tile) == (2, tilemap[0][0])
+    assert not any(b.should_destroy for b in buildings)
+    assert played == ["merge"]
