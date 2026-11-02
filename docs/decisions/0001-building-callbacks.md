@@ -1,5 +1,5 @@
 # 0001. Wire building callbacks at creation
-<!-- index | refs: #3, PR #20, #21 -->
+<!-- index | refs: #3, PR #20, #21, PR #22 -->
 
 - **Status:** Proposed
 - **Date:** 2026-10-30

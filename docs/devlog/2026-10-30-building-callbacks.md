@@ -1,5 +1,5 @@
 # Building movement and callback wiring
-<!-- index | refs: #3, PR #20, #21 -->
+<!-- index | refs: #3, PR #20, #21, PR #22 -->
 
 **Date:** 2026-10-30 · **Area:** Refactoring · **Issue:** [#3](https://github.com/vectorviolet/highrise/issues/3) · **Follow-up:** [#21](https://github.com/vectorviolet/highrise/issues/21)
 
