@@ -7,7 +7,7 @@ from pygamine import ImagePath
 
 
 def make_building(level=1, age_number=0, row=1, col=1) -> Building:
-    return Building(level, age_number, Tile(row, col))
+    return Building(level, age_number, Tile(row, col), on_payout=None)
 
 
 def test_speed_scales_with_level_and_age(assets):

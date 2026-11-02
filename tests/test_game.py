@@ -116,6 +116,7 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
     game.audio = FakeAudio()
     game.click_sound_path = "assets/sfx/click.ogg"
     game.go_back_sound_path = "assets/sfx/back.ogg"
+    game.merge_sound_path = assets.sound_path("merge")
     game.panel_manager = make_panels()
     game.cloud_animation = SimpleNamespace(
         create_clouds=Spy(), update=Spy(), draw=Spy()
@@ -133,7 +134,7 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
 def test_expand_grows_the_map_and_relocates_building_tiles(assets):
     game = make_game(assets, size=3, starting_money=100_000)
     tile = game.tilemap[1][1]
-    building = Building(1, 0, tile)
+    building = Building(1, 0, tile, on_payout=None)
     game.buildings.append(building)
 
     game.expand()
@@ -267,6 +268,97 @@ def test_next_age_does_nothing_at_max_age(assets):
     assert game.buildings.age_number == game.buildings.max_age_number
 
 
+def _start_merge(game):
+    """Two level-1 buildings side by side, moved left so they start merging."""
+    game.add_building(1, 1, 1)
+    game.add_building(1, 1, 2)
+    game.move_buildings("left")
+    survivor, sacrificial = sorted(game.buildings, key=lambda b: b.should_destroy)
+    assert sacrificial.merge_target is survivor
+    return survivor, sacrificial
+
+
+def _run_until_settled(game, max_frames=100):
+    for _ in range(max_frames):
+        game.buildings.control_moving()
+        if not game.buildings.is_busy():
+            return
+        for building in game.buildings:
+            if building.rigidbody.velocity != (0, 0):
+                building.rect.topleft = tuple(map(int, building.target_position))
+    raise AssertionError("buildings never settled")
+
+
+def test_next_age_does_nothing_while_a_merge_is_sliding(assets):
+    game = make_game(assets, size=3, starting_money=100_000)
+    survivor, sacrificial = _start_merge(game)
+    assert game.buildings.is_moving()
+    money = game.player.money
+
+    game.next_age()
+
+    assert game.buildings.age_number == 0
+    assert game.player.money == money
+    assert {id(b) for b in game.buildings} == {id(survivor), id(sacrificial)}
+    assert sacrificial.should_destroy and sacrificial.merge_target is survivor
+
+    _run_until_settled(game)
+    assert [b.level for b in game.buildings] == [2]
+
+
+def test_next_age_does_nothing_while_an_arrived_merge_waits_a_frame(assets):
+    game = make_game(assets, size=3, starting_money=100_000)
+    survivor, sacrificial = _start_merge(game)
+    sacrificial.rect.topleft = tuple(map(int, sacrificial.target_position))
+    game.buildings.control_moving()  # arrived; the merge finishes next frame
+    assert not game.buildings.is_moving()
+
+    game.next_age()
+
+    assert game.buildings.age_number == 0
+    game.buildings.control_moving()
+    assert [(b.level, b.tile) for b in game.buildings] == [(2, survivor.tile)]
+
+
+def test_next_age_works_again_once_the_merge_has_finished(assets):
+    game = make_game(assets, size=3, starting_money=100_000)
+    _start_merge(game)
+    _run_until_settled(game)
+
+    game.next_age()
+
+    assert game.buildings.age_number == 1
+    assert [(b.level, b.age_number) for b in game.buildings] == [(2, 1)]
+
+
+@pytest.mark.parametrize("path", ["purchase", "load", "age", "merge"])
+def test_every_production_insertion_path_pays_the_player(assets, path, monkeypatch):
+    game = make_game(assets, size=3, starting_money=100_000)
+    if path == "purchase":
+        monkeypatch.setattr("app.game.choice", lambda tiles: (1, 1))
+        game.create_building()
+    elif path == "load":
+        game.database = SimpleNamespace(execute_safely=lambda *a: [(2, 1, 1)])
+        game.load_buildings()
+    elif path == "age":
+        game.add_building(1, 1, 1)
+        game.next_age()
+    else:
+        _start_merge(game)
+        _run_until_settled(game)
+
+    assert len(game.buildings) == 1
+    building = game.buildings[0]
+    money = game.player.money
+    building._payout()
+    assert game.player.money == money + building.cooldown * building.speed
+
+
+def test_a_building_cannot_be_constructed_without_choosing_a_payout(assets):
+    with pytest.raises(TypeError):
+        Building(1, 0, Tilemap(3, 3)[0][0])
+
+
 # ── move_buildings ───────────────────────────────────────────────────────────
 
 
@@ -323,7 +415,7 @@ def test_has_save_data_true_with_buildings_or_advanced_age(assets):
     game = make_game(assets, size=3)
     assert game.has_save_data() is False
 
-    game.buildings.append(Building(1, 0, game.tilemap[0][0]))
+    game.buildings.append(Building(1, 0, game.tilemap[0][0], on_payout=None))
     assert game.has_save_data() is True
 
     game2 = make_game(assets, size=3)
@@ -333,7 +425,7 @@ def test_has_save_data_true_with_buildings_or_advanced_age(assets):
 
 def test_play_opens_the_play_panel_when_a_save_exists(assets):
     game = make_game(assets, size=3)
-    game.buildings.append(Building(1, 0, game.tilemap[0][0]))
+    game.buildings.append(Building(1, 0, game.tilemap[0][0], on_payout=None))
 
     game.play()
 

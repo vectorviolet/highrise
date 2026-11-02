@@ -126,6 +126,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         )
         self.click_sound_path = self.assets.sound_path("click")
         self.go_back_sound_path = self.assets.sound_path("back")
+        self.merge_sound_path = self.assets.sound_path("merge")
 
         self.info_panel = InfoPanel(self.panel_manager)
         self.tile_selector = TileSelector(self.tilemap, self.mouse, self.buildings)
@@ -328,7 +329,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.cloud_animation.update()
 
     def _on_buildings_merged(self) -> None:
-        self.audio.play_sfx(self.assets.sound_path("merge"))
+        self.audio.play_sfx(self.merge_sound_path)
 
     def draw(self) -> None:
         self.panel_manager.draw(self.window)
@@ -376,7 +377,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             level, tilemap[row_number - 1][column_number - 1]
         )
         self.buildings.append(new_building)
-        self.buildings.sort(key=lambda b: b.tile.column_number)
+        self.buildings.sort_by_column()
 
         if (
             len(self.buildings) == tilemap.row_count * tilemap.column_count
@@ -415,6 +416,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def next_age(self) -> None:
         if self.buildings.age_number >= self.buildings.max_age_number:
+            return
+        # set_age rebuilds every building, which would drop a slide or merge
+        # in progress; wait until the board has settled.
+        if self.buildings.is_busy():
             return
         if not self.player.spend(self.buildings.get_age_cost()):
             return

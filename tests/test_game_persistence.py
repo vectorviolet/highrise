@@ -2,8 +2,8 @@
 approach as test_game_events.py) against a real pygamine.Database pointed at
 pytest's tmp_path, so save/load round-trips exercise real SQL rather than a
 mocked connection. add_building() (defined on Game itself, not this mixin)
-is stubbed to build a real Building against the real Tilemap load_game_data()
-constructs, close enough to the real thing for persistence-level assertions."""
+is stubbed to build a real Building through Buildings.create (the production
+creation path) on the real Tilemap load_game_data() constructs."""
 
 from types import SimpleNamespace
 
@@ -57,7 +57,7 @@ class FakeGame(GamePersistenceMixin):
     def add_building(self, level, row, column) -> None:
         self.calls.append(("add_building", level, row, column))
         tile = self.tilemap[row - 1][column - 1]
-        self.buildings.append(Building(level, self.buildings.age_number, tile))
+        self.buildings.append(self.buildings.create(level, tile))
 
 
 def insert_building_row(game, level, row, column):
@@ -117,7 +117,7 @@ def test_load_data_restores_a_previously_saved_game(tmp_path, assets):
     seed.load_data()
     seed.player.money = 999
     seed.buildings.age_number = 2
-    seed.buildings.append(Building(3, 2, seed.tilemap[0][0]))
+    seed.buildings.append(Building(3, 2, seed.tilemap[0][0], on_payout=None))
     seed.save_game()
 
     game = FakeGame(tmp_path, assets, starting_money=250)
@@ -193,7 +193,9 @@ def test_load_buildings_clears_any_existing_in_memory_buildings_first(tmp_path, 
     game = FakeGame(tmp_path, assets)
     game.init_database()
     game.load_game_data([(0, 3, 0, 0.5, 0.5)])
-    game.buildings.append(Building(1, 0, game.tilemap[0][0]))  # stale in-memory state
+    game.buildings.append(
+        Building(1, 0, game.tilemap[0][0], on_payout=None)
+    )  # stale in-memory state
 
     game.load_buildings()
 
@@ -225,7 +227,7 @@ def test_save_game_persists_state_and_buildings(tmp_path, assets):
     game.load_game_data([(0, 3, 0, 0.5, 0.5)])
     game.player.money = 900
     game.buildings.age_number = 2
-    game.buildings.append(Building(3, 2, game.tilemap[1][1]))
+    game.buildings.append(Building(3, 2, game.tilemap[1][1], on_payout=None))
 
     game.save_game()
 
@@ -244,11 +246,11 @@ def test_save_game_replaces_rather_than_accumulates_building_rows(tmp_path, asse
     game.init_database()
     game.get_game_data()
     game.load_game_data([(0, 3, 0, 0.5, 0.5)])
-    game.buildings.append(Building(1, 0, game.tilemap[0][0]))
+    game.buildings.append(Building(1, 0, game.tilemap[0][0], on_payout=None))
     game.save_game()
 
     game.buildings.clear()
-    game.buildings.append(Building(2, 0, game.tilemap[2][2]))
+    game.buildings.append(Building(2, 0, game.tilemap[2][2], on_payout=None))
     game.save_game()
 
     building_rows = game.database.execute_safely(
@@ -262,7 +264,7 @@ def test_delete_data_resets_the_game_row_and_clears_buildings(tmp_path, assets):
     game.init_database()
     game.get_game_data()
     game.load_game_data([(0, 3, 0, 0.5, 0.5)])
-    game.buildings.append(Building(1, 0, game.tilemap[0][0]))
+    game.buildings.append(Building(1, 0, game.tilemap[0][0], on_payout=None))
     game.save_game()
 
     game.delete_data()

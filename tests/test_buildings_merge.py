@@ -20,7 +20,7 @@ def make_grid(assets, size=3) -> tuple[Buildings, Tilemap]:
 def place(
     buildings: Buildings, tilemap: Tilemap, level: int, row: int, col: int
 ) -> Building:
-    b = Building(level, 0, tilemap[row - 1][col - 1])
+    b = Building(level, 0, tilemap[row - 1][col - 1], on_payout=None)
     buildings.append(b)
     return b
 
@@ -117,8 +117,8 @@ def test_move_is_a_no_op_while_a_previous_move_is_still_animating(assets):
 def test_control_moving_finalizes_a_settled_merge_into_a_leveled_up_building(assets):
     buildings, tilemap = make_grid(assets)
     tile = tilemap[0][0]
-    survivor = Building(2, 0, tile)
-    sacrificial = Building(2, 0, tile)
+    survivor = Building(2, 0, tile, on_payout=None)
+    sacrificial = Building(2, 0, tile, on_payout=None)
     sacrificial.should_destroy = True
     sacrificial.merge_target = survivor
     # Both still have their construction-time (0, 0) velocity -- simulates
@@ -152,8 +152,8 @@ def test_control_moving_settles_a_building_that_reached_its_target(assets):
 
 def _settled_merge(tile) -> tuple[Building, Building]:
     """A survivor and a sacrificial building that already glided onto its tile."""
-    survivor = Building(1, 0, tile)
-    sacrificial = Building(1, 0, tile)
+    survivor = Building(1, 0, tile, on_payout=None)
+    sacrificial = Building(1, 0, tile, on_payout=None)
     sacrificial.should_destroy = True
     sacrificial.merge_target = survivor
     return survivor, sacrificial
@@ -185,7 +185,7 @@ def test_control_moving_does_not_skip_the_building_after_a_merge(assets):
     tile = tilemap[0][2]
     tile.selected = True
     tile.rect = tile.selected_rect
-    other = Building(1, 0, tile)
+    other = Building(1, 0, tile, on_payout=None)
     assert tuple(other.rect.topleft) != tuple(map(int, other.selected_position))
     buildings.extend([survivor, sacrificial, other])
 
@@ -243,3 +243,50 @@ def test_merge_still_waits_until_the_frame_after_arrival(assets):
     buildings.control_moving()
     assert len(buildings) == 1
     assert buildings[0].level == 2
+
+
+def _sell(buildings: Buildings, building: Building) -> None:
+    """What the info panel's SELL button does to the collection."""
+    buildings.remove(building)
+
+
+def test_selling_the_survivor_mid_merge_cancels_the_merge(assets):
+    played = []
+    buildings, tilemap = make_grid(assets)
+    buildings.on_merge = lambda: played.append("merge")
+    survivor = place(buildings, tilemap, 1, 1, 1)
+    sacrificial = place(buildings, tilemap, 1, 1, 2)
+    buildings.move("left", tilemap, MAX_LEVEL)
+    assert sacrificial.merge_target is survivor
+
+    _sell(buildings, survivor)
+    sacrificial.rect.topleft = tuple(map(int, sacrificial.target_position))
+    buildings.control_moving()  # arrives
+    buildings.control_moving()  # would finish the merge; must not raise
+
+    assert list(buildings) == [sacrificial]
+    assert sacrificial.level == 1
+    assert sacrificial.should_destroy is False
+    assert sacrificial.merge_target is None
+    assert sacrificial.tile is tilemap[0][0]
+    assert not buildings.is_busy()
+    assert played == []
+
+
+def test_selling_the_sacrificial_building_mid_merge_leaves_the_survivor(assets):
+    played = []
+    buildings, tilemap = make_grid(assets)
+    buildings.on_merge = lambda: played.append("merge")
+    survivor = place(buildings, tilemap, 1, 1, 1)
+    sacrificial = place(buildings, tilemap, 1, 1, 2)
+    buildings.move("left", tilemap, MAX_LEVEL)
+
+    _sell(buildings, sacrificial)
+    buildings.control_moving()
+    buildings.control_moving()
+
+    assert list(buildings) == [survivor]
+    assert survivor.level == 1
+    assert survivor.should_destroy is False
+    assert not buildings.is_busy()
+    assert played == []
