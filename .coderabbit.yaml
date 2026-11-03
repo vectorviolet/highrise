@@ -18,7 +18,7 @@ reviews:
     enabled: true
     drafts: true                  # our workers open drafts; review before the lead marks ready
     base_branches: ["main"]
-    ignore_title_keywords: ["Release"]
+    ignore_title_keywords: ["Release 0."]  # substring match; plain "Release" would also skip "key release" PRs
   path_filters:
     - "!uv.lock"
     - "!assets/**"
