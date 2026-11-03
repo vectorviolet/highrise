@@ -210,7 +210,7 @@ wheels = [
 
 [[package]]
 name = "pygamine"
-version = "0.28.0"
+version = "0.29.0"
 source = { editable = "src/pygamine" }
 dependencies = [
     { name = "pygame-ce" },
@@ -221,6 +221,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "moviepy", marker = "extra == 'video'", specifier = ">=2" },
+    { name = "pillow", marker = "extra == 'video'" },
     { name = "pygame-ce" },
     { name = "pytmx" },
     { name = "pyyaml" },
@@ -231,9 +232,10 @@ provides-extras = ["video"]
 dev = [
     { name = "moviepy", specifier = ">=2" },
     { name = "mypy", specifier = ">=1.13" },
+    { name = "pillow" },
     { name = "pytest", specifier = ">=8" },
     { name = "pytest-cov", specifier = ">=5" },
-    { name = "ruff", specifier = "==0.17.2" },
+    { name = "ruff", specifier = "==0.17.3" },
     { name = "types-pyyaml" },
 ]
 

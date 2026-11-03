@@ -28,6 +28,8 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - pygamine 0.28.0: buildings, clouds and tiles use the engine's `require_component()` and
   `require_image()` instead of `get_component()` plus a `None` assert, and the volume label uses
   `clamp01()`. No gameplay change.
+- pygamine 0.29.0: the display stack moved into the engine's `Display` class and localization support
+  was added. Highrise does not use the new localization yet. No gameplay change.
 - The engine submodule no longer follows pygamine's `main` on its own (`update = merge` removed
   from `.gitmodules`); it moves only through a reviewed bump PR.
 - Dependabot opens one grouped PR a week with `uv.lock` updates (`.github/dependabot.yml`).

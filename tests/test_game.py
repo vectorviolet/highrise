@@ -127,6 +127,13 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
     game.old_music_volume = 0.5
     game.old_sfx_volume = 0.5
     game.update_button_texts = Spy()
+    # pygamine 0.29.0 owns the display stack in Application.display; Game
+    # forwards display_surface, window_mode and resolution to it.
+    game.display = SimpleNamespace(
+        display_surface=pygame.display.get_surface(),
+        window_mode="windowed",
+        resolution=(1280, 720),
+    )
     return game
 
 
@@ -448,8 +455,8 @@ def test_set_music_label_clamps_out_of_range_values(assets):
 
 def test_set_window_size_and_mode_labels(assets):
     game = make_game(assets, size=3)
-    game._resolution_override = (1280, 720)  # `resolution` itself is read-only
-    game._window_mode = "windowed"
+    game.display.resolution = (1280, 720)
+    game.display.window_mode = "windowed"
 
     game.set_window_size_label()
     game.set_window_mode_label()
@@ -684,8 +691,8 @@ def test_run_resets_the_session_ui_and_opens_the_menu(assets, monkeypatch):
     game.load_data = Spy()
     game.add_objects = Spy()
     game.background_music_sound_path = None
-    game._resolution_override = (1280, 720)
-    game._window_mode = "windowed"
+    game.display.resolution = (1280, 720)
+    game.display.window_mode = "windowed"
     game.audio._music, game.audio._sfx = 0.2, 0.7
 
     game.run()
