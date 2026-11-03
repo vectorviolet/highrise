@@ -23,8 +23,8 @@ class Tile(GameObject):
 
         self.row_number, self.column_number = row_number, column_number
         renderer = self.add_component(SpriteRenderer2D)
-        renderer.set_image(load_image(ImagePath("tile")))
-        image = renderer.require_image()
+        image = load_image(ImagePath("tile"))
+        renderer.set_image(image)
 
         self.rect.size = image.get_size()
         self.rect.set_position(self.get_position(row_number, column_number))

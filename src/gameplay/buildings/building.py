@@ -60,7 +60,8 @@ class Building(StateObject):
             size=self.size,
             image_path=self.get_image_path(),
         )
-        self.add_component(Rigidbody2D).set_velocity((0, 0))
+        self.rigidbody = self.add_component(Rigidbody2D)
+        self.rigidbody.set_velocity((0, 0))
         self.on_payout = on_payout
         self.merge_target: Building | None = None
         self.invoke_repeating(self._payout, delay=self.cooldown, interval=self.cooldown)
@@ -68,10 +69,6 @@ class Building(StateObject):
     def _payout(self) -> None:
         if self.on_payout:
             self.on_payout(self.cooldown * self.speed)
-
-    @property
-    def rigidbody(self) -> Rigidbody2D:
-        return self.require_component(Rigidbody2D)
 
     def get_image_path(self) -> ImagePath:
         return ImagePath("level" + str(self.level), "buildings/" + self.age)

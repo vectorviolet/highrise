@@ -1,4 +1,4 @@
-from pygamine import ImagePath, Rigidbody2D
+from pygamine import ImagePath
 import pytest
 
 from gameplay.clouds.cloud import Cloud
@@ -16,7 +16,7 @@ def test_cloud_spawns_within_bounds_and_gets_a_horizontal_only_velocity():
 
     assert 0 <= cloud.rect.x <= SURFACE_SIZE[0] - 101
     assert 0 <= cloud.rect.y <= SURFACE_SIZE[1] - 101
-    rb = cloud.get_component(Rigidbody2D)
+    rb = cloud.rigidbody
     assert rb.velocity.y == 0
     assert abs(rb.velocity.x) in (1 / 6, 1 / 7, 1 / 8, 1 / 9, 1 / 10, 1 / 11, 1 / 12)
 
@@ -56,7 +56,7 @@ def test_update_spawns_a_wrap_companion_once_a_cloud_crosses_the_right_edge():
     anim = LoopingCloudAnimation(0, SURFACE_SIZE)
     cloud = anim._new_cloud()
     cloud.rect.x = SURFACE_SIZE[0] - cloud.rect.width + 1  # already past the right edge
-    cloud.get_component(Rigidbody2D).set_velocity((1, 0))  # moving right
+    cloud.rigidbody.set_velocity((1, 0))  # moving right
     anim.append(cloud)
 
     anim.update()
@@ -69,7 +69,7 @@ def test_update_only_spawns_one_companion_per_crossing():
     anim = LoopingCloudAnimation(0, SURFACE_SIZE)
     cloud = anim._new_cloud()
     cloud.rect.x = SURFACE_SIZE[0] - cloud.rect.width + 1
-    cloud.get_component(Rigidbody2D).set_velocity((1, 0))
+    cloud.rigidbody.set_velocity((1, 0))
     anim.append(cloud)
 
     anim.update()
@@ -99,7 +99,7 @@ def test_wrap_companion_keeps_position_velocity_and_waits_until_next_frame(direc
         -1 if direction < 0 else SURFACE_SIZE[0] - cloud.rect.width + 1,
         123,
     )
-    cloud.get_component(Rigidbody2D).set_velocity((direction, 0))
+    cloud.rigidbody.set_velocity((direction, 0))
     original_x = cloud.rect.x
     anim.append(cloud)
 
@@ -111,7 +111,7 @@ def test_wrap_companion_keeps_position_velocity_and_waits_until_next_frame(direc
         original_x - direction * SURFACE_SIZE[0],
         123,
     )
-    assert companion.get_component(Rigidbody2D).velocity == (direction, 0)
+    assert companion.rigidbody.velocity == (direction, 0)
     assert id(companion) not in anim._companions
 
 
@@ -142,7 +142,7 @@ def test_one_shot_creates_a_hundred_clouds_moving_away_from_center():
 
     assert len(anim) == 100
     for cloud in anim:
-        rb = cloud.get_component(Rigidbody2D)
+        rb = cloud.rigidbody
         if cloud.rect.x <= SURFACE_SIZE[0] / 2:
             assert rb.velocity.x == -10
         else:
