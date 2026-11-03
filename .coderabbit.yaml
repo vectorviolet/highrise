@@ -1,0 +1,64 @@
+# CodeRabbit config (trial). Schema: https://coderabbit.ai/integrations/schema.v2.json
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+tone_instructions: "Be brief. Only report real bugs, behavior changes, and violations of the repo rules. No style nitpicks; ruff, mypy and codespell already run in CI."
+early_access: false
+
+reviews:
+  profile: chill                  # fewer, higher-signal comments
+  request_changes_workflow: false # never block; the owner merges
+  high_level_summary: true
+  high_level_summary_in_walkthrough: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: true
+  sequence_diagrams: false
+  changed_files_summary: false
+  auto_review:
+    enabled: true
+    drafts: true                  # our workers open drafts; review before the lead marks ready
+    base_branches: ["main"]
+    ignore_title_keywords: ["Release"]
+  path_filters:
+    - "!uv.lock"
+    - "!assets/**"
+    - "!CREDITS.md"
+  path_instructions:
+    - path: "**/*.py"
+      instructions: |
+        - Types: flag silent `if not x: return` guards that hide a None that should be impossible.
+          The rule is to fix the type at its source and use `assert x is not None`, with real handling
+          only where None can actually happen.
+        - Flag state changes that can fail halfway and leave objects inconsistent.
+        - Flag imports of private (`_name`) members across modules.
+        - American English in identifiers, comments and strings.
+    - path: "tests/**"
+      instructions: |
+        - Tests must never touch the real `saves/` folder (the `saves_in_tmp` fixture must not be bypassed).
+        - Flag tests that were weakened or removed (assertions dropped, broader tolerances) without a stated reason.
+    - path: "src/pygamine/**"
+      instructions: "Submodule pointer bump only; do not review the engine code here."
+    - path: "docs/devlog/**"
+      instructions: "Check the entry matches what the PR actually changes. American English."
+    - path: "CHANGELOG.md"
+      instructions: "New entries go under 'Unreleased'. Check they match the PR."
+  pre_merge_checks:
+    docstrings:
+      mode: "off"                 # no docstring-coverage rule in our repos
+  tools:
+    ruff:
+      enabled: false              # CI runs ruff with the repo's own config
+    markdownlint:
+      enabled: false
+    languagetool:
+      enabled: false              # codespell covers spelling
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "CLAUDE.md"
+      - "AGENTS.md"
