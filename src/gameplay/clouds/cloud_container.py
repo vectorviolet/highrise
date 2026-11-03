@@ -44,8 +44,8 @@ class LoopingCloudAnimation(CloudContainer):
         self._companions.add(id(cloud))
         companion = self._new_cloud()
         companion.rect.topleft = (cloud.rect.x + dx, cloud.rect.y)
-        companion.get_component(Rigidbody2D).set_velocity(
-            cloud.get_component(Rigidbody2D).velocity
+        companion.require_component(Rigidbody2D).set_velocity(
+            cloud.require_component(Rigidbody2D).velocity
         )
         return companion
 
@@ -54,9 +54,7 @@ class LoopingCloudAnimation(CloudContainer):
         screen_width = self.surface_size[0]
 
         for cloud in self:
-            rb = cloud.get_component(Rigidbody2D)
-            assert rb is not None
-            velocity = rb.velocity
+            velocity = cloud.require_component(Rigidbody2D).velocity
             xvel = velocity.x
             x = cloud.rect.x
             width = cloud.rect.width
@@ -83,7 +81,7 @@ class OneShotCloudAnimation(CloudContainer):
         for _ in range(100):
             cloud = Cloud(ImagePath("cloud"), self.surface_size, (200, 200))
             xvel = -10 if cloud.rect.x <= self.surface_size[0] / 2 else 10
-            cloud.get_component(Rigidbody2D).set_velocity((xvel, 0))
+            cloud.require_component(Rigidbody2D).set_velocity((xvel, 0))
             self.append(cloud)
 
     def update(self) -> None:

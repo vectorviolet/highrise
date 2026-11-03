@@ -24,16 +24,16 @@ class Tile(GameObject):
         self.row_number, self.column_number = row_number, column_number
         renderer = self.add_component(SpriteRenderer2D)
         renderer.set_image(load_image(ImagePath("tile")))
-        assert renderer.image is not None
+        image = renderer.require_image()
 
-        self.rect.size = renderer.image.get_size()
+        self.rect.size = image.get_size()
         self.rect.set_position(self.get_position(row_number, column_number))
 
         self.unselected_rect = self.rect.copy()
         self.selected_rect = self.rect.copy()
         self.selected_rect.y -= self.HOVER_SHIFT_Y
 
-        self.surface = self.unselected_surface = renderer.image
+        self.surface = self.unselected_surface = image
         self.selected_surface = self.unselected_surface.__copy__()
 
         local_corners = [

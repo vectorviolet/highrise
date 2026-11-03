@@ -13,6 +13,7 @@ from gameplay.clouds.cloud_container import OneShotCloudAnimation, LoopingCloudA
 from gameplay.tile_selector import TileSelector
 from gameplay.tilemap import Tilemap
 from pygamine import Application
+from pygamine import clamp01
 from pygamine import AssetManager
 from pygamine import Database
 from pygamine import PanelLoaderExt
@@ -68,8 +69,7 @@ def has_sound(assets: AssetManager, key: str) -> bool:
 def format_volume(volume: float) -> str:
     """A volume in [0, 1] as the settings label text, e.g. 0.5 -> "%50".
     Values outside [0, 1] are clamped first."""
-    volume = max(0.0, min(1.0, volume))
-    return "%" + str(round(volume * 100))
+    return "%" + str(round(clamp01(volume) * 100))
 
 
 class Game(GameEventsMixin, GamePersistenceMixin, Application):
