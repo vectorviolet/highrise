@@ -1,0 +1,13 @@
+# Weekly dependency updates for uv.lock. All updates come as one grouped PR,
+# so a week's bumps are reviewed and merged together. The pygamine submodule
+# is not covered: it moves only with tagged pygamine releases.
+version: 2
+updates:
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      all-dependencies:
+        patterns: ["*"]
+    open-pull-requests-limit: 5

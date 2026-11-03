@@ -30,6 +30,7 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `clamp01()`. No gameplay change.
 - The engine submodule no longer follows pygamine's `main` on its own (`update = merge` removed
   from `.gitmodules`); it moves only through a reviewed bump PR.
+- Dependabot opens one grouped PR a week with `uv.lock` updates (`.github/dependabot.yml`).
 
 ## [0.2.4] – 2026-10-25
 
