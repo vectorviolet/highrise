@@ -71,9 +71,7 @@ class Building(StateObject):
 
     @property
     def rigidbody(self) -> Rigidbody2D:
-        rb = self.get_component(Rigidbody2D)
-        assert rb is not None, "Building requires a Rigidbody2D"
-        return rb
+        return self.require_component(Rigidbody2D)
 
     def get_image_path(self) -> ImagePath:
         return ImagePath("level" + str(self.level), "buildings/" + self.age)
