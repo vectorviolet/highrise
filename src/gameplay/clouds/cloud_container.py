@@ -1,5 +1,6 @@
 from gameplay.clouds.cloud import Cloud
 from pygamine import ImagePath
+from pygamine import Rigidbody2D
 from pygamine import GameObjectList
 
 
@@ -43,7 +44,9 @@ class LoopingCloudAnimation(CloudContainer):
         self._companions.add(id(cloud))
         companion = self._new_cloud()
         companion.rect.topleft = (cloud.rect.x + dx, cloud.rect.y)
-        companion.rigidbody.set_velocity(cloud.rigidbody.velocity)
+        companion.require_component(Rigidbody2D).set_velocity(
+            cloud.require_component(Rigidbody2D).velocity
+        )
         return companion
 
     def update(self) -> None:
@@ -51,7 +54,7 @@ class LoopingCloudAnimation(CloudContainer):
         screen_width = self.surface_size[0]
 
         for cloud in self:
-            velocity = cloud.rigidbody.velocity
+            velocity = cloud.require_component(Rigidbody2D).velocity
             xvel = velocity.x
             x = cloud.rect.x
             width = cloud.rect.width
@@ -78,7 +81,7 @@ class OneShotCloudAnimation(CloudContainer):
         for _ in range(100):
             cloud = Cloud(ImagePath("cloud"), self.surface_size, (200, 200))
             xvel = -10 if cloud.rect.x <= self.surface_size[0] / 2 else 10
-            cloud.rigidbody.set_velocity((xvel, 0))
+            cloud.require_component(Rigidbody2D).set_velocity((xvel, 0))
             self.append(cloud)
 
     def update(self) -> None:

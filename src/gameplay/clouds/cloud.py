@@ -18,8 +18,7 @@ class Cloud(GameObject):
         self.rect.size = size
         self.rect.set_position((x, y))
         self.add_component(SpriteRenderer2D).set_image(load_image(image_path, size))
-        self.rigidbody = self.add_component(Rigidbody2D)
-        self.rigidbody.set_velocity(
+        self.add_component(Rigidbody2D).set_velocity(
             (
                 random.choice(
                     [

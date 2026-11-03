@@ -25,8 +25,8 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   applies to all of them.
 - pygamine 0.27.0: skipping the splash with Space, Enter or a click no longer also triggers the
   first menu button.
-- pygamine 0.28.0: buildings and clouds keep their Rigidbody2D as a typed `rigidbody` attribute
-  instead of looking it up with `get_component()` plus a `None` assert, and the volume label uses
+- pygamine 0.28.0: buildings, clouds and tiles use the engine's `require_component()` and
+  `require_image()` instead of `get_component()` plus a `None` assert, and the volume label uses
   `clamp01()`. No gameplay change.
 - The engine submodule no longer follows pygamine's `main` on its own (`update = merge` removed
   from `.gitmodules`); it moves only through a reviewed bump PR.
