@@ -56,6 +56,7 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - The engine submodule no longer follows pygamine's `main` on its own (`update = merge` removed
   from `.gitmodules`); it moves only through a reviewed bump PR.
 - Dependabot opens one grouped PR a week with `uv.lock` updates (`.github/dependabot.yml`).
+- README: a status badge row (CI, release, license, coverage, Python) under the title, and the official itch.io badge in the Download section ([chokepoint#150](https://github.com/vectorviolet/chokepoint/issues/150)).
 
 ## [0.2.4] – 2026-10-25
 

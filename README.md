@@ -1,6 +1,10 @@
 # Highrise
 
-![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/vectorviolet/highrise/badges/coverage.json)
+[![CI](https://github.com/vectorviolet/highrise/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/vectorviolet/highrise/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/vectorviolet/highrise)](https://github.com/vectorviolet/highrise/releases/latest)
+[![License: MIT](https://img.shields.io/github/license/vectorviolet/highrise)](LICENSE)
+[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/vectorviolet/highrise/badges/coverage.json)](https://github.com/vectorviolet/highrise/actions/workflows/ci.yml)
+[![Python 3.12+ | pygame-ce](https://img.shields.io/badge/python-3.12%2B%20%7C%20pygame--ce-3776AB?logo=python&logoColor=white)](https://github.com/pygame-community/pygame-ce)
 
 An isometric city-builder where same-level buildings merge `2048`-style. Build, merge, expand, and advance through ages — Python + [pygame-ce](https://github.com/pygame-community/pygame-ce).
 
@@ -30,7 +34,7 @@ Place buildings on the isometric grid, then slide them with WASD/arrows to merge
 
 ## Download
 
-[![Available on itch.io](https://jessemillar.github.io/available-on-itchio-badge/badge-color.png)](https://umutcanekinci.itch.io/highrise)
+[![Available on itch.io](https://static.itch.io/images/badge.svg)](https://umutcanekinci.itch.io/highrise)
 
 Grab a ready-to-play build for your OS from [itch.io](https://umutcanekinci.itch.io/highrise) or the [latest GitHub release](https://github.com/vectorviolet/highrise/releases/latest) — no Python required. Unzip and run:
 
