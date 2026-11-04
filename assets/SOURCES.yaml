@@ -51,6 +51,12 @@ packs:
     url: https://kenney.nl/assets/ui-pack
     license: CC0-1.0
     used_for: "buttons, panel backgrounds, sounds"
+  music-sakura-girl-day-off:
+    name: "Day Off"
+    author: "Sakura Girl"
+    url: https://soundcloud.com/sakuragirl_official/dayoff
+    license: CC-BY-3.0
+    used_for: "menu and in-game music"
 
 files:
   "fonts/TitilliumWeb-Black.ttf":
@@ -2792,3 +2798,7 @@ files:
   "sounds/tap-b.ogg":
     source: kenney-ui-pack
     original: "Sounds/tap-b.ogg"
+  "sounds/bg.mp3":
+    source: music-sakura-girl-day-off
+    original: "Sakura Girl - Day Off.mp3"
+    note: "byte-identical to the artist's free Hypeddit download (https://hypeddit.com/sakuragirl/dayoff); not converted or trimmed"

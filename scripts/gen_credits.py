@@ -24,6 +24,7 @@ END = "<!-- assets:end -->"
 LICENSE_LINKS = {
     "CC0-1.0": "[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)",
     "OFL-1.1": "[SIL OFL 1.1](https://openfontlicense.org)",
+    "CC-BY-3.0": "[CC BY 3.0](https://creativecommons.org/licenses/by/3.0/)",
 }
 REPO_SOURCES = "https://github.com/vectorviolet/highrise/blob/main/assets/SOURCES.yaml"
 

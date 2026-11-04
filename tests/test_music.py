@@ -1,7 +1,8 @@
-"""The game without background music: config/assets.yaml has no `bg` sound
-(the previous track was unlicensed and removed). A real Game() boots and runs
-through run() cleanly -- no crash, no warnings, no missing asset -- plays no
-music, and hides the music volume control that would control nothing."""
+"""Background music. config/assets.yaml declares the `bg` sound (Sakura Girl -
+Day Off): a real Game() plays it from run() and shows the music volume
+control. Music is optional in the engine, so the same Game() with `bg` left
+out boots and runs cleanly, plays no music and hides the control that would
+control nothing."""
 
 from __future__ import annotations
 
@@ -15,7 +16,7 @@ from app.game import MUSIC_KEY, MUSIC_VOLUME_OBJECTS, Game, has_sound
 
 
 @pytest.fixture
-def game(monkeypatch) -> Game:
+def with_music(monkeypatch) -> Game:
     # The real window loop and splash don't apply headlessly; everything
     # else in run() does.
     monkeypatch.setattr(pygamine.Application, "run", lambda self: None)
@@ -23,11 +24,44 @@ def game(monkeypatch) -> Game:
     return Game()
 
 
-def test_the_manifest_has_no_music(game):
-    assert not has_sound(game.assets, MUSIC_KEY)
-    with pytest.raises(KeyError):
-        game.assets.sound_path(MUSIC_KEY)
-    assert game.assets.validate() == []
+@pytest.fixture
+def game(monkeypatch) -> Game:
+    """A Game whose manifest lacks `bg`."""
+    monkeypatch.setattr(pygamine.Application, "run", lambda self: None)
+    monkeypatch.setattr(Game, "show_splash", lambda self: None)
+    monkeypatch.setattr(
+        "app.game.has_sound",
+        lambda assets, key: key != MUSIC_KEY and has_sound(assets, key),
+    )
+    return Game()
+
+
+def test_the_manifest_has_the_music_file(with_music):
+    assert has_sound(with_music.assets, MUSIC_KEY)
+    assert with_music.assets.validate() == []
+
+
+def test_the_music_plays_and_its_volume_control_is_shown(with_music, monkeypatch):
+    played = []
+    monkeypatch.setattr(
+        with_music.audio, "play_music", lambda *a, **k: played.append(a)
+    )
+
+    with_music.run()
+
+    assert played == [(str(with_music.assets.sound_path(MUSIC_KEY)),)]
+    panel = with_music.panel_manager["audio_settings"]
+    assert all(panel[name].active for name in MUSIC_VOLUME_OBJECTS)
+
+
+def test_stepping_the_music_volume_changes_the_music_volume(with_music):
+    with_music.run()
+    with_music.open_panel("audio_settings")
+    volume = with_music.audio.music_volume()
+
+    with_music._step_volume("music", -0.1)
+
+    assert with_music.audio.music_volume() == pytest.approx(volume - 0.1)
 
 
 def test_the_game_runs_cleanly_and_plays_no_music(game, monkeypatch, capsys):
