@@ -14,6 +14,7 @@ PR. "Owner" is the project owner; "Claude" is the Claude Code session that imple
 |---|---|---|---|
 | 2026-10-28 | [Panels from UI Pack v2](2026-10-28-ui-pack-v2-panels.md) | Art, UI | #12, PR #13 |
 | 2026-10-30 | [Building movement and callback wiring](2026-10-30-building-callbacks.md) | Refactoring | #3, PR #20, #21, PR #22 |
+| 2026-11-04 | [Background music: Sakura Girl - Day Off](2026-11-04-day-off-music.md) | Audio | #35, PR #40 |
 | 2026-11-04 | [Language (English and Turkish), Skip intro and a new font](2026-11-04-language-and-skip-intro.md) | UI, Localization | #29, PR #34 |
 <!-- index:end -->
 

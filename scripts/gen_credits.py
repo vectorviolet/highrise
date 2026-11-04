@@ -62,7 +62,8 @@ def render(data: dict) -> str:
         ]
     lines += [
         "CC0 assets need no attribution; they are credited here anyway. The OFL fonts are",
-        "bundled unmodified with their license text. Each pack's own",
+        "bundled unmodified with their license text. CC BY assets require attribution:",
+        "see the Music section below. Each pack's own",
         "license text ships with the game: "
         + ", ".join(f"`licenses/assets/{slug}.txt`" for slug in sorted(packs))
         + ".",

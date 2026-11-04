@@ -57,6 +57,7 @@ packs:
     url: https://soundcloud.com/sakuragirl_official/dayoff
     license: CC-BY-3.0
     used_for: "menu and in-game music"
+    license_check: "The track's SoundCloud page (the url above) lists its license as CC BY 3.0; the owner verified this on 2026-11-04. The file itself comes from the artist's free Hypeddit download, https://hypeddit.com/sakuragirl/dayoff."
 
 files:
   "fonts/TitilliumWeb-Black.ttf":
@@ -2780,6 +2781,10 @@ files:
   "images/tile.png":
     source: kenney-isometric-landscape
     original: "PNG/landscapeTiles_067.png"
+  "sounds/bg.mp3":
+    source: music-sakura-girl-day-off
+    original: "Sakura Girl - Day Off.mp3"
+    note: "byte-identical to the artist's free Hypeddit download (https://hypeddit.com/sakuragirl/dayoff); not converted or trimmed"
   "sounds/click-a.ogg":
     source: kenney-ui-pack
     original: "Sounds/click-a.ogg"
@@ -2798,7 +2803,3 @@ files:
   "sounds/tap-b.ogg":
     source: kenney-ui-pack
     original: "Sounds/tap-b.ogg"
-  "sounds/bg.mp3":
-    source: music-sakura-girl-day-off
-    original: "Sakura Girl - Day Off.mp3"
-    note: "byte-identical to the artist's free Hypeddit download (https://hypeddit.com/sakuragirl/dayoff); not converted or trimmed"

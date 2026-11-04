@@ -25,7 +25,8 @@ freely available.
 Made for this game by its developer: cv.png (in assets/images/gui/developer).
 
 CC0 assets need no attribution; they are credited here anyway. The OFL fonts are
-bundled unmodified with their license text. Each pack's own
+bundled unmodified with their license text. CC BY assets require attribution:
+see the Music section below. Each pack's own
 license text ships with the game: `licenses/assets/font-titillium-web.txt`, `licenses/assets/kenney-background-elements-remastered.txt`, `licenses/assets/kenney-cursor-pack.txt`, `licenses/assets/kenney-game-icons.txt`, `licenses/assets/kenney-hexagon-buildings.txt`, `licenses/assets/kenney-isometric-landscape.txt`, `licenses/assets/kenney-ui-pack.txt`, `licenses/assets/music-sakura-girl-day-off.txt`.
 [assets/SOURCES.yaml](https://github.com/vectorviolet/highrise/blob/main/assets/SOURCES.yaml) in the source repository lists every asset
 file with its pack and its original file name there.
