@@ -46,6 +46,9 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `clamp01()`. No gameplay change.
 - pygamine 0.29.0: the display stack moved into the engine's `Display` class and localization support
   was added (Highrise uses it since the Language setting). No gameplay change.
+- Bump pygamine to v0.30.0: InputMap (rebindable key actions) and TooltipManager (tooltips with key
+  prompts). No game changes yet; key bindings and tooltips come in their own PRs. The game reads
+  `PanelManager.current_panel`, which is now a property in pygamine and behaves the same.
 - The engine submodule no longer follows pygamine's `main` on its own (`update = merge` removed
   from `.gitmodules`); it moves only through a reviewed bump PR.
 - Dependabot opens one grouped PR a week with `uv.lock` updates (`.github/dependabot.yml`).
