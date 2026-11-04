@@ -22,6 +22,7 @@ from gameplay.tilemap import Tilemap
 from pygamine import TextObject, Transform
 from pygamine.util.localization import localization
 from ui.info_panel import InfoPanel
+from ui.ui_scale import DEFAULT_UI_SCALE
 
 MAX_SIZE = 7
 MAX_BUILDING_LEVEL = 10
@@ -106,6 +107,7 @@ def make_panels() -> FakePanelManager:
             "display_settings": {
                 "window_size_entry_text": FakeText(),
                 "window_mode_entry_text": FakeText(),
+                "ui_scale_entry_text": FakeText(),
             },
             "game_settings": {
                 "language_entry_text": FakeText(),
@@ -142,6 +144,7 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
     game.old_sfx_volume = 0.5
     game.update_button_texts = Spy()
     game.skip_intro = False
+    game.ui_scale = DEFAULT_UI_SCALE
     # pygamine 0.29.0 owns the display stack in Application.display; Game
     # forwards display_surface, window_mode and resolution to it.
     game.display = SimpleNamespace(
@@ -706,7 +709,7 @@ def test_run_resets_the_session_ui_and_opens_the_menu(assets, monkeypatch):
     game.load_data = Spy()
     game.add_objects = Spy()
     game.init_database = Spy()
-    game.load_settings = lambda: GameSettings("en", False)
+    game.load_settings = lambda: GameSettings("en", False, DEFAULT_UI_SCALE)
     game.background_music_sound_path = None
     game.display.resolution = (1280, 720)
     game.display.window_mode = "windowed"
@@ -769,7 +772,7 @@ def test_run_watches_the_language_while_running_and_stops_after(assets, monkeypa
     game.load_data = Spy()
     game.add_objects = Spy()
     game.init_database = Spy()
-    game.load_settings = lambda: GameSettings("en", False)
+    game.load_settings = lambda: GameSettings("en", False, DEFAULT_UI_SCALE)
     game.background_music_sound_path = None
 
     game.run()
@@ -783,10 +786,14 @@ def test_run_watches_the_language_while_running_and_stops_after(assets, monkeypa
 def test_a_second_game_does_not_trigger_the_first_ones_language_callback(
     assets, monkeypatch
 ):
-    first, _ = _run_with_saved_settings(assets, monkeypatch, GameSettings("en", False))
+    first, _ = _run_with_saved_settings(
+        assets, monkeypatch, GameSettings("en", False, DEFAULT_UI_SCALE)
+    )
     calls_before = len(first.update_button_texts.calls)
 
-    _run_with_saved_settings(assets, monkeypatch, GameSettings("tr", False))
+    _run_with_saved_settings(
+        assets, monkeypatch, GameSettings("tr", False, DEFAULT_UI_SCALE)
+    )
 
     assert len(first.update_button_texts.calls) == calls_before
 
@@ -807,7 +814,7 @@ def test_run_unwatches_the_language_even_when_the_loop_crashes(assets, monkeypat
     game.load_data = Spy()
     game.add_objects = Spy()
     game.init_database = Spy()
-    game.load_settings = lambda: GameSettings("en", False)
+    game.load_settings = lambda: GameSettings("en", False, DEFAULT_UI_SCALE)
     game.background_music_sound_path = None
 
     with pytest.raises(RuntimeError):
@@ -820,21 +827,25 @@ def test_run_unwatches_the_language_even_when_the_loop_crashes(assets, monkeypat
 
 def test_run_shows_the_intro_by_default(assets, monkeypatch):
     game, splash = _run_with_saved_settings(
-        assets, monkeypatch, GameSettings("en", False)
+        assets, monkeypatch, GameSettings("en", False, DEFAULT_UI_SCALE)
     )
 
     assert game.calls == [("show_splash", splash)]
 
 
 def test_run_skips_the_intro_when_the_saved_setting_says_so(assets, monkeypatch):
-    game, _ = _run_with_saved_settings(assets, monkeypatch, GameSettings("en", True))
+    game, _ = _run_with_saved_settings(
+        assets, monkeypatch, GameSettings("en", True, DEFAULT_UI_SCALE)
+    )
 
     assert game.splash is None
     assert game.skip_intro is True
 
 
 def test_run_opens_in_the_saved_language(assets, monkeypatch):
-    game, _ = _run_with_saved_settings(assets, monkeypatch, GameSettings("tr", False))
+    game, _ = _run_with_saved_settings(
+        assets, monkeypatch, GameSettings("tr", False, DEFAULT_UI_SCALE)
+    )
 
     assert localization.language == "tr"
     assert game.panel_manager["game_settings"]["language_entry_text"].text == "TÜRKÇE"
@@ -845,7 +856,9 @@ def test_run_opens_in_the_saved_language(assets, monkeypatch):
 
 
 def test_run_falls_back_to_english_for_an_unknown_saved_language(assets, monkeypatch):
-    _run_with_saved_settings(assets, monkeypatch, GameSettings("xx", False))
+    _run_with_saved_settings(
+        assets, monkeypatch, GameSettings("xx", False, DEFAULT_UI_SCALE)
+    )
 
     assert localization.language == "en"
 
@@ -953,6 +966,8 @@ class FakeButton:
 
 
 class FakeImage:
+    rect = Transform((0, 0), (65, 89))
+
     def add_surface(self, name, surface) -> None:
         pass
 

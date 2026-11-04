@@ -9,6 +9,10 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- A **UI scale** setting on the DISPLAY page: 80 / 90 / 100 / 110 / 125 %, applied live and saved in
+  the database, with a RESET UI SCALE button. Panels, menus, the HUD and their text scale together;
+  the game world does not. The default stays 100 % until the owner picks one
+  ([devlog](docs/devlog/2026-11-04-ui-scale.md)).
 - Background music: **Sakura Girl - Day Off** ([CC BY 3.0](https://creativecommons.org/licenses/by/3.0/)),
   looping in the menu and in game. The MUSIC VOLUME setting and its row on the AUDIO page are back.
   Credit: "Music : Sakura Girl - Day Off", youtu.be/vAv9KtrU_5c (CREDITS.md, README).

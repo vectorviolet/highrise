@@ -32,6 +32,8 @@ display_settings:
   title: "EKRAN AYARLARI"
   window_mode: "PENCERE MODU"
   window_size: "PENCERE BOYUTU"
+  ui_scale: "ARAYÜZ ÖLÇEĞİ"
+  reset_ui_scale: "ÖLÇEĞİ SIFIRLA"
   modes:
     fullscreen: "TAM EKRAN"
     borderless: "ÇERÇEVESİZ"

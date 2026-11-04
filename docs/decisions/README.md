@@ -14,7 +14,7 @@ links; a changed decision gets a new ADR that supersedes the old one.
 | # | Title | Status | Date | Issues / PRs |
 |---|---|---|---|---|
 | [0001](0001-building-callbacks.md) | Wire building callbacks at creation | Proposed | 2026-10-30 | #3, PR #20, #21, PR #22 |
-| [0002](0002-settings-table.md) | Player settings in their own table | Proposed | 2026-11-04 | #29, PR #34 |
+| [0002](0002-settings-table.md) | Player settings in their own table | Accepted | 2026-11-04 | #29, PR #34 |
 <!-- index:end -->
 
 ## Adding an ADR

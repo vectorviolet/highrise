@@ -1,7 +1,7 @@
 # 0002. Player settings in their own table
 <!-- index | refs: #29, PR #34 -->
 
-- **Status:** Proposed
+- **Status:** Accepted (owner, 2026-11-04)
 - **Date:** 2026-11-04
 - **Issues / PRs:** [#29](https://github.com/vectorviolet/highrise/issues/29), [PR #34](https://github.com/vectorviolet/highrise/pull/34)
 

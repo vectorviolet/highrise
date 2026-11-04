@@ -164,12 +164,23 @@ panels:
 
   game:
     objects:
+      # The bottom bar hugs the bottom edge at every UI scale. The background is
+      # wider than any canvas so it still spans it when the UI scale shrinks it;
+      # the toolbar sits on a transparent 1920x100 root, so its children keep
+      # their authored offsets and scale about the bar's own origin.
       game_panel:
-        position: [0, 965]
-        size: [1920, 100]
+        anchor: bottom
+        position: [0, -15]
+        size: [3200, 100]
         extends: menu_panel
+      game_toolbar:
+        anchor: bottom
+        position: [0, -15]
+        size: [1920, 100]
+        color: [0, 0, 0, 0]
       selection_mode_button:
-        position: [340, 985]
+        parent: game_toolbar
+        position: [340, 20]
         size: [60, 60]
         asset: green_button
         hover: yellow_button
@@ -177,12 +188,14 @@ panels:
           "on":  { asset: green_button, hover: yellow_button }
           "off": { asset: red_button,   hover: yellow_button }
       selection_mode_button_image:
-        position: [345, 990]
+        parent: game_toolbar
+        position: [345, 25]
         size: [50, 50]
         asset: info_icon
 
       expand_button:
-        position: [560, 985]
+        parent: game_toolbar
+        position: [560, 20]
         size: [200, 60]
         asset: blue_button
         hover: yellow_button
@@ -193,7 +206,8 @@ panels:
         states:
           hover: "0$"
       build_button:
-        position: [860, 985]
+        parent: game_toolbar
+        position: [860, 20]
         size: [200, 60]
         asset: green_button
         hover: yellow_button
@@ -204,7 +218,8 @@ panels:
         states:
           hover: "0$"
       next_age_button:
-        position: [1160, 985]
+        parent: game_toolbar
+        position: [1160, 20]
         size: [200, 60]
         asset: green_button
         hover: yellow_button
@@ -222,7 +237,8 @@ panels:
         color: Green
         background_color: Black
         padding: [6, 16]
-        position: [1450, 995]
+        parent: game_toolbar
+        position: [1450, 30]
         text: ""
 
       info_panel:
@@ -280,17 +296,17 @@ panels:
 
       window_mode_text:
         extends: settings_text
-        position: [CENTER, 365]
+        position: [CENTER, 360]
         text_key: display_settings.window_mode
       window_mode_minus_button:
         extends: volume_button
-        position: [840, 415]
+        position: [840, 405]
       window_mode_plus_button:
         extends: volume_button
-        position: [1054, 415]
+        position: [1054, 405]
       window_mode_entry:
         extends: volume_entry
-        position: [885, 415]
+        position: [885, 405]
       window_mode_entry_text:
         extends: volume_entry_text
         parent: window_mode_entry
@@ -298,24 +314,24 @@ panels:
         text: ""
       window_mode_minus_icon:
         extends: minus_icon_template
-        position: [850, 425]
+        position: [850, 415]
       window_mode_plus_icon:
         extends: plus_icon_template
-        position: [1064, 425]
+        position: [1064, 415]
 
       window_size_text:
         extends: settings_text
-        position: [CENTER, 535]
+        position: [CENTER, 445]
         text_key: display_settings.window_size
       window_size_minus_button:
         extends: volume_button
-        position: [840, 585]
+        position: [840, 490]
       window_size_plus_button:
         extends: volume_button
-        position: [1054, 585]
+        position: [1054, 490]
       window_size_entry:
         extends: volume_entry
-        position: [885, 585]
+        position: [885, 490]
       window_size_entry_text:
         extends: volume_entry_text
         parent: window_size_entry
@@ -323,14 +339,49 @@ panels:
         text: ""
       window_size_minus_icon:
         extends: minus_icon_template
-        position: [850, 595]
+        position: [850, 500]
       window_size_plus_icon:
         extends: plus_icon_template
-        position: [1064, 595]
+        position: [1064, 500]
+
+      ui_scale_text:
+        extends: settings_text
+        position: [CENTER, 530]
+        text_key: display_settings.ui_scale
+      ui_scale_minus_button:
+        extends: volume_button
+        position: [840, 575]
+      ui_scale_plus_button:
+        extends: volume_button
+        position: [1054, 575]
+      ui_scale_entry:
+        extends: volume_entry
+        position: [885, 575]
+      ui_scale_entry_text:
+        extends: volume_entry_text
+        parent: ui_scale_entry
+        font_size: 18
+        text: ""
+      ui_scale_minus_icon:
+        extends: minus_icon_template
+        position: [850, 585]
+      ui_scale_plus_icon:
+        extends: plus_icon_template
+        position: [1064, 585]
+      ui_scale_reset_button:
+        extends: menu_btn
+        nine_slice: 12  # the 20px border of a menu button needs 40px of height at 80%
+        size: [315, 44]
+        position: [CENTER, 635]
+      ui_scale_reset_button_text:
+        extends: menu_btn_text
+        parent: ui_scale_reset_button
+        font_size: 22
+        text_key: display_settings.reset_ui_scale
 
       display_back_button:
         extends: go_back_btn
-        position: [810, 705]
+        position: [810, 715]
       display_back_button_text:
         extends: go_back_btn_text
         parent: display_back_button
