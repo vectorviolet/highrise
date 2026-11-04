@@ -1,7 +1,7 @@
 # Language (English and Turkish), Skip intro and a new font
-<!-- index | refs: #29 | area: UI, Localization -->
+<!-- index | refs: #29, PR #34 | area: UI, Localization -->
 
-**Date:** 2026-11-04 · **Area:** UI, Localization · **Issue:** [#29](https://github.com/vectorviolet/highrise/issues/29)
+**Date:** 2026-11-04 · **Area:** UI, Localization · **Issue:** [#29](https://github.com/vectorviolet/highrise/issues/29) · **PR:** [#34](https://github.com/vectorviolet/highrise/pull/34)
 
 ## Context
 
