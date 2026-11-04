@@ -34,6 +34,11 @@ comment right under its heading (see the READMEs' templates). The index tables i
 generated: add your entry file, run `uv run python scripts/gen_devlog_index.py`, and never edit
 the tables by hand. `tests/test_devlog_index.py` fails in CI if a table is out of date.
 
+**Type check and spelling:** CI also runs `uv run --group dev mypy` (lenient: `src/` only,
+`src/pygamine` excluded; config in `[tool.mypy]`) and `uv run --group dev codespell` (typos plus
+British to American spelling; config in `[tool.codespell]`, project dictionary in
+`.codespell-en-us.txt`). Fix the type or spelling; real words go in `ignore-words-list` with a reason.
+
 **Code style:** run `uv run --group dev ruff format .` and `uv run --group dev ruff check .`
 before every commit. Formatting is Black-compatible (`[tool.ruff.format]` in `pyproject.toml`);
 lint (`[tool.ruff.lint]`) runs pyflakes (F), return-type annotations on every function in

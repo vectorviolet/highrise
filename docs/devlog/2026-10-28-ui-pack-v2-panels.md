@@ -20,7 +20,7 @@ gave the mapping:
 
 Only `grey.png` is drawn today (the `grey_panel` asset behind every `menu_panel`: menu, play,
 settings, display, audio, game settings, developer, the game's bottom bar and the building info
-panel). The other four colours are not referenced anywhere; they were replaced too, so the folder
+panel). The other four colors are not referenced anywhere; they were replaced too, so the folder
 keeps one consistent set.
 
 ## Options
@@ -45,15 +45,15 @@ panels and the Default-size buttons drawn on top of them, and a 10 px corner cov
 corner, outline and inner highlight, so corners stay clean at every size used (300×460 up to
 1920×100).
 
-Text: the grey labels (`[128, 128, 128]`) sit in the upper and middle part of the gradient, where it
-is as light as or lighter than the old flat grey (contrast 3.5–3.9 against 3.4 before); black text
-on the info panel and the bottom bar is unchanged (17–19). No text colour was changed.
+Text: the gray labels (`[128, 128, 128]`) sit in the upper and middle part of the gradient, where it
+is as light as or lighter than the old flat gray (contrast 3.5–3.9 against 3.4 before); black text
+on the info panel and the bottom bar is unchanged (17–19). No text color was changed.
 
 ## Rejected alternatives
 
 - Double (128 px): its 4 px outline looks heavier than the buttons it frames, and it needs a larger
   corner value.
-- Deleting the four unused colours: possible, but the owner's mapping covers all five, and keeping
+- Deleting the four unused colors: possible, but the owner's mapping covers all five, and keeping
   them costs a few hundred bytes each.
 
 ## Result
@@ -71,5 +71,5 @@ files are listed under `kenney-ui-pack` in `assets/SOURCES.yaml` with their v2 p
 
 ## Revisit if
 
-- Panels get smaller than about 30 px, or a coloured panel (blue, green, red, yellow) is put into
-  use: check the corners and the text colour on it.
+- Panels get smaller than about 30 px, or a colored panel (blue, green, red, yellow) is put into
+  use: check the corners and the text color on it.

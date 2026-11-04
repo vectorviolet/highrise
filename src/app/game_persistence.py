@@ -8,6 +8,10 @@ class GamePersistenceMixin:
         # Attributes / methods supplied by the host class (Game).
         def __getattr__(self, name: str) -> Any: ...
 
+        # Declared here so the mixin's assignments don't narrow the type
+        # Game gives it (None until a game is loaded).
+        tilemap: Tilemap | None
+
     def load_data(self) -> None:
         self.init_database()
         self.load_game_data(self.get_game_data())
@@ -55,6 +59,7 @@ class GamePersistenceMixin:
         buildings = self.database.execute_safely("SELECT * FROM buildings", True)
         if not buildings:
             return
+        assert self.tilemap is not None, "tilemap not loaded yet"
         rows = self.tilemap.row_count
         cols = self.tilemap.column_count
         for level, row, column in buildings:
@@ -76,6 +81,7 @@ class GamePersistenceMixin:
         # A merge in progress saves as its finished result, not as two
         # buildings stacked on one tile.
         self.buildings.finish_pending_merges()
+        assert self.tilemap is not None, "tilemap not loaded yet"
         self.database.execute_safely(
             "UPDATE game SET age_number=?, size=?, money=?",
             params=(
