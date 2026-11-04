@@ -16,6 +16,7 @@ import pygame
 import pytest
 
 from pygamine import AssetManager, Database, SaveStore
+from pygamine.util.localization import localization
 
 pygame.init()
 # Tile/Building load images via convert_alpha(), which raises without a
@@ -42,3 +43,13 @@ def saves_in_tmp(tmp_path, monkeypatch):
         Database.__init__, "__defaults__", (str(tmp_path / "databases"),)
     )
     monkeypatch.setattr(SaveStore.__init__, "__defaults__", (str(tmp_path / "saves"),))
+
+
+@pytest.fixture(autouse=True)
+def english_strings():
+    """The game's language files, loaded, with English current: the language is
+    process-wide state, so no test may inherit another's."""
+    localization.load("config/lang")
+    localization.set_language("en")
+    yield
+    localization.set_language("en")

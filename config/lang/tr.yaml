@@ -1,0 +1,64 @@
+# Turkish strings (a draft: the owner reviews them). Same keys and {placeholders}
+# as en.yaml. Capital letters follow Turkish rules (İ and I are different letters).
+_meta:
+  name: "Türkçe"
+
+common:
+  go_back: "GERİ DÖN"
+  cancel: "İPTAL"
+  save: "KAYDET"
+  enabled: "AÇIK"
+  disabled: "KAPALI"
+
+menu:
+  title: "Highrise"
+  play: "OYNA"
+  settings: "AYARLAR"
+  developer: "GELİŞTİRİCİ"
+  exit: "ÇIKIŞ"
+
+play:
+  title: "OYNA"
+  new_game: "YENİ OYUN"
+  continue: "DEVAM ET"
+
+settings:
+  title: "AYARLAR"
+  display: "EKRAN"
+  audio: "SES"
+  game: "OYUN"
+
+display_settings:
+  title: "EKRAN AYARLARI"
+  window_mode: "PENCERE MODU"
+  window_size: "PENCERE BOYUTU"
+  modes:
+    fullscreen: "TAM EKRAN"
+    borderless: "ÇERÇEVESİZ"
+    windowed: "PENCERELİ"
+
+audio_settings:
+  title: "SES AYARLARI"
+  music_volume: "MÜZİK SESİ"
+  sfx_volume: "EFEKT SESİ"
+
+game_settings:
+  title: "OYUN AYARLARI"
+  language: "DİL"
+  skip_intro: "GİRİŞİ ATLA"
+
+game:
+  expand: "GENİŞLET"
+  build: "İNŞA ET"
+  next_age: "SONRAKİ ÇAĞ"
+  sell: "SAT"
+  max_size: "MAKS. BOYUT"
+  tiles_full: "ALAN DOLU"
+  max_age: "MAKS. ÇAĞ"
+  level: "Seviye: {value}"
+  speed: "Hız: {value} $/sn"
+  cooldown: "Bekleme: {value} sn"
+  sell_price: "Satış Fiyatı: {value}"
+
+developer:
+  title: "Yazılım Mühendisi"

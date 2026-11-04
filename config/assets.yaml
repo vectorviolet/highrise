@@ -1,7 +1,7 @@
 fonts:
-    #kenvector_future:      {folder: , name: kenvector_future}
-    kenvector_future:      {folder: , name: "Kenney Future"}
-    kenvector_future_thin: {folder: , name: "Kenney Future Narrow"}
+    titillium:       {folder: , name: TitilliumWeb-Regular}
+    titillium_bold:  {folder: , name: TitilliumWeb-Bold}
+    titillium_black: {folder: , name: TitilliumWeb-Black}
 images:
     cursor:         { folder: gui/developer, name: cursor }
     profile_image:  { folder: gui/developer, name: cv }

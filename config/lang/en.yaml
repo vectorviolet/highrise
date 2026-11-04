@@ -1,0 +1,65 @@
+# English strings: the fallback language, and the reference tr.yaml must match
+# (same keys, same {placeholders}). Every value is quoted so YAML never turns
+# one into a bool or a number. See docs/decisions/0001-localization.md in pygamine.
+_meta:
+  name: "English"
+
+common:
+  go_back: "GO BACK"
+  cancel: "CANCEL"
+  save: "SAVE"
+  enabled: "ON"
+  disabled: "OFF"
+
+menu:
+  title: "Highrise"
+  play: "PLAY"
+  settings: "SETTINGS"
+  developer: "DEVELOPER"
+  exit: "EXIT"
+
+play:
+  title: "PLAY"
+  new_game: "NEW GAME"
+  continue: "CONTINUE"
+
+settings:
+  title: "SETTINGS"
+  display: "DISPLAY"
+  audio: "AUDIO"
+  game: "GAME"
+
+display_settings:
+  title: "DISPLAY SETTINGS"
+  window_mode: "WINDOW MODE"
+  window_size: "WINDOW SIZE"
+  modes:
+    fullscreen: "FULLSCREEN"
+    borderless: "BORDERLESS"
+    windowed: "WINDOWED"
+
+audio_settings:
+  title: "AUDIO SETTINGS"
+  music_volume: "MUSIC VOLUME"
+  sfx_volume: "SFX VOLUME"
+
+game_settings:
+  title: "GAME SETTINGS"
+  language: "LANGUAGE"
+  skip_intro: "SKIP INTRO"
+
+game:
+  expand: "EXPAND"
+  build: "BUILD"
+  next_age: "NEXT AGE"
+  sell: "SELL"
+  max_size: "MAX SIZE"
+  tiles_full: "TILES FULL"
+  max_age: "MAX AGE"
+  level: "Level: {value}"
+  speed: "Speed: {value} $/sec"
+  cooldown: "Cooldown: {value} sec"
+  sell_price: "Sell Price: {value}"
+
+developer:
+  title: "Software Engineer"

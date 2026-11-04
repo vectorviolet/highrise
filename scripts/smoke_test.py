@@ -51,11 +51,19 @@ def boot_game() -> None:
     game.open_panel("menu")
     game.info_panel.close()
 
-    for panel in PANELS:
-        game.open_panel(panel)
-        game.update()
-        game.draw()
-        print(f"  {panel}: OK")
+    from pygamine.util.localization import localization
+
+    # Every panel in every language, the way a live switch leaves them; the
+    # language set at launch is restored afterwards.
+    launch_language = localization.language
+    for code in sorted(localization.languages()):
+        localization.set_language(code)
+        for panel in PANELS:
+            game.open_panel(panel)
+            game.update()
+            game.draw()
+            print(f"  {panel} ({code}): OK")
+    localization.set_language(launch_language)
 
 
 def run_game_briefly() -> None:

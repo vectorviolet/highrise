@@ -89,6 +89,18 @@ Button, ButtonText (src/button.py) — extend GuiObject
 
 All UI panels, buttons, and layout are declared in `config/panels.yaml`. Python code never hard-codes widget positions or sizes for UI — use `PanelLoaderExt` and `panel_factory.py` to wire YAML definitions to Python objects. `config/assets.yaml` declares the asset manifest (fonts, images by category).
 
+### Localization
+
+Every player-visible string lives in `config/lang/<code>.yaml` (`en.yaml` is the reference and the
+fallback; `tr.yaml` is Turkish), loaded with pygamine's `localization`. Panels use `text_key:` (and
+`text_params:`) instead of `text:`; code uses `tr("section.key")`. Texts inside `states:` are not
+key-driven in the engine, so `Game._on_language_changed` re-sets the ones the game builds from code
+(toolbar hover texts, window-mode label, the Game settings labels). Add a key to every language
+file with the same `{placeholders}`: `tests/test_localization.py` fails otherwise, and fails when a
+font in `assets/fonts/` lacks a character of any language (Titillium Web has no arrow, so don't use
+one). Quote every value: a bare `yes` or `10` is not a string. Don't write `on:`/`off:` as keys: YAML
+turns them into booleans.
+
 ### Isometric Tilemap
 
 `src/tile.py` renders an isometric diamond grid. Tile selection uses point-in-quadrangle collision. Selected tiles visually shift up by 10 px. Building movement (WASD/arrows) triggers 2048-style merge logic: same-level adjacent buildings merge and level up.
@@ -108,7 +120,7 @@ Saving finishes pending merges first. See ADR 0001.
 
 ### Persistence
 
-SQLite database at `databases/database.db`. Two tables: `game` (age, map size, money, volumes) and `buildings` (level, row, column). The database auto-initializes on first run. Save/load logic lives entirely in `GamePersistenceMixin`.
+SQLite database at `databases/database.db`. Three tables: `game` (age, map size, money, volumes), `buildings` (level, row, column) and `settings` (language, skip intro; saved the moment they change on the Game settings page, and kept by New Game). The database auto-initializes on first run. Save/load logic lives entirely in `GamePersistenceMixin`.
 
 ### Audio
 
