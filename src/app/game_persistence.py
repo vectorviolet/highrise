@@ -36,7 +36,7 @@ class GamePersistenceMixin:
         )
         # A separate table, so saves made before these settings existed load
         # unchanged: the game table keeps its columns. Seeded with the
-        # defaults (English, intro shown, default UI scale) so the UPDATEs
+        # defaults (English, intro shown; the column defaults the UI scale) so the UPDATEs
         # below always hit a row.
         self.database.execute_safely(
             "CREATE TABLE IF NOT EXISTS settings(language TEXT, skip_intro INTEGER, "
@@ -51,9 +51,9 @@ class GamePersistenceMixin:
                 f"ui_scale INTEGER NOT NULL DEFAULT {DEFAULT_UI_SCALE}"
             )
         self.database.execute_safely(
-            "INSERT INTO settings(language, skip_intro, ui_scale) "
-            "SELECT ?, 0, ? WHERE NOT EXISTS (SELECT 1 FROM settings)",
-            params=(DEFAULT_LANGUAGE, DEFAULT_UI_SCALE),
+            "INSERT INTO settings(language, skip_intro) "
+            "SELECT ?, 0 WHERE NOT EXISTS (SELECT 1 FROM settings)",
+            params=(DEFAULT_LANGUAGE,),
         )
 
     def load_settings(self) -> GameSettings:

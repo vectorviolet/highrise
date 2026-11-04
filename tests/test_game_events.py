@@ -8,11 +8,10 @@ real Game() (which needs the full YAML panel/asset stack for no benefit)."""
 from types import SimpleNamespace
 
 import pygame
-
-from ui.ui_scale import DEFAULT_UI_SCALE
 import pytest
 
 from app.game_events import GameEventsMixin
+from ui.ui_scale import DEFAULT_UI_SCALE
 
 
 class FakeButton:

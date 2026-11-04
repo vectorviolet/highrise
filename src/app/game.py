@@ -43,6 +43,19 @@ MUSIC_VOLUME_OBJECTS = (
     "music_volume_plus_icon",
 )
 
+# The game-panel objects that make up the info panel: children of its root.
+INFO_PANEL_OBJECTS = (
+    "info_panel",
+    "level_text",
+    "speed_text",
+    "cooldown_text",
+    "sell_price_text",
+    "close_button",
+    "sell_button",
+    "sell_button_text",
+    "info_panel_building_image",
+)
+
 # Escape (or the window's close request) on these panels goes back to the
 # panel given; "menu", "audio_settings" and "game" are handled separately.
 BACK_TARGETS = {
@@ -92,6 +105,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         # since on_canvas_resized() (see below) can fire during construction
         # (set_fullscreen() there triggers the first _rebuild_window_surface()).
         self._authored_size = tuple(window["size"])
+        # on_canvas_resized() rebuilds the panels only once they exist.
+        self._panels_built = False
 
         super().__init__(tuple(window["size"]), window["title"], window["fps"])
 
@@ -184,6 +199,12 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             self.set_render_scale(
                 target_scale
             )  # re-enters this method with the corrected size
+        elif self._panels_built and tuple(new_size) != tuple(
+            self.window_transform.size
+        ):
+            # The panels were laid out against the old canvas (a 16:10 window has
+            # more height than 16:9): lay them out again against this one.
+            self.rebuild_panels()
 
     def run(self) -> None:
         # Application.run() would call this itself, but this project needs
@@ -227,12 +248,36 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             panel[name].active = shown
 
     def add_objects(self) -> None:
-        # Game
+        """Builds everything: the game world, then the panels."""
+        self.add_world_objects()
+        self.build_panels()
+
+    def rebuild_panels(self) -> None:
+        """Rebuilds the panels at the current UI scale and canvas size and re-texts
+        what the YAML cannot. The world (buildings, payouts, the tile selection)
+        is not touched; an open info panel closes, since its widgets are new and
+        empty."""
+        self.build_panels()
+        self.info_panel.close()
+        self._refresh_ui_texts()
+
+    def add_world_objects(self) -> None:
+        """Puts the clouds, tiles and buildings in the game panel. The UI scale
+        never reaches them."""
         self.panel_manager.add_object(
             "game", "clouds", LoopingCloudAnimation(self.cloud_count, self.size)
         )
         self.panel_manager.add_object("game", "tiles", self.tilemap)
         self.panel_manager.add_object("game", "buildings", self.buildings)
+
+    def build_panels(self) -> None:
+        """Loads config/panels.yaml into the panel manager and wires up what the
+        YAML cannot: the info panel's parent, the menu controllers, the money text."""
+        # The widgets about to be replaced must not stay children of the long-lived
+        # info panel root.
+        if "game" in self.panel_manager and "info_panel" in self.panel_manager["game"]:
+            for name in INFO_PANEL_OBJECTS:
+                self.panel_manager["game"][name].set_parent(None)
 
         # Panels are laid out against the canvas as it is now, not the one the
         # Game started with.
@@ -241,6 +286,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         # The UI scale reaches every panel object (size, font size, offsets) through
         # the loader; the game world above is not loaded through it, so it stays put.
         loader.scale = self.ui_scale / 100
+        # Positions in panels.yaml are authored against this canvas; on a taller or
+        # wider one they scale about the authored center and are re-centered.
+        loader.authored_size = self._authored_size
         loader.register("object", make_factory(self.assets), default=True)
         loader.register("text", make_text_factory(self.assets))
         loader.register("animated", make_animated_factory(self.assets))
@@ -248,28 +296,26 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self._show_music_controls(self.background_music_sound_path is not None)
 
         panel = self.panel_manager["game"]
-        for name in (
-            "info_panel",
-            "level_text",
-            "speed_text",
-            "cooldown_text",
-            "sell_price_text",
-            "close_button",
-            "sell_button",
-            "sell_button_text",
-            "info_panel_building_image",
-        ):
+        for name in INFO_PANEL_OBJECTS:
             panel[name].set_parent(self.info_panel.root)
 
         panel["selection_mode_button"].set_base_state(
             "on" if self.tile_selector.is_active else "off"
         )
         close_button = panel["close_button"]
-        # The cross keeps its pixel size and sits in the middle of the scaled button.
-        for images, icon in (
-            (close_button.images, self.assets.get_image("cross_white")),
-            (close_button._hover_images, self.assets.get_image("cross_grey")),
+        # The cross scales with the button and sits in the middle of it.
+        for images, key in (
+            (close_button.images, "cross_white"),
+            (close_button._hover_images, "cross_grey"),
         ):
+            image = self.assets.get_image(key)
+            icon = pygame.transform.scale(
+                image,
+                (
+                    round(image.get_width() * self.ui_scale / 100),
+                    round(image.get_height() * self.ui_scale / 100),
+                ),
+            )
             button_image = images[None]
             button_image.blit(
                 icon,
@@ -317,6 +363,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.money_listener = lambda m: money_text.set_text(f"{m}$")
         self.player.add_money_listener(self.money_listener)
         money_text.set_text(f"{self.player.money}$")
+        self._panels_built = True
 
     @property
     def _tilemap(self) -> Tilemap:
@@ -485,11 +532,16 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.open_panel("game")
 
     def _reset_session_ui(self) -> None:
-        """Brings the UI in line with a freshly loaded session: the age, the
-        toolbar hover texts, a closed info panel and the settings labels."""
+        """Brings the UI in line with a freshly loaded session: the age, a closed
+        info panel, the toolbar hover texts and the settings labels."""
         self.set_age(self.buildings.age_number)
-        self.update_button_texts()
         self.info_panel.close()
+        self._refresh_ui_texts()
+
+    def _refresh_ui_texts(self) -> None:
+        """Re-texts what panels.yaml cannot: the toolbar hover texts and the
+        labels the game sets from code. Touches nothing but texts."""
+        self.update_button_texts()
         self.set_music_label(self.audio.music_volume())
         self.set_sfx_label(self.audio.sfx_volume())
         self.set_window_size_label()
@@ -546,8 +598,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             return
         self.save_ui_scale(ui_scale)
         self.ui_scale = ui_scale
-        self.add_objects()
-        self._reset_session_ui()
+        self.rebuild_panels()
 
     def step_ui_scale(self, delta: int) -> None:
         self.set_ui_scale(step_ui_scale(self.ui_scale, delta))

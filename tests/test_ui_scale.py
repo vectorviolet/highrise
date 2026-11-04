@@ -147,3 +147,59 @@ def test_the_hud_bar_hugs_the_bottom_edge_and_the_world_is_not_scaled(scale):
     assert panel["game_panel"].rect.bottom == game.size[1] - round(15 * scale / 100)
     assert panel["expand_button"].rect.width == round(200 * scale / 100)
     assert panel["tiles"][0][0].rect.size == reference
+
+
+def test_a_scale_change_leaves_the_world_alone():
+    game = started_game()
+    game.add_building(1, 0, 0)
+    game.add_building(2, 1, 1)
+    game.set_age(1)
+    game.tile_selector.is_active = True
+    before = list(game.buildings)
+    timers = [[c.fire_at for c in b._scheduled] for b in before]
+    money = game.player.money
+
+    for scale in (80, 125, 100):
+        game.set_ui_scale(scale)
+
+    assert all(a is b for a, b in zip(game.buildings, before)) and len(
+        game.buildings
+    ) == len(before)
+    assert [[c.fire_at for c in b._scheduled] for b in game.buildings] == timers
+    assert game.buildings.age_number == 1
+    assert game.player.money == money
+    assert game.tile_selector.is_active
+    assert game.panel_manager["game"]["selection_mode_button"]._base_state == "on"
+
+
+def test_rebuilding_the_panels_does_not_pile_up_children_on_the_info_panel_root():
+    game = started_game()
+    count = len(game.info_panel.root._children)
+    assert count > 0
+
+    for scale in (80, 90, 100, 110, 125, 80, 100):
+        game.set_ui_scale(scale)
+
+    assert len(game.info_panel.root._children) == count
+
+
+@pytest.mark.parametrize("scale", UI_SCALES)
+def test_on_a_taller_canvas_the_layout_follows_the_canvas(scale):
+    game = started_game((1920, 1080))
+    game.set_ui_scale(scale)
+    menu = game.panel_manager["menu"]["menu_panel"].rect.copy()
+    button = game.panel_manager["menu"]["play_button"].rect.copy()
+    toolbar = game.panel_manager["game"]["expand_button"].rect.copy()
+
+    game.set_resolution((1920, 1200))
+
+    assert game.size == (1920, 1200)
+    panel = game.panel_manager["menu"]
+    # Centered chrome moves down by half of the extra 120 px, all of it alike.
+    assert panel["menu_panel"].rect.y - menu.y == 60
+    assert panel["play_button"].rect.y - button.y == 60
+    assert panel["menu_panel"].rect.x == menu.x
+    # The HUD hugs the bottom edge of the taller canvas.
+    hud = game.panel_manager["game"]
+    assert hud["game_panel"].rect.bottom == 1200 - round(15 * scale / 100)
+    assert hud["expand_button"].rect.y - toolbar.y == 120
