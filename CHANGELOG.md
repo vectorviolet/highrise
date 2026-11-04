@@ -9,6 +9,9 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Background music: **Sakura Girl - Day Off** ([CC BY 3.0](https://creativecommons.org/licenses/by/3.0/)),
+  looping in the menu and in game. The MUSIC VOLUME setting and its row on the AUDIO page are back.
+  Credit: "Music : Sakura Girl - Day Off", youtu.be/vAv9KtrU_5c (CREDITS.md, README).
 - The GAME SETTINGS page has two settings, both saved in the database: **Language** (English or
   Türkçe, applied instantly, English by default) and **Skip intro** (off by default; when on, the
   game opens straight to the menu at the next launch).

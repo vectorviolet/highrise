@@ -20,15 +20,30 @@ freely available.
 | [Background Elements Remastered](https://kenney.nl/assets/background-elements-remastered) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | clouds | 1 |
 | [Cursor Pack](https://kenney.nl/assets/cursor-pack) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | mouse cursor | 1 |
 | [Isometric Landscape](https://kenney.nl/assets/isometric-tiles-landscape) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | ground tile | 1 |
+| [Day Off](https://soundcloud.com/sakuragirl_official/dayoff) | Sakura Girl | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | menu and in-game music | 1 |
 
 Made for this game by its developer: cv.png (in assets/images/gui/developer).
 
 CC0 assets need no attribution; they are credited here anyway. The OFL fonts are
-bundled unmodified with their license text. Each pack's own
-license text ships with the game: `licenses/assets/font-titillium-web.txt`, `licenses/assets/kenney-background-elements-remastered.txt`, `licenses/assets/kenney-cursor-pack.txt`, `licenses/assets/kenney-game-icons.txt`, `licenses/assets/kenney-hexagon-buildings.txt`, `licenses/assets/kenney-isometric-landscape.txt`, `licenses/assets/kenney-ui-pack.txt`.
+bundled unmodified with their license text. CC BY assets require attribution:
+see the Music section below. Each pack's own
+license text ships with the game: `licenses/assets/font-titillium-web.txt`, `licenses/assets/kenney-background-elements-remastered.txt`, `licenses/assets/kenney-cursor-pack.txt`, `licenses/assets/kenney-game-icons.txt`, `licenses/assets/kenney-hexagon-buildings.txt`, `licenses/assets/kenney-isometric-landscape.txt`, `licenses/assets/kenney-ui-pack.txt`, `licenses/assets/music-sakura-girl-day-off.txt`.
 [assets/SOURCES.yaml](https://github.com/vectorviolet/highrise/blob/main/assets/SOURCES.yaml) in the source repository lists every asset
 file with its pack and its original file name there.
 <!-- assets:end -->
+
+## Music
+
+**“Day Off”** by **Sakura Girl**, the menu and in-game music, downloaded from the artist's page on
+Hypeddit.
+
+The artist licenses the track on
+[SoundCloud](https://soundcloud.com/sakuragirl_official/dayoff) under
+[Creative Commons Attribution 3.0 (CC BY 3.0)](https://creativecommons.org/licenses/by/3.0/), and
+asks for these lines as attribution:
+
+> Music : Sakura Girl - Day Off
+> Link : youtu.be/vAv9KtrU_5c
 
 ## Software
 

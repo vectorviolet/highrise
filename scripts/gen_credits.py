@@ -24,6 +24,7 @@ END = "<!-- assets:end -->"
 LICENSE_LINKS = {
     "CC0-1.0": "[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)",
     "OFL-1.1": "[SIL OFL 1.1](https://openfontlicense.org)",
+    "CC-BY-3.0": "[CC BY 3.0](https://creativecommons.org/licenses/by/3.0/)",
 }
 REPO_SOURCES = "https://github.com/vectorviolet/highrise/blob/main/assets/SOURCES.yaml"
 
@@ -61,7 +62,8 @@ def render(data: dict) -> str:
         ]
     lines += [
         "CC0 assets need no attribution; they are credited here anyway. The OFL fonts are",
-        "bundled unmodified with their license text. Each pack's own",
+        "bundled unmodified with their license text. CC BY assets require attribution:",
+        "see the Music section below. Each pack's own",
         "license text ships with the game: "
         + ", ".join(f"`licenses/assets/{slug}.txt`" for slug in sorted(packs))
         + ".",

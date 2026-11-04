@@ -105,7 +105,7 @@ See [CLAUDE.md](CLAUDE.md) for the full architecture overview.
 
 ## Credits
 
-Art, UI and sounds from [Kenney](https://www.kenney.nl/) — [Hexagon Buildings](https://www.kenney.nl/assets/hexagon-buildings) and [UI Pack](https://www.kenney.nl/assets/ui-pack) (CC0); the font is [Titillium Web](https://fonts.google.com/specimen/Titillium+Web) (SIL OFL 1.1). See [CREDITS.md](CREDITS.md) for every asset, font and library with its license; it also ships with the game.
+Art, UI and sounds from [Kenney](https://www.kenney.nl/) — [Hexagon Buildings](https://www.kenney.nl/assets/hexagon-buildings) and [UI Pack](https://www.kenney.nl/assets/ui-pack) (CC0); the font is [Titillium Web](https://fonts.google.com/specimen/Titillium+Web) (SIL OFL 1.1). Music : Sakura Girl - Day Off (CC BY 3.0), link : [youtu.be/vAv9KtrU_5c](https://youtu.be/vAv9KtrU_5c). See [CREDITS.md](CREDITS.md) for every asset, font and library with its license; it also ships with the game.
 
 ## Asset sources
 
