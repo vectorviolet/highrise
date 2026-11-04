@@ -13,7 +13,15 @@ dependencies = [
 build = [
     "pyinstaller>=6.0",
 ]
-dev = ["pytest>=8", "pytest-cov>=5", "ruff==0.17.3"]
+dev = [
+    "pytest>=8",
+    "pytest-cov>=5",
+    "ruff==0.17.3",
+    "mypy==2.4.1",
+    "types-pyyaml>=6.0.12.20261030",
+    # Same version as `uvx codespell@...` in ci.yml's spelling job.
+    "codespell==2.4.3",
+]
 
 [tool.ruff]
 # ruff's own default, written out: both `ruff check` and `ruff format` use it.
@@ -31,7 +39,7 @@ quote-style = "double"
 # PLR6301 (no-self-use): a method that doesn't use `self` should be a static
 # method or a module-level function. It's a preview rule; `preview = true` with
 # `explicit-preview-rules = true` turns on only the preview rules selected by
-# their full code here, not every preview rule or preview behaviour.
+# their full code here, not every preview rule or preview behavior.
 # C901, PLR0912 and PLR0915 cap a function's complexity, branches and
 # statements, at ruff's defaults for now (see [tool.ruff.lint.mccabe] and
 # [tool.ruff.lint.pylint]).
@@ -62,6 +70,42 @@ max-statements = 50
 # ANN rules above). Test functions don't: pytest calls them and no type checker
 # runs here. Fixtures and helpers in tests that return a value still get one.
 "tests/**" = ["ANN201", "ANN202", "ANN204", "ANN205", "ANN206"]
+
+[tool.codespell]
+# Typos plus British -> American spelling (American English everywhere).
+# Run: uv run --group dev codespell
+builtin = "clear,rare,en-GB_to_en-US"
+# .codespell-en-us.txt adds the British doubled-l forms the built-ins miss
+# (traveled, leveled, ... spelled with -ll-); "-" keeps the built-ins.
+# "-" goes last: first, it would read as a command-line flag.
+dictionary = "./.codespell-en-us.txt,-"
+# .github too (hidden folders are skipped by default); .git and .venv aren't ours.
+check-hidden = true
+# Not ours or not text: the pygamine submodule (its own repo), third-party
+# license texts, assets and binaries, the lock file, and local files
+# (virtualenv, tool caches, saves, builds). Also the project dictionary
+# itself (it lists British forms).
+skip = "./.codespell-en-us.txt,./.git,./.venv,.*_cache,__pycache__,./saves,./dist,./build,./htmlcov,./src/pygamine,./licenses,./assets,./uv.lock,./docs/devlog/img,*.png,*.gif,*.ico,*.ogg,*.mp3,*.wav,*.ttf"
+# Real words codespell flags, one per line with why:
+#   datas: PyInstaller's Analysis(datas=...) argument (highrise.spec, util/paths.py)
+#   grey: Kenney's UI Pack folder and file names (config/assets.yaml, SOURCES.yaml, devlog)
+ignore-words-list = "datas,grey"
+
+[tool.mypy]
+# A lenient start (issue #32): the app's own code under src/, default
+# (non-strict) checks, untyped functions skipped. Tighten later, e.g. with
+# check_untyped_defs or per-module strict overrides.
+python_version = "3.12"
+files = ["src"]
+# src/pygamine first, so `pygamine` is the engine package, not its repo folder.
+mypy_path = ["src/pygamine", "src"]
+explicit_package_bases = true
+# The pygamine submodule has its own CI; its types are used, its errors not reported.
+exclude = ["^src/pygamine/"]
+
+[[tool.mypy.overrides]]
+module = ["pygamine", "pygamine.*"]
+follow_imports = "silent"
 
 [tool.uv.sources]
 pygamine = { path = "src/pygamine", editable = true }

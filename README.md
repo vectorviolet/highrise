@@ -8,7 +8,7 @@ An isometric city-builder where same-level buildings merge `2048`-style. Build, 
 
 ## Gameplay
 
-Place buildings on the isometric grid, then slide them with WASD/arrows to merge same-level neighbours into a higher-level building (just like 2048). Higher-level buildings produce more income. Spend income to construct new buildings, expand the land, or advance to the **next age** to unlock better building tiers.
+Place buildings on the isometric grid, then slide them with WASD/arrows to merge same-level neighbors into a higher-level building (just like 2048). Higher-level buildings produce more income. Spend income to construct new buildings, expand the land, or advance to the **next age** to unlock better building tiers.
 
 ### Screenshots
 
