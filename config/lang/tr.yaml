@@ -1,7 +1,7 @@
 # Turkish strings (a draft: the owner reviews them). Same keys and {placeholders}
 # as en.yaml. Capital letters follow Turkish rules (İ and I are different letters).
 _meta:
-  name: "Türkçe"
+  name: "TÜRKÇE"
 
 common:
   go_back: "GERİ DÖN"

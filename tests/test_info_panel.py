@@ -101,12 +101,7 @@ def test_refresh_writes_every_field_from_the_building(assets):
 
 def test_refresh_reads_from_whichever_panel_is_currently_open(assets):
     manager, panel = make_panel_manager()
-    other_panel = {
-        **{k: v for k, v in panel.items() if k.endswith("_text")},
-        "level_text": make_label("game.level"),
-    }
-    other_panel["sell_button_text"] = FakeText()
-    other_panel["info_panel_building_image"] = FakeImage()
+    _, other_panel = make_panel_manager()
     manager["other"] = other_panel
     manager.current_panel = "other"
     info_panel = InfoPanel(manager)
@@ -115,7 +110,15 @@ def test_refresh_reads_from_whichever_panel_is_currently_open(assets):
     info_panel.refresh(building)
 
     assert other_panel["level_text"].text == f"Level: {building.level}"
-    assert panel["level_text"].text == "Level: "  # untouched
+    # The panel that is not open keeps its own, untouched labels.
+    assert [panel[k].text for k in ("level_text", "speed_text")] == [
+        "Level: ",
+        "Speed:  $/sec",
+    ]
+    assert panel["cooldown_text"].text == "Cooldown:  sec"
+    assert panel["sell_price_text"].text == "Sell Price: "
+    assert panel["sell_button_text"].text is None
+    assert other_panel["speed_text"].text == f"Speed: {building.speed} $/sec"
 
 
 def test_refresh_texts_follow_a_language_switch():

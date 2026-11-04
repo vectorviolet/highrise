@@ -19,3 +19,7 @@ need to change.
 from __future__ import annotations
 
 from pygamine import resource_root as resource_root, resource_path as resource_path
+
+# The language files (config/lang/<code>.yaml), anchored to the resource root so
+# the game, the tests and the smoke test all find them from any folder.
+LANG_FOLDER = resource_path("config", "lang")

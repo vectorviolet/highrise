@@ -26,6 +26,7 @@ from pygamine import make_factory, make_text_factory, make_animated_factory
 from pygamine import MenuController
 from pygamine.util.localization import DEFAULT_LANGUAGE, localization, tr
 from ui.info_panel import InfoPanel
+from util.paths import LANG_FOLDER
 
 # Manifest key of the background music. Optional: without it the game plays
 # no music and hides the music volume control (it would control nothing --
@@ -77,7 +78,7 @@ def format_volume(volume: float) -> str:
 class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def __init__(self) -> None:
         self.settings = yaml.safe_load(Path("config/settings.yaml").read_text())
-        localization.load("config/lang")
+        localization.load(LANG_FOLDER)
         window = self.settings["window"]
         gameplay = self.settings["gameplay"]
         audio = self.settings["audio"]
@@ -153,10 +154,6 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         # Saved in the database (the Game settings page); the real value is
         # loaded in run().
         self.skip_intro = False
-        # False until add_objects() has built the panels the language
-        # callback re-texts.
-        self._ui_ready = False
-        localization.on_language_changed(self._on_language_changed)
 
     def on_canvas_resized(self, new_size: tuple[int, int]) -> None:
         # Every panel in config/panels.yaml is positioned with absolute pixel
@@ -216,7 +213,11 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         if self.background_music_sound_path is not None:
             self.audio.play_music(str(self.background_music_sound_path))
 
-        super().run()
+        self.watch_language()
+        try:
+            super().run()
+        finally:
+            self.unwatch_language()
 
     def _show_music_controls(self, shown: bool) -> None:
         panel = self.panel_manager["audio_settings"]
@@ -237,7 +238,6 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         loader.register("animated", make_animated_factory(self.assets))
         loader.load("config/panels.yaml")
         self._show_music_controls(self.background_music_sound_path is not None)
-        self._ui_ready = True
 
         panel = self.panel_manager["game"]
         for name in (
@@ -540,20 +540,26 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.set_skip_intro_label()
 
     def set_language_label(self) -> None:
-        name = localization.languages()[localization.language]
         self.panel_manager["game_settings"]["language_entry_text"].set_text(
-            name.upper()
+            localization.languages()[localization.language]
         )
 
     def set_skip_intro_label(self) -> None:
         key = "common.enabled" if self.skip_intro else "common.disabled"
         self.panel_manager["game_settings"]["skip_intro_entry_text"].set_text(tr(key))
 
+    def watch_language(self) -> None:
+        """Starts re-texting the code-built labels on a language change. Call
+        once the panels exist; pair it with `unwatch_language()`, so a game that
+        is over never reacts to the process-wide language again."""
+        localization.on_language_changed(self._on_language_changed)
+
+    def unwatch_language(self) -> None:
+        localization.remove_language_changed(self._on_language_changed)
+
     def _on_language_changed(self, code: str) -> None:
         """Re-texts what panels.yaml cannot: the toolbar hover texts and the
         labels the game sets from code (the other labels follow their key)."""
-        if not self._ui_ready:
-            return
         self.update_button_texts()
         self.set_window_mode_label()
         self.set_language_label()

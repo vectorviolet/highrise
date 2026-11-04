@@ -1,8 +1,10 @@
 # English strings: the fallback language, and the reference tr.yaml must match
 # (same keys, same {placeholders}). Every value is quoted so YAML never turns
 # one into a bool or a number. See docs/decisions/0001-localization.md in pygamine.
+# _meta.name is shown as is (in capitals, written by hand: no case functions on
+# Turkish text) in the Language setting.
 _meta:
-  name: "English"
+  name: "ENGLISH"
 
 common:
   go_back: "GO BACK"

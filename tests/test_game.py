@@ -142,7 +142,6 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
     game.old_sfx_volume = 0.5
     game.update_button_texts = Spy()
     game.skip_intro = False
-    game._ui_ready = True
     # pygamine 0.29.0 owns the display stack in Application.display; Game
     # forwards display_surface, window_mode and resolution to it.
     game.display = SimpleNamespace(
@@ -749,6 +748,74 @@ def _run_with_saved_settings(assets, monkeypatch, settings):
     game.background_music_sound_path = None
     game.run()
     return game, splash
+
+
+def test_run_watches_the_language_while_running_and_stops_after(assets, monkeypatch):
+    import pygamine
+
+    game = make_game(assets, size=3)
+    during = []
+
+    def fake_run(self):
+        localization.set_language("tr")
+        during.append(len(game.update_button_texts.calls))
+
+    monkeypatch.setattr(pygamine.Application, "run", fake_run)
+    game.splash = None
+    game.mouse = SimpleNamespace(
+        set_cursor_visible=Spy(), set_cursor_image=Spy(), position=(0, 0)
+    )
+    game.cursor_size = (10, 10)
+    game.load_data = Spy()
+    game.add_objects = Spy()
+    game.init_database = Spy()
+    game.load_settings = lambda: GameSettings("en", False)
+    game.background_music_sound_path = None
+
+    game.run()
+    calls_after_run = len(game.update_button_texts.calls)
+    localization.set_language("en")
+
+    assert during[0] > 0  # re-texted while running
+    assert len(game.update_button_texts.calls) == calls_after_run  # not afterwards
+
+
+def test_a_second_game_does_not_trigger_the_first_ones_language_callback(
+    assets, monkeypatch
+):
+    first, _ = _run_with_saved_settings(assets, monkeypatch, GameSettings("en", False))
+    calls_before = len(first.update_button_texts.calls)
+
+    _run_with_saved_settings(assets, monkeypatch, GameSettings("tr", False))
+
+    assert len(first.update_button_texts.calls) == calls_before
+
+
+def test_run_unwatches_the_language_even_when_the_loop_crashes(assets, monkeypatch):
+    import pygamine
+
+    def crash(self):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(pygamine.Application, "run", crash)
+    game = make_game(assets, size=3)
+    game.splash = None
+    game.mouse = SimpleNamespace(
+        set_cursor_visible=Spy(), set_cursor_image=Spy(), position=(0, 0)
+    )
+    game.cursor_size = (10, 10)
+    game.load_data = Spy()
+    game.add_objects = Spy()
+    game.init_database = Spy()
+    game.load_settings = lambda: GameSettings("en", False)
+    game.background_music_sound_path = None
+
+    with pytest.raises(RuntimeError):
+        game.run()
+    calls = len(game.update_button_texts.calls)
+    localization.set_language("tr")
+
+    assert len(game.update_button_texts.calls) == calls
 
 
 def test_run_shows_the_intro_by_default(assets, monkeypatch):

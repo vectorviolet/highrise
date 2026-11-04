@@ -8,20 +8,20 @@ import pytest
 import yaml
 
 from pygamine.util.localization import Localization, missing_glyphs
+from util.paths import LANG_FOLDER
 
 ROOT = Path(__file__).resolve().parent.parent
-LANG = ROOT / "config" / "lang"
 FONTS = ROOT / "assets" / "fonts"
 
 
 def loaded() -> Localization:
     localization = Localization()
-    localization.load(LANG)
+    localization.load(LANG_FOLDER)
     return localization
 
 
 def test_english_and_turkish_are_both_available():
-    assert loaded().languages() == {"en": "English", "tr": "Türkçe"}
+    assert loaded().languages() == {"en": "ENGLISH", "tr": "TÜRKÇE"}
 
 
 def test_every_language_has_exactly_the_keys_and_placeholders_of_english():
@@ -29,7 +29,7 @@ def test_every_language_has_exactly_the_keys_and_placeholders_of_english():
 
 
 def test_the_coverage_check_fails_on_a_missing_key(tmp_path):
-    for file in LANG.glob("*.yaml"):
+    for file in LANG_FOLDER.glob("*.yaml"):
         (tmp_path / file.name).write_text(file.read_text(encoding="utf-8"), "utf-8")
     turkish = yaml.safe_load((tmp_path / "tr.yaml").read_text(encoding="utf-8"))
     del turkish["menu"]["play"]
@@ -45,7 +45,7 @@ def test_the_coverage_check_fails_on_a_missing_key(tmp_path):
 
 
 def test_the_coverage_check_fails_on_a_changed_placeholder(tmp_path):
-    for file in LANG.glob("*.yaml"):
+    for file in LANG_FOLDER.glob("*.yaml"):
         (tmp_path / file.name).write_text(file.read_text(encoding="utf-8"), "utf-8")
     turkish = yaml.safe_load((tmp_path / "tr.yaml").read_text(encoding="utf-8"))
     turkish["game"]["level"] = "Seviye: {deger}"

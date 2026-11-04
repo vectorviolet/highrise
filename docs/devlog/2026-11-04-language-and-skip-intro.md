@@ -65,7 +65,7 @@ Titillium Web has no → (U+2192). No string uses it, and a test fails if one ev
 
 ### Saving the settings
 
-A new `settings` table (`language`, `skip_intro`) next to `game` and `buildings`, seeded with
+A new `settings` table (`language`, `skip_intro`; [ADR 0002](../decisions/0002-settings-table.md)) next to `game` and `buildings`, seeded with
 English and "intro shown". A separate table means saves made before this change load unchanged: the
 `game` table keeps its columns, and no migration runs. Both settings are saved the moment they
 change (there is no Save button on that page), and starting a new game keeps them.
