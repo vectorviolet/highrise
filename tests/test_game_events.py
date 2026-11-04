@@ -126,7 +126,13 @@ def make_panels() -> FakePanelManager:
                 "cancel_button": FakeButton(),
                 "save_button": FakeButton(),
             },
-            "game_settings": {"game_settings_back_button": FakeButton()},
+            "game_settings": {
+                "language_minus_button": FakeButton(),
+                "language_plus_button": FakeButton(),
+                "skip_intro_minus_button": FakeButton(),
+                "skip_intro_plus_button": FakeButton(),
+                "game_settings_back_button": FakeButton(),
+            },
             "developer": {
                 "github_button": FakeButton(),
                 "itch_button": FakeButton(),
@@ -178,6 +184,13 @@ class FakeGame(GameEventsMixin):
         self.buildings = FakeBuildings(self)
         self.player = SimpleNamespace(earn=lambda a: self.calls.append(("earn", a)))
         self.calls: list = []
+        self.skip_intro = False
+
+    def cycle_language(self, delta):
+        self.calls.append(("cycle_language", delta))
+
+    def set_skip_intro(self, value):
+        self.calls.append(("set_skip_intro", value))
 
     def play(self):
         self.calls.append("play")
@@ -400,6 +413,32 @@ def test_game_settings_back_button():
     game.handle_game_settings_events(click_up())
 
     assert ("open_panel", "settings") in game.calls
+
+
+@pytest.mark.parametrize(
+    ("button", "delta"), [("language_minus_button", -1), ("language_plus_button", 1)]
+)
+def test_language_steppers_cycle_the_language(button, delta):
+    game = FakeGame()
+    game.panel_manager["game_settings"][button].clicked = True
+
+    game.handle_game_settings_events(click_up())
+
+    assert game.calls == [("cycle_language", delta)]
+
+
+@pytest.mark.parametrize(
+    "button", ["skip_intro_minus_button", "skip_intro_plus_button"]
+)
+@pytest.mark.parametrize("before", [False, True])
+def test_skip_intro_steppers_toggle_the_setting(button, before):
+    game = FakeGame()
+    game.skip_intro = before
+    game.panel_manager["game_settings"][button].clicked = True
+
+    game.handle_game_settings_events(click_up())
+
+    assert game.calls == [("set_skip_intro", not before)]
 
 
 def test_developer_links_open_in_a_browser(monkeypatch):

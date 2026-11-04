@@ -6,7 +6,7 @@ import pygame
 import yaml
 
 from app.game_events import GameEventsMixin
-from app.game_persistence import GamePersistenceMixin
+from app.game_persistence import GamePersistenceMixin, GameSettings
 from domain.player import Player
 from gameplay.buildings.building import Buildings
 from gameplay.clouds.cloud_container import OneShotCloudAnimation, LoopingCloudAnimation
@@ -24,7 +24,9 @@ from pygamine import GameAudio
 from pygamine import StateObject
 from pygamine import make_factory, make_text_factory, make_animated_factory
 from pygamine import MenuController
+from pygamine.util.localization import DEFAULT_LANGUAGE, localization, tr
 from ui.info_panel import InfoPanel
+from util.paths import LANG_FOLDER
 
 # Manifest key of the background music. Optional: without it the game plays
 # no music and hides the music volume control (it would control nothing --
@@ -50,10 +52,11 @@ BACK_TARGETS = {
     "developer": "menu",
 }
 
-WINDOW_MODE_LABELS = {
-    "fullscreen": "FULLSCREEN",
-    "borderless": "BORDERLESS",
-    "windowed": "WINDOWED",
+# Localization keys (config/lang/*.yaml) of the window-mode labels.
+WINDOW_MODE_KEYS = {
+    "fullscreen": "display_settings.modes.fullscreen",
+    "borderless": "display_settings.modes.borderless",
+    "windowed": "display_settings.modes.windowed",
 }
 
 
@@ -75,6 +78,7 @@ def format_volume(volume: float) -> str:
 class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def __init__(self) -> None:
         self.settings = yaml.safe_load(Path("config/settings.yaml").read_text())
+        localization.load(LANG_FOLDER)
         window = self.settings["window"]
         gameplay = self.settings["gameplay"]
         audio = self.settings["audio"]
@@ -147,6 +151,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         }
         self.menu_controllers: dict = {}
 
+        # Saved in the database (the Game settings page); the real value is
+        # loaded in run().
+        self.skip_intro = False
+
     def on_canvas_resized(self, new_size: tuple[int, int]) -> None:
         # Every panel in config/panels.yaml is positioned with absolute pixel
         # coordinates authored against self._authored_size (1920x1080) -- the
@@ -180,6 +188,12 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         # menu/panel/audio setup interleaved between the splash and the
         # main loop, so it keeps its own run() override for that -- just
         # delegating the splash part instead of duplicating it.
+        # The settings come first: the language applies before any panel is
+        # built, and "skip intro" decides whether the splash runs at all.
+        self.init_database()
+        self._apply_settings(self.load_settings())
+        if self.skip_intro:
+            self.splash = None
         self.show_splash()
         self.mouse.set_cursor_visible(False)
         self.mouse.set_cursor_image(
@@ -196,12 +210,14 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         self._reset_session_ui()
         self.open_panel("menu")
-        self.set_window_size_label()
-        self.set_window_mode_label()
         if self.background_music_sound_path is not None:
             self.audio.play_music(str(self.background_music_sound_path))
 
-        super().run()
+        self.watch_language()
+        try:
+            super().run()
+        finally:
+            self.unwatch_language()
 
     def _show_music_controls(self, shown: bool) -> None:
         panel = self.panel_manager["audio_settings"]
@@ -294,21 +310,21 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         tilemap = self._tilemap
 
         if tilemap.is_max_size():
-            panel["expand_button_text"].set_text("MAX SIZE", state="hover")
+            panel["expand_button_text"].set_text(tr("game.max_size"), state="hover")
         else:
             panel["expand_button_text"].set_text(
                 f"{tilemap.get_expand_cost()}$", state="hover"
             )
 
         if len(self.buildings) == tilemap.row_count * tilemap.column_count:
-            panel["build_button_text"].set_text("TILES FULL", state="hover")
+            panel["build_button_text"].set_text(tr("game.tiles_full"), state="hover")
         else:
             panel["build_button_text"].set_text(
                 f"{self.buildings.get_build_cost()}$", state="hover"
             )
 
         if self.buildings.age_number == self.buildings.max_age_number:
-            panel["next_age_button_text"].set_text("MAX AGE", state="hover")
+            panel["next_age_button_text"].set_text(tr("game.max_age"), state="hover")
         else:
             panel["next_age_button_text"].set_text(
                 f"{self.buildings.get_age_cost()}$", state="hover"
@@ -392,7 +408,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             and "build_button_text" in self.panel_manager["game"]
         ):
             self.panel_manager["game"]["build_button_text"].set_text(
-                "TILES FULL", state="hover"
+                tr("game.tiles_full"), state="hover"
             )
 
     def create_building(self) -> None:
@@ -452,12 +468,16 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def _reset_session_ui(self) -> None:
         """Brings the UI in line with a freshly loaded session: the age, the
-        toolbar hover texts, a closed info panel and the volume labels."""
+        toolbar hover texts, a closed info panel and the settings labels."""
         self.set_age(self.buildings.age_number)
         self.update_button_texts()
         self.info_panel.close()
         self.set_music_label(self.audio.music_volume())
         self.set_sfx_label(self.audio.sfx_volume())
+        self.set_window_size_label()
+        self.set_window_mode_label()
+        self.set_language_label()
+        self.set_skip_intro_label()
 
     def has_save_data(self) -> bool:
         return len(self.buildings) > 0 or self.buildings.age_number > 0
@@ -488,5 +508,59 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def set_window_mode_label(self) -> None:
         self.panel_manager["display_settings"]["window_mode_entry_text"].set_text(
-            WINDOW_MODE_LABELS[self._window_mode]
+            tr(WINDOW_MODE_KEYS[self._window_mode])
         )
+
+    # ── game settings: language and skip intro ──
+
+    def _apply_settings(self, settings: GameSettings) -> None:
+        """Applies the saved settings at launch; an unknown saved language
+        (a language file removed since) falls back to English."""
+        language = settings.language
+        if language not in localization.languages():
+            language = DEFAULT_LANGUAGE
+        localization.set_language(language)
+        self.skip_intro = settings.skip_intro
+
+    def change_language(self, code: str) -> None:
+        """Saves and applies a language at once, with no restart."""
+        if code not in localization.languages():
+            raise KeyError(f"Unknown language '{code}'")
+        self.save_language(code)
+        localization.set_language(code)
+
+    def cycle_language(self, delta: int) -> None:
+        codes = sorted(localization.languages())
+        index = codes.index(localization.language)
+        self.change_language(codes[(index + delta) % len(codes)])
+
+    def set_skip_intro(self, skip_intro: bool) -> None:
+        self.save_skip_intro(skip_intro)
+        self.skip_intro = skip_intro
+        self.set_skip_intro_label()
+
+    def set_language_label(self) -> None:
+        self.panel_manager["game_settings"]["language_entry_text"].set_text(
+            localization.languages()[localization.language]
+        )
+
+    def set_skip_intro_label(self) -> None:
+        key = "common.enabled" if self.skip_intro else "common.disabled"
+        self.panel_manager["game_settings"]["skip_intro_entry_text"].set_text(tr(key))
+
+    def watch_language(self) -> None:
+        """Starts re-texting the code-built labels on a language change. Call
+        once the panels exist; pair it with `unwatch_language()`, so a game that
+        is over never reacts to the process-wide language again."""
+        localization.on_language_changed(self._on_language_changed)
+
+    def unwatch_language(self) -> None:
+        localization.remove_language_changed(self._on_language_changed)
+
+    def _on_language_changed(self, code: str) -> None:
+        """Re-texts what panels.yaml cannot: the toolbar hover texts and the
+        labels the game sets from code (the other labels follow their key)."""
+        self.update_button_texts()
+        self.set_window_mode_label()
+        self.set_language_label()
+        self.set_skip_intro_label()

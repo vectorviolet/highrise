@@ -107,6 +107,9 @@ class GameEventsMixin:
         self.cycle_resolution(delta)
         self.set_window_size_label()
 
+    def _toggle_skip_intro(self, _delta: int) -> None:
+        self.set_skip_intro(not self.skip_intro)
+
     def handle_audio_settings_events(self, event: pygame.event.Event) -> None:
         panel = self.panel_manager["audio_settings"]
         # Steppers use raw is_clicked: no click sound, no keyboard activation.
@@ -144,6 +147,18 @@ class GameEventsMixin:
 
     def handle_game_settings_events(self, event: pygame.event.Event) -> None:
         panel = self.panel_manager["game_settings"]
+        # Both buttons of a row do the same for a two-value choice. Steppers
+        # use raw is_clicked: no click sound, no keyboard activation.
+        steppers = (
+            ("language_minus_button", self.cycle_language, -1),
+            ("language_plus_button", self.cycle_language, 1),
+            ("skip_intro_minus_button", self._toggle_skip_intro, -1),
+            ("skip_intro_plus_button", self._toggle_skip_intro, 1),
+        )
+        for button_name, step, delta in steppers:
+            if panel[button_name].is_clicked(event, self.mouse.position):
+                step(delta)
+                return
         if self._activate(panel["game_settings_back_button"], event):
             self.open_panel("settings")
 

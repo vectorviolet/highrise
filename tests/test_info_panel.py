@@ -1,5 +1,11 @@
+from typing import Any
+
+import pygame
+
 from gameplay.buildings.building import Building
 from gameplay.tiles.tile import Tile
+from pygamine import TextObject, Transform
+from pygamine.util.localization import localization
 from ui.info_panel import InfoPanel
 
 
@@ -31,12 +37,23 @@ class FakePanelManager(dict):
         self.current_panel = "game"
 
 
-def make_panel_manager() -> tuple[FakePanelManager, dict[str, FakeText | FakeImage]]:
+def make_label(text_key: str) -> TextObject:
+    """A real label, built the way config/panels.yaml builds the info texts."""
+    return TextObject(
+        Transform((0, 0), (100, 100)),
+        (0, 0),
+        font=pygame.font.Font(None, 15),
+        text_key=text_key,
+        text_params={"value": ""},
+    )
+
+
+def make_panel_manager() -> tuple[FakePanelManager, dict[str, Any]]:
     panel = {
-        "level_text": FakeText(),
-        "speed_text": FakeText(),
-        "cooldown_text": FakeText(),
-        "sell_price_text": FakeText(),
+        "level_text": make_label("game.level"),
+        "speed_text": make_label("game.speed"),
+        "cooldown_text": make_label("game.cooldown"),
+        "sell_price_text": make_label("game.sell_price"),
         "sell_button_text": FakeText(),
         "info_panel_building_image": FakeImage(),
     }
@@ -84,7 +101,7 @@ def test_refresh_writes_every_field_from_the_building(assets):
 
 def test_refresh_reads_from_whichever_panel_is_currently_open(assets):
     manager, panel = make_panel_manager()
-    other_panel = {k: type(v)() for k, v in panel.items()}
+    _, other_panel = make_panel_manager()
     manager["other"] = other_panel
     manager.current_panel = "other"
     info_panel = InfoPanel(manager)
@@ -93,4 +110,24 @@ def test_refresh_reads_from_whichever_panel_is_currently_open(assets):
     info_panel.refresh(building)
 
     assert other_panel["level_text"].text == f"Level: {building.level}"
-    assert panel["level_text"].text is None  # untouched
+    # The panel that is not open keeps its own, untouched labels.
+    assert [panel[k].text for k in ("level_text", "speed_text")] == [
+        "Level: ",
+        "Speed:  $/sec",
+    ]
+    assert panel["cooldown_text"].text == "Cooldown:  sec"
+    assert panel["sell_price_text"].text == "Sell Price: "
+    assert panel["sell_button_text"].text is None
+    assert other_panel["speed_text"].text == f"Speed: {building.speed} $/sec"
+
+
+def test_refresh_texts_follow_a_language_switch():
+    manager, panel = make_panel_manager()
+    info_panel = InfoPanel(manager)
+    building = Building(level=2, age_number=1, tile=Tile(1, 1), on_payout=None)
+    info_panel.refresh(building)
+
+    localization.set_language("tr")
+
+    assert panel["level_text"].text == f"Seviye: {building.level}"
+    assert panel["cooldown_text"].text == f"Bekleme: {building.cooldown} sn"

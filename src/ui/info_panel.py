@@ -12,10 +12,12 @@ class InfoPanel:
     def refresh(self, building: Building) -> None:
         self.building = building
         panel = self.panel_manager[self.panel_manager.current_panel]
-        panel["level_text"].set_text("Level: " + str(building.level))
-        panel["speed_text"].set_text("Speed: " + str(building.speed) + " $/sec")
-        panel["cooldown_text"].set_text("Cooldown: " + str(building.cooldown) + " sec")
-        panel["sell_price_text"].set_text("Sell Price: " + str(building.sell_price))
+        # These labels take their text from the language files; set_params
+        # keeps them in the current language.
+        panel["level_text"].set_params(value=building.level)
+        panel["speed_text"].set_params(value=building.speed)
+        panel["cooldown_text"].set_params(value=building.cooldown)
+        panel["sell_price_text"].set_params(value=building.sell_price)
         panel["sell_button_text"].set_text(
             str(building.sell_price) + "$", state="hover"
         )

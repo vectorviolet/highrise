@@ -84,12 +84,13 @@ check-hidden = true
 # Not ours or not text: the pygamine submodule (its own repo), third-party
 # license texts, assets and binaries, the lock file, and local files
 # (virtualenv, tool caches, saves, builds). Also the project dictionary
-# itself (it lists British forms).
-skip = "./.codespell-en-us.txt,./.git,./.venv,.*_cache,__pycache__,./saves,./dist,./build,./htmlcov,./src/pygamine,./licenses,./assets,./uv.lock,./docs/devlog/img,*.png,*.gif,*.ico,*.ogg,*.mp3,*.wav,*.ttf"
+# itself (it lists British forms), and the Turkish strings (not English).
+skip = "./.codespell-en-us.txt,./.git,./.venv,.*_cache,__pycache__,./saves,./dist,./build,./htmlcov,./src/pygamine,./licenses,./assets,./config/lang/tr.yaml,./uv.lock,./docs/devlog/img,*.png,*.gif,*.ico,*.ogg,*.mp3,*.wav,*.ttf"
 # Real words codespell flags, one per line with why:
 #   datas: PyInstaller's Analysis(datas=...) argument (highrise.spec, util/paths.py)
 #   grey: Kenney's UI Pack folder and file names (config/assets.yaml, SOURCES.yaml, devlog)
-ignore-words-list = "datas,grey"
+#   accademia: the Italian school that designed Titillium Web (SOURCES.yaml, CREDITS.md)
+ignore-words-list = "datas,grey,accademia"
 
 [tool.mypy]
 # A lenient start (issue #32): the app's own code under src/, default

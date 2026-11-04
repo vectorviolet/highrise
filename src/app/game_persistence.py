@@ -1,6 +1,14 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 from gameplay.tilemap import Tilemap
+from pygamine.util.localization import DEFAULT_LANGUAGE
+
+
+class GameSettings(NamedTuple):
+    """The settings saved in the database's `settings` table."""
+
+    language: str
+    skip_intro: bool
 
 
 class GamePersistenceMixin:
@@ -23,6 +31,36 @@ class GamePersistenceMixin:
         )
         self.database.execute_safely(
             "CREATE TABLE IF NOT EXISTS buildings(level INTEGER, row INTEGER, column INTEGER)"
+        )
+        # A separate table, so saves made before these settings existed load
+        # unchanged: the game table keeps its columns. Seeded with the
+        # defaults (English, intro shown) so the UPDATEs below always hit a row.
+        self.database.execute_safely(
+            "CREATE TABLE IF NOT EXISTS settings(language TEXT, skip_intro INTEGER)"
+        )
+        self.database.execute_safely(
+            "INSERT INTO settings(language, skip_intro) "
+            "SELECT ?, 0 WHERE NOT EXISTS (SELECT 1 FROM settings)",
+            params=(DEFAULT_LANGUAGE,),
+        )
+
+    def load_settings(self) -> GameSettings:
+        """The saved settings. Needs `init_database()` first."""
+        rows = self.database.execute_safely(
+            "SELECT language, skip_intro FROM settings", True
+        )
+        assert rows, "settings row missing: call init_database() first"
+        language, skip_intro = rows[0]
+        return GameSettings(language, bool(skip_intro))
+
+    def save_language(self, language: str) -> None:
+        self.database.execute_safely(
+            "UPDATE settings SET language=?", params=(language,)
+        )
+
+    def save_skip_intro(self, skip_intro: bool) -> None:
+        self.database.execute_safely(
+            "UPDATE settings SET skip_intro=?", params=(int(skip_intro),)
         )
 
     def get_game_data(self) -> list[tuple] | None:

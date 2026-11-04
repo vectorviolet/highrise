@@ -10,15 +10,14 @@ object_templates:
     size: [16, 16]
   settings_text:
     type: text
-    font: kenvector_future
+    font: titillium_bold
     font_size: 25
     color: [128, 128, 128]
   panel_text:
     type: text
-    font: kenvector_future_thin
-    font_size: 15
+    font: titillium
+    font_size: 17
     color: Black
-    text: ""
 
   # ── Button image templates (image-only — pair with a child text object) ──
   menu_btn:
@@ -27,7 +26,7 @@ object_templates:
     nine_slice: 20
   menu_btn_text:
     type: text
-    font: kenvector_future
+    font: titillium_bold
     font_size: 30
     color: [251, 254, 255]
     position: [CENTER, CENTER]
@@ -35,13 +34,13 @@ object_templates:
     asset: blue_button
   title_btn_text:
     type: text
-    font: kenvector_future
+    font: titillium_bold
     font_size: 30
     color: white
     position: [CENTER, CENTER]
   bottom_panel_btn_text:
     type: text
-    font: kenvector_future
+    font: titillium_bold
     font_size: 27
     color: White
     position: [CENTER, CENTER]
@@ -51,8 +50,8 @@ object_templates:
     hover: yellow_button
   go_back_btn_text:
     type: text
-    text: "GO BACK"
-    font: kenvector_future
+    text_key: common.go_back
+    font: titillium_bold
     font_size: 28
     color: White
     position: [CENTER, CENTER]
@@ -61,10 +60,10 @@ object_templates:
     asset: grey8
   volume_entry_text:
     type: text
-    font: kenvector_future_thin
+    font: titillium
     font_size: 25
-    color: Gray
-    text: "%100"
+    color: [100, 100, 100]
+    text: ""
     position: [CENTER, CENTER]
   volume_button:
     size: [36, 36]
@@ -81,8 +80,8 @@ panels:
       menu_title_text:
         parent: menu_title
         type: text
-        text: "Highrise"
-        font: kenvector_future
+        text_key: menu.title
+        font: titillium_black
         font_size: 30
         color: white
         position: [CENTER, CENTER]
@@ -98,10 +97,10 @@ panels:
           settings_button:  { extends: menu_btn, size: [400, 60] }
           developer_button: { extends: menu_btn, size: [400, 60] }
           exit_button:      { extends: menu_btn, size: [400, 60], on_click_sound: back }
-      play_button_text:      { extends: menu_btn_text, parent: play_button,      text: "PLAY" }
-      settings_button_text:  { extends: menu_btn_text, parent: settings_button,  text: "SETTINGS" }
-      developer_button_text: { extends: menu_btn_text, parent: developer_button, text: "DEVELOPER" }
-      exit_button_text:      { extends: menu_btn_text, parent: exit_button,      text: "EXIT" }
+      play_button_text:      { extends: menu_btn_text, parent: play_button,      text_key: menu.play }
+      settings_button_text:  { extends: menu_btn_text, parent: settings_button,  text_key: menu.settings }
+      developer_button_text: { extends: menu_btn_text, parent: developer_button, text_key: menu.developer }
+      exit_button_text:      { extends: menu_btn_text, parent: exit_button,      text_key: menu.exit }
 
   settings:
     objects:
@@ -112,8 +111,8 @@ panels:
       settings_title_text:
         parent: settings_title
         type: text
-        text: "SETTINGS"
-        font: kenvector_future
+        text_key: settings.title
+        font: titillium_black
         font_size: 30
         color: white
         position: [CENTER, CENTER]
@@ -129,10 +128,10 @@ panels:
           audio_settings_button:   { extends: menu_btn, size: [400, 60] }
           game_settings_button:    { extends: menu_btn, size: [400, 60] }
           settings_back_button:    { extends: menu_btn, size: [400, 60] }
-      display_settings_button_text: { extends: menu_btn_text, parent: display_settings_button, text: "DISPLAY" }
-      audio_settings_button_text:   { extends: menu_btn_text, parent: audio_settings_button,   text: "AUDIO" }
-      game_settings_button_text:    { extends: menu_btn_text, parent: game_settings_button,    text: "GAME" }
-      settings_back_button_text:    { extends: menu_btn_text, parent: settings_back_button,    text: "GO BACK" }
+      display_settings_button_text: { extends: menu_btn_text, parent: display_settings_button, text_key: settings.display }
+      audio_settings_button_text:   { extends: menu_btn_text, parent: audio_settings_button,   text_key: settings.audio }
+      game_settings_button_text:    { extends: menu_btn_text, parent: game_settings_button,    text_key: settings.game }
+      settings_back_button_text:    { extends: menu_btn_text, parent: settings_back_button,    text_key: common.go_back }
 
   play:
     objects:
@@ -143,8 +142,8 @@ panels:
       play_title_text:
         parent: play_title
         type: text
-        text: "PLAY"
-        font: kenvector_future
+        text_key: play.title
+        font: titillium_black
         font_size: 30
         color: white
         position: [CENTER, CENTER]
@@ -159,9 +158,9 @@ panels:
           new_game_button: { extends: menu_btn, size: [400, 60] }
           continue_button: { extends: menu_btn, size: [400, 60] }
           play_back_button: { extends: menu_btn, size: [400, 60] }
-      new_game_button_text:  { extends: menu_btn_text, parent: new_game_button,  text: "NEW GAME" }
-      continue_button_text:  { extends: menu_btn_text, parent: continue_button,  text: "CONTINUE" }
-      play_back_button_text: { extends: menu_btn_text, parent: play_back_button, text: "GO BACK" }
+      new_game_button_text:  { extends: menu_btn_text, parent: new_game_button,  text_key: play.new_game }
+      continue_button_text:  { extends: menu_btn_text, parent: continue_button,  text_key: play.continue }
+      play_back_button_text: { extends: menu_btn_text, parent: play_back_button, text_key: common.go_back }
 
   game:
     objects:
@@ -190,7 +189,7 @@ panels:
       expand_button_text:
         extends: bottom_panel_btn_text
         parent: expand_button
-        text: "EXPAND"
+        text_key: game.expand
         states:
           hover: "0$"
       build_button:
@@ -201,7 +200,7 @@ panels:
       build_button_text:
         extends: bottom_panel_btn_text
         parent: build_button
-        text: "BUILD"
+        text_key: game.build
         states:
           hover: "0$"
       next_age_button:
@@ -212,13 +211,13 @@ panels:
       next_age_button_text:
         extends: bottom_panel_btn_text
         parent: next_age_button
-        text: "NEXT AGE"
+        text_key: game.next_age
         states:
           hover: "0$"
 
       money_text:
         type: text
-        font: freesansbold
+        font: titillium_bold
         font_size: 35
         color: Green
         background_color: Black
@@ -241,12 +240,12 @@ panels:
         on_click_sound: back
       sell_button_text:
         type: text
-        font: kenvector_future
+        font: titillium_bold
         font_size: 28
         color: White
         position: [CENTER, CENTER]
         parent: sell_button
-        text: "SELL"
+        text_key: game.sell
         states:
           hover: "0$"
       close_button:
@@ -255,10 +254,10 @@ panels:
         asset: red_button
         hover: yellow_button
         on_click_sound: back
-      level_text:        { extends: panel_text, position: [925, 390] }
-      speed_text:        { extends: panel_text, position: [925, 410] }
-      cooldown_text:     { extends: panel_text, position: [925, 430] }
-      sell_price_text:   { extends: panel_text, position: [925, 450] }
+      level_text: { extends: panel_text, position: [925, 390], text_key: game.level, text_params: { value: "" } }
+      speed_text: { extends: panel_text, position: [925, 410], text_key: game.speed, text_params: { value: "" } }
+      cooldown_text: { extends: panel_text, position: [925, 430], text_key: game.cooldown, text_params: { value: "" } }
+      sell_price_text: { extends: panel_text, position: [925, 450], text_key: game.sell_price, text_params: { value: "" } }
 
   display_settings:
     objects:
@@ -269,8 +268,8 @@ panels:
       display_settings_title_text:
         parent: display_settings_title
         type: text
-        text: "DISPLAY SETTINGS"
-        font: kenvector_future
+        text_key: display_settings.title
+        font: titillium_black
         font_size: 30
         color: white
         position: [CENTER, CENTER]
@@ -282,7 +281,7 @@ panels:
       window_mode_text:
         extends: settings_text
         position: [CENTER, 365]
-        text: "WINDOW MODE"
+        text_key: display_settings.window_mode
       window_mode_minus_button:
         extends: volume_button
         position: [840, 415]
@@ -296,7 +295,7 @@ panels:
         extends: volume_entry_text
         parent: window_mode_entry
         font_size: 16
-        text: "FULLSCREEN"
+        text: ""
       window_mode_minus_icon:
         extends: minus_icon_template
         position: [850, 425]
@@ -307,7 +306,7 @@ panels:
       window_size_text:
         extends: settings_text
         position: [CENTER, 535]
-        text: "WINDOW SIZE"
+        text_key: display_settings.window_size
       window_size_minus_button:
         extends: volume_button
         position: [840, 585]
@@ -321,7 +320,7 @@ panels:
         extends: volume_entry_text
         parent: window_size_entry
         font_size: 18
-        text: "1920x1080"
+        text: ""
       window_size_minus_icon:
         extends: minus_icon_template
         position: [850, 595]
@@ -345,8 +344,8 @@ panels:
       audio_settings_title_text:
         parent: audio_settings_title
         type: text
-        text: "AUDIO SETTINGS"
-        font: kenvector_future
+        text_key: audio_settings.title
+        font: titillium_black
         font_size: 30
         color: white
         position: [CENTER, CENTER]
@@ -357,11 +356,11 @@ panels:
       music_volume_text:
         extends: settings_text
         position: [CENTER, 380]
-        text: "MUSIC VOLUME"
+        text_key: audio_settings.music_volume
       sfx_volume_text:
         extends: settings_text
         position: [CENTER, 550]
-        text: "SFX VOLUME"
+        text_key: audio_settings.sfx_volume
 
       music_volume_minus_button:
         extends: volume_button
@@ -409,12 +408,12 @@ panels:
         on_click_sound: back
       cancel_button_text:
         type: text
-        font: kenvector_future
+        font: titillium_bold
         font_size: 28
         color: White
         position: [CENTER, CENTER]
         parent: cancel_button
-        text: "CANCEL"
+        text_key: common.cancel
       save_button:
         position: [975, 710]
         size: [150, 60]
@@ -423,41 +422,83 @@ panels:
         on_click_sound: back
       save_button_text:
         type: text
-        font: kenvector_future
+        font: titillium_bold
         font_size: 28
         color: White
         position: [CENTER, CENTER]
         parent: save_button
-        text: "SAVE"
+        text_key: common.save
 
   game_settings:
     objects:
       game_settings_title:
-        position: [740, 410]
+        position: [740, 300]
         size: [440, 70]
         asset: blue_button
       game_settings_title_text:
         parent: game_settings_title
         type: text
-        text: "GAME SETTINGS"
-        font: kenvector_future
+        text_key: game_settings.title
+        font: titillium_black
         font_size: 30
         color: white
         position: [CENTER, CENTER]
       game_settings_panel:
-        position: [740, 470]
-        size: [440, 200]
+        position: [740, 360]
+        size: [440, 400]
         extends: menu_panel
-      game_settings_coming_soon_text:
-        type: text
-        font: kenvector_future
-        font_size: 18
-        color: Green
-        position: [CENTER, 500]
-        text: "THIS PAGE WILL COMING SOON..."
+
+      language_text:
+        extends: settings_text
+        position: [CENTER, 395]
+        text_key: game_settings.language
+      language_minus_button:
+        extends: volume_button
+        position: [840, 445]
+      language_plus_button:
+        extends: volume_button
+        position: [1054, 445]
+      language_entry:
+        extends: volume_entry
+        position: [885, 445]
+      language_entry_text:
+        extends: volume_entry_text
+        parent: language_entry
+        font_size: 22
+      language_minus_icon:
+        extends: minus_icon_template
+        position: [850, 455]
+      language_plus_icon:
+        extends: plus_icon_template
+        position: [1064, 455]
+
+      skip_intro_text:
+        extends: settings_text
+        position: [CENTER, 530]
+        text_key: game_settings.skip_intro
+      skip_intro_minus_button:
+        extends: volume_button
+        position: [840, 580]
+      skip_intro_plus_button:
+        extends: volume_button
+        position: [1054, 580]
+      skip_intro_entry:
+        extends: volume_entry
+        position: [885, 580]
+      skip_intro_entry_text:
+        extends: volume_entry_text
+        parent: skip_intro_entry
+        font_size: 22
+      skip_intro_minus_icon:
+        extends: minus_icon_template
+        position: [850, 590]
+      skip_intro_plus_icon:
+        extends: plus_icon_template
+        position: [1064, 590]
+
       game_settings_back_button:
         extends: go_back_btn
-        position: [810, 580]
+        position: [810, 680]
       game_settings_back_button_text:
         extends: go_back_btn_text
         parent: game_settings_back_button
@@ -474,18 +515,18 @@ panels:
         asset: profile_image
       name_text:
         type: text
-        font: freesansbold
+        font: titillium_bold
         color: Black
         font_size: 20
         position: [CENTER, 480]
         text: "Umutcan Ekinci"
       title_text:
         type: text
-        font: freesansbold
+        font: titillium_bold
         color: [128, 128, 128]
         font_size: 17
         position: [CENTER, 500]
-        text: "Software Engineer"
+        text_key: developer.title
       github_button:
         position: [CENTER, 550]
         size: [250, 40]
@@ -493,7 +534,7 @@ panels:
         hover: yellow_button
       github_button_text:
         type: text
-        font: kenvector_future
+        font: titillium_bold
         font_size: 20
         color: Black
         position: [CENTER, CENTER]
@@ -512,7 +553,7 @@ panels:
         hover: yellow_button
       itch_button_text:
         type: text
-        font: kenvector_future
+        font: titillium_bold
         font_size: 20
         color: Black
         position: [CENTER, CENTER]

@@ -9,6 +9,12 @@
 # modified: what was changed, for edited pack files.
 
 packs:
+  font-titillium-web:
+    name: "Titillium Web"
+    author: "Accademia di Belle Arti di Urbino"
+    url: https://fonts.google.com/specimen/Titillium+Web
+    license: OFL-1.1
+    used_for: "all text: Regular, Bold and Black"
   kenney-background-elements-remastered:
     name: "Background Elements Remastered"
     author: Kenney
@@ -44,15 +50,18 @@ packs:
     author: Kenney
     url: https://kenney.nl/assets/ui-pack
     license: CC0-1.0
-    used_for: "buttons, panel backgrounds, sounds, fonts"
+    used_for: "buttons, panel backgrounds, sounds"
 
 files:
-  "fonts/Kenney Future Narrow.ttf":
-    source: kenney-ui-pack
-    original: "Font/Kenney Future Narrow.ttf"
-  "fonts/Kenney Future.ttf":
-    source: kenney-ui-pack
-    original: "Font/Kenney Future.ttf"
+  "fonts/TitilliumWeb-Black.ttf":
+    source: font-titillium-web
+    original: "ofl/titilliumweb/TitilliumWeb-Black.ttf"
+  "fonts/TitilliumWeb-Bold.ttf":
+    source: font-titillium-web
+    original: "ofl/titilliumweb/TitilliumWeb-Bold.ttf"
+  "fonts/TitilliumWeb-Regular.ttf":
+    source: font-titillium-web
+    original: "ofl/titilliumweb/TitilliumWeb-Regular.ttf"
   "images/buildings/rock/level1.png":
     source: kenney-hexagon-buildings
     composited_from: ["Tiles/redRoofShort.png"]

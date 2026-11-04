@@ -8,7 +8,7 @@ creation path) on the real Tilemap load_game_data() constructs."""
 from types import SimpleNamespace
 
 
-from app.game_persistence import GamePersistenceMixin
+from app.game_persistence import GamePersistenceMixin, GameSettings
 from gameplay.buildings.building import Building, Buildings
 from pygamine import Database
 
@@ -294,3 +294,62 @@ def test_delete_data_resets_the_game_row_and_clears_buildings(tmp_path, assets):
     assert game_row == [(0, 2, 500)]
     building_rows = game.database.execute_safely("SELECT * FROM buildings", True)
     assert building_rows == []
+
+
+# ── settings (language, skip intro) ──────────────────────────────────────────
+
+
+def test_settings_default_to_english_with_the_intro_shown(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    game.init_database()
+
+    assert game.load_settings() == GameSettings("en", False)
+
+
+def test_settings_round_trip_through_the_database(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    game.init_database()
+
+    game.save_language("tr")
+    game.save_skip_intro(True)
+
+    reopened = FakeGame(tmp_path, assets)
+    reopened.init_database()
+    assert reopened.load_settings() == GameSettings("tr", True)
+
+
+def test_init_database_keeps_saved_settings(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    game.init_database()
+    game.save_language("tr")
+
+    game.init_database()
+
+    assert game.load_settings().language == "tr"
+
+
+def test_a_save_from_before_the_settings_existed_loads_with_defaults(tmp_path, assets):
+    old = FakeGame(tmp_path, assets, starting_money=321)
+    old.database.execute_safely(
+        "CREATE TABLE game(age_number INTEGER, size INTEGER, money INTEGER, "
+        "music_volume INTEGER, sfx_volume INTEGER)"
+    )
+    old.database.execute_safely(
+        "INSERT INTO game VALUES(?, ?, ?, ?, ?)", params=(1, 3, 321, 0.5, 0.5)
+    )
+
+    old.load_data()
+
+    assert old.player.money == 321
+    assert old.load_settings() == GameSettings("en", False)
+
+
+def test_new_game_data_reset_keeps_the_settings(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    game.load_data()
+    game.save_language("tr")
+    game.save_skip_intro(True)
+
+    game.delete_data()
+
+    assert game.load_settings() == GameSettings("tr", True)

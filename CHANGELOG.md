@@ -7,6 +7,15 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- The GAME SETTINGS page has two settings, both saved in the database: **Language** (English or
+  Türkçe, applied instantly, English by default) and **Skip intro** (off by default; when on, the
+  game opens straight to the menu at the next launch).
+- Every player-visible string lives in `config/lang/en.yaml`, with a draft Turkish translation in
+  `config/lang/tr.yaml`. Tests check that both files have the same keys and that the font has every
+  character ([devlog](docs/devlog/2026-11-04-language-and-skip-intro.md)).
+
 ### Fixed
 
 - Moves, building, selling and NEXT AGE wait until buildings stop sliding and merging, so a merge
@@ -15,6 +24,9 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- The font is now Titillium Web (SIL OFL 1.1) instead of Kenney Future, which lacks the Turkish
+  letters ğ Ğ ı İ ş Ş. Info panel text is two points larger and the value boxes on the settings pages
+  use a darker gray, so they stay readable.
 - CI also runs mypy and codespell (American English spelling), like Chokepoint's.
 - Building movement is split into smaller methods; merge sounds and payout wiring
   use callbacks attached at creation ([devlog](docs/devlog/2026-10-30-building-callbacks.md)).
@@ -30,7 +42,7 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `require_image()` instead of `get_component()` plus a `None` assert, and the volume label uses
   `clamp01()`. No gameplay change.
 - pygamine 0.29.0: the display stack moved into the engine's `Display` class and localization support
-  was added. Highrise does not use the new localization yet. No gameplay change.
+  was added (Highrise uses it since the Language setting). No gameplay change.
 - The engine submodule no longer follows pygamine's `main` on its own (`update = merge` removed
   from `.gitmodules`); it moves only through a reviewed bump PR.
 - Dependabot opens one grouped PR a week with `uv.lock` updates (`.github/dependabot.yml`).
