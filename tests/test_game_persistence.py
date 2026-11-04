@@ -9,6 +9,7 @@ from types import SimpleNamespace
 
 
 from app.game_persistence import GamePersistenceMixin, GameSettings
+from ui.ui_scale import DEFAULT_UI_SCALE
 from gameplay.buildings.building import Building, Buildings
 from pygamine import Database
 
@@ -303,7 +304,7 @@ def test_settings_default_to_english_with_the_intro_shown(tmp_path, assets):
     game = FakeGame(tmp_path, assets)
     game.init_database()
 
-    assert game.load_settings() == GameSettings("en", False)
+    assert game.load_settings() == GameSettings("en", False, DEFAULT_UI_SCALE)
 
 
 def test_settings_round_trip_through_the_database(tmp_path, assets):
@@ -312,10 +313,11 @@ def test_settings_round_trip_through_the_database(tmp_path, assets):
 
     game.save_language("tr")
     game.save_skip_intro(True)
+    game.save_ui_scale(80)
 
     reopened = FakeGame(tmp_path, assets)
     reopened.init_database()
-    assert reopened.load_settings() == GameSettings("tr", True)
+    assert reopened.load_settings() == GameSettings("tr", True, 80)
 
 
 def test_init_database_keeps_saved_settings(tmp_path, assets):
@@ -341,7 +343,7 @@ def test_a_save_from_before_the_settings_existed_loads_with_defaults(tmp_path, a
     old.load_data()
 
     assert old.player.money == 321
-    assert old.load_settings() == GameSettings("en", False)
+    assert old.load_settings() == GameSettings("en", False, DEFAULT_UI_SCALE)
 
 
 def test_new_game_data_reset_keeps_the_settings(tmp_path, assets):
@@ -349,7 +351,42 @@ def test_new_game_data_reset_keeps_the_settings(tmp_path, assets):
     game.load_data()
     game.save_language("tr")
     game.save_skip_intro(True)
+    game.save_ui_scale(110)
 
     game.delete_data()
 
-    assert game.load_settings() == GameSettings("tr", True)
+    assert game.load_settings() == GameSettings("tr", True, 110)
+
+
+def test_a_settings_table_from_before_the_ui_scale_gets_the_column_and_keeps_its_row(
+    tmp_path, assets
+):
+    old = FakeGame(tmp_path, assets)
+    old.database.execute_safely(
+        "CREATE TABLE settings(language TEXT, skip_intro INTEGER)"
+    )
+    old.database.execute_safely("INSERT INTO settings VALUES('tr', 1)")
+
+    old.init_database()
+
+    assert old.load_settings() == GameSettings("tr", True, DEFAULT_UI_SCALE)
+    old.save_ui_scale(125)
+    assert old.load_settings().ui_scale == 125
+
+
+def test_init_database_keeps_a_saved_ui_scale(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    game.init_database()
+    game.save_ui_scale(90)
+
+    game.init_database()
+
+    assert game.load_settings().ui_scale == 90
+
+
+def test_an_unknown_saved_ui_scale_loads_as_the_default(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    game.init_database()
+    game.save_ui_scale(33)
+
+    assert game.load_settings().ui_scale == DEFAULT_UI_SCALE

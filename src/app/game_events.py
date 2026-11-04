@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING, Any
 import pygame
 import webbrowser
 
+from ui.ui_scale import DEFAULT_UI_SCALE
+
 # Game-panel keys that move every building one step (KEYUP).
 MOVE_KEYS = {
     pygame.K_RIGHT: "right",
@@ -90,12 +92,16 @@ class GameEventsMixin:
             ("window_mode_plus_button", self._step_window_mode, 1),
             ("window_size_minus_button", self._step_resolution, -1),
             ("window_size_plus_button", self._step_resolution, 1),
+            ("ui_scale_minus_button", self.step_ui_scale, -1),
+            ("ui_scale_plus_button", self.step_ui_scale, 1),
         )
         for button_name, step, delta in steppers:
             if panel[button_name].is_clicked(event, self.mouse.position):
                 step(delta)
                 return
-        if self._activate(panel["display_back_button"], event):
+        if self._activate(panel["ui_scale_reset_button"], event):
+            self.set_ui_scale(DEFAULT_UI_SCALE)
+        elif self._activate(panel["display_back_button"], event):
             self.open_panel("settings")
 
     def _step_window_mode(self, delta: int) -> None:

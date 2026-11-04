@@ -39,6 +39,7 @@ def check_config_yaml() -> None:
 
 def boot_game() -> None:
     from app.game import Game
+    from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES
 
     from pygamine.util.localization import localization
 
@@ -64,6 +65,15 @@ def boot_game() -> None:
                 game.update()
                 game.draw()
                 print(f"  {panel} ({code}): OK")
+        # Every UI scale step, rebuilding the panels live as the setting does.
+        for scale in UI_SCALES:
+            game.set_ui_scale(scale)
+            for panel in PANELS:
+                game.open_panel(panel)
+                game.update()
+                game.draw()
+            print(f"  every panel at UI scale {scale}%: OK")
+        game.set_ui_scale(DEFAULT_UI_SCALE)
     finally:
         game.unwatch_language()
         localization.set_language("en")

@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 
 from gameplay.tilemap import Tilemap
 from pygamine.util.localization import DEFAULT_LANGUAGE
+from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES
 
 
 class GameSettings(NamedTuple):
@@ -9,6 +10,7 @@ class GameSettings(NamedTuple):
 
     language: str
     skip_intro: bool
+    ui_scale: int
 
 
 class GamePersistenceMixin:
@@ -34,24 +36,36 @@ class GamePersistenceMixin:
         )
         # A separate table, so saves made before these settings existed load
         # unchanged: the game table keeps its columns. Seeded with the
-        # defaults (English, intro shown) so the UPDATEs below always hit a row.
+        # defaults (English, intro shown, default UI scale) so the UPDATEs
+        # below always hit a row.
         self.database.execute_safely(
-            "CREATE TABLE IF NOT EXISTS settings(language TEXT, skip_intro INTEGER)"
+            "CREATE TABLE IF NOT EXISTS settings(language TEXT, skip_intro INTEGER, "
+            f"ui_scale INTEGER NOT NULL DEFAULT {DEFAULT_UI_SCALE})"
         )
+        columns = self.database.execute_safely("PRAGMA table_info(settings)", True)
+        assert columns is not None
+        if "ui_scale" not in [column[1] for column in columns]:
+            # A settings table from before the UI scale: its existing row gets the default.
+            self.database.execute_safely(
+                "ALTER TABLE settings ADD COLUMN "
+                f"ui_scale INTEGER NOT NULL DEFAULT {DEFAULT_UI_SCALE}"
+            )
         self.database.execute_safely(
-            "INSERT INTO settings(language, skip_intro) "
-            "SELECT ?, 0 WHERE NOT EXISTS (SELECT 1 FROM settings)",
-            params=(DEFAULT_LANGUAGE,),
+            "INSERT INTO settings(language, skip_intro, ui_scale) "
+            "SELECT ?, 0, ? WHERE NOT EXISTS (SELECT 1 FROM settings)",
+            params=(DEFAULT_LANGUAGE, DEFAULT_UI_SCALE),
         )
 
     def load_settings(self) -> GameSettings:
         """The saved settings. Needs `init_database()` first."""
         rows = self.database.execute_safely(
-            "SELECT language, skip_intro FROM settings", True
+            "SELECT language, skip_intro, ui_scale FROM settings", True
         )
         assert rows, "settings row missing: call init_database() first"
-        language, skip_intro = rows[0]
-        return GameSettings(language, bool(skip_intro))
+        language, skip_intro, ui_scale = rows[0]
+        if ui_scale not in UI_SCALES:
+            ui_scale = DEFAULT_UI_SCALE  # a step removed since, or a hand-edited file
+        return GameSettings(language, bool(skip_intro), ui_scale)
 
     def save_language(self, language: str) -> None:
         self.database.execute_safely(
@@ -61,6 +75,11 @@ class GamePersistenceMixin:
     def save_skip_intro(self, skip_intro: bool) -> None:
         self.database.execute_safely(
             "UPDATE settings SET skip_intro=?", params=(int(skip_intro),)
+        )
+
+    def save_ui_scale(self, ui_scale: int) -> None:
+        self.database.execute_safely(
+            "UPDATE settings SET ui_scale=?", params=(ui_scale,)
         )
 
     def get_game_data(self) -> list[tuple] | None:

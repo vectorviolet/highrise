@@ -26,6 +26,7 @@ from pygamine import make_factory, make_text_factory, make_animated_factory
 from pygamine import MenuController
 from pygamine.util.localization import DEFAULT_LANGUAGE, localization, tr
 from ui.info_panel import InfoPanel
+from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES, step_ui_scale
 from util.paths import LANG_FOLDER
 
 # Manifest key of the background music. Optional: without it the game plays
@@ -154,6 +155,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         # Saved in the database (the Game settings page); the real value is
         # loaded in run().
         self.skip_intro = False
+        self.ui_scale = DEFAULT_UI_SCALE
 
     def on_canvas_resized(self, new_size: tuple[int, int]) -> None:
         # Every panel in config/panels.yaml is positioned with absolute pixel
@@ -232,7 +234,13 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.panel_manager.add_object("game", "tiles", self.tilemap)
         self.panel_manager.add_object("game", "buildings", self.buildings)
 
+        # Panels are laid out against the canvas as it is now, not the one the
+        # Game started with.
+        self.window_transform.size = self.size
         loader = PanelLoaderExt(self.panel_manager, self.window_transform, self.assets)
+        # The UI scale reaches every panel object (size, font size, offsets) through
+        # the loader; the game world above is not loaded through it, so it stays put.
+        loader.scale = self.ui_scale / 100
         loader.register("object", make_factory(self.assets), default=True)
         loader.register("text", make_text_factory(self.assets))
         loader.register("animated", make_animated_factory(self.assets))
@@ -253,13 +261,23 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         ):
             panel[name].set_parent(self.info_panel.root)
 
-        panel["selection_mode_button"].set_base_state("off")
-        panel["close_button"].images[None].blit(
-            self.assets.get_image("cross_white"), (9, 9)
+        panel["selection_mode_button"].set_base_state(
+            "on" if self.tile_selector.is_active else "off"
         )
-        panel["close_button"]._hover_images[None].blit(
-            self.assets.get_image("cross_grey"), (9, 9)
-        )
+        close_button = panel["close_button"]
+        # The cross keeps its pixel size and sits in the middle of the scaled button.
+        for images, icon in (
+            (close_button.images, self.assets.get_image("cross_white")),
+            (close_button._hover_images, self.assets.get_image("cross_grey")),
+        ):
+            button_image = images[None]
+            button_image.blit(
+                icon,
+                (
+                    (button_image.get_width() - icon.get_width()) // 2,
+                    (button_image.get_height() - icon.get_height()) // 2,
+                ),
+            )
 
         switch_up = self.assets.sound_path("switch_up")
         switch_down = self.assets.sound_path("switch_down")
@@ -461,9 +479,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def new_game(self) -> None:
         self.delete_data()
         self.load_data()
+        self.tile_selector.is_active = False
         self.add_objects()
         self._reset_session_ui()
-        self.tile_selector.is_active = False
         self.open_panel("game")
 
     def _reset_session_ui(self) -> None:
@@ -478,6 +496,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.set_window_mode_label()
         self.set_language_label()
         self.set_skip_intro_label()
+        self.set_ui_scale_label()
 
     def has_save_data(self) -> bool:
         return len(self.buildings) > 0 or self.buildings.age_number > 0
@@ -511,6 +530,28 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             tr(WINDOW_MODE_KEYS[self._window_mode])
         )
 
+    def set_ui_scale_label(self) -> None:
+        self.panel_manager["display_settings"]["ui_scale_entry_text"].set_text(
+            f"%{self.ui_scale}"
+        )
+
+    def set_ui_scale(self, ui_scale: int) -> None:
+        """Saves a UI scale and applies it at once: the panels are rebuilt at the
+        new scale and the panel that is open stays open."""
+        if ui_scale not in UI_SCALES:
+            raise ValueError(
+                f"Unknown UI scale {ui_scale}; expected one of {UI_SCALES}"
+            )
+        if ui_scale == self.ui_scale:
+            return
+        self.save_ui_scale(ui_scale)
+        self.ui_scale = ui_scale
+        self.add_objects()
+        self._reset_session_ui()
+
+    def step_ui_scale(self, delta: int) -> None:
+        self.set_ui_scale(step_ui_scale(self.ui_scale, delta))
+
     # ── game settings: language and skip intro ──
 
     def _apply_settings(self, settings: GameSettings) -> None:
@@ -521,6 +562,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             language = DEFAULT_LANGUAGE
         localization.set_language(language)
         self.skip_intro = settings.skip_intro
+        self.ui_scale = settings.ui_scale
 
     def change_language(self, code: str) -> None:
         """Saves and applies a language at once, with no restart."""

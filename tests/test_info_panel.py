@@ -23,6 +23,7 @@ class FakeImage:
     def __init__(self):
         self.surfaces = {}
         self.state = None
+        self.rect = Transform((0, 0), (65, 89))  # the size the panel was loaded at
 
     def add_surface(self, name, surface) -> None:
         self.surfaces[name] = surface

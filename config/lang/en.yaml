@@ -35,6 +35,8 @@ display_settings:
   title: "DISPLAY SETTINGS"
   window_mode: "WINDOW MODE"
   window_size: "WINDOW SIZE"
+  ui_scale: "UI SCALE"
+  reset_ui_scale: "RESET UI SCALE"
   modes:
     fullscreen: "FULLSCREEN"
     borderless: "BORDERLESS"

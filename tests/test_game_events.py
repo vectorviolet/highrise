@@ -8,6 +8,8 @@ real Game() (which needs the full YAML panel/asset stack for no benefit)."""
 from types import SimpleNamespace
 
 import pygame
+
+from ui.ui_scale import DEFAULT_UI_SCALE
 import pytest
 
 from app.game_events import GameEventsMixin
@@ -116,6 +118,9 @@ def make_panels() -> FakePanelManager:
                 "window_mode_plus_button": FakeButton(),
                 "window_size_minus_button": FakeButton(),
                 "window_size_plus_button": FakeButton(),
+                "ui_scale_minus_button": FakeButton(),
+                "ui_scale_plus_button": FakeButton(),
+                "ui_scale_reset_button": FakeButton(),
                 "display_back_button": FakeButton(),
             },
             "audio_settings": {
@@ -203,6 +208,12 @@ class FakeGame(GameEventsMixin):
 
     def cycle_window_mode(self, step):
         self.calls.append(("cycle_window_mode", step))
+
+    def step_ui_scale(self, delta):
+        self.calls.append(("step_ui_scale", delta))
+
+    def set_ui_scale(self, ui_scale):
+        self.calls.append(("set_ui_scale", ui_scale))
 
     def cycle_resolution(self, step):
         self.calls.append(("cycle_resolution", step))
@@ -793,6 +804,8 @@ def test_display_settings_exact_calls_per_button():
             ("cycle_resolution", 1),
             "set_window_size_label",
         ],
+        "ui_scale_minus_button": [("step_ui_scale", -1)],
+        "ui_scale_plus_button": [("step_ui_scale", 1)],
     }
     for name, expected in cases.items():
         game = FakeGame()
@@ -801,6 +814,16 @@ def test_display_settings_exact_calls_per_button():
         assert game.calls == expected, name
         # The stepper buttons use raw is_clicked: no click sound of their own.
         assert game.audio.played == [], name
+
+
+def test_display_settings_reset_button_restores_the_default_ui_scale():
+    game = FakeGame()
+    game.panel_manager["display_settings"]["ui_scale_reset_button"].clicked = True
+
+    game.handle_display_settings_events(click_up())
+
+    assert game.calls == [("set_ui_scale", DEFAULT_UI_SCALE)]
+    assert game.audio.played == [game.click_sound_path]
 
 
 def test_display_settings_only_the_first_clicked_button_acts():

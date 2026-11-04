@@ -89,6 +89,15 @@ Button, ButtonText (src/button.py) — extend GuiObject
 
 All UI panels, buttons, and layout are declared in `config/panels.yaml`. Python code never hard-codes widget positions or sizes for UI — use `PanelLoaderExt` and `panel_factory.py` to wire YAML definitions to Python objects. `config/assets.yaml` declares the asset manifest (fonts, images by category).
 
+### UI scale
+
+The DISPLAY page's UI scale (`UI_SCALES` in `src/ui/ui_scale.py`, percent; default `DEFAULT_UI_SCALE`)
+is applied by `Game.add_objects()` through `PanelLoader.scale`; `Game.set_ui_scale()` saves it and
+rebuilds the panels. Panels scale about the window center, so edge-hugging chrome (the HUD bar) uses
+`anchor: bottom` and children of a fixed-size root. Python code that needs a widget size reads it
+from the built widget (`image.rect.size`), never from a hard-coded pixel count. Nine-slice borders and
+padding are not scaled by the loader.
+
 ### Localization
 
 Every player-visible string lives in `config/lang/<code>.yaml` (`en.yaml` is the reference and the
@@ -120,7 +129,7 @@ Saving finishes pending merges first. See ADR 0001.
 
 ### Persistence
 
-SQLite database at `databases/database.db`. Three tables: `game` (age, map size, money, volumes), `buildings` (level, row, column) and `settings` (language, skip intro; saved the moment they change on the Game settings page, and kept by New Game). The database auto-initializes on first run. Save/load logic lives entirely in `GamePersistenceMixin`.
+SQLite database at `databases/database.db`. Three tables: `game` (age, map size, money, volumes), `buildings` (level, row, column) and `settings` (language, skip intro, UI scale; saved the moment they change on the Game and Display settings pages, and kept by New Game). The database auto-initializes on first run. Save/load logic lives entirely in `GamePersistenceMixin`.
 
 ### Audio
 
