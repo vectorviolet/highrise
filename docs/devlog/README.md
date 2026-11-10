@@ -17,7 +17,7 @@ PR. "Owner" is the project owner; "Claude" is the Claude Code session that imple
 | 2026-11-04 | [Background music: Sakura Girl - Day Off](2026-11-04-day-off-music.md) | Audio | #35, PR #40 |
 | 2026-11-04 | [Language (English and Turkish), Skip intro and a new font](2026-11-04-language-and-skip-intro.md) | UI, Localization | #29, PR #34 |
 | 2026-11-04 | [UI scale setting](2026-11-04-ui-scale.md) | UI | #38, PR #41 |
-| 2026-11-10 | [Cash display restyle and floating money text](2026-11-10-cash-display-and-floating-text.md) | UI | #48, #50 |
+| 2026-11-10 | [Cash display restyle and floating money text](2026-11-10-cash-display-and-floating-text.md) | UI | #48, #50, PR #54 |
 <!-- index:end -->
 
 ## Adding an entry

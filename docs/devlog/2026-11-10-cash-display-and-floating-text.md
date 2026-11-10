@@ -1,7 +1,7 @@
 # Cash display restyle and floating money text
-<!-- index | refs: #48, #50 -->
+<!-- index | refs: #48, #50, PR #54 -->
 
-**Date:** 2026-11-10 · **Area:** UI · **Issues:** [#48](https://github.com/vectorviolet/highrise/issues/48), [#50](https://github.com/vectorviolet/highrise/issues/50)
+**Date:** 2026-11-10 · **Area:** UI · **Issues:** [#48](https://github.com/vectorviolet/highrise/issues/48), [#50](https://github.com/vectorviolet/highrise/issues/50)  · **PR:** [#54](https://github.com/vectorviolet/highrise/pull/54)
 
 ## Context
 
