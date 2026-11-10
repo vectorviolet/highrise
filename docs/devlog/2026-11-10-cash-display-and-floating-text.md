@@ -44,11 +44,11 @@ self-contained class, `ui/floating_text.py`, driven by a time value passed in by
 
 ## Decision
 
-- **Cash display look: pending owner choice.** Candidate 1 is the default for now.
-  `ui.cash_display` in `config/settings.yaml` (1, 2 or 3) switches the look; the unused
-  candidates are deleted from `ui/cash_display.py` once the owner picks.
+- **Cash display look:** the owner picked candidate 1 (dark plate, gold coin, white text) after
+  comparing all three in game. Candidates 2 and 3 and the `ui.cash_display` switch are removed;
+  the comparison images above stay as the record of the options.
 - **Alignment:** the plate and the buttons share `y: 20`, `height: 60` in `config/panels.yaml`;
-  `tests/test_cash_display.py` checks top, bottom and height at every UI scale and style.
+  `tests/test_cash_display.py` checks top, bottom and height at every UI scale.
 - **Floating text:** the numbers (colors, lifetime, rise and fall, merge window, cap) are in
   `config/settings.yaml` under `floating_text`. Text size and distances scale with the UI scale.
   A building's payouts within the merge window of its first text add into that text.
@@ -67,8 +67,7 @@ self-contained class, `ui/floating_text.py`, driven by a time value passed in by
 
 ## Result
 
-Pending the owner's pick of a candidate. The floating text and the alignment work at every UI
-scale; tests cover the amounts, signs, colors, the merge window and expiry.
+The cash display and the floating text work at every UI scale; tests cover the amounts, signs, colors, the merge window and expiry.
 
 ## Review follow-ups
 

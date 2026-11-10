@@ -130,8 +130,7 @@ Saving finishes pending merges first. See ADR 0001.
 ### Cash display and floating money text
 
 The cash display is `money_panel` (plate), `money_icon` (coin) and `money_text` in `config/panels.yaml`,
-on the buttons' top and bottom line. `ui/cash_display.py` paints the plate and coin for the style picked
-by `ui.cash_display` in `config/settings.yaml`. Money changes show `ui/floating_text.py` texts, numbers in
+on the buttons' top and bottom line. `ui/cash_display.py` paints the plate and coin. Money changes show `ui/floating_text.py` texts, numbers in
 `floating_text` in `config/settings.yaml`: `Game._on_building_payout` and `show_gain` (payouts, sales) and
 `Game._spend` (build, upgrade, expand, NEXT AGE; always spend through it, not `Player.spend`). Amounts are
 written by `ui/money_format.py` from the `money.amount` language key, for the cash display and the texts alike.

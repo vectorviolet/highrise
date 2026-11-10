@@ -25,7 +25,7 @@ from pygamine import StateObject
 from pygamine import make_factory, make_text_factory, make_animated_factory
 from pygamine import MenuController
 from pygamine.util.localization import DEFAULT_LANGUAGE, localization, tr
-from ui.cash_display import apply_cash_style, cash_style
+from ui.cash_display import apply_cash_display
 from ui.floating_text import FloatingTextConfig, FloatingTexts
 from ui.info_panel import InfoPanel
 from ui.money_format import format_money
@@ -102,7 +102,6 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         ui = self.settings["ui"]
 
         self.cursor_size = tuple(ui["cursor_size"])
-        self.cash_style = cash_style(ui["cash_display"])
         self.floating_text_config = FloatingTextConfig.from_dict(
             self.settings["floating_text"]
         )
@@ -369,8 +368,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             ),
         }
 
-        apply_cash_style(
-            self.cash_style,
+        apply_cash_display(
             panel["money_panel"],
             panel["money_icon"],
             panel["money_text"],

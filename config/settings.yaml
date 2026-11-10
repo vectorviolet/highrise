@@ -26,7 +26,6 @@ floating_text:
   max_texts: 40            # alive at once
 
 ui:
-  cash_display: 1          # the cash display's look, 1-3 (ui/cash_display.py; the owner picks)
   cursor_size: [32, 32]  # the Kenney Cursor Pack sprite's native size: crisp pixel art
   background_colors:
     menu: yellow
