@@ -33,8 +33,8 @@ Alignment is checked at every UI scale (80 to 125 percent); candidate 1 at 80, 1
 
 ### Floating text (#50)
 
-Frames at 0, 300, 700 and 1100 ms: a sale (+$840) over the sold building, two payouts (+$12, +$6)
-over the buildings that paid, and a spend (-$400) falling onto the cash display.
+Frames at 0, 300, 700 and 1100 ms: a sale (+840$) over the sold building, two payouts (+12$, +6$)
+over the buildings that paid, and a spend (-400$) falling onto the cash display.
 
 ![Floating text frames](img/50-floating-text-frames.png)
 
@@ -69,3 +69,11 @@ self-contained class, `ui/floating_text.py`, driven by a time value passed in by
 
 Pending the owner's pick of a candidate. The floating text and the alignment work at every UI
 scale; tests cover the amounts, signs, colors, the merge window and expiry.
+
+## Review follow-ups
+
+- One formatter, `ui/money_format.py`, writes every amount from the `money.amount` language key
+  (now `"{amount}$"`), so the cash display and the floating text always match; changing the one
+  string to `"${amount}"` or `"${amount:,}"` changes both. The owner is still deciding the format.
+- A sale always gets its own text; only a building's payouts merge.
+- Texts over the world are hidden while the info panel is open, so they never cover it.

@@ -243,7 +243,7 @@ panels:
         parent: money_panel
         position: [14, 10]
         size: [40, 40]
-        asset: grey_button
+        color: [0, 0, 0, 0]  # empty: the coin is drawn in code
       money_text:
         type: text
         font: titillium_bold

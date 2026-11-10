@@ -190,8 +190,8 @@ class FakeGame(GameEventsMixin):
         self.calls: list = []
         self.skip_intro = False
 
-    def show_gain(self, building, amount):
-        self.calls.append(("show_gain", building, amount))
+    def show_gain(self, building, amount, *, merge=True):
+        self.calls.append(("show_gain", building, amount, merge))
 
     def cycle_language(self, delta):
         self.calls.append(("cycle_language", delta))
@@ -507,7 +507,8 @@ def test_game_events_info_panel_open_sell_button_sells_the_building():
 
     assert ("remove", game.info_panel.building) in game.calls
     assert ("earn", 42) in game.calls
-    assert ("show_gain", game.info_panel.building, 42) in game.calls
+    # A sale never merges into a payout's text.
+    assert ("show_gain", game.info_panel.building, 42, False) in game.calls
     assert game.info_panel.close_calls == 1
     assert "update_button_texts" in game.calls
 
@@ -640,7 +641,7 @@ def test_game_events_info_panel_sell_wins_over_close():
     assert game.calls == [
         ("remove", game.info_panel.building),
         ("earn", 5),
-        ("show_gain", game.info_panel.building, 5),
+        ("show_gain", game.info_panel.building, 5, False),
         "update_button_texts",
     ]
     assert game.info_panel.close_calls == 1

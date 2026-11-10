@@ -29,7 +29,7 @@ def test_a_gain_reads_plus_dollar_amount_and_rises(texts):
     texts.gain("a", (100, 200), 35, now_ms=0)
 
     (text,) = texts.texts
-    assert text.text == "+$35"
+    assert text.text == "+35$"
     assert text.amount == 35
     assert texts.current_position(text, 0) == Vector2(100, 200)
     assert texts.current_position(text, 1000).y == 200 - CONFIG.rise
@@ -40,7 +40,7 @@ def test_a_spend_reads_minus_dollar_amount_and_falls(texts):
     texts.spend((300, 80), 120, now_ms=0)
 
     (text,) = texts.texts
-    assert text.text == "-$120"
+    assert text.text == "-120$"
     assert text.amount == -120
     assert texts.current_position(text, 1000) == Vector2(300, 80 + CONFIG.fall)
 
@@ -49,7 +49,7 @@ def test_payouts_of_one_source_inside_the_merge_window_become_one_number(texts):
     texts.gain("a", (0, 0), 10, now_ms=0)
     texts.gain("a", (0, 0), 5, now_ms=499)
 
-    assert [t.text for t in texts.texts] == ["+$15"]
+    assert [t.text for t in texts.texts] == ["+15$"]
     assert texts.texts[0].born_ms == 0  # merging doesn't restart its life
 
 
@@ -57,14 +57,14 @@ def test_a_payout_after_the_merge_window_starts_a_new_number(texts):
     texts.gain("a", (0, 0), 10, now_ms=0)
     texts.gain("a", (0, 0), 5, now_ms=500)
 
-    assert [t.text for t in texts.texts] == ["+$10", "+$5"]
+    assert [t.text for t in texts.texts] == ["+10$", "+5$"]
 
 
 def test_payouts_of_different_sources_never_merge(texts):
     texts.gain("a", (0, 0), 10, now_ms=0)
     texts.gain("b", (50, 0), 10, now_ms=1)
 
-    assert [t.text for t in texts.texts] == ["+$10", "+$10"]
+    assert [t.text for t in texts.texts] == ["+10$", "+10$"]
 
 
 def test_a_spend_never_merges_with_a_gain_or_another_spend(texts):
@@ -72,7 +72,7 @@ def test_a_spend_never_merges_with_a_gain_or_another_spend(texts):
     texts.spend((0, 0), 10, now_ms=1)
     texts.spend((0, 0), 10, now_ms=2)
 
-    assert [t.text for t in texts.texts] == ["+$10", "-$10", "-$10"]
+    assert [t.text for t in texts.texts] == ["+10$", "-10$", "-10$"]
 
 
 def test_texts_vanish_after_their_lifetime(texts):
@@ -82,7 +82,7 @@ def test_texts_vanish_after_their_lifetime(texts):
     texts.update(now_ms=999)
     assert len(texts.texts) == 2
     texts.update(now_ms=1000)
-    assert [t.text for t in texts.texts] == ["-$5"]
+    assert [t.text for t in texts.texts] == ["-5$"]
     texts.update(now_ms=1600)
     assert texts.texts == []
 
@@ -91,7 +91,7 @@ def test_at_most_max_texts_stay_alive_and_the_oldest_go_first(texts):
     for i in range(5):
         texts.spend((0, 0), i + 1, now_ms=i)
 
-    assert [t.text for t in texts.texts] == ["-$3", "-$4", "-$5"]
+    assert [t.text for t in texts.texts] == ["-3$", "-4$", "-5$"]
 
 
 def test_the_distance_scales_with_the_ui_scale(texts):
@@ -143,3 +143,61 @@ def test_a_text_fades_out_over_its_life(texts):
     assert covered(0) == 255
     assert 0 < covered(700) < 255
     assert covered(999) < covered(700)
+
+
+def test_a_gain_without_a_key_never_merges(texts):
+    texts.gain("a", (0, 0), 10, now_ms=0)
+    texts.gain(None, (0, 0), 500, now_ms=1)
+    texts.gain(None, (0, 0), 7, now_ms=2)
+
+    assert [t.text for t in texts.texts] == ["+10$", "+500$", "+7$"]
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [({"max_texts": 0}, "max_texts"), ({"lifetime_ms": 0}, "lifetime_ms")],
+)
+def test_the_config_rejects_values_that_break_the_texts(change, message):
+    values = {
+        "font_size": 30,
+        "gain_color": [0, 255, 0],
+        "spend_color": [255, 0, 0],
+        "outline_color": [0, 0, 0],
+        "lifetime_ms": 1000,
+        "rise": 10,
+        "fall": 10,
+        "merge_window_ms": 500,
+        "max_texts": 3,
+    } | change
+
+    with pytest.raises(ValueError, match=message):
+        FloatingTextConfig.from_dict(values)
+
+
+def test_gains_over_the_world_are_skipped_while_a_panel_is_open_but_spends_stay(texts):
+    texts.gain("a", (50, 50), 10, now_ms=0)
+    texts.spend((150, 50), 10, now_ms=0)
+
+    def drawn(**kwargs) -> tuple[bool, bool]:
+        surface = pygame.Surface((200, 100), pygame.SRCALPHA)
+        texts.draw(surface, now_ms=0, **kwargs)
+        left = surface.subsurface((0, 0, 100, 100))
+        right = surface.subsurface((100, 0, 100, 100))
+        return (
+            pygame.mask.from_surface(left).count() > 0,
+            pygame.mask.from_surface(right).count() > 0,
+        )
+
+    assert drawn() == (True, True)
+    assert drawn(over_world=False) == (False, True)
+
+
+def test_a_fade_step_is_drawn_from_one_cached_image(texts):
+    texts.gain("a", (50, 50), 10, now_ms=0)
+    surface = pygame.Surface((200, 100), pygame.SRCALPHA)
+
+    texts.draw(surface, now_ms=300)
+    image = texts._render(texts.texts[0], 14)
+    texts.draw(surface, now_ms=301)
+
+    assert texts._render(texts.texts[0], 14) is image

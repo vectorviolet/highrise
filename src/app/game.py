@@ -28,6 +28,7 @@ from pygamine.util.localization import DEFAULT_LANGUAGE, localization, tr
 from ui.cash_display import apply_cash_style, cash_style
 from ui.floating_text import FloatingTextConfig, FloatingTexts
 from ui.info_panel import InfoPanel
+from ui.money_format import format_money
 from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES, step_ui_scale
 from util.paths import LANG_FOLDER
 
@@ -137,8 +138,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         self.audio = GameAudio()
         self.player = Player()
+        # The font of the coin's dollar sign and of the floating money text.
+        self.money_font_path = str(self.assets.font_path("titillium_black"))
         self.floating_texts = FloatingTexts(
-            self.floating_text_config, str(self.assets.font_path("titillium_black"))
+            self.floating_text_config, self.money_font_path
         )
         # The listener add_objects() registered last; replaced on every
         # rebuild so new games don't pile up listeners on the same player.
@@ -372,14 +375,15 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             panel["money_icon"],
             panel["money_text"],
             self.assets,
+            self.money_font_path,
         )
         self.floating_texts.scale = self.ui_scale / 100
         money_text = panel["money_text"]
         if self.money_listener is not None:
             self.player.remove_money_listener(self.money_listener)
-        self.money_listener = lambda m: money_text.set_text(f"{m}$")
+        self.money_listener = lambda m: money_text.set_text(format_money(m))
         self.player.add_money_listener(self.money_listener)
-        money_text.set_text(f"{self.player.money}$")
+        money_text.set_text(format_money(self.player.money))
         self._panels_built = True
 
     @property
@@ -440,7 +444,13 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def draw(self) -> None:
         self.panel_manager.draw(self.window)
         if self.panel_manager.current_panel == "game":
-            self.floating_texts.draw(self.window, pygame.time.get_ticks())
+            # A panel open over the world (the info panel) is never covered by the
+            # texts floating over the world.
+            self.floating_texts.draw(
+                self.window,
+                pygame.time.get_ticks(),
+                over_world=not self.info_panel.is_active,
+            )
         self.cloud_animation.draw(self.window)
         super().draw()
 
@@ -537,16 +547,19 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.player.earn(amount)
         self.show_gain(building, amount)
 
-    def show_gain(self, building: Building, amount: int) -> None:
-        """A green "+$amount" over `building`; payouts of one building that come close
-        together merge into one number."""
+    def show_gain(self, building: Building, amount: int, *, merge: bool = True) -> None:
+        """A green "+amount" over `building`. With `merge`, payouts of one building that
+        come close together become one number; a sale (`merge=False`) is always its own."""
         if amount > 0:
             self.floating_texts.gain(
-                building, building.rect.midtop, amount, pygame.time.get_ticks()
+                building if merge else None,
+                building.rect.midtop,
+                amount,
+                pygame.time.get_ticks(),
             )
 
     def _spend(self, amount: int) -> bool:
-        """Pays `amount` if the player can afford it, and floats a red "-$amount" down
+        """Pays `amount` if the player can afford it, and floats a red "-amount" down
         onto the cash display from just above it (below it is the screen edge).
         Returns whether it was paid."""
         if not self.player.spend(amount):
@@ -585,6 +598,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def _refresh_ui_texts(self) -> None:
         """Re-texts what panels.yaml cannot: the toolbar hover texts and the
         labels the game sets from code. Touches nothing but texts."""
+        self.panel_manager["game"]["money_text"].set_text(
+            format_money(self.player.money)
+        )
         self.update_button_texts()
         self.set_music_label(self.audio.music_volume())
         self.set_sfx_label(self.audio.sfx_volume())

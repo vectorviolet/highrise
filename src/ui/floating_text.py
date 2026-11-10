@@ -15,7 +15,12 @@ from dataclasses import dataclass
 import pygame
 from pygame.math import Vector2
 
+from ui.money_format import format_money
+
 Color = tuple[int, int, int]
+
+ALPHA_STEPS = 16  # the fade-out is drawn in this many opacity steps
+MAX_CACHED_IMAGES = 400
 
 
 @dataclass(frozen=True)
@@ -32,6 +37,10 @@ class FloatingTextConfig:
 
     @classmethod
     def from_dict(cls, values: dict) -> "FloatingTextConfig":
+        if values["max_texts"] < 1:
+            raise ValueError("floating_text.max_texts must be at least 1")
+        if values["lifetime_ms"] <= 0:
+            raise ValueError("floating_text.lifetime_ms must be greater than 0")
         return cls(
             font_size=values["font_size"],
             gain_color=tuple(values["gain_color"]),
@@ -54,8 +63,14 @@ class FloatingText:
     direction: int  # -1 moves up the screen, 1 moves down
 
     @property
+    def over_world(self) -> bool:
+        """Whether it floats over the game world (a gain) rather than the HUD (a spend)."""
+        return self.amount > 0
+
+    @property
     def text(self) -> str:
-        return f"+${self.amount}" if self.amount > 0 else f"-${-self.amount}"
+        sign = "+" if self.amount > 0 else "-"
+        return sign + format_money(abs(self.amount))
 
 
 def progress(text: FloatingText, now_ms: int, lifetime_ms: int) -> float:
@@ -69,14 +84,15 @@ class FloatingTexts:
         self.scale = 1.0  # the UI scale as a factor: 1.1 at 110%
         self._font_path = font_path
         self._fonts: dict[int, pygame.font.Font] = {}
-        self._images: dict[tuple[str, int], pygame.Surface] = {}
+        self._images: dict[tuple[str, int, int], pygame.Surface] = {}
         self.texts: list[FloatingText] = []
 
-    def gain(self, key: object, position, amount: int, now_ms: int) -> None:
-        """A green "+$amount" rising from `position`. A text for the same `key` that is
-        still inside the merge window takes the amount instead (and keeps floating)."""
+    def gain(self, key: object | None, position, amount: int, now_ms: int) -> None:
+        """A green "+amount" rising from `position`. With a `key`, a text for the same key
+        that is still inside the merge window takes the amount instead (and keeps floating);
+        with no key (a sale) the gain always gets its own text."""
         assert amount > 0, "a gain must be positive"
-        for text in self.texts:
+        for text in self.texts if key is not None else ():
             if (
                 text.key is key
                 and text.amount > 0
@@ -87,7 +103,7 @@ class FloatingTexts:
         self._add(FloatingText(Vector2(position), amount, now_ms, key, -1))
 
     def spend(self, position, amount: int, now_ms: int) -> None:
-        """A red "-$amount" falling from `position`."""
+        """A red "-amount" falling from `position`."""
         assert amount > 0, "a spend must be positive"
         self._add(FloatingText(Vector2(position), -amount, now_ms, None, 1))
 
@@ -112,29 +128,44 @@ class FloatingTexts:
             0, text.direction * distance * self.scale * eased
         )
 
-    def draw(self, surface: pygame.Surface, now_ms: int) -> None:
+    def draw(
+        self, surface: pygame.Surface, now_ms: int, *, over_world: bool = True
+    ) -> None:
+        """Draws the texts; the gains over the world only when `over_world` (they would
+        cover a panel that is open over the world)."""
         for text in self.texts:
+            if text.over_world and not over_world:
+                continue
             fade = 1 - progress(text, now_ms, self.config.lifetime_ms) ** 2
-            image = self._render(text).copy()
-            image.set_alpha(round(255 * fade))
+            image = self._render(text, round(fade * ALPHA_STEPS))
             position = self.current_position(text, now_ms)
             surface.blit(
                 image, image.get_rect(midbottom=(round(position.x), round(position.y)))
             )
 
+    @property
+    def _size(self) -> int:
+        """The font size in pixels at the current UI scale."""
+        return max(1, round(self.config.font_size * self.scale))
+
     def _font(self) -> pygame.font.Font:
-        size = max(1, round(self.config.font_size * self.scale))
+        size = self._size
         if size not in self._fonts:
             self._fonts[size] = pygame.font.Font(self._font_path, size)
         return self._fonts[size]
 
-    def _render(self, text: FloatingText) -> pygame.Surface:
-        size = round(self.config.font_size * self.scale)
-        cache_key = (text.text, size)
+    def _render(
+        self, text: FloatingText, alpha_step: int = ALPHA_STEPS
+    ) -> pygame.Surface:
+        """The image of `text` at `alpha_step` of ALPHA_STEPS opacity, cached: the
+        fade has few steps, so no frame copies a surface."""
+        cache_key = (text.text, self._size, alpha_step)
         if cache_key not in self._images:
-            if len(self._images) > 200:
+            if len(self._images) > MAX_CACHED_IMAGES:
                 self._images.clear()
-            self._images[cache_key] = self._paint(text)
+            image = self._paint(text)
+            image.set_alpha(round(255 * alpha_step / ALPHA_STEPS))
+            self._images[cache_key] = image
         return self._images[cache_key]
 
     def _paint(self, text: FloatingText) -> pygame.Surface:

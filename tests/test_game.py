@@ -104,6 +104,7 @@ def make_panels() -> FakePanelManager:
         {
             "game": {
                 "build_button_text": FakeText(),
+                "money_text": FakeText(),
                 "money_panel": SimpleNamespace(rect=pygame.Rect(1420, 20, 280, 60)),
             },
             "audio_settings": {
@@ -168,7 +169,7 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
 
 
 def _spend_texts(game: Game) -> list[str]:
-    """The red "-$X" texts floating from the cash display, in order."""
+    """The red "-X$" texts floating from the cash display, in order."""
     texts = [t for t in game.floating_texts.texts if t.amount < 0]
     # They start at the middle of the cash display's top edge.
     assert all(t.position == (1420 + 140, 20) for t in texts)
@@ -187,7 +188,7 @@ def test_expand_grows_the_map_and_relocates_building_tiles(assets):
 
     game.expand()
 
-    assert _spend_texts(game) == [f"-${cost}"]
+    assert _spend_texts(game) == [f"-{cost}$"]
     assert (game.tilemap.row_count, game.tilemap.column_count) == (4, 4)
     # Same logical (row, col) on the new, bigger grid -- a fresh Tile object.
     assert building.tile is game.tilemap[1][1]
@@ -250,7 +251,7 @@ def test_create_building_places_on_an_empty_tile_and_spends_money(assets, monkey
     )
     assert game.player.money == 100_000 - game.buildings.get_build_cost()
     assert game.audio.played == [game.click_sound_path]
-    assert _spend_texts(game) == [f"-${game.buildings.get_build_cost()}"]
+    assert _spend_texts(game) == [f"-{game.buildings.get_build_cost()}$"]
 
 
 def test_create_building_does_nothing_when_unaffordable(assets):
@@ -291,7 +292,7 @@ def test_next_age_advances_and_spends_money(assets):
 
     assert game.buildings.age_number == 1
     assert game.audio.played == [game.click_sound_path]
-    assert _spend_texts(game) == [f"-${cost}"]
+    assert _spend_texts(game) == [f"-{cost}$"]
 
 
 def test_next_age_does_nothing_when_unaffordable(assets):
@@ -406,7 +407,7 @@ def test_on_building_payout_credits_the_player(assets):
     game._on_building_payout(building, 15)
 
     assert game.player.money == 500 + 15
-    assert [t.text for t in game.floating_texts.texts] == ["+$15"]
+    assert [t.text for t in game.floating_texts.texts] == ["+15$"]
 
 
 def test_payouts_of_one_building_inside_the_merge_window_show_one_number(
@@ -427,7 +428,7 @@ def test_payouts_of_one_building_inside_the_merge_window_show_one_number(
     now[0] += 1
     game._on_building_payout(first, 1)
 
-    assert [t.text for t in game.floating_texts.texts] == ["+$15", "+$7", "+$1"]
+    assert [t.text for t in game.floating_texts.texts] == ["+15$", "+7$", "+1$"]
     assert game.player.money == 500 + 10 + 7 + 5 + 1
 
 
@@ -572,7 +573,7 @@ def test_add_building_assigns_payout_before_the_first_update(assets):
     building._payout()
     assert game.player.money == money + building.cooldown * building.speed
     assert [(t.text, t.key, t.position) for t in game.floating_texts.texts] == [
-        (f"+${building.cooldown * building.speed}", building, building.rect.midtop)
+        (f"+{building.cooldown * building.speed}$", building, building.rect.midtop)
     ]
 
 
@@ -1202,5 +1203,20 @@ def test_sell_through_the_info_panel_sells_a_settled_building(assets):
     assert game.player.money == money + building.sell_price
     assert not game.info_panel.is_active
     assert [(t.text, t.position) for t in game.floating_texts.texts] == [
-        (f"+${building.sell_price}", building.rect.midtop)
+        (f"+{building.sell_price}$", building.rect.midtop)
+    ]
+
+
+def test_a_sale_right_after_a_payout_gets_its_own_text(assets):
+    game = make_playable_game(assets)
+    game.add_building(2, 2, 2)
+    building = game.buildings[0]
+    _pick(game, game.tilemap[1][1])
+    game._on_building_payout(building, 10)
+
+    _click(game, "sell_button")
+
+    assert [t.text for t in game.floating_texts.texts] == [
+        "+10$",
+        f"+{building.sell_price}$",
     ]

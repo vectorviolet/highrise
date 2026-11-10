@@ -7,6 +7,7 @@ and the coin and colors the text. `ui.cash_display` in config/settings.yaml pick
 """
 
 from dataclasses import dataclass
+from functools import lru_cache
 
 import pygame
 
@@ -63,6 +64,11 @@ def cash_style(key: int) -> CashStyle:
         ) from None
 
 
+@lru_cache(maxsize=None)
+def _glyph_font(path: str, size: int) -> pygame.font.Font:
+    return pygame.font.Font(path, size)
+
+
 def draw_coin(size: int, glyph_font_path: str) -> pygame.Surface:
     """A gold coin with a dollar sign, `size` pixels wide, on a transparent surface."""
     big = size * COIN_SUPERSAMPLE
@@ -77,7 +83,7 @@ def draw_coin(size: int, glyph_font_path: str) -> pygame.Surface:
         round(center * 0.84),
         width=max(2, big // 24),
     )
-    font = pygame.font.Font(glyph_font_path, round(big * 0.68))
+    font = _glyph_font(glyph_font_path, round(big * 0.68))
     glyph = font.render("$", True, COIN_GLYPH)
     coin.blit(glyph, glyph.get_rect(center=(center, center)))
     return pygame.transform.smoothscale(coin, (size, size))
@@ -89,6 +95,7 @@ def apply_cash_style(
     icon: StateObject,
     text: TextObject,
     assets: AssetManager,
+    coin_font_path: str,
 ) -> None:
     """Paints `plate` and `icon` and colors `text` for `style`. The widgets keep the size
     and position the panel loader gave them, so the UI scale already applies."""
@@ -103,7 +110,6 @@ def apply_cash_style(
 
     icon.active = style.coin
     if style.coin:
-        glyph_font = str(assets.font_path("titillium_black"))
-        icon.add_surface(None, draw_coin(icon.rect.height, glyph_font))
+        icon.add_surface(None, draw_coin(icon.rect.height, coin_font_path))
         icon.set_state(None)
     text.set_color(style.text_color)
