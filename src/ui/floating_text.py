@@ -25,7 +25,8 @@ MAX_CACHED_IMAGES = 400
 
 @dataclass(frozen=True)
 class FloatingTextConfig:
-    font_size: int  # pixels at 100% UI scale
+    gain_font_size: int  # pixels at 100% UI scale
+    spend_font_size: int
     gain_color: Color
     spend_color: Color
     outline_color: Color
@@ -42,7 +43,8 @@ class FloatingTextConfig:
         if values["lifetime_ms"] <= 0:
             raise ValueError("floating_text.lifetime_ms must be greater than 0")
         return cls(
-            font_size=values["font_size"],
+            gain_font_size=values["gain_font_size"],
+            spend_font_size=values["spend_font_size"],
             gain_color=tuple(values["gain_color"]),
             spend_color=tuple(values["spend_color"]),
             outline_color=tuple(values["outline_color"]),
@@ -56,11 +58,12 @@ class FloatingTextConfig:
 
 @dataclass
 class FloatingText:
-    position: Vector2  # where it starts: the middle of its bottom edge
+    position: Vector2  # where it starts: the point of the text named by `anchor`
     amount: int  # positive: gained; negative: spent
     born_ms: int
     key: object | None  # the source whose payouts merge; None for spends
     direction: int  # -1 moves up the screen, 1 moves down
+    anchor: str  # the pygame.Rect attribute `position` sets: "midbottom", "bottomright"
 
     @property
     def over_world(self) -> bool:
@@ -100,12 +103,15 @@ class FloatingTexts:
             ):
                 text.amount += amount
                 return
-        self._add(FloatingText(Vector2(position), amount, now_ms, key, -1))
+        self._add(FloatingText(Vector2(position), amount, now_ms, key, -1, "midbottom"))
 
     def spend(self, position, amount: int, now_ms: int) -> None:
-        """A red "-amount" falling from `position`."""
+        """A red "-amount" falling from `position`, its bottom right corner there (so it
+        lines up with the right edge of the number it falls onto)."""
         assert amount > 0, "a spend must be positive"
-        self._add(FloatingText(Vector2(position), -amount, now_ms, None, 1))
+        self._add(
+            FloatingText(Vector2(position), -amount, now_ms, None, 1, "bottomright")
+        )
 
     def _add(self, text: FloatingText) -> None:
         self.texts.append(text)
@@ -139,17 +145,22 @@ class FloatingTexts:
             fade = 1 - progress(text, now_ms, self.config.lifetime_ms) ** 2
             image = self._render(text, round(fade * ALPHA_STEPS))
             position = self.current_position(text, now_ms)
-            surface.blit(
-                image, image.get_rect(midbottom=(round(position.x), round(position.y)))
-            )
+            rect = image.get_rect()
+            setattr(rect, text.anchor, (round(position.x), round(position.y)))
+            # Whatever the UI scale or the window, a text never leaves the screen.
+            rect.clamp_ip(surface.get_rect())
+            surface.blit(image, rect)
 
-    @property
-    def _size(self) -> int:
-        """The font size in pixels at the current UI scale."""
-        return max(1, round(self.config.font_size * self.scale))
+    def _size(self, text: FloatingText) -> int:
+        """The font size of `text` in pixels at the current UI scale."""
+        base = (
+            self.config.gain_font_size
+            if text.amount > 0
+            else self.config.spend_font_size
+        )
+        return max(1, round(base * self.scale))
 
-    def _font(self) -> pygame.font.Font:
-        size = self._size
+    def _font(self, size: int) -> pygame.font.Font:
         if size not in self._fonts:
             self._fonts[size] = pygame.font.Font(self._font_path, size)
         return self._fonts[size]
@@ -159,7 +170,7 @@ class FloatingTexts:
     ) -> pygame.Surface:
         """The image of `text` at `alpha_step` of ALPHA_STEPS opacity, cached: the
         fade has few steps, so no frame copies a surface."""
-        cache_key = (text.text, self._size, alpha_step)
+        cache_key = (text.text, self._size(text), alpha_step)
         if cache_key not in self._images:
             if len(self._images) > MAX_CACHED_IMAGES:
                 self._images.clear()
@@ -170,7 +181,7 @@ class FloatingTexts:
 
     def _paint(self, text: FloatingText) -> pygame.Surface:
         color = self.config.gain_color if text.amount > 0 else self.config.spend_color
-        font = self._font()
+        font = self._font(self._size(text))
         face = font.render(text.text, True, color)
         outline = font.render(text.text, True, self.config.outline_color)
         reach = max(1, round(2 * self.scale))

@@ -77,3 +77,8 @@ scale; tests cover the amounts, signs, colors, the merge window and expiry.
   string to `"${amount}"` or `"${amount:,}"` changes both. The owner is still deciding the format.
 - A sale always gets its own text; only a building's payouts merge.
 - Texts over the world are hidden while the info panel is open, so they never cover it.
+- After a play-test: gain texts are smaller (24 pt, `gain_font_size`; spends stay 30 pt,
+  `spend_font_size`), and the red spend text is right-aligned with the amount it falls onto. Texts
+  are also clamped to the screen.
+
+![The spend text next to the plate at 80, 100 and 125 percent](img/50-spend-text-right-aligned.png)

@@ -8,7 +8,8 @@ from pygame.math import Vector2
 from ui.floating_text import FloatingTextConfig, FloatingTexts
 
 CONFIG = FloatingTextConfig(
-    font_size=30,
+    gain_font_size=24,
+    spend_font_size=30,
     gain_color=(10, 250, 10),
     spend_color=(250, 10, 10),
     outline_color=(0, 0, 0),
@@ -159,7 +160,8 @@ def test_a_gain_without_a_key_never_merges(texts):
 )
 def test_the_config_rejects_values_that_break_the_texts(change, message):
     values = {
-        "font_size": 30,
+        "gain_font_size": 24,
+        "spend_font_size": 30,
         "gain_color": [0, 255, 0],
         "spend_color": [255, 0, 0],
         "outline_color": [0, 0, 0],
@@ -176,7 +178,7 @@ def test_the_config_rejects_values_that_break_the_texts(change, message):
 
 def test_gains_over_the_world_are_skipped_while_a_panel_is_open_but_spends_stay(texts):
     texts.gain("a", (50, 50), 10, now_ms=0)
-    texts.spend((150, 50), 10, now_ms=0)
+    texts.spend((190, 50), 10, now_ms=0)
 
     def drawn(**kwargs) -> tuple[bool, bool]:
         surface = pygame.Surface((200, 100), pygame.SRCALPHA)
@@ -201,3 +203,48 @@ def test_a_fade_step_is_drawn_from_one_cached_image(texts):
     texts.draw(surface, now_ms=301)
 
     assert texts._render(texts.texts[0], 14) is image
+
+
+def test_a_spend_is_right_aligned_with_its_position_and_gains_are_centered(texts):
+    texts.spend((190, 60), 10, now_ms=0)
+    texts.gain("a", (50, 60), 10, now_ms=0)
+    surface = pygame.Surface((200, 100), pygame.SRCALPHA)
+
+    texts.draw(surface, now_ms=0)
+
+    bounds = pygame.mask.from_surface(
+        surface.subsurface((100, 0, 100, 100))
+    ).get_bounding_rects()[0]
+    assert (
+        bounds.right + 100 <= 190 + 1
+    )  # ends at the spend's x (the outline adds a pixel)
+    assert bounds.right + 100 >= 190 - 4
+    gain = pygame.mask.from_surface(
+        surface.subsurface((0, 0, 100, 100))
+    ).get_bounding_rects()[0]
+    assert abs(gain.centerx - 50) <= 2
+
+
+def test_a_text_that_would_leave_the_screen_is_pulled_back_in(texts):
+    texts.spend((195, 5), 1_000_000, now_ms=0)
+    texts.gain("a", (-30, 2), 10, now_ms=0)
+    surface = pygame.Surface((200, 100), pygame.SRCALPHA)
+
+    texts.draw(surface, now_ms=0)
+
+    mask = pygame.mask.from_surface(surface)
+    assert mask.count() > 0
+    # Drawn on a surface of exactly the screen's size, so every pixel is inside; the clamp
+    # keeps the whole text, not just a part of it.
+    assert pygame.Rect(mask.get_bounding_rects()[0]).left >= 0
+
+
+def test_gains_are_smaller_than_spends(texts):
+    texts.gain("a", (0, 0), 10, now_ms=0)
+    texts.spend((0, 0), 10, now_ms=0)
+    gain, spend = texts.texts
+
+    assert texts._size(gain) == 24
+    assert texts._size(spend) == 30
+    texts.scale = 1.25
+    assert texts._size(gain) == 30

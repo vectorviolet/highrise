@@ -82,3 +82,20 @@ def test_the_style_colors_the_text_and_shows_the_coin_only_when_it_has_one(game,
 
     assert panel["money_text"].color == (*game.cash_style.text_color,)
     assert panel["money_icon"].active is game.cash_style.coin
+
+
+@pytest.mark.parametrize("ui_scale", UI_SCALES)
+def test_a_spend_text_lines_up_with_the_amount_and_stays_on_screen(game, ui_scale):
+    game.ui_scale = ui_scale
+    game.rebuild_panels()
+    game.player.money = 100_000
+    game._spend(500)
+    (text,) = game.floating_texts.texts
+    panel = hud(game)
+
+    assert text.position == (
+        panel["money_text"].rect.right,
+        panel["money_panel"].rect.top,
+    )
+    assert text.anchor == "bottomright"
+    assert game.window.get_rect().collidepoint(text.position)

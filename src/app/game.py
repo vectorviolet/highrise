@@ -560,13 +560,14 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def _spend(self, amount: int) -> bool:
         """Pays `amount` if the player can afford it, and floats a red "-amount" down
-        onto the cash display from just above it (below it is the screen edge).
-        Returns whether it was paid."""
+        onto the cash display from just above it (below it is the screen edge),
+        right-aligned with the amount. Returns whether it was paid."""
         if not self.player.spend(amount):
             return False
         if amount > 0:
+            hud = self.panel_manager["game"]
             self.floating_texts.spend(
-                self.panel_manager["game"]["money_panel"].rect.midtop,
+                (hud["money_text"].rect.right, hud["money_panel"].rect.top),
                 amount,
                 pygame.time.get_ticks(),
             )

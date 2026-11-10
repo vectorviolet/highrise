@@ -49,6 +49,12 @@ class FakeText:
         self.state = state
 
 
+class FakeMoneyText(FakeText):
+    def __init__(self):
+        super().__init__()
+        self.rect = pygame.Rect(1480, 30, 102, 40)  # right edge 1582
+
+
 class FakePanelManager(dict):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -104,7 +110,7 @@ def make_panels() -> FakePanelManager:
         {
             "game": {
                 "build_button_text": FakeText(),
-                "money_text": FakeText(),
+                "money_text": FakeMoneyText(),
                 "money_panel": SimpleNamespace(rect=pygame.Rect(1420, 20, 280, 60)),
             },
             "audio_settings": {
@@ -171,8 +177,8 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
 def _spend_texts(game: Game) -> list[str]:
     """The red "-X$" texts floating from the cash display, in order."""
     texts = [t for t in game.floating_texts.texts if t.amount < 0]
-    # They start at the middle of the cash display's top edge.
-    assert all(t.position == (1420 + 140, 20) for t in texts)
+    # They start above the plate, at the right edge of the amount.
+    assert all(t.position == (1582, 20) for t in texts)
     return [t.text for t in texts]
 
 
