@@ -1,7 +1,7 @@
 # CREDITS page and a master volume
-<!-- index | refs: #46, #47 | area: UI, Audio -->
+<!-- index | refs: #46, #47, PR #49 | area: UI, Audio -->
 
-**Date:** 2026-11-10 · **Area:** UI, Audio · **Issues:** [#46](https://github.com/vectorviolet/highrise/issues/46), [#47](https://github.com/vectorviolet/highrise/issues/47)
+**Date:** 2026-11-10 · **Area:** UI, Audio · **Issues:** [#46](https://github.com/vectorviolet/highrise/issues/46), [#47](https://github.com/vectorviolet/highrise/issues/47) · **PR:** [#49](https://github.com/vectorviolet/highrise/pull/49)
 
 ## Context
 
