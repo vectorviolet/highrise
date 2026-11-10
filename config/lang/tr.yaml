@@ -14,7 +14,7 @@ menu:
   title: "Highrise"
   play: "OYNA"
   settings: "AYARLAR"
-  credits: "KREDİLER"
+  credits: "YAPIMCILAR"
   exit: "ÇIKIŞ"
 
 play:
@@ -64,7 +64,7 @@ game:
   sell_price: "Satış Fiyatı: {value}"
 
 credits:
-  title: "KREDİLER"
+  title: "YAPIMCILAR"
   developer: "Geliştirici"
   art: "Sanat"
   ui: "Arayüz"
