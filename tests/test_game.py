@@ -70,8 +70,15 @@ class FakePanelManager(dict):
 class FakeAudio:
     def __init__(self):
         self.played = []
+        self._master = 1.0
         self._music = 0.5
         self._sfx = 0.5
+
+    def master_volume(self) -> float:
+        return self._master
+
+    def set_master_volume(self, v):
+        self._master = v
 
     def play_sfx(self, path):
         self.played.append(path)
@@ -101,6 +108,7 @@ def make_panels() -> FakePanelManager:
         {
             "game": {"build_button_text": FakeText()},
             "audio_settings": {
+                "master_volume_entry_text": FakeText(),
                 "music_volume_entry_text": FakeText(),
                 "sfx_volume_entry_text": FakeText(),
             },
@@ -140,6 +148,7 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
         create_clouds=Spy(), update=Spy(), draw=Spy()
     )
     game.info_panel = SimpleNamespace(is_active=False, close=Spy())
+    game.old_master_volume = 1.0
     game.old_music_volume = 0.5
     game.old_sfx_volume = 0.5
     game.update_button_texts = Spy()
@@ -396,6 +405,20 @@ def test_open_panel_switches_tabs_and_spawns_clouds(assets):
     assert len(game.cloud_animation.create_clouds.calls) == 1
 
 
+def test_open_panel_credits_replays_the_scroll_from_the_top(assets):
+    game = make_game(assets, size=3)
+    scroller = Spy()
+    game.panel_manager["credits"] = {
+        "credits_scroller": SimpleNamespace(reset=scroller)
+    }
+
+    game.open_panel("credits")
+    game.open_panel("credits")
+
+    assert len(scroller.calls) == 2
+    assert game.panel_manager.current_panel == "credits"
+
+
 def test_has_save_data_true_with_buildings_or_advanced_age(assets):
     game = make_game(assets, size=3)
     assert game.has_save_data() is False
@@ -447,6 +470,16 @@ def test_play_starts_a_new_game_with_no_save(assets):
 )
 def test_format_volume_is_a_clamped_rounded_percentage(volume, text):
     assert format_volume(volume) == text
+
+
+def test_set_master_label_rounds_to_a_percentage(assets):
+    game = make_game(assets, size=3)
+
+    game.set_master_label(0.333)
+
+    assert (
+        game.panel_manager["audio_settings"]["master_volume_entry_text"].text == "%33"
+    )
 
 
 def test_set_music_and_sfx_labels_round_to_a_percentage(assets):
@@ -578,7 +611,7 @@ def test_on_exit_request_from_menu_exits(assets):
         ("settings", "menu"),
         ("display_settings", "settings"),
         ("game_settings", "settings"),
-        ("developer", "menu"),
+        ("credits", "menu"),
     ],
 )
 def test_on_exit_request_navigates_back(assets, panel, expected):
@@ -593,12 +626,12 @@ def test_on_exit_request_navigates_back(assets, panel, expected):
 def test_on_exit_request_from_audio_settings_restores_snapshotted_volumes(assets):
     game = make_game(assets, size=3)
     game.panel_manager.current_panel = "audio_settings"
-    game.audio._music, game.audio._sfx = 0.9, 0.9
-    game.old_music_volume, game.old_sfx_volume = 0.2, 0.3
+    game.audio._master, game.audio._music, game.audio._sfx = 0.1, 0.9, 0.9
+    game.old_master_volume, game.old_music_volume, game.old_sfx_volume = 0.6, 0.2, 0.3
 
     game.on_exit_request()
 
-    assert (game.audio._music, game.audio._sfx) == (0.2, 0.3)
+    assert (game.audio._master, game.audio._music, game.audio._sfx) == (0.6, 0.2, 0.3)
     assert game.panel_manager.current_panel == "settings"
 
 
@@ -649,7 +682,7 @@ def test_on_exit_request_from_an_unknown_panel_only_plays_the_back_sound(assets)
 
 @pytest.mark.parametrize(
     "panel",
-    ["play", "settings", "display_settings", "game_settings", "developer"],
+    ["play", "settings", "display_settings", "game_settings", "credits"],
 )
 def test_on_exit_request_back_navigation_spawns_clouds_once(assets, panel):
     game = make_game(assets, size=3)
@@ -664,11 +697,12 @@ def test_on_exit_request_back_navigation_spawns_clouds_once(assets, panel):
 def test_on_exit_request_from_audio_settings_resets_the_labels(assets):
     game = make_game(assets, size=3)
     game.panel_manager.current_panel = "audio_settings"
-    game.old_music_volume, game.old_sfx_volume = 0.2, 0.3
+    game.old_master_volume, game.old_music_volume, game.old_sfx_volume = 0.6, 0.2, 0.3
 
     game.on_exit_request()
 
     labels = game.panel_manager["audio_settings"]
+    assert labels["master_volume_entry_text"].text == "%60"
     assert labels["music_volume_entry_text"].text == "%20"
     assert labels["sfx_volume_entry_text"].text == "%30"
 
@@ -679,7 +713,7 @@ def test_new_game_resets_the_session_ui(assets):
     game.load_data = Spy()
     game.add_objects = Spy()
     game.tile_selector.is_active = True
-    game.audio._music, game.audio._sfx = 0.2, 0.7
+    game.audio._master, game.audio._music, game.audio._sfx = 0.9, 0.2, 0.7
     game.buildings.set_age(1)
 
     game.new_game()
@@ -691,6 +725,7 @@ def test_new_game_resets_the_session_ui(assets):
     assert len(game.info_panel.close.calls) == 1
     assert game.tile_selector.is_active is False
     labels = game.panel_manager["audio_settings"]
+    assert labels["master_volume_entry_text"].text == "%90"
     assert labels["music_volume_entry_text"].text == "%20"
     assert labels["sfx_volume_entry_text"].text == "%70"
     assert game.panel_manager.current_panel == "game"
@@ -709,7 +744,7 @@ def test_run_resets_the_session_ui_and_opens_the_menu(assets, monkeypatch):
     game.load_data = Spy()
     game.add_objects = Spy()
     game.init_database = Spy()
-    game.load_settings = lambda: GameSettings("en", False, DEFAULT_UI_SCALE)
+    game.load_settings = lambda: GameSettings("en", False, DEFAULT_UI_SCALE, 1.0)
     game.background_music_sound_path = None
     game.display.resolution = (1280, 720)
     game.display.window_mode = "windowed"
@@ -753,6 +788,17 @@ def _run_with_saved_settings(assets, monkeypatch, settings):
     return game, splash
 
 
+def test_run_applies_the_saved_master_volume_before_the_splash(assets, monkeypatch):
+    game, _ = _run_with_saved_settings(
+        assets, monkeypatch, GameSettings("en", False, DEFAULT_UI_SCALE, 0.4)
+    )
+
+    assert game.audio.master_volume() == 0.4
+    assert (
+        game.panel_manager["audio_settings"]["master_volume_entry_text"].text == "%40"
+    )
+
+
 def test_run_watches_the_language_while_running_and_stops_after(assets, monkeypatch):
     import pygamine
 
@@ -772,7 +818,7 @@ def test_run_watches_the_language_while_running_and_stops_after(assets, monkeypa
     game.load_data = Spy()
     game.add_objects = Spy()
     game.init_database = Spy()
-    game.load_settings = lambda: GameSettings("en", False, DEFAULT_UI_SCALE)
+    game.load_settings = lambda: GameSettings("en", False, DEFAULT_UI_SCALE, 1.0)
     game.background_music_sound_path = None
 
     game.run()
@@ -787,12 +833,12 @@ def test_a_second_game_does_not_trigger_the_first_ones_language_callback(
     assets, monkeypatch
 ):
     first, _ = _run_with_saved_settings(
-        assets, monkeypatch, GameSettings("en", False, DEFAULT_UI_SCALE)
+        assets, monkeypatch, GameSettings("en", False, DEFAULT_UI_SCALE, 1.0)
     )
     calls_before = len(first.update_button_texts.calls)
 
     _run_with_saved_settings(
-        assets, monkeypatch, GameSettings("tr", False, DEFAULT_UI_SCALE)
+        assets, monkeypatch, GameSettings("tr", False, DEFAULT_UI_SCALE, 1.0)
     )
 
     assert len(first.update_button_texts.calls) == calls_before
@@ -814,7 +860,7 @@ def test_run_unwatches_the_language_even_when_the_loop_crashes(assets, monkeypat
     game.load_data = Spy()
     game.add_objects = Spy()
     game.init_database = Spy()
-    game.load_settings = lambda: GameSettings("en", False, DEFAULT_UI_SCALE)
+    game.load_settings = lambda: GameSettings("en", False, DEFAULT_UI_SCALE, 1.0)
     game.background_music_sound_path = None
 
     with pytest.raises(RuntimeError):
@@ -827,7 +873,7 @@ def test_run_unwatches_the_language_even_when_the_loop_crashes(assets, monkeypat
 
 def test_run_shows_the_intro_by_default(assets, monkeypatch):
     game, splash = _run_with_saved_settings(
-        assets, monkeypatch, GameSettings("en", False, DEFAULT_UI_SCALE)
+        assets, monkeypatch, GameSettings("en", False, DEFAULT_UI_SCALE, 1.0)
     )
 
     assert game.calls == [("show_splash", splash)]
@@ -835,7 +881,7 @@ def test_run_shows_the_intro_by_default(assets, monkeypatch):
 
 def test_run_skips_the_intro_when_the_saved_setting_says_so(assets, monkeypatch):
     game, _ = _run_with_saved_settings(
-        assets, monkeypatch, GameSettings("en", True, DEFAULT_UI_SCALE)
+        assets, monkeypatch, GameSettings("en", True, DEFAULT_UI_SCALE, 1.0)
     )
 
     assert game.splash is None
@@ -844,7 +890,7 @@ def test_run_skips_the_intro_when_the_saved_setting_says_so(assets, monkeypatch)
 
 def test_run_opens_in_the_saved_language(assets, monkeypatch):
     game, _ = _run_with_saved_settings(
-        assets, monkeypatch, GameSettings("tr", False, DEFAULT_UI_SCALE)
+        assets, monkeypatch, GameSettings("tr", False, DEFAULT_UI_SCALE, 1.0)
     )
 
     assert localization.language == "tr"
@@ -857,7 +903,7 @@ def test_run_opens_in_the_saved_language(assets, monkeypatch):
 
 def test_run_falls_back_to_english_for_an_unknown_saved_language(assets, monkeypatch):
     _run_with_saved_settings(
-        assets, monkeypatch, GameSettings("xx", False, DEFAULT_UI_SCALE)
+        assets, monkeypatch, GameSettings("xx", False, DEFAULT_UI_SCALE, 1.0)
     )
 
     assert localization.language == "en"

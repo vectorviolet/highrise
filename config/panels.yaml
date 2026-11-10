@@ -55,6 +55,17 @@ object_templates:
     font_size: 28
     color: White
     position: [CENTER, CENTER]
+  # Credits page: a gray heading per section, black entries below it.
+  credits_heading:
+    type: text
+    font: titillium_bold
+    font_size: 25
+    color: [128, 128, 128]
+  credits_entry:
+    type: text
+    font: titillium
+    font_size: 22
+    color: Black
   volume_entry:
     size: [150, 35]
     asset: grey8
@@ -95,11 +106,11 @@ panels:
         objects:
           play_button:      { extends: menu_btn, size: [400, 60] }
           settings_button:  { extends: menu_btn, size: [400, 60] }
-          developer_button: { extends: menu_btn, size: [400, 60] }
+          credits_button:   { extends: menu_btn, size: [400, 60] }
           exit_button:      { extends: menu_btn, size: [400, 60], on_click_sound: back }
       play_button_text:      { extends: menu_btn_text, parent: play_button,      text_key: menu.play }
       settings_button_text:  { extends: menu_btn_text, parent: settings_button,  text_key: menu.settings }
-      developer_button_text: { extends: menu_btn_text, parent: developer_button, text_key: menu.developer }
+      credits_button_text:   { extends: menu_btn_text, parent: credits_button,   text_key: menu.credits }
       exit_button_text:      { extends: menu_btn_text, parent: exit_button,      text_key: menu.exit }
 
   settings:
@@ -402,57 +413,80 @@ panels:
         position: [CENTER, CENTER]
       audio_settings_panel:
         position: [740, 320]
-        size: [440, 500]
+        size: [440, 640]
         extends: menu_panel
-      music_volume_text:
+      master_volume_text:
         extends: settings_text
         position: [CENTER, 380]
+        text_key: audio_settings.master_volume
+      music_volume_text:
+        extends: settings_text
+        position: [CENTER, 550]
         text_key: audio_settings.music_volume
       sfx_volume_text:
         extends: settings_text
-        position: [CENTER, 550]
+        position: [CENTER, 720]
         text_key: audio_settings.sfx_volume
+
+      master_volume_minus_button:
+        extends: volume_button
+        position: [840, 430]
+      master_volume_plus_button:
+        extends: volume_button
+        position: [1054, 430]
+      master_volume_entry:
+        extends: volume_entry
+        position: [885, 430]
+      master_volume_entry_text:
+        extends: volume_entry_text
+        parent: master_volume_entry
+      master_volume_minus_icon:
+        extends: minus_icon_template
+        position: [850, 440]
+      master_volume_plus_icon:
+        extends: plus_icon_template
+        position: [1064, 440]
 
       music_volume_minus_button:
         extends: volume_button
-        position: [840, 430]
+        position: [840, 600]
       music_volume_plus_button:
         extends: volume_button
-        position: [1054, 430]
+        position: [1054, 600]
       music_volume_entry:
         extends: volume_entry
-        position: [885, 430]
+        position: [885, 600]
       music_volume_entry_text:
         extends: volume_entry_text
         parent: music_volume_entry
       music_volume_minus_icon:
         extends: minus_icon_template
-        position: [850, 440]
+        position: [850, 610]
       music_volume_plus_icon:
         extends: plus_icon_template
-        position: [1064, 440]
+        position: [1064, 610]
 
       sfx_volume_minus_button:
         extends: volume_button
-        position: [840, 600]
+        position: [840, 770]
       sfx_volume_plus_button:
         extends: volume_button
-        position: [1054, 600]
+        position: [1054, 770]
       sfx_volume_entry:
         extends: volume_entry
-        position: [885, 600]
+        position: [885, 770]
       sfx_volume_entry_text:
         extends: volume_entry_text
         parent: sfx_volume_entry
       sfx_volume_minus_icon:
         extends: minus_icon_template
-        position: [850, 610]
+        position: [850, 780]
       sfx_volume_plus_icon:
         extends: plus_icon_template
-        position: [1064, 610]
+        position: [1064, 780]
 
       cancel_button:
-        position: [810, 710]
+        position: [810, 880]
         size: [150, 60]
         asset: red_button
         hover: yellow_button
@@ -466,7 +500,7 @@ panels:
         parent: cancel_button
         text_key: common.cancel
       save_button:
-        position: [975, 710]
+        position: [975, 880]
         size: [150, 60]
         asset: green_button
         hover: yellow_button
@@ -554,74 +588,142 @@ panels:
         extends: go_back_btn_text
         parent: game_settings_back_button
 
-  developer:
+  credits:
     objects:
-      developer_panel:
+      credits_title:
+        position: [740, 120]
+        size: [440, 70]
+        asset: blue_button
+      credits_title_text:
+        parent: credits_title
+        type: text
+        text_key: credits.title
+        font: titillium_black
+        font_size: 30
+        color: white
         position: [CENTER, CENTER]
-        size: [300, 380]
+      credits_panel:
         extends: menu_panel
-      profile_image:
-        position: [CENTER, 370]
-        size: [100, 100]
-        asset: profile_image
-      name_text:
-        type: text
-        font: titillium_bold
-        color: Black
-        font_size: 20
-        position: [CENTER, 480]
+        position: [640, 200]
+        size: [640, 640]
+      # Scrolls its targets up through the panel, clipped to its own rect and
+      # replayed from the bottom each time the page opens.
+      credits_scroller:
+        type: scrolling_panel
+        position: [660, 220]
+        size: [600, 600]
+        speed: 40
+        targets:
+          - credits_dev_heading
+          - credits_dev_1
+          - credits_art_heading
+          - credits_art_1
+          - credits_art_2
+          - credits_art_3
+          - credits_art_4
+          - credits_ui_heading
+          - credits_ui_1
+          - credits_ui_2
+          - credits_sound_heading
+          - credits_sound_1
+          - credits_music_heading
+          - credits_music_1
+          - credits_music_2
+          - credits_music_3
+          - credits_fonts_heading
+          - credits_fonts_1
+          - credits_built_heading
+          - credits_built_1
+          - credits_built_2
+
+      credits_dev_heading:
+        extends: credits_heading
+        position: [CENTER, 0]
+        text_key: "credits.developer"
+      credits_dev_1:
+        extends: credits_entry
+        position: [CENTER, 40]
         text: "Umutcan Ekinci"
-      title_text:
-        type: text
-        font: titillium_bold
-        color: [128, 128, 128]
-        font_size: 17
-        position: [CENTER, 500]
-        text_key: developer.title
-      github_button:
-        position: [CENTER, 550]
-        size: [250, 40]
-        asset: grey_button
-        hover: yellow_button
-      github_button_text:
-        type: text
-        font: titillium_bold
-        font_size: 20
-        color: Black
-        position: [CENTER, CENTER]
-        parent: github_button
-        text: ""
-        states:
-          hover: "github.com/umutcanekinci"
-      github_icon:
-        position: [940, 555]
-        size: [16, 16]
-        asset: github_icon
-      itch_button:
-        position: [CENTER, 600]
-        size: [250, 40]
-        asset: grey_button
-        hover: yellow_button
-      itch_button_text:
-        type: text
-        font: titillium_bold
-        font_size: 20
-        color: Black
-        position: [CENTER, CENTER]
-        parent: itch_button
-        text: ""
-        states:
-          hover: "umutcanekinci.itch.io"
-      itch_icon:
-        position: [939, 605]
-        size: [18, 16]
-        asset: itch_icon
-      developer_back_button:
-        extends: go_back_btn
-        size: [250, 40]
+      credits_art_heading:
+        extends: credits_heading
+        position: [CENTER, 110]
+        text_key: "credits.art"
+      credits_art_1:
+        extends: credits_entry
+        position: [CENTER, 150]
+        text: "Kenney - Hexagon Buildings (CC0)"
+      credits_art_2:
+        extends: credits_entry
+        position: [CENTER, 184]
+        text: "Kenney - Isometric Landscape (CC0)"
+      credits_art_3:
+        extends: credits_entry
+        position: [CENTER, 218]
+        text: "Kenney - Background Elements Remastered (CC0)"
+      credits_art_4:
+        extends: credits_entry
+        position: [CENTER, 252]
+        text: "Kenney - Cursor Pack (CC0)"
+      credits_ui_heading:
+        extends: credits_heading
+        position: [CENTER, 322]
+        text_key: "credits.ui"
+      credits_ui_1:
+        extends: credits_entry
+        position: [CENTER, 362]
+        text: "Kenney - UI Pack (CC0)"
+      credits_ui_2:
+        extends: credits_entry
+        position: [CENTER, 396]
+        text: "Kenney - Game Icons (CC0)"
+      credits_sound_heading:
+        extends: credits_heading
+        position: [CENTER, 466]
+        text_key: "credits.sound"
+      credits_sound_1:
+        extends: credits_entry
+        position: [CENTER, 506]
+        text: "Kenney - UI Pack (CC0)"
+      credits_music_heading:
+        extends: credits_heading
+        position: [CENTER, 576]
+        text_key: "credits.music"
+      credits_music_1:
+        extends: credits_entry
+        position: [CENTER, 616]
+        text: "Music : Sakura Girl - Day Off"
+      credits_music_2:
+        extends: credits_entry
         position: [CENTER, 650]
-      developer_back_button_text:
+        text: "Link : youtu.be/vAv9KtrU_5c"
+      credits_music_3:
+        extends: credits_entry
+        position: [CENTER, 684]
+        text: "CC BY 3.0"
+      credits_fonts_heading:
+        extends: credits_heading
+        position: [CENTER, 754]
+        text_key: "credits.fonts"
+      credits_fonts_1:
+        extends: credits_entry
+        position: [CENTER, 794]
+        text: "Titillium Web - Accademia di Belle Arti di Urbino (SIL OFL 1.1)"
+      credits_built_heading:
+        extends: credits_heading
+        position: [CENTER, 864]
+        text_key: "credits.built_with"
+      credits_built_1:
+        extends: credits_entry
+        position: [CENTER, 904]
+        text: "pygame-ce (LGPL 2.1)"
+      credits_built_2:
+        extends: credits_entry
+        position: [CENTER, 938]
+        text: "pygamine (MIT)"
+
+      credits_back_button:
+        extends: go_back_btn
+        position: [CENTER, 880]
+      credits_back_button_text:
         extends: go_back_btn_text
-        parent: developer_back_button
-        font_size: 28
-        color: Black
+        parent: credits_back_button

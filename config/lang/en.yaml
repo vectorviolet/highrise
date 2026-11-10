@@ -17,7 +17,7 @@ menu:
   title: "Highrise"
   play: "PLAY"
   settings: "SETTINGS"
-  developer: "DEVELOPER"
+  credits: "CREDITS"
   exit: "EXIT"
 
 play:
@@ -44,6 +44,7 @@ display_settings:
 
 audio_settings:
   title: "AUDIO SETTINGS"
+  master_volume: "MASTER VOLUME"
   music_volume: "MUSIC VOLUME"
   sfx_volume: "SFX VOLUME"
 
@@ -65,5 +66,12 @@ game:
   cooldown: "Cooldown: {value} sec"
   sell_price: "Sell Price: {value}"
 
-developer:
-  title: "Software Engineer"
+credits:
+  title: "CREDITS"
+  developer: "Developer"
+  art: "Art"
+  ui: "UI"
+  sound: "Sound"
+  music: "Music"
+  fonts: "Fonts"
+  built_with: "Built with"

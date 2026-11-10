@@ -9,6 +9,12 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- A **CREDITS** page replaces the DEVELOPER page: scrolling sections for the developer, art, UI,
+  sound, music, fonts and software, every pack with its license and the Day Off attribution. The
+  social link buttons, the photo and their assets are gone
+  ([devlog](docs/devlog/2026-11-10-credits-and-master-volume.md)).
+- A **MASTER VOLUME** row at the top of the AUDIO page scales the music and every sound effect live.
+  Saved in the database, 100 % by default.
 - A **UI scale** setting on the DISPLAY page: 80 / 90 / 100 / 110 / 125 %, applied live and saved in
   the database, with a RESET UI SCALE button. Panels, menus, the HUD and their text scale together;
   the game world does not. The default stays 100 % until the owner picks one
