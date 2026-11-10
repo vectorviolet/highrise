@@ -52,10 +52,12 @@ game_settings:
   language: "LANGUAGE"
   skip_intro: "SKIP INTRO"
 
-# How an amount of money is written: the cash display shows it as is, and the floating text puts
-# a + or - in front. "${amount}" or "${amount:,}" would change every place at once.
+# How an amount of money is written (ui/money_format.py): the cash display shows it as is, and the
+# floating text puts a + or - in front. {amount} has its thousands grouped with `thousands`
+# ("12,345"); `amount` places the currency sign.
 money:
   amount: "{amount}$"
+  thousands: ","
 
 game:
   expand: "EXPAND"

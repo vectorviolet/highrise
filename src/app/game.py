@@ -397,21 +397,21 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             panel["expand_button_text"].set_text(tr("game.max_size"), state="hover")
         else:
             panel["expand_button_text"].set_text(
-                f"{tilemap.get_expand_cost()}$", state="hover"
+                format_money(tilemap.get_expand_cost()), state="hover"
             )
 
         if len(self.buildings) == tilemap.row_count * tilemap.column_count:
             panel["build_button_text"].set_text(tr("game.tiles_full"), state="hover")
         else:
             panel["build_button_text"].set_text(
-                f"{self.buildings.get_build_cost()}$", state="hover"
+                format_money(self.buildings.get_build_cost()), state="hover"
             )
 
         if self.buildings.age_number == self.buildings.max_age_number:
             panel["next_age_button_text"].set_text(tr("game.max_age"), state="hover")
         else:
             panel["next_age_button_text"].set_text(
-                f"{self.buildings.get_age_cost()}$", state="hover"
+                format_money(self.buildings.get_age_cost()), state="hover"
             )
 
     def handle_event(self, event: pygame.Event) -> None:
@@ -545,12 +545,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.player.earn(amount)
         self.show_gain(building, amount)
 
-    def show_gain(self, building: Building, amount: int, *, merge: bool = True) -> None:
-        """A green "+amount" over `building`. With `merge`, payouts of one building that
-        come close together become one number; a sale (`merge=False`) is always its own."""
+    def show_gain(self, building: Building, amount: int) -> None:
+        """A green "+amount" over `building`: a payout or a sale."""
         if amount > 0:
             self.floating_texts.gain(
-                building if merge else None,
                 building.rect.midtop,
                 amount,
                 pygame.time.get_ticks(),

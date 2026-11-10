@@ -1,13 +1,12 @@
-"""Floating money text: a green "+$X" that rises over a building that paid or was sold, and a
-red "-$X" that falls onto the cash display from just above it when the player spends (the
+"""Floating money text: a green "+X$" that rises over a building that paid or was sold, and a
+red "-X$" that falls onto the cash display from just above it when the player spends (the
 display sits at the bottom screen edge, so there is no room below it).
 
 Nothing here knows about the game: callers pass the screen position, the amount and the time
 (milliseconds, the same clock the building timers use), so the logic is testable without a
 window. The numbers come from `floating_text` in config/settings.yaml (FloatingTextConfig).
 
-Payouts from the same source within `merge_window_ms` of its first text are added into that one
-number instead of starting another, so a busy board stays readable.
+Every payout, sale and spend gets its own text.
 """
 
 from dataclasses import dataclass
@@ -33,7 +32,6 @@ class FloatingTextConfig:
     lifetime_ms: int
     rise: int  # pixels a gain moves up over its life, at 100% UI scale
     fall: int  # pixels a spend moves down over its life, at 100% UI scale
-    merge_window_ms: int
     max_texts: int  # alive at once; the oldest is dropped first
 
     @classmethod
@@ -51,7 +49,6 @@ class FloatingTextConfig:
             lifetime_ms=values["lifetime_ms"],
             rise=values["rise"],
             fall=values["fall"],
-            merge_window_ms=values["merge_window_ms"],
             max_texts=values["max_texts"],
         )
 
@@ -61,7 +58,6 @@ class FloatingText:
     position: Vector2  # where it starts: the point of the text named by `anchor`
     amount: int  # positive: gained; negative: spent
     born_ms: int
-    key: object | None  # the source whose payouts merge; None for spends
     direction: int  # -1 moves up the screen, 1 moves down
     anchor: str  # the pygame.Rect attribute `position` sets: "midbottom", "bottomright"
 
@@ -90,28 +86,16 @@ class FloatingTexts:
         self._images: dict[tuple[str, int, int], pygame.Surface] = {}
         self.texts: list[FloatingText] = []
 
-    def gain(self, key: object | None, position, amount: int, now_ms: int) -> None:
-        """A green "+amount" rising from `position`. With a `key`, a text for the same key
-        that is still inside the merge window takes the amount instead (and keeps floating);
-        with no key (a sale) the gain always gets its own text."""
+    def gain(self, position, amount: int, now_ms: int) -> None:
+        """A green "+amount" rising from `position`: one text per payout or sale."""
         assert amount > 0, "a gain must be positive"
-        for text in self.texts if key is not None else ():
-            if (
-                text.key is key
-                and text.amount > 0
-                and now_ms - text.born_ms < self.config.merge_window_ms
-            ):
-                text.amount += amount
-                return
-        self._add(FloatingText(Vector2(position), amount, now_ms, key, -1, "midbottom"))
+        self._add(FloatingText(Vector2(position), amount, now_ms, -1, "midbottom"))
 
     def spend(self, position, amount: int, now_ms: int) -> None:
         """A red "-amount" falling from `position`, its bottom right corner there (so it
         lines up with the right edge of the number it falls onto)."""
         assert amount > 0, "a spend must be positive"
-        self._add(
-            FloatingText(Vector2(position), -amount, now_ms, None, 1, "bottomright")
-        )
+        self._add(FloatingText(Vector2(position), -amount, now_ms, 1, "bottomright"))
 
     def _add(self, text: FloatingText) -> None:
         self.texts.append(text)

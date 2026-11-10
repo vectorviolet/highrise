@@ -22,7 +22,6 @@ floating_text:
   lifetime_ms: 1400
   rise: 70                 # pixels a gain moves up over its life, at 100% UI scale
   fall: 44                 # pixels a spend moves down over its life, at 100% UI scale
-  merge_window_ms: 500     # payouts of one building within this time become one number
   max_texts: 40            # alive at once
 
 ui:

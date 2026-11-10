@@ -7,6 +7,7 @@ from gameplay.tiles.tile import Tile
 from pygamine import TextObject, Transform
 from pygamine.util.localization import localization
 from ui.info_panel import InfoPanel
+from ui.money_format import format_money
 
 
 class FakeText:
@@ -94,7 +95,7 @@ def test_refresh_writes_every_field_from_the_building(assets):
     assert panel["speed_text"].text == f"Speed: {building.speed} $/sec"
     assert panel["cooldown_text"].text == f"Cooldown: {building.cooldown} sec"
     assert panel["sell_price_text"].text == f"Sell Price: {building.sell_price}"
-    assert panel["sell_button_text"].text == f"{building.sell_price}$"
+    assert panel["sell_button_text"].text == format_money(building.sell_price)
     assert panel["sell_button_text"].state == "hover"
     assert panel["info_panel_building_image"].state == "default"
     assert "default" in panel["info_panel_building_image"].surfaces

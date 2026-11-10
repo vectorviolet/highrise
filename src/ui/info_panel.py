@@ -1,6 +1,7 @@
 from pygamine import load_image
 from pygamine import GameObject
 from gameplay.buildings.building import Building
+from ui.money_format import format_money
 
 
 class InfoPanel:
@@ -19,7 +20,7 @@ class InfoPanel:
         panel["cooldown_text"].set_params(value=building.cooldown)
         panel["sell_price_text"].set_params(value=building.sell_price)
         panel["sell_button_text"].set_text(
-            str(building.sell_price) + "$", state="hover"
+            format_money(building.sell_price), state="hover"
         )
         image = panel["info_panel_building_image"]
         image.add_surface(

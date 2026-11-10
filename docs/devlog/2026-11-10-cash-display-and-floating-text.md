@@ -49,9 +49,10 @@ self-contained class, `ui/floating_text.py`, driven by a time value passed in by
   the comparison images above stay as the record of the options.
 - **Alignment:** the plate and the buttons share `y: 20`, `height: 60` in `config/panels.yaml`;
   `tests/test_cash_display.py` checks top, bottom and height at every UI scale.
-- **Floating text:** the numbers (colors, lifetime, rise and fall, merge window, cap) are in
+- **Floating text:** the numbers (colors, sizes, lifetime, rise and fall, cap) are in
   `config/settings.yaml` under `floating_text`. Text size and distances scale with the UI scale.
-  A building's payouts within the merge window of its first text add into that text.
+  Every payout gets its own text: the owner dropped the per-building merge window after
+  play-testing, so there is no merge code or setting.
 - **Spend text direction:** the cash display sits at the bottom screen edge, so a text falling
   from it would leave the screen. The red text starts just above the plate and falls onto it,
   fading out. This is the one deviation from the issue's wording; the owner can overrule it.
@@ -67,14 +68,14 @@ self-contained class, `ui/floating_text.py`, driven by a time value passed in by
 
 ## Result
 
-The cash display and the floating text work at every UI scale; tests cover the amounts, signs, colors, the merge window and expiry.
+The cash display and the floating text work at every UI scale; tests cover the amounts, signs, colors and expiry.
 
 ## Review follow-ups
 
-- One formatter, `ui/money_format.py`, writes every amount from the `money.amount` language key
-  (now `"{amount}$"`), so the cash display and the floating text always match; changing the one
-  string to `"${amount}"` or `"${amount:,}"` changes both. The owner is still deciding the format.
-- A sale always gets its own text; only a building's payouts merge.
+- One formatter, `ui/money_format.py`, writes every amount from the language keys
+  and `money.thousands`, so the cash display, the floating text and the toolbar and sell prices
+  always match. The owner chose a thousands separator with the sign after the digits: "12,345$" in
+  English and "12.345$" in Turkish (a dot), set per language in the lang files.
 - Texts over the world are hidden while the info panel is open, so they never cover it.
 - After a play-test: gain texts are smaller (24 pt, `gain_font_size`; spends stay 30 pt,
   `spend_font_size`), and the red spend text is right-aligned with the amount it falls onto. Texts

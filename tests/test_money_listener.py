@@ -8,6 +8,7 @@ import pytest
 
 import pygamine
 from app.game import Game
+from ui.money_format import format_money
 
 
 @pytest.fixture
@@ -27,11 +28,11 @@ def money_text(game: Game):
 
 def test_startup_registers_one_listener_and_shows_the_money(game):
     assert len(game.player._money_listeners) == 1
-    assert money_text(game).text == f"{game.player.money}$"
+    assert money_text(game).text == format_money(game.player.money)
 
     game.player.earn(7)
 
-    assert money_text(game).text == f"{game.player.money}$"
+    assert money_text(game).text == format_money(game.player.money)
 
 
 def test_several_new_games_keep_exactly_one_listener(game):
@@ -48,4 +49,4 @@ def test_money_change_after_new_games_updates_the_current_text(game):
 
     game.player.earn(42)
 
-    assert current.text == f"{game.player.money}$"
+    assert current.text == format_money(game.player.money)
