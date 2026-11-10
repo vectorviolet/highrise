@@ -33,8 +33,9 @@ class Tile(GameObject):
         self.selected_rect = self.rect.copy()
         self.selected_rect.y -= self.HOVER_SHIFT_Y
 
-        self.surface = self.unselected_surface = image
-        self.selected_surface = self.unselected_surface.__copy__()
+        self.unselected_surface = image.copy()
+        self.surface = self.unselected_surface
+        self.selected_surface = image.copy()
 
         local_corners = [
             (0, (self.rect.height / 2) - 16),
