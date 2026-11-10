@@ -112,7 +112,7 @@ turns them into booleans.
 
 ### Credits page
 
-The CREDITS page (`credits` panel) scrolls its sections with pygamine's `scrolling_panel`; `Game.open_panel` replays it from the top. Its entries are written in `config/panels.yaml`: when an asset pack is added to `assets/SOURCES.yaml`, add it there too (`tests/test_sources.py` checks).
+The CREDITS page (`credits` panel) scrolls its sections with pygamine's `scrolling_panel`; `Game.open_panel` restarts it each time (content enters from below). Its entries are written in `config/panels.yaml`: when an asset pack is added to `assets/SOURCES.yaml`, add it there too (`tests/test_sources.py` checks).
 
 ### Isometric Tilemap
 
@@ -137,6 +137,6 @@ SQLite database at `databases/database.db`. Three tables: `game` (age, map size,
 
 ### Audio
 
-Channel 0 plays the looping music. Each SFX plays on a free channel from pygamine's pool (channels 3 and up; 1 and 2 are reserved and unused here), so SFX overlap; if all are busy the new sound is dropped. The SFX volume applies to the whole pool. The master volume (first row of the AUDIO page) scales the music and the SFX pool through pygamine's `GameAudio`. The music and SFX volumes are stored in the `game` table, the master volume in `settings`, and all are applied on load. 
+Channel 0 plays the looping music. Each SFX plays on a free channel from pygamine's pool (channels 3 and up; 1 and 2 are reserved and unused here), so SFX overlap; if all are busy the new sound is dropped. The SFX volume applies to the whole pool. The master volume (first row of the AUDIO page) scales the music and the SFX pool through pygamine's `GameAudio`. The music and SFX volumes are stored in the `game` table, the master volume in `settings`, and all are applied on load. All audio logic is in `GameAudioMixin`.
 
 Background music is optional: the game plays the `bg` sound from `config/assets.yaml` if it's there. Without it, the game plays no music and hides the music volume row on the AUDIO settings screen (`MUSIC_KEY` / `MUSIC_VOLUME_OBJECTS` in `app/game.py`). The track is Sakura Girl - Day Off (CC BY 3.0, `assets/sounds/bg.mp3`); its attribution ("Music : Sakura Girl - Day Off", youtu.be/vAv9KtrU_5c) lives in CREDITS.md and README. Any other track needs a license that allows bundling it in the game.

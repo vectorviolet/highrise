@@ -50,6 +50,22 @@ MUSIC_VOLUME_OBJECTS = (
     "music_volume_entry_text",
     "music_volume_minus_icon",
     "music_volume_plus_icon",
+    "audio_settings_panel",
+)
+# What sits below the music row on the AUDIO page: with no music it moves up
+# into the music row's place, under the shorter panel.
+BELOW_MUSIC_OBJECTS = (
+    "sfx_volume_text",
+    "sfx_volume_minus_button",
+    "sfx_volume_plus_button",
+    "sfx_volume_entry",
+    "sfx_volume_entry_text",
+    "sfx_volume_minus_icon",
+    "sfx_volume_plus_icon",
+    "cancel_button",
+    "cancel_button_text",
+    "save_button",
+    "save_button_text",
 )
 
 # The game-panel objects that make up the info panel: children of its root.
@@ -256,6 +272,11 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         panel = self.panel_manager["audio_settings"]
         for name in MUSIC_VOLUME_OBJECTS:
             panel[name].active = shown
+        panel["audio_settings_panel_no_music"].active = not shown
+        if not shown:
+            step = panel["sfx_volume_text"].rect.y - panel["music_volume_text"].rect.y
+            for name in BELOW_MUSIC_OBJECTS:
+                panel[name].rect.y -= step
 
     def add_objects(self) -> None:
         """Builds everything: the game world, then the panels."""
@@ -532,7 +553,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             self.exit()
             return
         if tab == "credits":
-            self.panel_manager["credits"]["credits_scroller"].reset()  # from the top
+            self.panel_manager["credits"][
+                "credits_scroller"
+            ].reset()  # restart the scroll
         self.panel_manager.open_panel(tab)
         self.cloud_animation.create_clouds()
 

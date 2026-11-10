@@ -88,12 +88,17 @@ def _credits_page_entries() -> list[str]:
     return [o["text"] for o in objects.values() if isinstance(o, dict) and "text" in o]
 
 
-def test_the_credits_page_lists_every_pack_with_its_license(sources):
+def test_the_credits_page_lists_every_pack_with_its_own_license(sources):
     entries = _credits_page_entries()
-    page = "\n".join(entries)
     for pack in sources["packs"].values():
-        assert any(pack["name"] in entry for entry in entries), pack["name"]
-        assert CREDITS_PAGE_LICENSES[pack["license"]] in page, pack["name"]
+        label = CREDITS_PAGE_LICENSES[pack["license"]]
+        names = [i for i, e in enumerate(entries) if pack["name"] in e]
+        assert names, pack["name"]
+        # The license is on the entry itself, or (CC BY, whose attribution
+        # takes two lines first) on a line of its own right after them.
+        assert any(
+            label in entries[i] or label in entries[i + 1 : i + 3] for i in names
+        ), pack["name"]
 
 
 def test_the_credits_page_carries_the_music_attribution_lines():

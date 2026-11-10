@@ -447,11 +447,3 @@ def test_a_settings_table_from_before_the_master_volume_gets_the_column(
     old.init_database()
 
     assert old.load_settings() == GameSettings("tr", True, 110, 1.0)
-
-
-def test_a_master_volume_outside_zero_to_one_is_clamped(tmp_path, assets):
-    game = FakeGame(tmp_path, assets)
-    game.init_database()
-    game.database.execute_safely("UPDATE settings SET master_volume=7.5")
-
-    assert game.load_settings().master_volume == 1.0

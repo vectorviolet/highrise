@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 from gameplay.tilemap import Tilemap
-from pygamine import clamp01
 from pygamine.util.localization import DEFAULT_LANGUAGE
 from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES
 
@@ -78,10 +77,8 @@ class GamePersistenceMixin:
         language, skip_intro, ui_scale, master_volume = rows[0]
         if ui_scale not in UI_SCALES:
             ui_scale = DEFAULT_UI_SCALE  # a step removed since, or a hand-edited file
-        # A hand-edited value outside 0-1 is clamped.
-        return GameSettings(
-            language, bool(skip_intro), ui_scale, clamp01(float(master_volume))
-        )
+        # Not clamped here: GameAudio.set_master_volume clamps what it gets.
+        return GameSettings(language, bool(skip_intro), ui_scale, float(master_volume))
 
     def save_language(self, language: str) -> None:
         self.database.execute_safely(

@@ -415,6 +415,12 @@ panels:
         position: [740, 320]
         size: [440, 640]
         extends: menu_panel
+      # Replaces the panel above when there is no music (the music row is
+      # hidden and the rows below it move up; see Game._show_music_controls).
+      audio_settings_panel_no_music:
+        position: [740, 320]
+        size: [440, 470]
+        extends: menu_panel
       master_volume_text:
         extends: settings_text
         position: [CENTER, 380]
@@ -591,7 +597,7 @@ panels:
   credits:
     objects:
       credits_title:
-        position: [740, 120]
+        position: [740, 130]
         size: [440, 70]
         asset: blue_button
       credits_title_text:
@@ -606,8 +612,9 @@ panels:
         extends: menu_panel
         position: [640, 200]
         size: [640, 640]
-      # Scrolls its targets up through the panel, clipped to its own rect and
-      # replayed from the bottom each time the page opens.
+      # Scrolls its targets up through the panel, clipped to its own rect.
+      # Game.open_panel restarts it each time the page opens (content enters
+      # from below).
       credits_scroller:
         type: scrolling_panel
         position: [660, 220]
