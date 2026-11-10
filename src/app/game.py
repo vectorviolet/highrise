@@ -8,7 +8,7 @@ import yaml
 from app.game_events import GameEventsMixin
 from app.game_persistence import GamePersistenceMixin, GameSettings
 from domain.player import Player
-from gameplay.buildings.building import Buildings
+from gameplay.buildings.building import Building, Buildings
 from gameplay.clouds.cloud_container import OneShotCloudAnimation, LoopingCloudAnimation
 from gameplay.tile_selector import TileSelector
 from gameplay.tilemap import Tilemap
@@ -25,6 +25,8 @@ from pygamine import StateObject
 from pygamine import make_factory, make_text_factory, make_animated_factory
 from pygamine import MenuController
 from pygamine.util.localization import DEFAULT_LANGUAGE, localization, tr
+from ui.cash_display import apply_cash_style, cash_style
+from ui.floating_text import FloatingTextConfig, FloatingTexts
 from ui.info_panel import InfoPanel
 from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES, step_ui_scale
 from util.paths import LANG_FOLDER
@@ -99,6 +101,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         ui = self.settings["ui"]
 
         self.cursor_size = tuple(ui["cursor_size"])
+        self.cash_style = cash_style(ui["cash_display"])
+        self.floating_text_config = FloatingTextConfig.from_dict(
+            self.settings["floating_text"]
+        )
 
         # Every panel position in config/panels.yaml is an absolute pixel
         # coordinate authored against this size -- set before super().__init__()
@@ -131,6 +137,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         self.audio = GameAudio()
         self.player = Player()
+        self.floating_texts = FloatingTexts(
+            self.floating_text_config, str(self.assets.font_path("titillium_black"))
+        )
         # The listener add_objects() registered last; replaced on every
         # rebuild so new games don't pile up listeners on the same player.
         self.money_listener: Callable[[int], None] | None = None
@@ -357,7 +366,15 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             ),
         }
 
-        money_text = self.panel_manager["game"]["money_text"]
+        apply_cash_style(
+            self.cash_style,
+            panel["money_panel"],
+            panel["money_icon"],
+            panel["money_text"],
+            self.assets,
+        )
+        self.floating_texts.scale = self.ui_scale / 100
+        money_text = panel["money_text"]
         if self.money_listener is not None:
             self.player.remove_money_listener(self.money_listener)
         self.money_listener = lambda m: money_text.set_text(f"{m}$")
@@ -407,6 +424,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def update(self) -> None:
         self.panel_manager.update()
         self.buildings.update()
+        self.floating_texts.update(pygame.time.get_ticks())
         self._close_stale_info_panel()
         self.cloud_animation.update()
 
@@ -421,6 +439,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def draw(self) -> None:
         self.panel_manager.draw(self.window)
+        if self.panel_manager.current_panel == "game":
+            self.floating_texts.draw(self.window, pygame.time.get_ticks())
         self.cloud_animation.draw(self.window)
         super().draw()
 
@@ -446,7 +466,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def expand(self) -> None:
         tilemap = self._tilemap
-        if tilemap.is_max_size() or not self.player.spend(tilemap.get_expand_cost()):
+        if tilemap.is_max_size() or not self._spend(tilemap.get_expand_cost()):
             return
 
         tilemap.expand()
@@ -492,7 +512,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         if empty_tiles:
             row_number, column_number = choice(empty_tiles)
             self.add_building(1, row_number, column_number)
-            self.player.spend(self.buildings.get_build_cost())
+            self._spend(self.buildings.get_build_cost())
             self.audio.play_sfx(self.click_sound_path)
 
     def set_age(self, age_number) -> None:
@@ -503,7 +523,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def next_age(self) -> None:
         if self.buildings.age_number >= self.buildings.max_age_number:
             return
-        if not self.player.spend(self.buildings.get_age_cost()):
+        if not self._spend(self.buildings.get_age_cost()):
             return
         self.set_age(self.buildings.age_number + 1)
         self.audio.play_sfx(self.click_sound_path)
@@ -513,8 +533,31 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             return
         self.buildings.move(rotation, self._tilemap, self.max_building_level)
 
-    def _on_building_payout(self, amount: int) -> None:
+    def _on_building_payout(self, building: Building, amount: int) -> None:
         self.player.earn(amount)
+        self.show_gain(building, amount)
+
+    def show_gain(self, building: Building, amount: int) -> None:
+        """A green "+$amount" over `building`; payouts of one building that come close
+        together merge into one number."""
+        if amount > 0:
+            self.floating_texts.gain(
+                building, building.rect.midtop, amount, pygame.time.get_ticks()
+            )
+
+    def _spend(self, amount: int) -> bool:
+        """Pays `amount` if the player can afford it, and floats a red "-$amount" down
+        onto the cash display from just above it (below it is the screen edge).
+        Returns whether it was paid."""
+        if not self.player.spend(amount):
+            return False
+        if amount > 0:
+            self.floating_texts.spend(
+                self.panel_manager["game"]["money_panel"].rect.midtop,
+                amount,
+                pygame.time.get_ticks(),
+            )
+        return True
 
     def open_panel(self, tab: str) -> None:
         if tab == "exit":
@@ -534,6 +577,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def _reset_session_ui(self) -> None:
         """Brings the UI in line with a freshly loaded session: the age, a closed
         info panel, the toolbar hover texts and the settings labels."""
+        self.floating_texts.clear()
         self.set_age(self.buildings.age_number)
         self.info_panel.close()
         self._refresh_ui_texts()

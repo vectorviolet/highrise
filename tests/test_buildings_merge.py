@@ -211,7 +211,7 @@ def test_control_moving_calls_the_merge_callback_once_per_merge(assets):
 
 def test_payout_callback_is_ready_after_creation_age_change_and_merge(assets):
     paid = []
-    buildings = Buildings(on_payout=paid.append)
+    buildings = Buildings(on_payout=lambda _building, amount: paid.append(amount))
     tilemap = Tilemap(size=3, max_size=3)
     buildings.append(buildings.create(1, tilemap[0][0]))
     buildings[0]._payout()

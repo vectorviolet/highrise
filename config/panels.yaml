@@ -230,15 +230,28 @@ panels:
         states:
           hover: "0$"
 
+      # The cash display: same top, height and bottom line as the buttons (y 20,
+      # height 60). The plate image, the coin and the text color come from the
+      # style picked by `ui.cash_display` in settings.yaml (ui/cash_display.py);
+      # the amount is right-aligned inside the plate.
+      money_panel:
+        parent: game_toolbar
+        position: [1420, 20]
+        size: [280, 60]
+        asset: grey_button
+      money_icon:
+        parent: money_panel
+        position: [14, 10]
+        size: [40, 40]
+        asset: grey_button
       money_text:
         type: text
         font: titillium_bold
-        font_size: 35
-        color: Green
-        background_color: Black
-        padding: [6, 16]
-        parent: game_toolbar
-        position: [1450, 30]
+        font_size: 32
+        color: White
+        parent: money_panel
+        anchor: right
+        position: [-18, -2]
         text: ""
 
       info_panel:

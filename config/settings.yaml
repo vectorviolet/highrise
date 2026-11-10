@@ -13,7 +13,19 @@ audio:
   default_music_volume: 1.0
   default_sfx_volume: 1.0
 
+floating_text:
+  font_size: 30            # pixels at 100% UI scale
+  gain_color: [96, 232, 96]    # +$X over a building that paid or was sold
+  spend_color: [255, 90, 80]   # -$X falling from the cash display
+  outline_color: [24, 32, 24]
+  lifetime_ms: 1400
+  rise: 70                 # pixels a gain moves up over its life, at 100% UI scale
+  fall: 44                 # pixels a spend moves down over its life, at 100% UI scale
+  merge_window_ms: 500     # payouts of one building within this time become one number
+  max_texts: 40            # alive at once
+
 ui:
+  cash_display: 1          # the cash display's look, 1-3 (ui/cash_display.py; the owner picks)
   cursor_size: [32, 32]  # the Kenney Cursor Pack sprite's native size: crisp pixel art
   background_colors:
     menu: yellow

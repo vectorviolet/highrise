@@ -22,6 +22,11 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Every player-visible string lives in `config/lang/en.yaml`, with a draft Turkish translation in
   `config/lang/tr.yaml`. Tests check that both files have the same keys and that the font has every
   character ([devlog](docs/devlog/2026-11-04-language-and-skip-intro.md)).
+- **Floating money text**: a green "+$X" rises over a building that paid or was sold, and a red
+  "-$X" falls onto the cash display when you build, upgrade (NEXT AGE) or expand. Payouts of one
+  building within 0.5 s merge into one number. Colors, speed, lifetime and the merge window are in
+  `config/settings.yaml` (`floating_text`); the text scales with the UI scale
+  ([devlog](docs/devlog/2026-11-10-cash-display-and-floating-text.md)).
 
 ### Fixed
 
@@ -31,6 +36,9 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- The cash display is a UI Pack plate (a coin, light text) instead of green text on black, with the
+  same height and top/bottom line as the HUD buttons at every UI scale. Three looks exist; the owner
+  picks one, and `ui.cash_display` in `config/settings.yaml` switches between them.
 - The font is now Titillium Web (SIL OFL 1.1) instead of Kenney Future, which lacks the Turkish
   letters ğ Ğ ı İ ş Ş. Info panel text is two points larger and the value boxes on the settings pages
   use a darker gray, so they stay readable.

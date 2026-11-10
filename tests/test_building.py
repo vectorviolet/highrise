@@ -52,11 +52,11 @@ def test_get_image_path_reflects_level_and_age(assets):
 def test_payout_calls_on_payout_with_cooldown_times_speed(assets):
     b = make_building(level=2, age_number=0)  # speed == 3
     payouts = []
-    b.on_payout = payouts.append
+    b.on_payout = lambda building, amount: payouts.append((building, amount))
 
     b._payout()
 
-    assert payouts == [b.cooldown * b.speed]
+    assert payouts == [(b, b.cooldown * b.speed)]
 
 
 def test_payout_is_a_no_op_without_a_listener(assets):

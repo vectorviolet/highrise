@@ -118,7 +118,7 @@ turns them into booleans.
 
 `Buildings` owns movement and replacement construction. Use `Buildings.create`
 for production building creation (purchase/load, merge and age change) so the
-collection's `on_payout` callback is passed in. `Building` requires `on_payout`
+collection's `on_payout` callback (`(building, amount)`) is passed in. `Building` requires `on_payout`
 as a keyword-only argument (`None` for no income), so it can't be forgotten.
 `on_merge` delegates the merge sound to `Game`; the collection has no
 asset/audio dependency. Merges are collected during movement checks and applied
@@ -126,6 +126,15 @@ after iteration, then sorted by column. Keep the existing next-frame merge after
 arrival. Board-changing actions (moves, build, sell, NEXT AGE) wait while
 `Buildings.is_busy()`; the one guard is in `GameEventsMixin.handle_game_events`.
 Saving finishes pending merges first. See ADR 0001.
+
+### Cash display and floating money text
+
+The cash display is `money_panel` (plate), `money_icon` (coin) and `money_text` in `config/panels.yaml`,
+on the buttons' top and bottom line. `ui/cash_display.py` paints the plate and coin for the style picked
+by `ui.cash_display` in `config/settings.yaml`. Money changes show `ui/floating_text.py` texts, numbers in
+`floating_text` in `config/settings.yaml`: `Game._on_building_payout` and `show_gain` (payouts, sales) and
+`Game._spend` (build, upgrade, expand, NEXT AGE; always spend through it, not `Player.spend`). A building's
+`on_payout` callback takes `(building, amount)`.
 
 ### Persistence
 
