@@ -34,7 +34,7 @@ Fields that live outside the description, following itch.io's
   (graphics: the icon only). The other art is Kenney's CC0 packs and the music is by Sakura Girl, so
   answer no AI for those. Check what itch.io's form asks about code, graphics, sound and text.
 - **Screenshots:** at least 4 are wanted, uploaded to the page's gallery in this order (all in
-  `docs/screenshots/`, 1280 px wide): `02_build_mode.png`, `03_inspection.png` and
+  `docs/screenshots/`, 1920x1080): `02_build_mode.png`, `03_inspection.png` and
   `01_main_menu.png`. That is only three, so add a fourth (for example a later age or a boosted
   city). itch.io shows them apart from the description, so the description only embeds the
   preview GIF.
