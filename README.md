@@ -2,27 +2,31 @@
 
 # Highrise
 
+<div align="center">
+
 [![CI](https://github.com/vectorviolet/highrise/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/vectorviolet/highrise/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/vectorviolet/highrise)](https://github.com/vectorviolet/highrise/releases/latest)
 [![License: MIT](https://img.shields.io/github/license/vectorviolet/highrise)](LICENSE)
 [![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/vectorviolet/highrise/badges/coverage.json)](https://github.com/vectorviolet/highrise/actions/workflows/ci.yml)
 [![Python 3.12+ | pygame-ce](https://img.shields.io/badge/python-3.12%2B%20%7C%20pygame--ce-3776AB?logo=python&logoColor=white)](https://github.com/pygame-community/pygame-ce)
 
-An isometric city-builder where same-level buildings merge `2048`-style. Build, merge, expand, and advance through ages — Python + [pygame-ce](https://github.com/pygame-community/pygame-ce).
+</div>
 
-![Gameplay](docs/preview.gif)
+An isometric city-builder where same-level buildings merge `2048`-style: slide them together, watch them grow taller and richer, expand the land and advance through four ages. Built with Python and [pygame-ce](https://github.com/pygame-community/pygame-ce) on the author's own [pygamine](https://github.com/vectorviolet/pygamine) engine layer.
+
+![Buildings sliding and merging into a taller building on an isometric grid](docs/preview.gif)
 
 ## Gameplay
 
-Place buildings on the isometric grid, then slide them with WASD/arrows to merge same-level neighbors into a higher-level building (just like 2048). Higher-level buildings produce more income. Spend income to construct new buildings, expand the land, or advance to the **next age** to unlock better building tiers.
+Place buildings on the isometric grid, then slide them with WASD or the arrow keys to merge same-level neighbors into a higher-level building, just like 2048. Higher-level buildings earn more income. Spend it to build, expand the land, or advance to the **next age** for better-looking buildings; each age's tasks (reach a building level, earn so much per second, and in later ages boost some buildings) must be done first. **BOOST** puts a booster on the board that raises the income of the buildings on the tiles it covers. English and Turkish, with display, audio and game settings; leaving the board for the menu saves your game, and CONTINUE resumes it.
 
-### Screenshots
+## Screenshots
 
 | Menu | Build mode | Inspection |
 |------|------------|------------|
 | ![](docs/screenshots/01_main_menu.png) | ![](docs/screenshots/02_build_mode.png) | ![](docs/screenshots/03_inspection.png) |
 
-### Controls
+## Controls
 
 | Action | Input |
 |---|---|
@@ -30,6 +34,7 @@ Place buildings on the isometric grid, then slide them with WASD/arrows to merge
 | Construct a building | Spacebar |
 | Toggle inspection mode | INFORMATION button |
 | Build a new building | BUILD button |
+| Place a booster (after the first age's tasks) | BOOST button |
 | Expand the land | EXPAND button |
 | Advance to next age | NEXT AGE button |
 | Inspect / sell building | Click a building in inspection mode |
@@ -50,13 +55,9 @@ Grab a ready-to-play build for your OS from [itch.io](https://umutcanekinci.itch
 >
 > Windows SmartScreen: the app is unsigned, so the first launch shows **"Windows protected your PC."** Click **More info → Run anyway**. This is Microsoft's download-reputation check, not a virus warning — brand-new unsigned executables always trigger it.
 
-## Requirements (from source)
+## Running from source
 
-- Python 3.12+
-- [pygame-ce](https://github.com/pygame-community/pygame-ce), pyyaml (resolved automatically from `pyproject.toml` / `uv.lock`)
-- [uv](https://docs.astral.sh/uv/) (optional but recommended)
-
-## Running
+Needs Python 3.12+ and [uv](https://docs.astral.sh/uv/), which also installs the pygamine engine from its submodule.
 
 ```bash
 git clone --recurse-submodules https://github.com/vectorviolet/highrise.git
@@ -66,48 +67,16 @@ uv run python __main__.py
 ```
 
 If you forgot `--recurse-submodules`, or the engine folder is out of step after a pull:
-`git submodule update --init` (on Windows, `scripts\sync-pygamine.bat` does the same).
+`git submodule update --init` (on Windows, `scripts\sync-pygamine.bat` does the same). Without `uv`: `pip install .` then `python __main__.py`.
 
-Without `uv`: `pip install .` then `python __main__.py`.
+Tests, code style, bundles and releases are in [CONTRIBUTING.md](CONTRIBUTING.md); how the code fits together is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## Building a standalone bundle
+## Links
 
-Builds are produced by [PyInstaller](https://pyinstaller.org/) from `highrise.spec`, which bundles `assets/` and `config/` alongside the executable (onedir). To build locally for your current OS:
-
-```bash
-uv sync --group build
-uv run pyinstaller highrise.spec --noconfirm
-```
-
-The result lands in `dist/highrise/` (`dist/Highrise.app` on macOS).
-
-### Cutting a release
-
-Per-OS bundles for Windows, macOS, and Linux are built and published automatically by [`.github/workflows/release.yml`](.github/workflows/release.yml) when a version tag is pushed:
-
-```bash
-git tag v0.1.0
-git push origin v0.1.0
-```
-
-The workflow builds on each OS, zips the bundle, attaches all three to a GitHub Release (with auto-generated notes), and pushes each build to its [itch.io](https://umutcanekinci.itch.io/highrise) channel via [Butler](https://itch.io/docs/butler/). Use the workflow's **Run workflow** button to test a build without publishing.
-
-## Project layout
-
-```
-__main__.py            Entry point — injects src/ + src/pygamine/ into sys.path
-src/app/game.py        Game class — wires Application + Events + Persistence mixins
-src/domain/            Pure data (Player)
-src/gameplay/          Tilemap, tile selector, buildings, clouds
-src/ui/                Info panel and UI helpers
-src/util/              Frozen-build resource path resolution
-src/pygamine/       Engine submodule (Application, PanelLoaderExt, Database, ...)
-config/                YAML: assets, panels, settings
-databases/             SQLite save file (auto-created on first run)
-assets/                Images, sounds, fonts
-```
-
-See [CLAUDE.md](CLAUDE.md) for the full architecture overview.
+- [Devlog](docs/devlog/README.md): every feature and design decision, with screenshots; [decision records](docs/decisions/README.md)
+- [Changelog](CHANGELOG.md)
+- [Contributing](CONTRIBUTING.md) and [architecture](docs/ARCHITECTURE.md)
+- [itch.io page](https://umutcanekinci.itch.io/highrise) and [releases](https://github.com/vectorviolet/highrise/releases)
 
 ## Credits
 
@@ -135,47 +104,12 @@ When you add, replace or remove an asset:
 
 Only use assets whose license allows bundling them in a distributed game.
 
-## Code style
-
-- **Formatting:** Black-compatible, enforced by `ruff format` (line length 88, double quotes,
-  otherwise Black's defaults; see `[tool.ruff.format]` in `pyproject.toml`).
-- **Lint:** `ruff check`, deliberately narrow (pyflakes rules only).
-- **CI:** runs both. The `src/pygamine` submodule is excluded; it has its own setup.
-
-Run both locally before committing:
-
-```bash
-uv run --group dev ruff format .          # reformat
-uv run --group dev ruff check .           # lint
-uv run --group dev ruff format --check .  # what CI runs: fails if anything would be reformatted
-```
-
-The commit that first applied the formatter is listed in `.git-blame-ignore-revs`. To have
-`git blame` skip it and show the real author of each line:
-
-```bash
-git config blame.ignoreRevsFile .git-blame-ignore-revs
-```
-
-## Contributing
-
-1. Fork this repository.
-2. Clone your fork: `git clone --recurse-submodules https://github.com/<you>/highrise.git`
-3. Create a branch: `git checkout -b feature/<your-feature>`
-4. Commit + push: `git commit -am "<message>" && git push origin feature/<your-feature>`
-5. Open a pull request.
-
-A pull request that changes how the game looks retakes the screenshots it affects (and the GIF if
-the loop changed): run `uv run --group dev python scripts/capture_readme.py` from the repo root and
-commit the changed files in `docs/`. The script drives the game headless with a seeded random
-generator and keeps its saves in a temporary folder, so it never touches your own save.
-
 ## Author
 
-Umutcan Ekinci — [umutcannekinci@gmail.com](mailto:umutcannekinci@gmail.com)
+[Umutcan Ekinci](https://www.linkedin.com/in/umutcanekinci/)
 
-See also the [contributors](https://github.com/vectorviolet/highrise/contributors).
+Built with Claude Code as a coding assistant; game design, art direction, playtesting and review by me.
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file. The icon, cover, banner and key arts in `docs/design/` are not CC0: they were generated by the owner with OpenAI Codex (see [docs/design/README.md](docs/design/README.md)).
