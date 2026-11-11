@@ -9,6 +9,8 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Own sounds for **build** (one per age), **NEXT AGE** and **sell** instead of the UI click, and a dust and debris effect where a sold building stood. Sounds are set in `action_sounds` in `config/settings.yaml`; three Kenney sound packs (CC0) are credited
+  ([devlog](docs/devlog/2026-11-11-action-sounds-and-sell-effect.md)).
 - A **CREDITS** page replaces the DEVELOPER page: scrolling sections for the developer, art, UI,
   sound, music, fonts and software, every pack with its license and the Day Off attribution. The
   social link buttons, the photo and their assets are gone

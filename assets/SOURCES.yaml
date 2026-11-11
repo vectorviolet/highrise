@@ -39,12 +39,30 @@ packs:
     url: https://kenney.nl/assets/hexagon-buildings
     license: CC0-1.0
     used_for: "buildings"
+  kenney-impact-sounds:
+    name: "Impact Sounds"
+    author: Kenney
+    url: https://kenney.nl/assets/impact-sounds
+    license: CC0-1.0
+    used_for: "build sounds"
+  kenney-interface-sounds:
+    name: "Interface Sounds"
+    author: Kenney
+    url: https://kenney.nl/assets/interface-sounds
+    license: CC0-1.0
+    used_for: "NEXT AGE sound"
   kenney-isometric-landscape:
     name: "Isometric Landscape"
     author: Kenney
     url: https://kenney.nl/assets/isometric-tiles-landscape
     license: CC0-1.0
     used_for: "ground tile"
+  kenney-sci-fi-sounds:
+    name: "Sci-Fi Sounds"
+    author: Kenney
+    url: https://kenney.nl/assets/sci-fi-sounds
+    license: CC0-1.0
+    used_for: "sell sound"
   kenney-ui-pack:
     name: "UI Pack"
     author: Kenney
@@ -2783,6 +2801,24 @@ files:
     source: music-sakura-girl-day-off
     original: "Sakura Girl - Day Off.mp3"
     note: "byte-identical to the artist's free Hypeddit download (https://hypeddit.com/sakuragirl/dayoff); not converted or trimmed"
+  "sounds/build-wood.ogg":
+    source: kenney-impact-sounds
+    original: "Audio/impactPlank_medium_000.ogg"
+  "sounds/build-rock.ogg":
+    source: kenney-impact-sounds
+    original: "Audio/impactMining_000.ogg"
+  "sounds/build-sand.ogg":
+    source: kenney-impact-sounds
+    original: "Audio/impactSoft_heavy_000.ogg"
+  "sounds/build-stone.ogg":
+    source: kenney-impact-sounds
+    original: "Audio/impactPlate_heavy_000.ogg"
+  "sounds/next-age.ogg":
+    source: kenney-interface-sounds
+    original: "Audio/maximize_005.ogg"
+  "sounds/sell.ogg":
+    source: kenney-sci-fi-sounds
+    original: "Audio/explosionCrunch_000.ogg"
   "sounds/click-a.ogg":
     source: kenney-ui-pack
     original: "Sounds/click-a.ogg"

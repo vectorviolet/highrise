@@ -5,6 +5,7 @@ from random import choice
 import pygame
 import yaml
 
+from app.action_sounds import ActionSounds
 from app.game_events import GameEventsMixin
 from app.game_persistence import (
     DEFAULT_MASTER_VOLUME,
@@ -35,6 +36,7 @@ from pygamine import (
 from pygamine import MenuController
 from pygamine.util.localization import DEFAULT_LANGUAGE, localization, tr
 from ui.cash_display import apply_cash_display
+from ui.dust_effect import DustBursts, DustConfig
 from ui.floating_text import FloatingTextConfig, FloatingTexts
 from ui.info_panel import InfoPanel
 from ui.money_format import format_money
@@ -187,6 +189,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.click_sound_path = self.assets.sound_path("click")
         self.go_back_sound_path = self.assets.sound_path("back")
         self.merge_sound_path = self.assets.sound_path("merge")
+
+        self._load_action_feedback()
 
         self.info_panel = InfoPanel(self.panel_manager)
         self.tile_selector = TileSelector(self.tilemap, self.mouse, self.buildings)
@@ -478,10 +482,20 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         if handler := self.handlers.get(self.panel_manager.current_panel):
             handler(event)
 
+    def _load_action_feedback(self) -> None:
+        """The sounds of build, NEXT AGE and sell, and the dust of a sale."""
+        self.action_sounds = ActionSounds.from_config(
+            self.settings["action_sounds"], self.assets
+        )
+        self.sell_effect = DustBursts(
+            DustConfig.from_dict(self.settings["sell_effect"])
+        )
+
     def update(self) -> None:
         self.panel_manager.update()
         self.buildings.update()
         self.floating_texts.update(pygame.time.get_ticks())
+        self.sell_effect.update(pygame.time.get_ticks())
         self._close_stale_info_panel()
         self.cloud_animation.update()
 
@@ -498,6 +512,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.panel_manager.draw(self.window)
         if self.panel_manager.current_panel == "game":
             self.odometer.draw(self.window, pygame.time.get_ticks())
+            self.sell_effect.draw(self.window, pygame.time.get_ticks())
             # A panel open over the world (the info panel) is never covered by the
             # texts floating over the world.
             self.floating_texts.draw(
@@ -577,7 +592,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             row_number, column_number = choice(empty_tiles)
             self.add_building(1, row_number, column_number)
             self._spend(self.buildings.get_build_cost())
-            self.audio.play_sfx(self.click_sound_path)
+            self.audio.play_sfx(self.action_sounds.build(self.buildings.age_number))
 
     def set_age(self, age_number) -> None:
         if age_number <= self.buildings.max_age_number:
@@ -590,7 +605,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         if not self._spend(self.buildings.get_age_cost()):
             return
         self.set_age(self.buildings.age_number + 1)
-        self.audio.play_sfx(self.click_sound_path)
+        self.audio.play_sfx(self.action_sounds.next_age)
 
     def move_buildings(self, rotation: str) -> None:
         if self.tile_selector.is_active:
@@ -649,6 +664,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         """Brings the UI in line with a freshly loaded session: the age, a closed
         info panel, the toolbar hover texts and the settings labels."""
         self.floating_texts.clear()
+        self.sell_effect.clear()
         self.set_age(self.buildings.age_number)
         self.info_panel.close()
         self._refresh_ui_texts()

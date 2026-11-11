@@ -648,6 +648,9 @@ panels:
           - credits_ui_2
           - credits_sound_heading
           - credits_sound_1
+          - credits_sound_2
+          - credits_sound_3
+          - credits_sound_4
           - credits_music_heading
           - credits_music_1
           - credits_music_2
@@ -706,41 +709,53 @@ panels:
         extends: credits_entry
         position: [CENTER, 506]
         text: "Kenney - UI Pack (CC0)"
+      credits_sound_2:
+        extends: credits_entry
+        position: [CENTER, 540]
+        text: "Kenney - Impact Sounds (CC0)"
+      credits_sound_3:
+        extends: credits_entry
+        position: [CENTER, 574]
+        text: "Kenney - Interface Sounds (CC0)"
+      credits_sound_4:
+        extends: credits_entry
+        position: [CENTER, 608]
+        text: "Kenney - Sci-Fi Sounds (CC0)"
       credits_music_heading:
         extends: credits_heading
-        position: [CENTER, 576]
+        position: [CENTER, 678]
         text_key: "credits.music"
       credits_music_1:
         extends: credits_entry
-        position: [CENTER, 616]
+        position: [CENTER, 718]
         text: "Music : Sakura Girl - Day Off"
       credits_music_2:
         extends: credits_entry
-        position: [CENTER, 650]
+        position: [CENTER, 752]
         text: "Link : youtu.be/vAv9KtrU_5c"
       credits_music_3:
         extends: credits_entry
-        position: [CENTER, 684]
+        position: [CENTER, 786]
         text: "CC BY 3.0"
       credits_fonts_heading:
         extends: credits_heading
-        position: [CENTER, 754]
+        position: [CENTER, 856]
         text_key: "credits.fonts"
       credits_fonts_1:
         extends: credits_entry
-        position: [CENTER, 794]
+        position: [CENTER, 896]
         text: "Titillium Web - Accademia di Belle Arti di Urbino (SIL OFL 1.1)"
       credits_built_heading:
         extends: credits_heading
-        position: [CENTER, 864]
+        position: [CENTER, 966]
         text_key: "credits.built_with"
       credits_built_1:
         extends: credits_entry
-        position: [CENTER, 904]
+        position: [CENTER, 1006]
         text: "pygame-ce (LGPL 2.1)"
       credits_built_2:
         extends: credits_entry
-        position: [CENTER, 938]
+        position: [CENTER, 1040]
         text: "pygamine (MIT)"
 
       credits_back_button:

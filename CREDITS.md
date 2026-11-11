@@ -15,17 +15,20 @@ freely available. The CREDITS page in the game lists the same assets and softwar
 |---|---|---|---|---|
 | [UI Pack](https://kenney.nl/assets/ui-pack) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | buttons, panel backgrounds, sounds | 879 |
 | [Hexagon Buildings](https://kenney.nl/assets/hexagon-buildings) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | buildings | 24 |
+| [Impact Sounds](https://kenney.nl/assets/impact-sounds) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | build sounds | 4 |
 | [Titillium Web](https://fonts.google.com/specimen/Titillium+Web) | Accademia di Belle Arti di Urbino | [SIL OFL 1.1](https://openfontlicense.org) | all text: Regular, Bold and Black | 3 |
 | [Game Icons](https://kenney.nl/assets/game-icons) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | info, plus and minus icons | 3 |
 | [Background Elements Remastered](https://kenney.nl/assets/background-elements-remastered) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | clouds | 1 |
 | [Cursor Pack](https://kenney.nl/assets/cursor-pack) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | mouse cursor | 1 |
+| [Interface Sounds](https://kenney.nl/assets/interface-sounds) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | NEXT AGE sound | 1 |
 | [Isometric Landscape](https://kenney.nl/assets/isometric-tiles-landscape) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | ground tile | 1 |
+| [Sci-Fi Sounds](https://kenney.nl/assets/sci-fi-sounds) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | sell sound | 1 |
 | [Day Off](https://soundcloud.com/sakuragirl_official/dayoff) | Sakura Girl | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | menu and in-game music | 1 |
 
 CC0 assets need no attribution; they are credited here anyway. The OFL fonts are
 bundled unmodified with their license text. CC BY assets require attribution:
 see the Music section below. Each pack's own
-license text ships with the game: `licenses/assets/font-titillium-web.txt`, `licenses/assets/kenney-background-elements-remastered.txt`, `licenses/assets/kenney-cursor-pack.txt`, `licenses/assets/kenney-game-icons.txt`, `licenses/assets/kenney-hexagon-buildings.txt`, `licenses/assets/kenney-isometric-landscape.txt`, `licenses/assets/kenney-ui-pack.txt`, `licenses/assets/music-sakura-girl-day-off.txt`.
+license text ships with the game: `licenses/assets/font-titillium-web.txt`, `licenses/assets/kenney-background-elements-remastered.txt`, `licenses/assets/kenney-cursor-pack.txt`, `licenses/assets/kenney-game-icons.txt`, `licenses/assets/kenney-hexagon-buildings.txt`, `licenses/assets/kenney-impact-sounds.txt`, `licenses/assets/kenney-interface-sounds.txt`, `licenses/assets/kenney-isometric-landscape.txt`, `licenses/assets/kenney-sci-fi-sounds.txt`, `licenses/assets/kenney-ui-pack.txt`, `licenses/assets/music-sakura-girl-day-off.txt`.
 [assets/SOURCES.yaml](https://github.com/vectorviolet/highrise/blob/main/assets/SOURCES.yaml) in the source repository lists every asset
 file with its pack and its original file name there.
 <!-- assets:end -->

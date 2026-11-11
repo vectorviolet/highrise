@@ -32,3 +32,10 @@ sounds:
     switch_up:      {folder: "", name: switch-b}
     switch_down:    {folder: "", name: switch-a}
     merge:          {folder: "", name: tap-a}
+    # Main actions (see action_sounds in config/settings.yaml): one build sound per age.
+    build_wood:     {folder: "", name: build-wood}
+    build_rock:     {folder: "", name: build-rock}
+    build_sand:     {folder: "", name: build-sand}
+    build_stone:    {folder: "", name: build-stone}
+    next_age:       {folder: "", name: next-age}
+    sell:           {folder: "", name: sell}
