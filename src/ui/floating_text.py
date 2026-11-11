@@ -1,6 +1,6 @@
 """Floating money text: a green "+X$" that rises over a building that paid or was sold, and a
-red "-X$" that falls from just under the cash display when the player spends (the display sits
-at the bottom screen edge, so it may fall partly off screen; the owner accepts that).
+red "-X$" that falls from the bottom of the cash amount when the player spends (the display sits at
+the bottom screen edge, so it may fall partly off screen; the owner accepts that).
 
 Nothing here knows about the game: callers pass the screen position, the amount and the time
 (milliseconds, the same clock the building timers use), so the logic is testable without a
@@ -92,8 +92,8 @@ class FloatingTexts:
         self._add(FloatingText(Vector2(position), amount, now_ms, -1, "midbottom"))
 
     def spend(self, position, amount: int, now_ms: int) -> None:
-        """A red "-amount" falling from `position`, its top right corner there (so it
-        lines up with the right edge of the number above it). Not kept on screen."""
+        """A red "-amount" falling from `position`: the top of its ink and its right edge are
+        there (so it lines up with the number above it). Not kept on screen."""
         assert amount > 0, "a spend must be positive"
         self._add(FloatingText(Vector2(position), -amount, now_ms, 1, "topright"))
 
@@ -131,10 +131,16 @@ class FloatingTexts:
             position = self.current_position(text, now_ms)
             rect = image.get_rect()
             setattr(rect, text.anchor, (round(position.x), round(position.y)))
+            if text.anchor == "topright":
+                rect.top -= self._ink_top(text)  # the ink, not the empty line above it
             if text.over_world:
                 # A gain over the world is kept on screen; a spend may fall off the bottom.
                 rect.clamp_ip(surface.get_rect())
             surface.blit(image, rect)
+
+    def _ink_top(self, text: FloatingText) -> int:
+        """The empty rows above the ink of `text`'s image."""
+        return self._render(text).get_bounding_rect().top
 
     def _size(self, text: FloatingText) -> int:
         """The font size of `text` in pixels at the current UI scale."""

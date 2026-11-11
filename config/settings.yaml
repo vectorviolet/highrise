@@ -15,7 +15,7 @@ audio:
 
 floating_text:
   gain_font_size: 24       # +X$ over a building, pixels at 100% UI scale
-  spend_font_size: 30      # -X$ under the cash display, pixels at 100% UI scale
+  spend_font_size: 30      # -X$ falling from the cash amount, pixels at 100% UI scale
   gain_color: [96, 232, 96]    # +$X over a building that paid or was sold
   spend_color: [255, 90, 80]   # -$X falling from the cash display
   outline_color: [24, 32, 24]

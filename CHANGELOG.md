@@ -27,7 +27,7 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ui.cash_roll_ms`); a change during a roll retargets to the newest amount
   ([devlog](docs/devlog/2026-11-10-cash-display-and-floating-text.md)).
 - **Floating money text**: a green "+X$" rises over a building that paid or was sold, and a red
-  "-X$" falls from under the cash display when you build, upgrade (NEXT AGE) or expand. Every payout
+  "-X$" falls from the bottom of the cash amount when you build, upgrade (NEXT AGE) or expand. Every payout
   gets its own number. Colors, sizes, speed and lifetime are in `config/settings.yaml`
   (`floating_text`); the text scales with the UI scale
   ([devlog](docs/devlog/2026-11-10-cash-display-and-floating-text.md)).

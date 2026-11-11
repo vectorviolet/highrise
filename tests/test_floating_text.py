@@ -229,3 +229,13 @@ def test_every_gain_and_spend_gets_its_own_text(texts):
     texts.spend((0, 0), 10, now_ms=2)
 
     assert [t.text for t in texts.texts] == ["+10$", "+5$", "-10$"]
+
+
+def test_a_spend_starts_with_the_top_of_its_ink_at_its_position(texts):
+    texts.spend((100, 40), 10, now_ms=0)
+    surface = pygame.Surface((200, 100), pygame.SRCALPHA)
+
+    texts.draw(surface, now_ms=0)
+
+    ink = pygame.mask.from_surface(surface).get_bounding_rects()[0]
+    assert ink.top == 40

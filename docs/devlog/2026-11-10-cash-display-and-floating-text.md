@@ -53,8 +53,8 @@ self-contained class, `ui/floating_text.py`, driven by a time value passed in by
   `config/settings.yaml` under `floating_text`. Text size and distances scale with the UI scale.
   Every payout gets its own text: the owner dropped the per-building merge window after
   play-testing, so there is no merge code or setting.
-- **Spend text direction:** the red text starts just under the plate's bottom edge,
-  right-aligned with the amount, and falls down while fading, as the issue says. The cash display
+- **Spend text direction:** the red text starts at the bottom of the amount (the top of its
+  ink at the digits' baseline, inside the plate), right-aligned with the amount, and falls down while fading, as the issue says. The cash display
   sits at the bottom screen edge, so it may fall partly off screen; the owner accepts that. (A
   first version started above the plate and fell onto it, so it stayed on screen.)
 - **Payout callback:** `on_payout` now receives the building as well as the amount, so the
@@ -82,7 +82,7 @@ The cash display and the floating text work at every UI scale; tests cover the a
   `spend_font_size`), and the red spend text is right-aligned with the amount. Gain texts are
   clamped to the screen; the spend text is not.
 
-![The spend text under the plate at 80, 100 and 125 percent](img/50-spend-text-under-plate.png)
+![The spend text falling from the amount at 80, 100 and 125 percent](img/50-spend-text-from-amount.png)
 
 The dark band is below the real screen edge (the picture is extended to show where the text
 goes). The game window ends right under the HUD bar, so the text leaves the screen as it falls.
