@@ -205,3 +205,110 @@ def test_default_door_side_is_deterministic_and_uses_both_sides():
     assert {sprites.default_door_side(r, c) for r in (1, 2) for c in (1, 2)} == set(
         sprites.DOOR_SIDES
     )
+
+
+def edge_and_core(surface: pygame.Surface) -> tuple[list, list]:
+    """Positions of solid pixels with and without a non-solid 4-neighbor (or the surface edge)."""
+    width, height = surface.get_size()
+
+    def solid(x: int, y: int) -> bool:
+        return 0 <= x < width and 0 <= y < height and surface.get_at((x, y)).a >= 128
+
+    edge, core = [], []
+    for x in range(width):
+        for y in range(height):
+            if solid(x, y):
+                around = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
+                (core if all(solid(*n) for n in around) else edge).append((x, y))
+    return edge, core
+
+
+def test_the_outline_settings_are_a_width_and_a_darkening_factor(assets):
+    assert sprites.outline_settings() == (1, 0.55)
+
+
+@pytest.mark.parametrize("booster", [False, True])
+def test_outlined_sprites_are_cached_and_keep_size_and_foot(assets, booster):
+    for fetch in (
+        lambda: sprites.game_sprite("stone", 3, "left", booster),
+        lambda: sprites.panel_sprite("stone", 3, "left", (60, 185), booster),
+    ):
+        assert fetch() is fetch()
+    plain = pygame.transform.scale(
+        sprites.compose("stone", 3, "left", booster),
+        sprites.world_size(sprites.compose("stone", 3, "left", booster)),
+    )
+    outlined = sprites.game_sprite("stone", 3, "left", booster)
+    assert outlined.get_size() == plain.get_size()
+    # The outline recolors pixels but never adds or removes any: the alpha mask (so the click
+    # area and the foot on the bottom row) is the plain sprite's.
+    alpha = lambda surface: [  # noqa: E731
+        surface.get_at((x, y)).a
+        for x in range(surface.get_width())
+        for y in range(surface.get_height())
+    ]
+    assert alpha(outlined) == alpha(plain)
+
+
+@pytest.mark.parametrize("booster", [False, True])
+def test_outline_pixels_are_a_darker_shade_of_their_own_color(assets, booster):
+    _, factor = sprites.outline_settings()
+    plain = pygame.transform.scale(
+        sprites.compose("rock", 4, "right", booster),
+        sprites.world_size(sprites.compose("rock", 4, "right", booster)),
+    )
+    outlined = sprites.game_sprite("rock", 4, "right", booster)
+    edge, core = edge_and_core(plain)
+    assert edge
+    assert core
+    for pos in edge:
+        before, after = plain.get_at(pos), outlined.get_at(pos)
+        assert after[:3] == tuple(int(c * factor) for c in before[:3])
+        assert after.a == before.a
+    for pos in core:
+        assert outlined.get_at(pos) == plain.get_at(pos)
+    # Colored, not gray: some outline pixel keeps a clear hue (channels differ), and no pixel
+    # got brighter.
+    assert any(
+        max(outlined.get_at(p)[:3]) - min(outlined.get_at(p)[:3]) > 15 for p in edge
+    )
+    assert all(sum(outlined.get_at(p)[:3]) <= sum(plain.get_at(p)[:3]) for p in edge)
+
+
+def test_the_panel_sprite_is_outlined_too(assets, monkeypatch):
+    box = (60, 185)
+    shown = sprites.panel_sprite("wood", 5, "left", box)
+    _, factor = sprites.outline_settings()
+    monkeypatch.setitem(sprites.recipes()["outline"], "width", 0)
+    plain = sprites.panel_sprite.__wrapped__("wood", 5, "left", box)  # not cached
+    edge, core = edge_and_core(plain)
+    assert shown.get_size() == plain.get_size() == box
+    assert edge
+    assert core
+    for pos in edge:
+        assert shown.get_at(pos)[:3] == tuple(
+            int(c * factor) for c in plain.get_at(pos)[:3]
+        )
+    assert all(shown.get_at(pos) == plain.get_at(pos) for pos in core)
+
+
+def test_outline_width_zero_changes_nothing(assets, monkeypatch):
+    surface = pygame.Surface((6, 6), pygame.SRCALPHA)
+    surface.fill((200, 100, 50, 255))
+    monkeypatch.setitem(sprites.recipes()["outline"], "width", 0)
+    assert pixels(sprites.outline(surface)) == pixels(surface)
+
+
+def test_outline_of_a_square_darkens_only_its_rim(assets):
+    surface = pygame.Surface((6, 6), pygame.SRCALPHA)
+    pygame.draw.rect(surface, (200, 100, 50, 255), (1, 1, 4, 4))
+    result = sprites.outline(surface)
+    assert result.get_at((1, 1)) == (110, 55, 27, 255)
+    assert result.get_at((2, 2)) == (200, 100, 50, 255)
+    assert result.get_at((0, 0)).a == 0  # transparent stays transparent
+
+
+def test_bad_outline_settings_are_rejected(assets, monkeypatch):
+    monkeypatch.setitem(sprites.recipes()["outline"], "darken", 1.5)
+    with pytest.raises(ValueError, match="outline"):
+        sprites.outline_settings()

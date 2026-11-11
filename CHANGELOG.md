@@ -9,6 +9,10 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Building outline**: every building and booster sprite (board and info panel) gets a thin outline
+  in a darker shade of its own edge colors, so stacked buildings of the same age stay readable. Width
+  and darkening are `outline` in `config/buildings.yaml`
+  ([devlog](docs/devlog/2026-11-11-building-outline.md)).
 - With a building's info panel open, clicking another building (in selection mode) switches the
   panel to it; clicks on the panel never reach the board behind it, and a click on an empty tile
   leaves the panel as it is.

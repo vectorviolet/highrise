@@ -4,6 +4,10 @@ A sprite is cached per (age, level, door side, booster), so composing happens on
 combination, never per frame. `compose` builds the full-size sprite, `game_sprite` the one drawn
 in the world. A booster (`booster=True`) uses the `boosters` recipes instead of the building
 levels; its sprite has no door, so the door side makes no difference to it.
+
+Every sprite the game draws (world and info panel) gets a thin outline, applied once when the
+sprite is built and cached with it. It is drawn inside the sprite's own surface, on the silhouette's
+outermost pixels, so size, anchor and click area stay what they were (see `outline`).
 """
 
 from functools import cache
@@ -49,6 +53,53 @@ def checked_max_level(max_level: int) -> int:
             f"in {RECIPES_PATH.as_posix()}"
         )
     return max_level
+
+
+def outline_settings() -> tuple[int, float]:
+    """The outline's width in pixels (0 = none) and the factor its edge pixels' color is multiplied
+    by (`outline` in the recipes)."""
+    config = recipes()["outline"]
+    width, factor = config["width"], config["darken"]
+    if width < 0 or not 0 < factor <= 1:
+        raise ValueError(
+            f"outline in {RECIPES_PATH.as_posix()}: width must be 0 or more and darken in (0, 1]"
+        )
+    return width, factor
+
+
+def outline(sprite: pygame.Surface) -> pygame.Surface:
+    """A copy of `sprite` with an outline that follows its alpha silhouette. The outline is the
+    outermost `width` pixels of the silhouette (also where it touches the surface's edge),
+    recolored to a darker shade of their own color (each channel times `darken`), so it stays
+    part of the art instead of being black or gray. Alpha is kept, so the size, the anchor and the
+    opaque area are exactly the sprite's. Slow (a pass over the pixels): only call it when a
+    sprite is built, never per frame."""
+    width, factor = outline_settings()
+    result = sprite.copy()
+    size_x, size_y = result.get_size()
+    # Pixels with alpha 0 or 1..127 (the scaled sprite's soft edge) are outside the solid core.
+    solid = {
+        (x, y)
+        for x in range(size_x)
+        for y in range(size_y)
+        if result.get_at((x, y)).a >= 128
+    }
+    core = solid
+    for _ in range(width):
+        core = {
+            (x, y)
+            for x, y in core
+            if all(n in core for n in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)))
+        }
+    for x in range(size_x):
+        for y in range(size_y):
+            red, green, blue, alpha = result.get_at((x, y))
+            if alpha > 0 and (x, y) not in core:
+                result.set_at(
+                    (x, y),
+                    (int(red * factor), int(green * factor), int(blue * factor), alpha),
+                )
+    return result
 
 
 def random_door_side() -> str:
@@ -139,7 +190,7 @@ def game_sprite(
 ) -> pygame.Surface:
     """The sprite at its size in the world (see `game_size` in the recipes)."""
     sprite = compose(age, level, door_side, booster)
-    return pygame.transform.scale(sprite, world_size(sprite))
+    return outline(pygame.transform.scale(sprite, world_size(sprite)))
 
 
 @cache
@@ -168,7 +219,7 @@ def panel_sprite(
     result.blit(
         # Scaled once from the full-size sprite (not the board's already scaled one), to the
         # board's proportions times the panel factor, so it stays as sharp as it can.
-        pygame.transform.scale(compose(age, level, door_side, booster), size),
+        outline(pygame.transform.scale(compose(age, level, door_side, booster), size)),
         ((box[0] - size[0]) // 2, 0),
     )
     return result
