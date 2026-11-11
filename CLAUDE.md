@@ -180,7 +180,7 @@ board stays visible; `tests/test_info_panel_layout.py` checks it at every UI sca
 Issue #52. `config/tasks.yaml` gives every age but the last 2 or 3 tasks (`building_level`,
 `income_per_second`, `boosted_buildings`; the measures are `MEASURES` in `gameplay/tasks.py`, the
 texts are `tasks.<type>` in the language files), the NEXT AGE cost factor (`next_age_cost_factor`: cost
-is (age number + 1) x factor) and `ui`. Targets are checked at load
+is (age number + 1) x factor). Targets are checked at load
 (`TasksConfig.load(ages, max_level, max_tiles)`: a target the game can't reach is a ValueError).
 `AgeTasks` (`Game.tasks`) reads the age from `Buildings.age_number` (no copy) and holds the done tasks
 (latched, keyed by age: a done task stays done), `boost_unlocked` (latched when the first age's tasks are
@@ -188,10 +188,7 @@ done; any later age counts too) and the cost. `Game._update_tasks` runs every fr
 measures each task once and stores `values` (the checklist reads them), and a newly done task refreshes
 the button texts (BOOST and NEXT AGE show `game.locked` until their tasks are done). `Game.next_age`
 checks tasks and cash before paying. State is saved in the `tasks` table (`GamePersistenceMixin.load_tasks`
-/ `save_tasks`); an old save starts its tasks fresh and has BOOST unlocked past age 1. `ui` picks how the
-checklist (`ui/task_list.py`) shows: `hover` over the NEXT AGE button, or `panel` at the top left (it
-swallows mouse clicks like the info panel); the owner is choosing one (see the devlog), the other is then
-removed.
+/ `save_tasks`); an old save starts its tasks fresh and has BOOST unlocked past age 1. The checklist (`ui/task_list.py`) shows over the NEXT AGE button while the mouse is on it.
 
 ### Cash display and floating money text
 

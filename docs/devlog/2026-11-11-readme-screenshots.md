@@ -24,7 +24,7 @@ uv run --group dev python scripts/capture_readme.py
 ```
 
 - **01 main menu:** the new menu, the mouse on PLAY.
-- **02 build mode:** a 5x5 board of buildings up to level 5 and a booster; the mouse is on the
+- **02 build mode:** a 6x6 board of buildings up to level 7 and a booster; the mouse is on the
   booster, so the tiles it covers are lit, and the payouts' texts float over the buildings.
 - **03 inspection:** a level 5 building's info panel with the SELL button.
 - **preview.gif:** BUILD twice, three slides that merge buildings, then BOOST and the payouts

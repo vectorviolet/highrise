@@ -261,24 +261,26 @@ def main_menu(studio: Studio) -> Image.Image:
 
 
 def mid_game(studio: Studio) -> Building:
-    """A 5x5 wood board with buildings of several levels and a booster; returns the booster."""
-    studio.new_game(money=2340, size=5)
+    """A 6x6 wood board with buildings of several levels and a booster; returns the booster."""
+    studio.new_game(money=2340, size=6)
     place = studio.place
     for level, row, col, door in (
         (1, 1, 2, L),
-        (2, 1, 4, R),
+        (2, 1, 5, R),
         (3, 2, 1, R),
         (1, 2, 3, L),
-        (4, 2, 5, R),
+        (7, 2, 6, R),
         (2, 3, 2, L),
-        (5, 3, 4, R),
-        (1, 4, 1, L),
-        (3, 4, 3, R),
-        (2, 5, 2, L),
-        (1, 5, 5, L),
+        (5, 3, 5, R),
+        (4, 4, 1, L),
+        (3, 4, 4, R),
+        (6, 5, 2, L),
+        (1, 5, 6, L),
+        (2, 6, 4, R),
+        (1, 6, 1, R),
     ):
         place(level, row, col, door)
-    booster = place(2, 3, 3, L, booster=True)
+    booster = place(2, 4, 3, L, booster=True)
     studio.game.tasks.unlock_boost()
     studio.game.update_button_texts()
     studio.step(4)
@@ -444,10 +446,14 @@ def main() -> None:
     # Every Database this run opens goes to a temp folder, never the real databases/.
     from pygamine import Database, SaveStore
 
-    temp = tempfile.TemporaryDirectory()
-    Database.__init__.__defaults__ = (str(Path(temp.name) / "databases"),)
-    SaveStore.__init__.__defaults__ = (str(Path(temp.name) / "saves"),)
-    random.seed(SEED)
+    with tempfile.TemporaryDirectory() as temp:
+        Database.__init__.__defaults__ = (str(Path(temp) / "databases"),)
+        SaveStore.__init__.__defaults__ = (str(Path(temp) / "saves"),)
+        random.seed(SEED)
+        capture_all(args)
+
+
+def capture_all(args: argparse.Namespace) -> None:
     studio = Studio()
     shots = args.docs / "screenshots"
     try:
@@ -469,7 +475,6 @@ def main() -> None:
         save_png(game_page, extra / "settings-game-tr.png")
     finally:
         studio.close()
-        temp.cleanup()
 
 
 if __name__ == "__main__":
