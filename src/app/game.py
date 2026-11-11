@@ -133,6 +133,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     # Whether BOOST works. Always for now: a quest unlocks it later (issue #52), which sets
     # this on the instance; create_booster() is the one place that checks it.
     boosters_unlocked = True
+    # What _highlight_boosted_tiles last lit up (the booster and where it stood, and the board).
+    _highlight_key: tuple | None = None
+    _highlight_tilemap: Tilemap | None = None
 
     def __init__(self) -> None:
         self.settings = yaml.safe_load(Path("config/settings.yaml").read_text())
@@ -173,7 +176,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.buildings = Buildings(
             on_merge=self._on_buildings_merged,
             on_payout=self._on_building_payout,
-            boosters=BoosterConfig.from_dict(self.settings["boosters"], AGES),
+            boosters=BoosterConfig.from_dict(
+                self.settings["boosters"], AGES, sprites.level_count(booster=True)
+            ),
         )
         self.cloud_count = gameplay["cloud_count"]
         self.max_size = gameplay["max_map_size"]
@@ -484,19 +489,17 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
                 format_money(tilemap.get_expand_cost()), state="hover"
             )
 
-        if self._board_is_full():
-            panel["build_button_text"].set_text(tr("game.tiles_full"), state="hover")
-        else:
-            panel["build_button_text"].set_text(
-                format_money(self.buildings.get_build_cost()), state="hover"
-            )
-
-        if self._board_is_full():
-            panel["boost_button_text"].set_text(tr("game.tiles_full"), state="hover")
-        else:
-            panel["boost_button_text"].set_text(
-                format_money(self.buildings.get_booster_cost()), state="hover"
-            )
+        full = self._board_is_full()
+        for name, cost in (
+            ("build_button_text", self.buildings.get_build_cost()),
+            ("boost_button_text", self.buildings.get_booster_cost()),
+        ):
+            hover = tr("game.tiles_full") if full else format_money(cost)
+            if name == "boost_button_text" and not self.boosters_unlocked:
+                hover = (
+                    ""  # a locked BOOST shows no price (the locked look is #52's job)
+                )
+            panel[name].set_text(hover, state="hover")
 
         if self.buildings.age_number == self.buildings.max_age_number:
             panel["next_age_button_text"].set_text(tr("game.max_age"), state="hover")
@@ -539,24 +542,31 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             self.info_panel.close()
 
     def _highlight_boosted_tiles(self) -> None:
-        """Lights up the tiles of the booster the info panel shows (and nothing otherwise)."""
+        """Lights up the tiles of the booster the info panel shows (and nothing otherwise).
+        The tiles are only walked when the shown booster, its tile or age, or the board
+        changes: a closed panel costs one comparison per frame."""
         booster = self.info_panel.building
-        covered: set[tuple[int, int]] = set()
-        if (
-            self.info_panel.is_active
+        shown = (
+            booster
+            if self.info_panel.is_active
             and booster is not None
+            and booster.is_booster
             and booster in self.buildings
-        ):
-            if booster.is_booster:
-                covered = {
-                    (tile.row_number, tile.column_number)
-                    for tile in self._tilemap.tiles()
-                    if self.buildings.covers(
-                        booster, tile.row_number, tile.column_number
-                    )
-                }
-        for tile in self._tilemap.tiles():
-            tile.highlighted = (tile.row_number, tile.column_number) in covered
+            else None
+        )
+        key = (
+            None
+            if shown is None
+            else (shown, shown.tile.row_number, shown.tile.column_number, shown.age)
+        )
+        tilemap = self._tilemap
+        if key == self._highlight_key and tilemap is self._highlight_tilemap:
+            return
+        self._highlight_key, self._highlight_tilemap = key, tilemap
+        for tile in tilemap.tiles():
+            tile.highlighted = shown is not None and self.buildings.covers(
+                shown, tile.row_number, tile.column_number
+            )
 
     def _on_buildings_merged(self) -> None:
         self.audio.play_sfx(self.merge_sound_path)

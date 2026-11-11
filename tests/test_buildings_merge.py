@@ -7,14 +7,17 @@ separately below without needing to simulate that animation."""
 
 from pygame import Vector2
 
-from gameplay.buildings.building import Building, Buildings
+from gameplay.buildings.boosters import BoosterConfig
+from gameplay.buildings.building import AGES, Building, Buildings
 from gameplay.tilemap import Tilemap
 
 MAX_LEVEL = 6
 
 
 def make_grid(assets, size=3) -> tuple[Buildings, Tilemap]:
-    return Buildings(), Tilemap(size=size, max_size=size)
+    return Buildings(boosters=BoosterConfig.load(AGES)), Tilemap(
+        size=size, max_size=size
+    )
 
 
 def place(
@@ -211,7 +214,10 @@ def test_control_moving_calls_the_merge_callback_once_per_merge(assets):
 
 def test_payout_callback_is_ready_after_creation_age_change_and_merge(assets):
     paid = []
-    buildings = Buildings(on_payout=lambda _building, amount: paid.append(amount))
+    buildings = Buildings(
+        on_payout=lambda _building, amount: paid.append(amount),
+        boosters=BoosterConfig.load(AGES),
+    )
     tilemap = Tilemap(size=3, max_size=3)
     buildings.append(buildings.create(1, tilemap[0][0]))
     buildings[0]._payout()

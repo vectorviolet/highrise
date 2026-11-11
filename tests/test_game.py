@@ -19,7 +19,8 @@ from app.action_sounds import ActionSounds
 from app.game import Game, format_volume
 from app.game_persistence import GameSettings
 from domain.player import Player
-from gameplay.buildings.building import Building, Buildings
+from gameplay.buildings.boosters import BoosterConfig
+from gameplay.buildings.building import AGES, Building, Buildings
 from gameplay.tile_selector import TileSelector
 from gameplay.tilemap import Tilemap
 from pygamine import TextObject, Transform
@@ -158,7 +159,9 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
         str(assets.font_path("titillium_black")),
     )
     game.buildings = Buildings(
-        on_merge=game._on_buildings_merged, on_payout=game._on_building_payout
+        on_merge=game._on_buildings_merged,
+        on_payout=game._on_building_payout,
+        boosters=BoosterConfig.load(AGES),
     )
     game.tilemap = Tilemap(size, max_size)
     game.max_size = max_size
@@ -1445,3 +1448,40 @@ def test_no_highlight_for_a_building_a_closed_panel_or_a_sold_booster(assets):
     game.info_panel.building = booster
     game.buildings.remove(booster)  # sold
     assert lit() == 0
+
+
+def test_a_locked_boost_button_shows_no_price(assets):
+    game = make_game(assets, size=3)
+    _use_real_button_texts(game)
+    game.panel_manager["game"]["boost_button_text"] = FakeText()
+    game.panel_manager["game"]["expand_button_text"] = FakeText()
+    game.panel_manager["game"]["next_age_button_text"] = FakeText()
+
+    game.update_button_texts()
+    unlocked = game.panel_manager["game"]["boost_button_text"].text
+    game.boosters_unlocked = False
+    game.update_button_texts()
+
+    assert unlocked == format_money(game.buildings.get_booster_cost())
+    assert game.panel_manager["game"]["boost_button_text"].text == ""
+    assert game.panel_manager["game"]["build_button_text"].text == format_money(
+        game.buildings.get_build_cost()
+    )
+
+
+def test_the_highlight_is_recomputed_only_when_the_shown_booster_changes(assets):
+    game = make_game(assets, size=3)
+    game.add_building(1, 2, 2, "left", booster=True)
+    game.info_panel.is_active = True
+    game.info_panel.building = game.buildings[0]
+    game._highlight_boosted_tiles()
+    tile = game.tilemap[0][1]
+    assert tile.highlighted
+
+    tile.highlighted = False  # a recompute would light it again
+    game._highlight_boosted_tiles()
+    assert not tile.highlighted
+
+    game.buildings[0].tile = game.tilemap[0][0]  # the booster moved: recompute
+    game._highlight_boosted_tiles()
+    assert game.tilemap[0][1].highlighted

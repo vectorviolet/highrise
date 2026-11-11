@@ -11,6 +11,8 @@ from pathlib import Path
 
 import yaml
 
+from gameplay.buildings import sprites
+
 # Each shape tells whether `target` is covered by a booster at `origin`, as the row and column
 # distance (dr, dc) between them. A booster never covers its own tile.
 SHAPES: dict[str, Callable[[int, int], bool]] = {
@@ -30,8 +32,10 @@ class BoosterConfig:
     shapes: dict[str, str]
 
     @classmethod
-    def from_dict(cls, data: dict, ages: list[str]) -> "BoosterConfig":
-        """Reads the `boosters` section; every age needs a price and a shape."""
+    def from_dict(cls, data: dict, ages: list[str], looks: int) -> "BoosterConfig":
+        """Reads the `boosters` section; every age needs a price and a shape, and there must be
+        one multiplier for each of the `looks` booster levels the recipes have a sprite for
+        (a level without a sprite would crash mid-game)."""
         config = cls(
             price=dict(data["price"]),
             multipliers=tuple(data["multipliers"]),
@@ -45,19 +49,27 @@ class BoosterConfig:
                 raise ValueError(f"boosters: unknown shape {shape!r}")
         if not config.multipliers or any(m <= 1 for m in config.multipliers):
             raise ValueError("boosters: multipliers must be above 1")
+        if len(config.multipliers) != looks:
+            raise ValueError(
+                f"boosters: {len(config.multipliers)} multipliers in settings.yaml but "
+                f"{looks} booster levels in the recipes (config/buildings.yaml)"
+            )
         return config
 
     @classmethod
     def load(cls, ages: list[str]) -> "BoosterConfig":
         """The config of config/settings.yaml."""
         settings = yaml.safe_load(Path("config/settings.yaml").read_text())
-        return cls.from_dict(settings["boosters"], ages)
+        return cls.from_dict(
+            settings["boosters"], ages, sprites.level_count(booster=True)
+        )
 
     @property
     def max_level(self) -> int:
         return len(self.multipliers)
 
     def multiplier(self, level: int) -> float:
+        assert 1 <= level <= self.max_level, level
         return self.multipliers[level - 1]
 
     def covers(

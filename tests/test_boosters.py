@@ -13,7 +13,9 @@ MAX_LEVEL = 6
 
 
 def make_grid(size=5) -> tuple[Buildings, Tilemap]:
-    return Buildings(), Tilemap(size=size, max_size=size)
+    return Buildings(boosters=BoosterConfig.load(AGES)), Tilemap(
+        size=size, max_size=size
+    )
 
 
 def place(
@@ -357,14 +359,84 @@ def _config(**changes) -> dict:
 
 def test_a_config_without_a_price_for_an_age_is_refused():
     with pytest.raises(ValueError, match="price and shape"):
-        BoosterConfig.from_dict(_config(price={"wood": 1}), AGES)
+        BoosterConfig.from_dict(_config(price={"wood": 1}), AGES, 2)
 
 
 def test_an_unknown_shape_is_refused():
     with pytest.raises(ValueError, match="unknown shape"):
-        BoosterConfig.from_dict(_config(shapes=dict.fromkeys(AGES, "spiral")), AGES)
+        BoosterConfig.from_dict(_config(shapes=dict.fromkeys(AGES, "spiral")), AGES, 2)
 
 
 def test_a_multiplier_that_does_not_boost_is_refused():
     with pytest.raises(ValueError, match="above 1"):
-        BoosterConfig.from_dict(_config(multipliers=[0.9]), AGES)
+        BoosterConfig.from_dict(_config(multipliers=[0.9]), AGES, 1)
+
+
+def test_more_multipliers_than_booster_looks_is_refused():
+    with pytest.raises(ValueError, match="6 multipliers.*5 booster levels"):
+        BoosterConfig.from_dict(_config(multipliers=[1.1] * 6), AGES, 5)
+
+
+def test_fewer_multipliers_than_booster_looks_is_refused():
+    with pytest.raises(ValueError, match="booster levels"):
+        BoosterConfig.from_dict(_config(), AGES, 5)
+
+
+def test_a_booster_level_outside_the_multipliers_fails_loudly():
+    config = BoosterConfig.load(AGES)
+
+    for level in (0, config.max_level + 1):
+        with pytest.raises(AssertionError):
+            config.multiplier(level)
+
+
+def test_a_booster_has_no_payout_timer(monkeypatch):
+    scheduled = []
+    monkeypatch.setattr(
+        Building, "invoke_repeating", lambda self, *a, **k: scheduled.append(self)
+    )
+    buildings, tilemap = make_grid(3)
+    buildings.on_payout = lambda _b, _amount: None
+
+    booster = place(buildings, tilemap, 1, 1, booster=True)
+    building = place(buildings, tilemap, 1, 2)
+
+    assert scheduled == [building]
+    assert booster not in scheduled
+
+
+def test_held_back_cents_are_carried_into_a_merged_building():
+    buildings, tilemap = make_grid(3)
+    first = place(buildings, tilemap, 1, 1)
+    second = place(buildings, tilemap, 1, 2)
+    first.income_fraction, second.income_fraction = 0.25, 0.5
+
+    buildings.move("left", tilemap, MAX_LEVEL)
+    buildings.finish_pending_merges()
+
+    (merged,) = buildings
+    assert merged.income_fraction == pytest.approx(0.75)
+
+
+def test_held_back_cents_survive_a_next_age():
+    buildings, tilemap = make_grid(3)
+    building = place(buildings, tilemap, 1, 1)
+    building.income_fraction = 0.4
+
+    buildings.set_age(1)
+
+    assert buildings[0].income_fraction == pytest.approx(0.4)
+
+
+def test_the_booster_list_follows_the_collection():
+    buildings, tilemap = make_grid(3)
+    booster = place(buildings, tilemap, 2, 2, booster=True)
+    beside = place(buildings, tilemap, 2, 3)
+    assert buildings.income_multiplier(beside) > 1
+
+    buildings.remove(booster)
+    assert buildings.income_multiplier(beside) == 1
+    buildings.append(booster)
+    assert buildings.income_multiplier(beside) > 1
+    buildings.set_age(1)  # replaces every building in place: the diagonal shape
+    assert buildings.income_multiplier(buildings[1]) == 1

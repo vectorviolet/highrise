@@ -11,7 +11,8 @@ from types import SimpleNamespace
 from app.game_persistence import GamePersistenceMixin, GameSettings
 from gameplay.buildings.sprites import DOOR_SIDES, default_door_side
 from ui.ui_scale import DEFAULT_UI_SCALE
-from gameplay.buildings.building import Building, Buildings
+from gameplay.buildings.boosters import BoosterConfig
+from gameplay.buildings.building import AGES, Building, Buildings
 from pygamine import Database
 
 
@@ -61,7 +62,7 @@ class FakeGame(GamePersistenceMixin):
         self.max_building_level = 11
         self.tilemap = None
         self.tile_selector = SimpleNamespace(tilemap=None)
-        self.buildings = Buildings()
+        self.buildings = Buildings(boosters=BoosterConfig.load(AGES))
         self.calls: list = []
 
     def add_building(

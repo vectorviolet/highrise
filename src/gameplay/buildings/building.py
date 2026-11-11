@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Callable
+from collections.abc import Iterable
+from typing import Callable, SupportsIndex
 
 from pygame import Vector2
 from gameplay.buildings import sprites
@@ -44,6 +45,7 @@ class Building(StateObject):
         door_side: str,
         on_payout: Callable[["Building", int], None] | None,
         booster_multiplier: float | None = None,
+        income_fraction: float = 0.0,
     ) -> None:
         # on_payout is required (keyword-only) so a building can't be built
         # without deciding where its income goes; pass None for no income.
@@ -70,20 +72,32 @@ class Building(StateObject):
         self.add_component(Rigidbody2D).set_velocity((0, 0))
         self.on_payout = on_payout
         self.merge_target: Building | None = None
-        self._income_fraction = 0.0
-        self.invoke_repeating(self._payout, delay=self.cooldown, interval=self.cooldown)
+        # Cents a boosted payout couldn't pay yet (see boosted_income). Carried into the building
+        # that replaces this one on a merge or an age change; not saved, so a save and load drops
+        # them (under 1$).
+        self.income_fraction = income_fraction
+        if on_payout is not None:  # a booster has none: it earns nothing, so no timer
+            self.invoke_repeating(
+                self._payout, delay=self.cooldown, interval=self.cooldown
+            )
 
     def _payout(self) -> None:
         if self.on_payout:
             self.on_payout(self, self.cooldown * self.speed)
 
+    @property
+    def boost_bonus(self) -> float:
+        """What a booster adds to the income multiplier: its multiplier minus 1."""
+        assert self.booster_multiplier is not None, "not a booster"
+        return self.booster_multiplier - 1
+
     def boosted_income(self, amount: int, multiplier: float) -> int:
         """`amount` times `multiplier` in whole dollars. The cents a payout can't pay are kept
         and paid with later ones, so a small boost still shows on a small income (2$ at x1.2
         pays 2, 2, 3, 2, 3 ...) instead of rounding away."""
-        exact = round(amount * multiplier + self._income_fraction, 6)
+        exact = round(amount * multiplier + self.income_fraction, 6)
         paid = int(exact)
-        self._income_fraction = exact - paid
+        self.income_fraction = exact - paid
         return paid
 
     @property
@@ -142,14 +156,15 @@ class Buildings(list[Building]):
         *,
         on_merge: Callable[[], None] | None = None,
         on_payout: Callable[[Building, int], None] | None = None,
-        boosters: BoosterConfig | None = None,
+        boosters: BoosterConfig,
     ) -> None:
         super().__init__()
         self.max_age_number = len(AGES) - 1
         self.age_number = 0
         self.on_merge = on_merge
         self.on_payout = on_payout
-        self.boosters = boosters or BoosterConfig.load(AGES)
+        self.boosters = boosters
+        self._booster_list: list[Building] | None = None
 
     def create(
         self,
@@ -159,6 +174,7 @@ class Buildings(list[Building]):
         age_number: int | None = None,
         door_side: str | None = None,
         booster: bool = False,
+        income_fraction: float = 0.0,
     ) -> Building:
         """Construct a building with the collection's payout callback, without adding it.
 
@@ -178,6 +194,7 @@ class Buildings(list[Building]):
             door_side=side,
             on_payout=None if booster else self.on_payout,
             booster_multiplier=self.boosters.multiplier(level) if booster else None,
+            income_fraction=income_fraction,
         )
 
     def set_age(self, age_number) -> None:
@@ -190,6 +207,7 @@ class Buildings(list[Building]):
                     building.tile,
                     door_side=building.door_side,
                     booster=building.is_booster,
+                    income_fraction=building.income_fraction,
                 )
 
     def is_moving(self) -> bool:
@@ -226,13 +244,51 @@ class Buildings(list[Building]):
         it already stands on its survivor's tile."""
         tile = building.tile
         bonus = sum(
-            booster.booster_multiplier - 1
-            for booster in self
-            if booster.booster_multiplier is not None
-            and not booster.should_destroy
+            booster.boost_bonus
+            for booster in self._boosters()
+            if not booster.should_destroy
             and self.covers(booster, tile.row_number, tile.column_number)
         )
         return 1 + bonus
+
+    def _boosters(self) -> list[Building]:
+        """The boosters on the board, kept until the collection changes (every payout asks)."""
+        if self._booster_list is None:
+            self._booster_list = [b for b in self if b.is_booster]
+        return self._booster_list
+
+    # Every change of membership forgets the booster list.
+    def append(self, item: Building) -> None:
+        self._booster_list = None
+        super().append(item)
+
+    def extend(self, items: Iterable[Building]) -> None:
+        self._booster_list = None
+        super().extend(items)
+
+    def insert(self, index: SupportsIndex, item: Building) -> None:
+        self._booster_list = None
+        super().insert(index, item)
+
+    def remove(self, item: Building) -> None:
+        self._booster_list = None
+        super().remove(item)
+
+    def pop(self, index: SupportsIndex = -1) -> Building:
+        self._booster_list = None
+        return super().pop(index)
+
+    def clear(self) -> None:
+        self._booster_list = None
+        super().clear()
+
+    def __setitem__(self, index, value) -> None:  # type: ignore[override]
+        self._booster_list = None
+        super().__setitem__(index, value)
+
+    def __delitem__(self, index) -> None:
+        self._booster_list = None
+        super().__delitem__(index)
 
     def control_moving(self) -> None:
         # Merges are collected and applied after the loop: removing from the
@@ -283,6 +339,7 @@ class Buildings(list[Building]):
                 age_number=building.age_number,
                 door_side=target.door_side,
                 booster=building.is_booster,
+                income_fraction=building.income_fraction + target.income_fraction,
             )
         )
         if self.on_merge is not None:
