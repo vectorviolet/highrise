@@ -205,3 +205,139 @@ def test_default_door_side_is_deterministic_and_uses_both_sides():
     assert {sprites.default_door_side(r, c) for r in (1, 2) for c in (1, 2)} == set(
         sprites.DOOR_SIDES
     )
+
+
+def rgb_close(color, expected, tolerance=1):
+    return all(abs(a - b) <= tolerance for a, b in zip(color[:3], expected))
+
+
+def square(size=8, inset=1, side=6, color=(200, 100, 50, 255)):
+    """A transparent surface with one opaque square (side x side) at (inset, inset)."""
+    surface = pygame.Surface((size, size), pygame.SRCALPHA)
+    pygame.draw.rect(surface, color, (inset, inset, side, side))
+    return surface
+
+
+def test_the_outline_settings_are_a_width_and_a_darkening_factor(assets):
+    assert sprites.outline_settings() == (1, 0.55)
+
+
+@pytest.mark.parametrize("booster", [False, True])
+def test_outlined_sprites_are_cached_and_keep_size_and_foot(assets, booster):
+    for fetch in (
+        lambda: sprites.game_sprite("stone", 3, "left", booster),
+        lambda: sprites.panel_sprite("stone", 3, "left", (60, 185), booster),
+    ):
+        assert fetch() is fetch()
+    full = sprites.compose("stone", 3, "left", booster)
+    plain = pygame.transform.scale(full, sprites.world_size(full))
+    outlined = sprites.game_sprite("stone", 3, "left", booster)
+    assert outlined.get_size() == plain.get_size()
+    # The outline recolors pixels but never adds or removes any: the alpha mask (so the click
+    # area and the foot on the bottom row) is the plain sprite's.
+    assert pixels(outlined)[3::4] == pixels(plain)[3::4]
+
+
+@pytest.mark.parametrize("booster", [False, True])
+def test_real_sprites_get_a_darker_but_colored_rim(assets, booster):
+    full = sprites.compose("rock", 4, "right", booster)
+    plain = pygame.transform.scale(full, sprites.world_size(full))
+    outlined = sprites.game_sprite("rock", 4, "right", booster)
+    changed = [
+        (x, y)
+        for x in range(plain.get_width())
+        for y in range(plain.get_height())
+        if outlined.get_at((x, y)) != plain.get_at((x, y))
+    ]
+    assert changed
+    # Every changed pixel is darker (never brighter) and keeps its alpha.
+    for pos in changed:
+        assert sum(outlined.get_at(pos)[:3]) < sum(plain.get_at(pos)[:3])
+        assert outlined.get_at(pos).a == plain.get_at(pos).a
+    # Colored, not gray: some rim pixel keeps a clear hue (its channels differ).
+    assert any(
+        max(outlined.get_at(p)[:3]) - min(outlined.get_at(p)[:3]) > 15 for p in changed
+    )
+
+
+def test_outline_of_a_square_darkens_exactly_its_rim(assets):
+    result = sprites.outline(square())  # solid 1..6 in x and y
+    rim = {
+        (x, y) for x in range(1, 7) for y in range(1, 7) if x in (1, 6) or y in (1, 6)
+    }
+    for x in range(8):
+        for y in range(8):
+            color = result.get_at((x, y))
+            if (x, y) in rim:
+                assert rgb_close(color, (110, 55, 27), 2) and color.a == 255, (x, y)
+            elif 1 <= x <= 6 and 1 <= y <= 6:
+                assert color == (200, 100, 50, 255), (x, y)
+            else:
+                assert color.a == 0, (x, y)
+
+
+def test_outline_on_the_surface_edge_counts_as_a_rim(assets):
+    result = sprites.outline(square(size=4, inset=0, side=4))  # fills the whole surface
+    assert rgb_close(result.get_at((0, 0)), (110, 55, 27), 2)
+    assert rgb_close(result.get_at((3, 1)), (110, 55, 27), 2)
+    assert result.get_at((1, 1)) == (200, 100, 50, 255)
+    assert result.get_at((2, 2)) == (200, 100, 50, 255)
+
+
+def test_outline_width_two_is_two_pixels_deep(assets, monkeypatch):
+    monkeypatch.setitem(sprites.recipes()["outline"], "width", 2)
+    result = sprites.outline(square(size=10, inset=1, side=8))  # solid 1..8
+    for pos in [(1, 4), (2, 4), (7, 4), (8, 4), (4, 1), (4, 2), (4, 7), (4, 8)]:
+        assert rgb_close(result.get_at(pos), (110, 55, 27), 2), pos
+    for pos in [(3, 4), (4, 4), (6, 4), (4, 3), (4, 6)]:
+        assert result.get_at(pos) == (200, 100, 50, 255), pos
+    assert result.get_at((0, 4)).a == 0
+
+
+def test_the_panel_sprite_is_outlined_too(assets, monkeypatch):
+    box = (60, 185)
+    shown = sprites.panel_sprite("wood", 5, "left", box)
+    monkeypatch.setitem(sprites.recipes()["outline"], "width", 0)
+    plain = sprites.panel_sprite.__wrapped__("wood", 5, "left", box)  # not cached
+    assert shown.get_size() == plain.get_size() == box
+    assert pixels(shown)[3::4] == pixels(plain)[3::4]  # same alpha mask
+    changed = [
+        (x, y)
+        for x in range(box[0])
+        for y in range(box[1])
+        if shown.get_at((x, y)) != plain.get_at((x, y))
+    ]
+    assert changed
+    assert all(sum(shown.get_at(p)[:3]) < sum(plain.get_at(p)[:3]) for p in changed)
+    center = (box[0] // 2, plain.get_bounding_rect().centery)
+    assert shown.get_at(center) == plain.get_at(center)  # the inside is untouched
+
+
+def test_outline_width_zero_returns_the_sprite_unchanged(assets, monkeypatch):
+    surface = square()
+    soft = pygame.Surface((4, 4), pygame.SRCALPHA)
+    soft.fill((200, 100, 50, 60))  # alpha 1..127: the soft edge of a scaled sprite
+    monkeypatch.setitem(sprites.recipes()["outline"], "width", 0)
+    for source in (surface, soft):
+        assert pixels(sprites.outline(source)) == pixels(source)
+
+
+@pytest.mark.parametrize("width", [-1, 1.0, 1.5, True, "1", None])
+def test_a_width_that_is_not_a_whole_number_is_rejected(assets, monkeypatch, width):
+    monkeypatch.setitem(sprites.recipes()["outline"], "width", width)
+    with pytest.raises(ValueError, match="outline width"):
+        sprites.outline_settings()
+
+
+@pytest.mark.parametrize("darken", [0, 1.5, True, "0.5"])
+def test_bad_darken_is_rejected(assets, monkeypatch, darken):
+    monkeypatch.setitem(sprites.recipes()["outline"], "darken", darken)
+    with pytest.raises(ValueError, match="outline darken"):
+        sprites.outline_settings()
+
+
+def test_reading_the_tallest_height_does_not_outline_every_sprite(assets):
+    sprites.tallest_world_height.cache_clear()
+    sprites.game_sprite.cache_clear()
+    sprites.tallest_world_height()
+    assert sprites.game_sprite.cache_info().currsize == 0

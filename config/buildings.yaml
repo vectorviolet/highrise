@@ -18,6 +18,14 @@ floor_size: [65, 89]  # every floor piece, pack pixels
 # one-floor sprite is this size in every age.
 game_size: [50, 75]
 
+# The outline every sprite gets in the world and the info panel, so stacked buildings of the same
+# age stay readable. It follows the alpha silhouette: the outermost `width` pixels of the sprite
+# (as drawn, so in screen pixels) get their own color times `darken`, a darker shade of the
+# art's own colors (not black or gray). `width: 0` turns it off. Computed once per sprite.
+outline:
+  width: 1
+  darken: 0.55
+
 # Prefixes per age. The rock age wears the pack's red roofs on grey walls. `roof_base` is the
 # y inside that age's roof pieces which lands on the top floor's top edge (the sand and
 # stone roofs are one pixel taller than the others).
