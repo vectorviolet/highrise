@@ -6,7 +6,11 @@ import pygame
 import yaml
 
 from app.game_events import GameEventsMixin
-from app.game_persistence import GamePersistenceMixin, GameSettings
+from app.game_persistence import (
+    DEFAULT_MASTER_VOLUME,
+    GamePersistenceMixin,
+    GameSettings,
+)
 from domain.player import Player
 from gameplay.buildings.building import Building, Buildings
 from gameplay.clouds.cloud_container import OneShotCloudAnimation, LoopingCloudAnimation
@@ -22,7 +26,12 @@ from pygamine import SplashScreen, standard_splash_media
 from pygamine import Transform
 from pygamine import GameAudio
 from pygamine import StateObject
-from pygamine import make_factory, make_text_factory, make_animated_factory
+from pygamine import (
+    make_animated_factory,
+    make_factory,
+    make_scrolling_panel_factory,
+    make_text_factory,
+)
 from pygamine import MenuController
 from pygamine.util.localization import DEFAULT_LANGUAGE, localization, tr
 from ui.cash_display import apply_cash_display
@@ -45,6 +54,22 @@ MUSIC_VOLUME_OBJECTS = (
     "music_volume_entry_text",
     "music_volume_minus_icon",
     "music_volume_plus_icon",
+    "audio_settings_panel",
+)
+# What sits below the music row on the AUDIO page: with no music it moves up
+# into the music row's place, under the shorter panel.
+BELOW_MUSIC_OBJECTS = (
+    "sfx_volume_text",
+    "sfx_volume_minus_button",
+    "sfx_volume_plus_button",
+    "sfx_volume_entry",
+    "sfx_volume_entry_text",
+    "sfx_volume_minus_icon",
+    "sfx_volume_plus_icon",
+    "cancel_button",
+    "cancel_button_text",
+    "save_button",
+    "save_button_text",
 )
 
 # The game-panel objects that make up the info panel: children of its root.
@@ -67,7 +92,7 @@ BACK_TARGETS = {
     "settings": "menu",
     "display_settings": "settings",
     "game_settings": "settings",
-    "developer": "menu",
+    "credits": "menu",
 }
 
 # Localization keys (config/lang/*.yaml) of the window-mode labels.
@@ -150,6 +175,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.money_listener: Callable[[int], None] | None = None
         self.default_music_volume = audio["default_music_volume"]
         self.default_sfx_volume = audio["default_sfx_volume"]
+        self.old_master_volume = DEFAULT_MASTER_VOLUME
         self.old_music_volume = self.default_music_volume
         self.old_sfx_volume = self.default_sfx_volume
 
@@ -176,7 +202,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             "display_settings": self.handle_display_settings_events,
             "audio_settings": self.handle_audio_settings_events,
             "game_settings": self.handle_game_settings_events,
-            "developer": self.handle_developer_events,
+            "credits": self.handle_credits_events,
             "game": self.handle_game_events,
         }
         self.menu_controllers: dict = {}
@@ -260,6 +286,11 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         panel = self.panel_manager["audio_settings"]
         for name in MUSIC_VOLUME_OBJECTS:
             panel[name].active = shown
+        panel["audio_settings_panel_no_music"].active = not shown
+        if not shown:
+            step = panel["sfx_volume_text"].rect.y - panel["music_volume_text"].rect.y
+            for name in BELOW_MUSIC_OBJECTS:
+                panel[name].rect.y -= step
 
     def add_objects(self) -> None:
         """Builds everything: the game world, then the panels."""
@@ -306,6 +337,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         loader.register("object", make_factory(self.assets), default=True)
         loader.register("text", make_text_factory(self.assets))
         loader.register("animated", make_animated_factory(self.assets))
+        loader.register("scrolling_panel", make_scrolling_panel_factory(self.assets))
         loader.load("config/panels.yaml")
         self._show_music_controls(self.background_music_sound_path is not None)
 
@@ -346,7 +378,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             for n in (
                 "play_button",
                 "settings_button",
-                "developer_button",
+                "credits_button",
                 "exit_button",
             )
         ]
@@ -598,6 +630,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         if tab == "exit":
             self.exit()
             return
+        if tab == "credits":
+            self.panel_manager["credits"][
+                "credits_scroller"
+            ].reset()  # restart the scroll
         self.panel_manager.open_panel(tab)
         self.cloud_animation.create_clouds()
 
@@ -622,6 +658,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         labels the game sets from code. Touches nothing but texts."""
         self.odometer.snap(format_money(self.player.money))
         self.update_button_texts()
+        self.set_master_label(self.audio.master_volume())
         self.set_music_label(self.audio.music_volume())
         self.set_sfx_label(self.audio.sfx_volume())
         self.set_window_size_label()
@@ -640,6 +677,11 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             self.new_game()
 
     # ── audio-settings UI labels (volume → "%NN" text on a panel widget) ──
+
+    def set_master_label(self, volume: float) -> None:
+        self.panel_manager["audio_settings"]["master_volume_entry_text"].set_text(
+            format_volume(volume)
+        )
 
     def set_music_label(self, volume: float) -> None:
         self.panel_manager["audio_settings"]["music_volume_entry_text"].set_text(
@@ -694,6 +736,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         localization.set_language(language)
         self.skip_intro = settings.skip_intro
         self.ui_scale = settings.ui_scale
+        self.audio.set_master_volume(settings.master_volume)
 
     def change_language(self, code: str) -> None:
         """Saves and applies a language at once, with no restart."""

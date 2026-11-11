@@ -14,7 +14,7 @@ menu:
   title: "Highrise"
   play: "OYNA"
   settings: "AYARLAR"
-  developer: "GELİŞTİRİCİ"
+  credits: "YAPIMCILAR"
   exit: "ÇIKIŞ"
 
 play:
@@ -41,6 +41,7 @@ display_settings:
 
 audio_settings:
   title: "SES AYARLARI"
+  master_volume: "ANA SES"
   music_volume: "MÜZİK SESİ"
   sfx_volume: "EFEKT SESİ"
 
@@ -67,5 +68,12 @@ game:
   cooldown: "Bekleme: {value} sn"
   sell_price: "Satış Fiyatı: {value}"
 
-developer:
-  title: "Yazılım Mühendisi"
+credits:
+  title: "YAPIMCILAR"
+  developer: "Geliştirici"
+  art: "Sanat"
+  ui: "Arayüz"
+  sound: "Ses"
+  music: "Müzik"
+  fonts: "Yazı tipleri"
+  built_with: "Kullanılan araçlar"

@@ -121,6 +121,31 @@ def test_the_music_volume_control_is_hidden(game):
     assert panel["sfx_volume_plus_button"].active
 
 
+def test_without_music_the_rows_below_close_up_under_a_shorter_panel(game):
+    game.run()
+    panel = game.panel_manager["audio_settings"]
+
+    assert panel["sfx_volume_text"].rect.y == panel["music_volume_text"].rect.y
+    assert panel["save_button"].rect.bottom < panel["audio_settings_panel"].rect.bottom
+    assert panel["audio_settings_panel_no_music"].active
+    for name in ("cancel_button", "save_button", "sfx_volume_entry"):
+        assert abs(panel[f"{name}_text"].rect.centery - panel[name].rect.centery) <= 1
+    assert (
+        panel["save_button"].rect.bottom
+        < panel["audio_settings_panel_no_music"].rect.bottom
+    )
+
+
+def test_with_music_the_rows_keep_their_places_under_the_tall_panel(with_music):
+    with_music.run()
+    panel = with_music.panel_manager["audio_settings"]
+
+    assert panel["sfx_volume_text"].rect.y > panel["music_volume_text"].rect.y
+    assert not panel["audio_settings_panel_no_music"].active
+    assert panel["audio_settings_panel"].active
+    assert panel["save_button"].rect.bottom < panel["audio_settings_panel"].rect.bottom
+
+
 def test_clicks_where_the_hidden_music_buttons_sit_change_nothing(game):
     game.run()
     game.open_panel("audio_settings")

@@ -4,6 +4,9 @@ from gameplay.tilemap import Tilemap
 from pygamine.util.localization import DEFAULT_LANGUAGE
 from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES
 
+# The master volume a fresh database starts with (also its column default).
+DEFAULT_MASTER_VOLUME = 1.0
+
 
 class GameSettings(NamedTuple):
     """The settings saved in the database's `settings` table."""
@@ -11,6 +14,7 @@ class GameSettings(NamedTuple):
     language: str
     skip_intro: bool
     ui_scale: int
+    master_volume: float
 
 
 class GamePersistenceMixin:
@@ -40,15 +44,23 @@ class GamePersistenceMixin:
         # below always hit a row.
         self.database.execute_safely(
             "CREATE TABLE IF NOT EXISTS settings(language TEXT, skip_intro INTEGER, "
-            f"ui_scale INTEGER NOT NULL DEFAULT {DEFAULT_UI_SCALE})"
+            f"ui_scale INTEGER NOT NULL DEFAULT {DEFAULT_UI_SCALE}, "
+            f"master_volume REAL NOT NULL DEFAULT {DEFAULT_MASTER_VOLUME})"
         )
         columns = self.database.execute_safely("PRAGMA table_info(settings)", True)
         assert columns is not None
-        if "ui_scale" not in [column[1] for column in columns]:
+        names = [column[1] for column in columns]
+        if "ui_scale" not in names:
             # A settings table from before the UI scale: its existing row gets the default.
             self.database.execute_safely(
                 "ALTER TABLE settings ADD COLUMN "
                 f"ui_scale INTEGER NOT NULL DEFAULT {DEFAULT_UI_SCALE}"
+            )
+        if "master_volume" not in names:
+            # Likewise for a table from before the master volume.
+            self.database.execute_safely(
+                "ALTER TABLE settings ADD COLUMN "
+                f"master_volume REAL NOT NULL DEFAULT {DEFAULT_MASTER_VOLUME}"
             )
         self.database.execute_safely(
             "INSERT INTO settings(language, skip_intro) "
@@ -59,13 +71,14 @@ class GamePersistenceMixin:
     def load_settings(self) -> GameSettings:
         """The saved settings. Needs `init_database()` first."""
         rows = self.database.execute_safely(
-            "SELECT language, skip_intro, ui_scale FROM settings", True
+            "SELECT language, skip_intro, ui_scale, master_volume FROM settings", True
         )
         assert rows, "settings row missing: call init_database() first"
-        language, skip_intro, ui_scale = rows[0]
+        language, skip_intro, ui_scale, master_volume = rows[0]
         if ui_scale not in UI_SCALES:
             ui_scale = DEFAULT_UI_SCALE  # a step removed since, or a hand-edited file
-        return GameSettings(language, bool(skip_intro), ui_scale)
+        # Not clamped here: GameAudio.set_master_volume clamps what it gets.
+        return GameSettings(language, bool(skip_intro), ui_scale, float(master_volume))
 
     def save_language(self, language: str) -> None:
         self.database.execute_safely(
@@ -132,6 +145,10 @@ class GamePersistenceMixin:
         self.database.execute_safely(
             "UPDATE game SET music_volume=?, sfx_volume=?",
             params=(self.audio.music_volume(), self.audio.sfx_volume()),
+        )
+        # The master volume is a player setting, so New Game keeps it.
+        self.database.execute_safely(
+            "UPDATE settings SET master_volume=?", params=(self.audio.master_volume(),)
         )
 
     def save_game(self) -> None:

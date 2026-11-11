@@ -26,7 +26,7 @@ PANELS = (
     "display_settings",
     "audio_settings",
     "game_settings",
-    "developer",
+    "credits",
     "game",
 )
 

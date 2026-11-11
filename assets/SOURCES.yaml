@@ -637,11 +637,9 @@ files:
   "images/gui/Blue/Double/star_outline_depth.png":
     source: kenney-ui-pack
     original: "PNG/Blue/Double/star_outline_depth.png"
-  "images/gui/developer/cursor.png":
+  "images/gui/cursor/cursor.png":
     source: kenney-cursor-pack
     original: "PNG/Outline/Default/pointer_c.png"
-  "images/gui/developer/cv.png":
-    source: own
   "images/gui/Extra/Default/button_rectangle_depth_line.png":
     source: kenney-ui-pack
     original: "PNG/Extra/Default/button_rectangle_depth_line.png"

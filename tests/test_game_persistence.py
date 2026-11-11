@@ -16,8 +16,15 @@ from pygamine import Database
 
 class FakeAudio:
     def __init__(self, music=0.5, sfx=0.5):
+        self._master = 1.0
         self._music = music
         self._sfx = sfx
+
+    def master_volume(self) -> float:
+        return self._master
+
+    def set_master_volume(self, value) -> None:
+        self._master = value
 
     def music_volume(self) -> float:
         return self._music
@@ -304,7 +311,7 @@ def test_settings_default_to_english_with_the_intro_shown(tmp_path, assets):
     game = FakeGame(tmp_path, assets)
     game.init_database()
 
-    assert game.load_settings() == GameSettings("en", False, DEFAULT_UI_SCALE)
+    assert game.load_settings() == GameSettings("en", False, DEFAULT_UI_SCALE, 1.0)
 
 
 def test_settings_round_trip_through_the_database(tmp_path, assets):
@@ -317,7 +324,7 @@ def test_settings_round_trip_through_the_database(tmp_path, assets):
 
     reopened = FakeGame(tmp_path, assets)
     reopened.init_database()
-    assert reopened.load_settings() == GameSettings("tr", True, 80)
+    assert reopened.load_settings() == GameSettings("tr", True, 80, 1.0)
 
 
 def test_init_database_keeps_saved_settings(tmp_path, assets):
@@ -343,7 +350,7 @@ def test_a_save_from_before_the_settings_existed_loads_with_defaults(tmp_path, a
     old.load_data()
 
     assert old.player.money == 321
-    assert old.load_settings() == GameSettings("en", False, DEFAULT_UI_SCALE)
+    assert old.load_settings() == GameSettings("en", False, DEFAULT_UI_SCALE, 1.0)
 
 
 def test_new_game_data_reset_keeps_the_settings(tmp_path, assets):
@@ -355,7 +362,7 @@ def test_new_game_data_reset_keeps_the_settings(tmp_path, assets):
 
     game.delete_data()
 
-    assert game.load_settings() == GameSettings("tr", True, 110)
+    assert game.load_settings() == GameSettings("tr", True, 110, 1.0)
 
 
 def test_a_settings_table_from_before_the_ui_scale_gets_the_column_and_keeps_its_row(
@@ -369,7 +376,7 @@ def test_a_settings_table_from_before_the_ui_scale_gets_the_column_and_keeps_its
 
     old.init_database()
 
-    assert old.load_settings() == GameSettings("tr", True, DEFAULT_UI_SCALE)
+    assert old.load_settings() == GameSettings("tr", True, DEFAULT_UI_SCALE, 1.0)
     old.save_ui_scale(125)
     assert old.load_settings().ui_scale == 125
 
@@ -390,3 +397,53 @@ def test_an_unknown_saved_ui_scale_loads_as_the_default(tmp_path, assets):
     game.save_ui_scale(33)
 
     assert game.load_settings().ui_scale == DEFAULT_UI_SCALE
+
+
+# ── master volume ────────────────────────────────────────────────────────────
+
+
+def test_the_master_volume_defaults_to_full(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    game.init_database()
+
+    assert game.load_settings().master_volume == 1.0
+
+
+def test_saving_the_audio_settings_keeps_the_master_volume_across_a_restart(
+    tmp_path, assets
+):
+    game = FakeGame(tmp_path, assets)
+    game.load_data()
+    game.audio.set_master_volume(0.3)
+
+    game.save_audio_settings()
+
+    reopened = FakeGame(tmp_path, assets)
+    reopened.init_database()
+    assert reopened.load_settings().master_volume == 0.3
+
+
+def test_new_game_data_reset_keeps_the_master_volume(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    game.load_data()
+    game.audio.set_master_volume(0.3)
+    game.save_audio_settings()
+
+    game.delete_data()
+
+    assert game.load_settings().master_volume == 0.3
+
+
+def test_a_settings_table_from_before_the_master_volume_gets_the_column(
+    tmp_path, assets
+):
+    old = FakeGame(tmp_path, assets)
+    old.database.execute_safely(
+        "CREATE TABLE settings(language TEXT, skip_intro INTEGER, "
+        "ui_scale INTEGER NOT NULL DEFAULT 100)"
+    )
+    old.database.execute_safely("INSERT INTO settings VALUES('tr', 1, 110)")
+
+    old.init_database()
+
+    assert old.load_settings() == GameSettings("tr", True, 110, 1.0)

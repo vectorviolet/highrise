@@ -37,10 +37,17 @@ class FakeGuiObject:
 
 
 class FakeAudio:
-    def __init__(self, music=0.5, sfx=0.5):
+    def __init__(self, music=0.5, sfx=0.5, master=1.0):
+        self._master = master
         self._music = music
         self._sfx = sfx
         self.played = []
+
+    def master_volume(self) -> float:
+        return self._master
+
+    def set_master_volume(self, value) -> None:
+        self._master = value
 
     def music_volume(self) -> float:
         return self._music
@@ -98,7 +105,7 @@ def make_panels() -> FakePanelManager:
             "menu": {
                 "play_button": FakeButton(),
                 "settings_button": FakeButton(),
-                "developer_button": FakeButton(),
+                "credits_button": FakeButton(),
                 "exit_button": FakeButton(),
             },
             "play": {
@@ -123,6 +130,8 @@ def make_panels() -> FakePanelManager:
                 "display_back_button": FakeButton(),
             },
             "audio_settings": {
+                "master_volume_plus_button": FakeButton(),
+                "master_volume_minus_button": FakeButton(),
                 "music_volume_plus_button": FakeButton(),
                 "music_volume_minus_button": FakeButton(),
                 "sfx_volume_plus_button": FakeButton(),
@@ -137,11 +146,7 @@ def make_panels() -> FakePanelManager:
                 "skip_intro_plus_button": FakeButton(),
                 "game_settings_back_button": FakeButton(),
             },
-            "developer": {
-                "github_button": FakeButton(),
-                "itch_button": FakeButton(),
-                "developer_back_button": FakeButton(),
-            },
+            "credits": {"credits_back_button": FakeButton()},
             "game": {
                 "info_panel": FakeGuiObject(active=False),
                 "sell_button": FakeButton(),
@@ -181,6 +186,7 @@ class FakeGame(GameEventsMixin):
         self.background_music_sound_path = (
             "assets/sounds/music.ogg"  # a game with music: its controls work
         )
+        self.old_master_volume = 1.0
         self.old_music_volume = 0.5
         self.old_sfx_volume = 0.5
         self.tile_selector = FakeTileSelector()
@@ -225,6 +231,9 @@ class FakeGame(GameEventsMixin):
 
     def set_window_size_label(self):
         self.calls.append("set_window_size_label")
+
+    def set_master_label(self, v):
+        self.calls.append(("set_master_label", v))
 
     def set_music_label(self, v):
         self.calls.append(("set_music_label", v))
@@ -281,7 +290,7 @@ def test_menu_play_button_calls_play():
 def test_menu_navigation_buttons():
     for button_name, dest in (
         ("settings_button", "settings"),
-        ("developer_button", "developer"),
+        ("credits_button", "credits"),
         ("exit_button", "exit"),
     ):
         game = FakeGame()
@@ -327,13 +336,17 @@ def test_settings_navigation():
 
 def test_settings_audio_settings_button_snapshots_the_current_volumes():
     game = FakeGame()
-    game.audio._music, game.audio._sfx = 0.7, 0.3
-    game.old_music_volume, game.old_sfx_volume = 0.0, 0.0
+    game.audio._master, game.audio._music, game.audio._sfx = 0.8, 0.7, 0.3
+    game.old_master_volume = game.old_music_volume = game.old_sfx_volume = 0.0
     game.panel_manager["settings"]["audio_settings_button"].clicked = True
 
     game.handle_settings_events(click_up())
 
-    assert (game.old_music_volume, game.old_sfx_volume) == (0.7, 0.3)
+    assert (game.old_master_volume, game.old_music_volume, game.old_sfx_volume) == (
+        0.8,
+        0.7,
+        0.3,
+    )
     assert ("open_panel", "audio_settings") in game.calls
 
 
@@ -394,15 +407,43 @@ def test_audio_settings_volume_buttons_adjust_by_a_tenth():
     assert game2.audio._sfx == pytest.approx(0.4)
 
 
+@pytest.mark.parametrize(
+    ("button", "delta"),
+    [("master_volume_plus_button", 0.1), ("master_volume_minus_button", -0.1)],
+)
+def test_audio_settings_master_buttons_adjust_the_master_by_a_tenth(button, delta):
+    game = FakeGame()
+    game.audio._master = 0.5
+    game.audio._music = game.audio._sfx = 0.4
+    game.panel_manager["audio_settings"][button].clicked = True
+
+    game.handle_audio_settings_events(click_up())
+
+    assert game.audio._master == pytest.approx(0.5 + delta)
+    assert ("set_master_label", pytest.approx(0.5 + delta)) in game.calls
+    assert (game.audio._music, game.audio._sfx) == (0.4, 0.4)  # their own values
+
+
+def test_audio_settings_master_buttons_work_without_music():
+    game = FakeGame()
+    game.background_music_sound_path = None
+    game.audio._master = 0.5
+    game.panel_manager["audio_settings"]["master_volume_minus_button"].clicked = True
+
+    game.handle_audio_settings_events(click_up())
+
+    assert game.audio._master == pytest.approx(0.4)
+
+
 def test_audio_settings_cancel_restores_the_snapshotted_volumes():
     game = FakeGame()
-    game.audio._music, game.audio._sfx = 0.9, 0.9
-    game.old_music_volume, game.old_sfx_volume = 0.2, 0.3
+    game.audio._master, game.audio._music, game.audio._sfx = 0.1, 0.9, 0.9
+    game.old_master_volume, game.old_music_volume, game.old_sfx_volume = 0.6, 0.2, 0.3
     game.panel_manager["audio_settings"]["cancel_button"].clicked = True
 
     game.handle_audio_settings_events(click_up())
 
-    assert (game.audio._music, game.audio._sfx) == (0.2, 0.3)
+    assert (game.audio._master, game.audio._music, game.audio._sfx) == (0.6, 0.2, 0.3)
     assert ("open_panel", "settings") in game.calls
 
 
@@ -416,7 +457,7 @@ def test_audio_settings_save_persists_and_returns_to_settings():
     assert ("open_panel", "settings") in game.calls
 
 
-# ── game settings / developer ────────────────────────────────────────────────
+# ── game settings / credits ─────────────────────────────────────────────────
 
 
 def test_game_settings_back_button():
@@ -454,33 +495,11 @@ def test_skip_intro_steppers_toggle_the_setting(button, before):
     assert game.calls == [("set_skip_intro", not before)]
 
 
-def test_developer_links_open_in_a_browser(monkeypatch):
-    import app.game_events as game_events_module
-
-    opened = []
-    monkeypatch.setattr(
-        game_events_module.webbrowser, "open", lambda url: opened.append(url)
-    )
-
+def test_credits_back_button():
     game = FakeGame()
-    game.panel_manager["developer"]["github_button"].clicked = True
-    game.handle_developer_events(click_up())
-    assert opened == ["https://www.github.com/umutcanekinci/"]
+    game.panel_manager["credits"]["credits_back_button"].clicked = True
 
-    game2 = FakeGame()
-    game2.panel_manager["developer"]["itch_button"].clicked = True
-    game2.handle_developer_events(click_up())
-    assert opened == [
-        "https://www.github.com/umutcanekinci/",
-        "https://umutcanekinci.itch.io/",
-    ]
-
-
-def test_developer_back_button():
-    game = FakeGame()
-    game.panel_manager["developer"]["developer_back_button"].clicked = True
-
-    game.handle_developer_events(click_up())
+    game.handle_credits_events(click_up())
 
     assert ("open_panel", "menu") in game.calls
 
@@ -900,8 +919,8 @@ def test_audio_settings_only_the_first_clicked_button_acts():
 
     game.handle_audio_settings_events(click_up())
 
-    assert game.calls == [("set_music_label", pytest.approx(0.6))]
-    assert game.audio._sfx == 0.5
+    assert game.calls == [("set_master_label", pytest.approx(1.1))]
+    assert game.audio._music == game.audio._sfx == 0.5
 
 
 def test_audio_settings_without_music_ignores_music_buttons():
@@ -920,12 +939,13 @@ def test_audio_settings_without_music_ignores_music_buttons():
 
 def test_audio_settings_cancel_exact_calls():
     game = FakeGame()
-    game.old_music_volume, game.old_sfx_volume = 0.2, 0.3
+    game.old_master_volume, game.old_music_volume, game.old_sfx_volume = 0.6, 0.2, 0.3
     game.panel_manager["audio_settings"]["cancel_button"].clicked = True
 
     game.handle_audio_settings_events(click_up())
 
     assert game.calls == [
+        ("set_master_label", 0.6),
         ("set_music_label", 0.2),
         ("set_sfx_label", 0.3),
         ("open_panel", "settings"),

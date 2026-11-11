@@ -19,7 +19,7 @@ PANELS = (
     "display_settings",
     "audio_settings",
     "game_settings",
-    "developer",
+    "credits",
     "game",
 )
 
@@ -203,3 +203,54 @@ def test_on_a_taller_canvas_the_layout_follows_the_canvas(scale):
     hud = game.panel_manager["game"]
     assert hud["game_panel"].rect.bottom == 1200 - round(15 * scale / 100)
     assert hud["expand_button"].rect.y - toolbar.y == 120
+
+
+BACK_BUTTONS = (
+    ("settings", "settings_panel", ("settings_back_button",)),
+    ("display_settings", "display_settings_panel", ("display_back_button",)),
+    # CANCEL and SAVE are a pair, centered together.
+    ("audio_settings", "audio_settings_panel", ("cancel_button", "save_button")),
+    ("game_settings", "game_settings_panel", ("game_settings_back_button",)),
+    ("credits", "credits_panel", ("credits_back_button",)),
+)
+
+
+@pytest.mark.parametrize("resolution", [(1280, 720), (1920, 1080)])
+@pytest.mark.parametrize("scale", UI_SCALES)
+def test_every_back_button_is_centered_on_its_page(resolution, scale):
+    game = started_game(resolution)
+    game.set_ui_scale(scale)
+
+    window = pygame.Rect((0, 0), game.size)
+    for panel, body_name, names in BACK_BUTTONS:
+        page = game.panel_manager[panel]
+        rects = [page[name].rect for name in names]
+        row = rects[0].unionall(rects[1:])
+        assert abs(row.centerx - window.centerx) <= 1, (panel, scale, row)
+        # The page's own panel is centered too, so they share one center line.
+        body = page[body_name].rect
+        assert abs(body.centerx - window.centerx) <= 1, (panel, scale, body)
+
+
+HEADERS = (
+    ("menu", "menu_title", "menu_panel"),
+    ("settings", "settings_title", "settings_panel"),
+    ("play", "play_title", "play_panel"),
+    ("display_settings", "display_settings_title", "display_settings_panel"),
+    ("audio_settings", "audio_settings_title", "audio_settings_panel"),
+    ("audio_settings", "audio_settings_title", "audio_settings_panel_no_music"),
+    ("game_settings", "game_settings_title", "game_settings_panel"),
+    ("credits", "credits_title", "credits_panel"),
+)
+
+
+@pytest.mark.parametrize("scale", UI_SCALES)
+def test_every_header_plate_is_as_wide_as_its_body_panel(scale):
+    game = started_game()
+    game.set_ui_scale(scale)
+
+    for panel, header_name, body_name in HEADERS:
+        page = game.panel_manager[panel]
+        header, body = page[header_name].rect, page[body_name].rect
+        assert abs(header.width - body.width) <= 1, (panel, body_name, scale)
+        assert abs(header.left - body.left) <= 1, (panel, body_name, scale)

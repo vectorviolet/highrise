@@ -70,3 +70,38 @@ def test_credits_md_asset_section_is_generated_from_sources(sources):
     assert gen_credits.updated_credits(text, gen_credits.render(sources)) == text, (
         "CREDITS.md is out of date: run scripts/gen_credits.py"
     )
+
+
+# The license as the in-game CREDITS page writes it.
+CREDITS_PAGE_LICENSES = {
+    "CC0-1.0": "CC0",
+    "OFL-1.1": "SIL OFL 1.1",
+    "CC-BY-3.0": "CC BY 3.0",
+}
+
+
+def _credits_page_entries() -> list[str]:
+    import yaml
+
+    panels = yaml.safe_load((ROOT / "config" / "panels.yaml").read_text("utf-8"))
+    objects = panels["panels"]["credits"]["objects"]
+    return [o["text"] for o in objects.values() if isinstance(o, dict) and "text" in o]
+
+
+def test_the_credits_page_lists_every_pack_with_its_own_license(sources):
+    entries = _credits_page_entries()
+    for pack in sources["packs"].values():
+        label = CREDITS_PAGE_LICENSES[pack["license"]]
+        names = [i for i, e in enumerate(entries) if pack["name"] in e]
+        assert names, pack["name"]
+        # The license is on the entry itself, or (CC BY, whose attribution
+        # takes two lines first) on a line of its own right after them.
+        assert any(
+            label in entries[i] or label in entries[i + 1 : i + 3] for i in names
+        ), pack["name"]
+
+
+def test_the_credits_page_carries_the_music_attribution_lines():
+    entries = _credits_page_entries()
+    assert "Music : Sakura Girl - Day Off" in entries
+    assert "Link : youtu.be/vAv9KtrU_5c" in entries

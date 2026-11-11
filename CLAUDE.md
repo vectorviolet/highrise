@@ -110,6 +110,10 @@ font in `assets/fonts/` lacks a character of any language (Titillium Web has no 
 one). Quote every value: a bare `yes` or `10` is not a string. Don't write `on:`/`off:` as keys: YAML
 turns them into booleans.
 
+### Credits page
+
+The CREDITS page (`credits` panel) scrolls its sections with pygamine's `scrolling_panel`; `Game.open_panel` restarts it each time (content enters from below). Its entries are written in `config/panels.yaml`: when an asset pack is added to `assets/SOURCES.yaml`, add it there too (`tests/test_sources.py` checks).
+
 ### Isometric Tilemap
 
 `src/tile.py` renders an isometric diamond grid. Tile selection uses point-in-quadrangle collision. Selected tiles visually shift up by 10 px. Building movement (WASD/arrows) triggers 2048-style merge logic: same-level adjacent buildings merge and level up.
@@ -143,10 +147,10 @@ World texts are hidden while the info panel is open. A building's
 
 ### Persistence
 
-SQLite database at `databases/database.db`. Three tables: `game` (age, map size, money, volumes), `buildings` (level, row, column) and `settings` (language, skip intro, UI scale; saved the moment they change on the Game and Display settings pages, and kept by New Game). The database auto-initializes on first run. Save/load logic lives entirely in `GamePersistenceMixin`.
+SQLite database at `databases/database.db`. Three tables: `game` (age, map size, money, volumes), `buildings` (level, row, column) and `settings` (language, skip intro, UI scale, master volume; the first three are saved the moment they change on the Game and Display settings pages, the master volume with the AUDIO page's SAVE; all kept by New Game). The database auto-initializes on first run. Save/load logic lives entirely in `GamePersistenceMixin`.
 
 ### Audio
 
-Channel 0 plays the looping music. Each SFX plays on a free channel from pygamine's pool (channels 3 and up; 1 and 2 are reserved and unused here), so SFX overlap; if all are busy the new sound is dropped. The SFX volume applies to the whole pool. Volumes are stored in the database and applied on load. All audio logic is in `GameAudioMixin`.
+Channel 0 plays the looping music. Each SFX plays on a free channel from pygamine's pool (channels 3 and up; 1 and 2 are reserved and unused here), so SFX overlap; if all are busy the new sound is dropped. The SFX volume applies to the whole pool. The master volume (first row of the AUDIO page) scales the music and the SFX pool through pygamine's `GameAudio`. The music and SFX volumes are stored in the `game` table, the master volume in `settings`, and all are applied on load. All audio logic is in `GameAudioMixin`.
 
 Background music is optional: the game plays the `bg` sound from `config/assets.yaml` if it's there. Without it, the game plays no music and hides the music volume row on the AUDIO settings screen (`MUSIC_KEY` / `MUSIC_VOLUME_OBJECTS` in `app/game.py`). The track is Sakura Girl - Day Off (CC BY 3.0, `assets/sounds/bg.mp3`); its attribution ("Music : Sakura Girl - Day Off", youtu.be/vAv9KtrU_5c) lives in CREDITS.md and README. Any other track needs a license that allows bundling it in the game.

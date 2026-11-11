@@ -34,5 +34,5 @@ ui:
     display_settings: yellow
     audio_settings: yellow
     game_settings: yellow
-    developer: yellow
+    credits: yellow
     game: [72, 218, 233]

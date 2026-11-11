@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING, Any
 
 import pygame
-import webbrowser
 
 from ui.ui_scale import DEFAULT_UI_SCALE
 
@@ -18,6 +17,10 @@ MOVE_KEYS = {
 }
 
 # Audio-settings volume buttons: (button name, channel, volume change).
+MASTER_STEPPERS = (
+    ("master_volume_plus_button", "master", 0.1),
+    ("master_volume_minus_button", "master", -0.1),
+)
 MUSIC_STEPPERS = (
     ("music_volume_plus_button", "music", 0.1),
     ("music_volume_minus_button", "music", -0.1),
@@ -54,7 +57,7 @@ class GameEventsMixin:
             return
         navigations = (
             ("settings_button", "settings"),
-            ("developer_button", "developer"),
+            ("credits_button", "credits"),
             ("exit_button", "exit"),
         )
         for button_name, dest in navigations:
@@ -121,7 +124,9 @@ class GameEventsMixin:
         # Steppers use raw is_clicked: no click sound, no keyboard activation.
         # The music controls are hidden (and ignored) when there's no music.
         has_music = self.background_music_sound_path is not None
-        steppers = (MUSIC_STEPPERS if has_music else ()) + SFX_STEPPERS
+        steppers = (
+            MASTER_STEPPERS + (MUSIC_STEPPERS if has_music else ()) + SFX_STEPPERS
+        )
         for button_name, channel, delta in steppers:
             if panel[button_name].is_clicked(event, self.mouse.position):
                 self._step_volume(channel, delta)
@@ -134,18 +139,21 @@ class GameEventsMixin:
             self.open_panel("settings")
 
     def _step_volume(self, channel: str, delta: float) -> None:
-        """Changes the "music" or "sfx" volume by `delta` and updates its label."""
+        """Changes the "master", "music" or "sfx" volume by `delta` and updates its label."""
         volume = getattr(self.audio, f"{channel}_volume")() + delta
         getattr(self.audio, f"set_{channel}_volume")(volume)
         getattr(self, f"set_{channel}_label")(volume)
 
     def _snapshot_audio_settings(self) -> None:
         """Remembers the volumes so Cancel or Escape can restore them."""
+        self.old_master_volume = self.audio.master_volume()
         self.old_music_volume = self.audio.music_volume()
         self.old_sfx_volume = self.audio.sfx_volume()
 
     def _revert_audio_settings(self) -> None:
         """Restores the volumes from the last snapshot, with their labels."""
+        self.audio.set_master_volume(self.old_master_volume)
+        self.set_master_label(self.old_master_volume)
         self.audio.set_music_volume(self.old_music_volume)
         self.set_music_label(self.old_music_volume)
         self.audio.set_sfx_volume(self.old_sfx_volume)
@@ -168,13 +176,9 @@ class GameEventsMixin:
         if self._activate(panel["game_settings_back_button"], event):
             self.open_panel("settings")
 
-    def handle_developer_events(self, event: pygame.event.Event) -> None:
-        panel = self.panel_manager["developer"]
-        if self._activate(panel["github_button"], event):
-            webbrowser.open("https://www.github.com/umutcanekinci/")
-        elif self._activate(panel["itch_button"], event):
-            webbrowser.open("https://umutcanekinci.itch.io/")
-        elif self._activate(panel["developer_back_button"], event):
+    def handle_credits_events(self, event: pygame.event.Event) -> None:
+        panel = self.panel_manager["credits"]
+        if self._activate(panel["credits_back_button"], event):
             self.open_panel("menu")
 
     def handle_game_events(self, event: pygame.event.Event) -> None:
