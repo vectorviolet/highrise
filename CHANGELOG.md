@@ -9,6 +9,8 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- The CREDITS page opens with the "a VECTORVIOLET game" lockup and closes with GitHub and itch.io
+  rows (`umutcanekinci`), using pygamine's bundled logos.
 - **Menu polish** ([devlog](docs/devlog/2026-11-11-menu-polish.md)): buttons follow one color scheme
   (red leaves, cancels or destroys; green goes; blue is the rest), CONTINUE is above NEW GAME, and
   sub-page headers are one plate in one place that doesn't look like a button, with two styles to

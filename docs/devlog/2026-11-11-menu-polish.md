@@ -1,7 +1,7 @@
 # Menu polish
-<!-- index | refs: #55, #56, #62, #63 | area: UI -->
+<!-- index | refs: #55, #56, #62, #63, #66 | area: UI -->
 
-**Date:** 2026-11-11 · **Area:** UI · **Issues:** [#55](https://github.com/vectorviolet/highrise/issues/55), [#56](https://github.com/vectorviolet/highrise/issues/56), [#62](https://github.com/vectorviolet/highrise/issues/62), [#63](https://github.com/vectorviolet/highrise/issues/63)
+**Date:** 2026-11-11 · **Area:** UI · **Issues:** [#55](https://github.com/vectorviolet/highrise/issues/55), [#56](https://github.com/vectorviolet/highrise/issues/56), [#62](https://github.com/vectorviolet/highrise/issues/62), [#63](https://github.com/vectorviolet/highrise/issues/63), [#66](https://github.com/vectorviolet/highrise/issues/66)
 
 ## Context
 
@@ -23,6 +23,11 @@ English, "%60" in Turkish; English showed "%60").
 - **Headers (#56):** the blue button-shaped plates are gone. Every sub-page header is one plate at
   one place (640x70, centered, 140 px from the top), with no hover state. The main menu has no
   header (it showed "Highrise" in a blue plate before).
+
+- **Credits branding (#66):** the CREDITS page opens with the "a VECTORVIOLET game" lockup and
+  closes with GitHub and itch.io rows (icon + username, each pair centered), as on Chokepoint's
+  page. The three images ship with pygamine (`source: branding`, the light-page variants), so no
+  asset files or strings were added.
 
 ## Options: the header style
 
@@ -49,3 +54,7 @@ Before (left) and after (right):
 ![PLAY page before and after](img/menu-polish/play-before-after.png)
 
 Header text fits in English and Turkish at every UI scale (`tests/test_menu_polish.py`).
+
+The CREDITS page, top of the scroll (the lockup) and its end (the profile rows):
+
+![CREDITS top and end](img/menu-polish/credits-top-and-end.png)

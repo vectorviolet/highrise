@@ -260,3 +260,38 @@ def test_open_values_re_text_when_the_language_changes(monkeypatch, language, te
         assert audio[name].text == template.format(value=round(volume * 100)), name
     ui_scale = game.panel_manager["display_settings"]["ui_scale_entry_text"]
     assert ui_scale.text == template.format(value=110)
+
+
+# ── credits: lockup and profile rows ──────────────────────────────────────
+
+
+@pytest.mark.parametrize("language", ["en", "tr"])
+@pytest.mark.parametrize("scale", UI_SCALES)
+def test_the_credits_lockup_and_profile_rows_fit_and_are_centered(
+    monkeypatch, language, scale
+):
+    game = started_game(monkeypatch)
+    localization.set_language(language)
+    game.set_ui_scale(scale)
+    scroller = game.panel_manager["credits"]["credits_scroller"]
+    # The scroller takes its targets out of the panel; it has no public way to list them.
+    page = {
+        obj_name: obj
+        for obj_name, obj in zip(scroller._target_names, scroller._targets)
+    }
+    viewport = scroller.rect
+    window = pygame.Rect((0, 0), game.size)
+
+    lockup = page["credits_lockup"].rect
+    assert viewport.left <= lockup.left and lockup.right <= viewport.right
+    assert abs(lockup.centerx - window.centerx) <= 1
+
+    for icon, name in (
+        ("credits_github_icon", "credits_github_name"),
+        ("credits_itch_icon", "credits_itch_name"),
+    ):
+        pair = page[icon].rect.union(page[name].rect)
+        where = (icon, language, scale)
+        assert viewport.left <= pair.left and pair.right <= viewport.right, where
+        assert abs(pair.centerx - window.centerx) <= 4, where
+        assert page[icon].rect.right < page[name].rect.left, where
