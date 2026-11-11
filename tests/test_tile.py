@@ -1,3 +1,6 @@
+from pygame.image import tobytes
+from pygamine import ImagePath, load_image
+
 from gameplay.tiles.tile import Tile
 
 
@@ -32,3 +35,14 @@ def test_own_center_registers_as_mouse_over_unselected(assets):
     assert tile.is_mouse_over_unselected(center) is True
     far_away = (center[0] + 10_000, center[1] + 10_000)
     assert tile.is_mouse_over_unselected(far_away) is False
+
+
+def test_building_a_tile_leaves_the_cached_image_unchanged(assets):
+    cached = load_image(ImagePath("tile"))
+    before = tobytes(cached, "RGBA")
+    tile = Tile(1, 1)
+    assert tobytes(cached, "RGBA") == before
+    assert tile.unselected_surface is not cached
+    assert tile.selected_surface is not cached
+    # The outline went onto the tile's own copy.
+    assert tobytes(tile.unselected_surface, "RGBA") != before
