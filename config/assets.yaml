@@ -15,6 +15,10 @@ images:
     red_button:     {folder: gui/Red//Default, name: button_rectangle_depth_flat}
     grey8:          {folder: gui/Grey/Default, name: button_square_gloss}
     cross_white:    {folder: gui/Grey/Default, name: icon_outline_cross}
+    # Logos shipped with pygamine (source: branding), the variants for light pages.
+    vv_lockup:      {source: branding, folder: vectorviolet, name: lockup-light-solid}
+    github_icon:    {source: branding, folder: github, name: GitHub_Invertocat_Black}
+    itch_icon:      {source: branding, folder: itchio/logos, name: itchio-logo-textless-black}
     cross_grey:     {folder: gui/Grey/Default, name: icon_outline_cross}
     
     minus_icon:     {folder: gui/icons, name: minus}

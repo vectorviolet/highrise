@@ -30,6 +30,14 @@ object_templates:
     font_size: 30
     color: [251, 254, 255]
     position: [CENTER, CENTER]
+  # Button colors (issue #63): red leaves/cancels/destroys, green is the main
+  # "go" action, blue is everything else. tests/test_menu_polish.py lists them.
+  menu_btn_red:
+    extends: menu_btn
+    asset: red_button
+  menu_btn_green:
+    extends: menu_btn
+    asset: green_button
   title_btn:
     asset: blue_button
   title_btn_text:
@@ -104,10 +112,10 @@ panels:
         parent: menu_panel
         layout: { direction: vertical, start: [20, 30], spacing: 80 }
         objects:
-          play_button:      { extends: menu_btn, size: [400, 60] }
+          play_button:      { extends: menu_btn_green, size: [400, 60] }
           settings_button:  { extends: menu_btn, size: [400, 60] }
           credits_button:   { extends: menu_btn, size: [400, 60] }
-          exit_button:      { extends: menu_btn, size: [400, 60], on_click_sound: back }
+          exit_button:      { extends: menu_btn_red, size: [400, 60], on_click_sound: back }
       play_button_text:      { extends: menu_btn_text, parent: play_button,      text_key: menu.play }
       settings_button_text:  { extends: menu_btn_text, parent: settings_button,  text_key: menu.settings }
       credits_button_text:   { extends: menu_btn_text, parent: credits_button,   text_key: menu.credits }
@@ -169,11 +177,11 @@ panels:
         parent: play_panel
         layout: { direction: vertical, start: [20, 30], spacing: 80 }
         objects:
+          continue_button: { extends: menu_btn_green, size: [400, 60] }
           new_game_button: { extends: menu_btn, size: [400, 60] }
-          continue_button: { extends: menu_btn, size: [400, 60] }
-          play_back_button: { extends: menu_btn, size: [400, 60] }
-      new_game_button_text:  { extends: menu_btn_text, parent: new_game_button,  text_key: play.new_game }
+          play_back_button: { extends: menu_btn_red, size: [400, 60] }
       continue_button_text:  { extends: menu_btn_text, parent: continue_button,  text_key: play.continue }
+      new_game_button_text:  { extends: menu_btn_text, parent: new_game_button,  text_key: play.new_game }
       play_back_button_text: { extends: menu_btn_text, parent: play_back_button, text_key: common.go_back }
 
   game:
@@ -277,8 +285,8 @@ panels:
       sell_button:
         position: [CENTER, 690]
         size: [210, 50]
-        asset: green_button
-        hover: red_button
+        asset: red_button
+        hover: yellow_button
         # No on_click_sound: Game._sell plays the sell sound.
       sell_button_text:
         type: text
@@ -636,6 +644,7 @@ panels:
         size: [600, 520]
         speed: 40
         targets:
+          - credits_lockup
           - credits_dev_heading
           - credits_dev_1
           - credits_art_heading
@@ -660,103 +669,135 @@ panels:
           - credits_built_heading
           - credits_built_1
           - credits_built_2
+          - credits_github_icon
+          - credits_github_name
+          - credits_itch_icon
+          - credits_itch_name
 
+      # "a VECTORVIOLET game", pygamine's lockup for light backgrounds (4096x560).
+      credits_lockup:
+        position: [CENTER, 0]
+        size: [600, 82]
+        asset: vv_lockup
       credits_dev_heading:
         extends: credits_heading
-        position: [CENTER, 0]
+        position: [CENTER, 100]
         text_key: "credits.developer"
       credits_dev_1:
         extends: credits_entry
-        position: [CENTER, 40]
+        position: [CENTER, 140]
         text: "Umutcan Ekinci"
       credits_art_heading:
         extends: credits_heading
-        position: [CENTER, 110]
+        position: [CENTER, 210]
         text_key: "credits.art"
       credits_art_1:
         extends: credits_entry
-        position: [CENTER, 150]
+        position: [CENTER, 250]
         text: "Kenney - Hexagon Buildings (CC0)"
       credits_art_2:
         extends: credits_entry
-        position: [CENTER, 184]
+        position: [CENTER, 284]
         text: "Kenney - Isometric Landscape (CC0)"
       credits_art_3:
         extends: credits_entry
-        position: [CENTER, 218]
+        position: [CENTER, 318]
         text: "Kenney - Background Elements Remastered (CC0)"
       credits_art_4:
         extends: credits_entry
-        position: [CENTER, 252]
+        position: [CENTER, 352]
         text: "Kenney - Cursor Pack (CC0)"
       credits_ui_heading:
         extends: credits_heading
-        position: [CENTER, 322]
+        position: [CENTER, 422]
         text_key: "credits.ui"
       credits_ui_1:
         extends: credits_entry
-        position: [CENTER, 362]
+        position: [CENTER, 462]
         text: "Kenney - UI Pack (CC0)"
       credits_ui_2:
         extends: credits_entry
-        position: [CENTER, 396]
+        position: [CENTER, 496]
         text: "Kenney - Game Icons (CC0)"
       credits_sound_heading:
         extends: credits_heading
-        position: [CENTER, 466]
+        position: [CENTER, 566]
         text_key: "credits.sound"
       credits_sound_1:
         extends: credits_entry
-        position: [CENTER, 506]
+        position: [CENTER, 606]
         text: "Kenney - UI Pack (CC0)"
       credits_sound_2:
         extends: credits_entry
-        position: [CENTER, 540]
+        position: [CENTER, 640]
         text: "Kenney - Impact Sounds (CC0)"
       credits_sound_3:
         extends: credits_entry
-        position: [CENTER, 574]
+        position: [CENTER, 674]
         text: "Kenney - Interface Sounds (CC0)"
       credits_sound_4:
         extends: credits_entry
-        position: [CENTER, 608]
+        position: [CENTER, 708]
         text: "Kenney - Sci-Fi Sounds (CC0)"
       credits_music_heading:
         extends: credits_heading
-        position: [CENTER, 678]
+        position: [CENTER, 778]
         text_key: "credits.music"
       credits_music_1:
         extends: credits_entry
-        position: [CENTER, 718]
+        position: [CENTER, 818]
         text: "Music : Sakura Girl - Day Off"
       credits_music_2:
         extends: credits_entry
-        position: [CENTER, 752]
+        position: [CENTER, 852]
         text: "Link : youtu.be/vAv9KtrU_5c"
       credits_music_3:
         extends: credits_entry
-        position: [CENTER, 786]
+        position: [CENTER, 886]
         text: "CC BY 3.0"
       credits_fonts_heading:
         extends: credits_heading
-        position: [CENTER, 856]
+        position: [CENTER, 956]
         text_key: "credits.fonts"
       credits_fonts_1:
         extends: credits_entry
-        position: [CENTER, 896]
+        position: [CENTER, 996]
         text: "Titillium Web - Accademia di Belle Arti di Urbino (SIL OFL 1.1)"
       credits_built_heading:
         extends: credits_heading
-        position: [CENTER, 966]
+        position: [CENTER, 1066]
         text_key: "credits.built_with"
       credits_built_1:
         extends: credits_entry
-        position: [CENTER, 1006]
+        position: [CENTER, 1106]
         text: "pygame-ce (LGPL 2.1)"
       credits_built_2:
         extends: credits_entry
-        position: [CENTER, 1040]
+        position: [CENTER, 1140]
         text: "pygamine (MIT)"
+      # Profile links, closing the scroll a little apart from the sections:
+      # platform icon + username, each pair centered as a row. The engine's layout
+      # blocks only stack from a start point and can't center a row of mixed widths,
+      # so the x positions are computed by hand from the rendered width of
+      # "umutcanekinci" (137 px at 22 pt, the same in every language): the names
+      # start at x=914 and each icon ends 14 px before it, around the page center
+      # 960. tests/test_menu_polish.py checks the pairs stay centered.
+      credits_github_icon:
+        position: [869, 1222]
+        size: [31, 30]
+        asset: github_icon
+      credits_github_name:
+        extends: credits_entry
+        position: [914, 1220]
+        text: "umutcanekinci"
+      credits_itch_icon:
+        position: [867, 1268]
+        size: [33, 30]
+        asset: itch_icon
+      credits_itch_name:
+        extends: credits_entry
+        position: [914, 1266]
+        text: "umutcanekinci"
 
       credits_back_button:
         extends: go_back_btn

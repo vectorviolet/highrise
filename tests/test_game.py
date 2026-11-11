@@ -522,12 +522,12 @@ def test_play_starts_a_new_game_with_no_save(assets):
 @pytest.mark.parametrize(
     ("volume", "text"),
     [
-        (0.0, "%0"),
-        (0.5, "%50"),
-        (0.567, "%57"),
-        (1.0, "%100"),
-        (-0.5, "%0"),
-        (1.5, "%100"),
+        (0.0, "0%"),
+        (0.5, "50%"),
+        (0.567, "57%"),
+        (1.0, "100%"),
+        (-0.5, "0%"),
+        (1.5, "100%"),
     ],
 )
 def test_format_volume_is_a_clamped_rounded_percentage(volume, text):
@@ -540,7 +540,7 @@ def test_set_master_label_rounds_to_a_percentage(assets):
     game.set_master_label(0.333)
 
     assert (
-        game.panel_manager["audio_settings"]["master_volume_entry_text"].text == "%33"
+        game.panel_manager["audio_settings"]["master_volume_entry_text"].text == "33%"
     )
 
 
@@ -550,19 +550,19 @@ def test_set_music_and_sfx_labels_round_to_a_percentage(assets):
     game.set_music_label(0.567)
     game.set_sfx_label(1.0)
 
-    assert game.panel_manager["audio_settings"]["music_volume_entry_text"].text == "%57"
-    assert game.panel_manager["audio_settings"]["sfx_volume_entry_text"].text == "%100"
+    assert game.panel_manager["audio_settings"]["music_volume_entry_text"].text == "57%"
+    assert game.panel_manager["audio_settings"]["sfx_volume_entry_text"].text == "100%"
 
 
 def test_set_music_label_clamps_out_of_range_values(assets):
     game = make_game(assets, size=3)
 
     game.set_music_label(-0.5)
-    assert game.panel_manager["audio_settings"]["music_volume_entry_text"].text == "%0"
+    assert game.panel_manager["audio_settings"]["music_volume_entry_text"].text == "0%"
 
     game.set_music_label(1.5)
     assert (
-        game.panel_manager["audio_settings"]["music_volume_entry_text"].text == "%100"
+        game.panel_manager["audio_settings"]["music_volume_entry_text"].text == "100%"
     )
 
 
@@ -767,9 +767,9 @@ def test_on_exit_request_from_audio_settings_resets_the_labels(assets):
     game.on_exit_request()
 
     labels = game.panel_manager["audio_settings"]
-    assert labels["master_volume_entry_text"].text == "%60"
-    assert labels["music_volume_entry_text"].text == "%20"
-    assert labels["sfx_volume_entry_text"].text == "%30"
+    assert labels["master_volume_entry_text"].text == "60%"
+    assert labels["music_volume_entry_text"].text == "20%"
+    assert labels["sfx_volume_entry_text"].text == "30%"
 
 
 def test_new_game_resets_the_session_ui(assets):
@@ -790,9 +790,9 @@ def test_new_game_resets_the_session_ui(assets):
     assert len(game.info_panel.close.calls) == 1
     assert game.tile_selector.is_active is False
     labels = game.panel_manager["audio_settings"]
-    assert labels["master_volume_entry_text"].text == "%90"
-    assert labels["music_volume_entry_text"].text == "%20"
-    assert labels["sfx_volume_entry_text"].text == "%70"
+    assert labels["master_volume_entry_text"].text == "90%"
+    assert labels["music_volume_entry_text"].text == "20%"
+    assert labels["sfx_volume_entry_text"].text == "70%"
     assert game.panel_manager.current_panel == "game"
 
 
@@ -821,8 +821,8 @@ def test_run_resets_the_session_ui_and_opens_the_menu(assets, monkeypatch):
     assert len(game.info_panel.close.calls) == 1
     assert game.panel_manager.current_panel == "menu"
     labels = game.panel_manager["audio_settings"]
-    assert labels["music_volume_entry_text"].text == "%20"
-    assert labels["sfx_volume_entry_text"].text == "%70"
+    assert labels["music_volume_entry_text"].text == "20%"
+    assert labels["sfx_volume_entry_text"].text == "70%"
     display = game.panel_manager["display_settings"]
     assert display["window_size_entry_text"].text == "1280x720"
     assert display["window_mode_entry_text"].text == "WINDOWED"
@@ -860,7 +860,7 @@ def test_run_applies_the_saved_master_volume_before_the_splash(assets, monkeypat
 
     assert game.audio.master_volume() == 0.4
     assert (
-        game.panel_manager["audio_settings"]["master_volume_entry_text"].text == "%40"
+        game.panel_manager["audio_settings"]["master_volume_entry_text"].text == "40%"
     )
 
 

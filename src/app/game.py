@@ -114,10 +114,16 @@ def has_sound(assets: AssetManager, key: str) -> bool:
     return True
 
 
+def format_percent(value: int) -> str:
+    """A percentage as text in the current language's format ("50%", Turkish
+    "%50"): the sign's place comes from the `common.percent` key."""
+    return tr("common.percent", value=value)
+
+
 def format_volume(volume: float) -> str:
-    """A volume in [0, 1] as the settings label text, e.g. 0.5 -> "%50".
+    """A volume in [0, 1] as the settings label text, e.g. 0.5 -> "50%".
     Values outside [0, 1] are clamped first."""
-    return "%" + str(round(clamp01(volume) * 100))
+    return format_percent(round(clamp01(volume) * 100))
 
 
 class Game(GameEventsMixin, GamePersistenceMixin, Application):
@@ -392,7 +398,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         ]
         play_buttons = [
             self.panel_manager["play"][n]
-            for n in ("new_game_button", "continue_button", "play_back_button")
+            for n in ("continue_button", "new_game_button", "play_back_button")
         ]
         settings_buttons = [
             self.panel_manager["settings"][n]
@@ -695,7 +701,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         else:
             self.new_game()
 
-    # ── audio-settings UI labels (volume → "%NN" text on a panel widget) ──
+    # ── audio-settings UI labels (volume → `format_percent` text on a panel widget) ──
 
     def set_master_label(self, volume: float) -> None:
         self.panel_manager["audio_settings"]["master_volume_entry_text"].set_text(
@@ -725,7 +731,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def set_ui_scale_label(self) -> None:
         self.panel_manager["display_settings"]["ui_scale_entry_text"].set_text(
-            f"%{self.ui_scale}"
+            format_percent(self.ui_scale)
         )
 
     def set_ui_scale(self, ui_scale: int) -> None:
@@ -794,11 +800,15 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def _on_language_changed(self, code: str) -> None:
         """Re-texts what panels.yaml cannot: the toolbar hover texts and the
-        labels the game sets from code (the other labels follow their key). The cash
+        labels the game sets from code (percent values included; the other labels follow their key). The cash
         amount and an open info panel's prices change their number format too."""
         self.odometer.snap(format_money(self.player.money))
         self.info_panel.relocalize()
         self.update_button_texts()
+        self.set_master_label(self.audio.master_volume())
+        self.set_music_label(self.audio.music_volume())
+        self.set_sfx_label(self.audio.sfx_volume())
+        self.set_ui_scale_label()
         self.set_window_mode_label()
         self.set_language_label()
         self.set_skip_intro_label()
