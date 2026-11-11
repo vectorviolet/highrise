@@ -7,6 +7,12 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.0] – 2026-11-11
+
+The first stable release: eleven building levels with their own look, boosters, age tasks that gate
+NEXT AGE, a new menu and credits pages, UI scale and master volume settings, floating money text,
+a game icon, and a refreshed README, screenshots and store page.
+
 ### Added
 
 - **Cover and banner**: a new Codex-generated cover (replacing the Gemini one), the itch.io banner and
