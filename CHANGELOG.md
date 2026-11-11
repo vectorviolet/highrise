@@ -65,6 +65,9 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Bump pygamine to v0.30.0: InputMap (rebindable key actions) and TooltipManager (tooltips with key
   prompts). No game changes yet; key bindings and tooltips come in their own PRs. The game reads
   `PanelManager.current_panel`, which is now a property in pygamine and behaves the same.
+- Bump pygamine to v1.0.0 (the first stable release): panel loaders reject empty YAML entries, the
+  loader's `parent:` links the GameObject parent so `active` follows the hierarchy, and the Tiled
+  module is now `pygamine.assets.tiledmap`. No gameplay change.
 - The engine submodule no longer follows pygamine's `main` on its own (`update = merge` removed
   from `.gitmodules`); it moves only through a reviewed bump PR.
 - Dependabot opens one grouped PR a week with `uv.lock` updates (`.github/dependabot.yml`).
