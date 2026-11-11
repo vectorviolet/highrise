@@ -9,9 +9,9 @@ common:
   save: "KAYDET"
   enabled: "AÇIK"
   disabled: "KAPALI"
+  percent: "%{value}"
 
 menu:
-  title: "Highrise"
   play: "OYNA"
   settings: "AYARLAR"
   credits: "YAPIMCILAR"

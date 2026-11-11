@@ -104,11 +104,19 @@ Every player-visible string lives in `config/lang/<code>.yaml` (`en.yaml` is the
 fallback; `tr.yaml` is Turkish), loaded with pygamine's `localization`. Panels use `text_key:` (and
 `text_params:`) instead of `text:`; code uses `tr("section.key")`. Texts inside `states:` are not
 key-driven in the engine, so `Game._on_language_changed` re-sets the ones the game builds from code
-(toolbar hover texts, window-mode label, the Game settings labels). Add a key to every language
+(toolbar hover texts, window-mode label, the Game settings labels, the percent values: write a percentage with `format_percent`, never by joining a "%" to a number; `common.percent` holds each language's order). Add a key to every language
 file with the same `{placeholders}`: `tests/test_localization.py` fails otherwise, and fails when a
 font in `assets/fonts/` lacks a character of any language (Titillium Web has no arrow, so don't use
 one). Quote every value: a bare `yes` or `10` is not a string. Don't write `on:`/`off:` as keys: YAML
 turns them into booleans.
+
+### Menu buttons and page headers
+
+Button colors: red (`red_button`) leaves, cancels or destroys, green goes (PLAY, CONTINUE, SAVE, BUILD),
+blue is the rest; `tests/test_menu_polish.py` lists them, so add a new button there. Every sub-page header
+(`<page>_title`, extends `page_header`) is one plate at one place with no hover; its image is `header_plate`,
+defined by the manifest `config/header_styles/<style>.yaml` that `ui.header_style` in `config/settings.yaml`
+picks (`a` plate, `b` banner; the images come from `scripts/gen_header_art.py`). The main menu has no title.
 
 ### Credits page
 

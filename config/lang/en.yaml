@@ -12,9 +12,9 @@ common:
   save: "SAVE"
   enabled: "ON"
   disabled: "OFF"
+  percent: "{value}%"
 
 menu:
-  title: "Highrise"
   play: "PLAY"
   settings: "SETTINGS"
   credits: "CREDITS"

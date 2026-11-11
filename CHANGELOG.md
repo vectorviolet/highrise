@@ -9,6 +9,10 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Menu polish** ([devlog](docs/devlog/2026-11-11-menu-polish.md)): buttons follow one color scheme
+  (red leaves, cancels or destroys; green goes; blue is the rest), CONTINUE is above NEW GAME, and
+  sub-page headers are one plate in one place that doesn't look like a button, with two styles to
+  pick from (`ui.header_style`). The main menu has no title.
 - A **CREDITS** page replaces the DEVELOPER page: scrolling sections for the developer, art, UI,
   sound, music, fonts and software, every pack with its license and the Day Off attribution. The
   social link buttons, the photo and their assets are gone
@@ -40,6 +44,7 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Percent values follow the language: "60%" in English, "%60" in Turkish.
 - The GO BACK buttons on the settings pages are centered (they sat about 8 px to the right) and
   red like the other panels; the AUDIO page's rows are spaced like the DISPLAY page's.
 - `Tile` draws its grid outline on a copy of the cached `tile` image instead of the shared one.

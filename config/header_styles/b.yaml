@@ -1,0 +1,3 @@
+# Header style b, "banner": a ribbon with swallowtail ends.
+images:
+    header_plate: { folder: gui/header, name: banner }

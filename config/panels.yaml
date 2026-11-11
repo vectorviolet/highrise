@@ -30,11 +30,25 @@ object_templates:
     font_size: 30
     color: [251, 254, 255]
     position: [CENTER, CENTER]
-  title_btn:
-    asset: blue_button
-  title_btn_text:
+  # Button colors (issue #63): red leaves/cancels/destroys, green is the main
+  # "go" action, blue is everything else. tests/test_button_colors.py lists them.
+  menu_btn_red:
+    extends: menu_btn
+    asset: red_button
+  menu_btn_green:
+    extends: menu_btn
+    asset: green_button
+  # Page header (issue #56): one plate at one place on every sub-page, with no
+  # hover state. Its image is the `header_plate` asset of the style that
+  # `ui.header_style` in settings.yaml picks (config/header_styles/).
+  page_header:
+    asset: header_plate
+    nine_slice: 20
+    position: [640, 140]
+    size: [640, 70]
+  page_header_text:
     type: text
-    font: titillium_bold
+    font: titillium_black
     font_size: 30
     color: white
     position: [CENTER, CENTER]
@@ -84,30 +98,18 @@ object_templates:
 panels:
   menu:
     objects:
-      menu_title:
-        position: [740, 320]
-        size: [440, 70]
-        asset: blue_button
-      menu_title_text:
-        parent: menu_title
-        type: text
-        text_key: menu.title
-        font: titillium_black
-        font_size: 30
-        color: white
-        position: [CENTER, CENTER]
       menu_panel:
         extends: menu_panel
-        position: [740, 380]
+        position: [740, 350]
         size: [440, 380]
       menu_buttons:
         parent: menu_panel
         layout: { direction: vertical, start: [20, 30], spacing: 80 }
         objects:
-          play_button:      { extends: menu_btn, size: [400, 60] }
+          play_button:      { extends: menu_btn_green, size: [400, 60] }
           settings_button:  { extends: menu_btn, size: [400, 60] }
           credits_button:   { extends: menu_btn, size: [400, 60] }
-          exit_button:      { extends: menu_btn, size: [400, 60], on_click_sound: back }
+          exit_button:      { extends: menu_btn_red, size: [400, 60], on_click_sound: back }
       play_button_text:      { extends: menu_btn_text, parent: play_button,      text_key: menu.play }
       settings_button_text:  { extends: menu_btn_text, parent: settings_button,  text_key: menu.settings }
       credits_button_text:   { extends: menu_btn_text, parent: credits_button,   text_key: menu.credits }
@@ -115,18 +117,8 @@ panels:
 
   settings:
     objects:
-      settings_title:
-        position: [740, 320]
-        size: [440, 70]
-        asset: blue_button
-      settings_title_text:
-        parent: settings_title
-        type: text
-        text_key: settings.title
-        font: titillium_black
-        font_size: 30
-        color: white
-        position: [CENTER, CENTER]
+      settings_title: { extends: page_header }
+      settings_title_text: { extends: page_header_text, parent: settings_title, text_key: settings.title }
       settings_panel:
         extends: menu_panel
         position: [740, 380]
@@ -149,18 +141,8 @@ panels:
 
   play:
     objects:
-      play_title:
-        position: [740, 320]
-        size: [440, 70]
-        asset: blue_button
-      play_title_text:
-        parent: play_title
-        type: text
-        text_key: play.title
-        font: titillium_black
-        font_size: 30
-        color: white
-        position: [CENTER, CENTER]
+      play_title: { extends: page_header }
+      play_title_text: { extends: page_header_text, parent: play_title, text_key: play.title }
       play_panel:
         extends: menu_panel
         position: [740, 380]
@@ -169,11 +151,11 @@ panels:
         parent: play_panel
         layout: { direction: vertical, start: [20, 30], spacing: 80 }
         objects:
+          continue_button: { extends: menu_btn_green, size: [400, 60] }
           new_game_button: { extends: menu_btn, size: [400, 60] }
-          continue_button: { extends: menu_btn, size: [400, 60] }
-          play_back_button: { extends: menu_btn, size: [400, 60] }
-      new_game_button_text:  { extends: menu_btn_text, parent: new_game_button,  text_key: play.new_game }
+          play_back_button: { extends: menu_btn_red, size: [400, 60] }
       continue_button_text:  { extends: menu_btn_text, parent: continue_button,  text_key: play.continue }
+      new_game_button_text:  { extends: menu_btn_text, parent: new_game_button,  text_key: play.new_game }
       play_back_button_text: { extends: menu_btn_text, parent: play_back_button, text_key: common.go_back }
 
   game:
@@ -277,8 +259,8 @@ panels:
       sell_button:
         position: [CENTER, 690]
         size: [210, 50]
-        asset: green_button
-        hover: red_button
+        asset: red_button
+        hover: yellow_button
         on_click_sound: back
       sell_button_text:
         type: text
@@ -303,18 +285,8 @@ panels:
 
   display_settings:
     objects:
-      display_settings_title:
-        position: [740, 275]
-        size: [440, 70]
-        asset: blue_button
-      display_settings_title_text:
-        parent: display_settings_title
-        type: text
-        text_key: display_settings.title
-        font: titillium_black
-        font_size: 30
-        color: white
-        position: [CENTER, CENTER]
+      display_settings_title: { extends: page_header }
+      display_settings_title_text: { extends: page_header_text, parent: display_settings_title, text_key: display_settings.title }
       display_settings_panel:
         position: [740, 335]
         size: [440, 470]
@@ -414,18 +386,8 @@ panels:
 
   audio_settings:
     objects:
-      audio_settings_title:
-        position: [740, 260]
-        size: [440, 70]
-        asset: blue_button
-      audio_settings_title_text:
-        parent: audio_settings_title
-        type: text
-        text_key: audio_settings.title
-        font: titillium_black
-        font_size: 30
-        color: white
-        position: [CENTER, CENTER]
+      audio_settings_title: { extends: page_header }
+      audio_settings_title_text: { extends: page_header_text, parent: audio_settings_title, text_key: audio_settings.title }
       audio_settings_panel:
         position: [740, 320]
         size: [440, 405]
@@ -537,18 +499,8 @@ panels:
 
   game_settings:
     objects:
-      game_settings_title:
-        position: [740, 300]
-        size: [440, 70]
-        asset: blue_button
-      game_settings_title_text:
-        parent: game_settings_title
-        type: text
-        text_key: game_settings.title
-        font: titillium_black
-        font_size: 30
-        color: white
-        position: [CENTER, CENTER]
+      game_settings_title: { extends: page_header }
+      game_settings_title_text: { extends: page_header_text, parent: game_settings_title, text_key: game_settings.title }
       game_settings_panel:
         position: [740, 360]
         size: [440, 400]
@@ -611,18 +563,8 @@ panels:
 
   credits:
     objects:
-      credits_title:
-        position: [640, 140]
-        size: [640, 70]
-        asset: blue_button
-      credits_title_text:
-        parent: credits_title
-        type: text
-        text_key: credits.title
-        font: titillium_black
-        font_size: 30
-        color: white
-        position: [CENTER, CENTER]
+      credits_title: { extends: page_header }
+      credits_title_text: { extends: page_header_text, parent: credits_title, text_key: credits.title }
       credits_panel:
         extends: menu_panel
         position: [640, 200]

@@ -88,7 +88,7 @@ def test_reset_restores_the_default_and_saves_it():
     assert game.ui_scale == DEFAULT_UI_SCALE
     assert game.load_settings().ui_scale == DEFAULT_UI_SCALE
     assert game.panel_manager["display_settings"]["ui_scale_entry_text"].text == (
-        f"%{DEFAULT_UI_SCALE}"
+        f"{DEFAULT_UI_SCALE}%"
     )
     assert game.panel_manager.current_panel == "display_settings"
 
@@ -230,27 +230,3 @@ def test_every_back_button_is_centered_on_its_page(resolution, scale):
         # The page's own panel is centered too, so they share one center line.
         body = page[body_name].rect
         assert abs(body.centerx - window.centerx) <= 1, (panel, scale, body)
-
-
-HEADERS = (
-    ("menu", "menu_title", "menu_panel"),
-    ("settings", "settings_title", "settings_panel"),
-    ("play", "play_title", "play_panel"),
-    ("display_settings", "display_settings_title", "display_settings_panel"),
-    ("audio_settings", "audio_settings_title", "audio_settings_panel"),
-    ("audio_settings", "audio_settings_title", "audio_settings_panel_no_music"),
-    ("game_settings", "game_settings_title", "game_settings_panel"),
-    ("credits", "credits_title", "credits_panel"),
-)
-
-
-@pytest.mark.parametrize("scale", UI_SCALES)
-def test_every_header_plate_is_as_wide_as_its_body_panel(scale):
-    game = started_game()
-    game.set_ui_scale(scale)
-
-    for panel, header_name, body_name in HEADERS:
-        page = game.panel_manager[panel]
-        header, body = page[header_name].rect, page[body_name].rect
-        assert abs(header.width - body.width) <= 1, (panel, body_name, scale)
-        assert abs(header.left - body.left) <= 1, (panel, body_name, scale)
