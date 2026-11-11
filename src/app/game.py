@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Callable
 from pathlib import Path
 from random import choice
@@ -46,8 +47,10 @@ from ui.money_format import format_money
 from ui.odometer import Odometer
 from ui.task_list import TaskRow, render_task_list
 from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES, step_ui_scale
-from util.paths import LANG_FOLDER
+from util.paths import LANG_FOLDER, resource_path
 
+# The window and taskbar icon: the plate-less tower, crisp at the small sizes the OS shows.
+WINDOW_ICON = resource_path("assets", "images", "icon", "icon_64.png")
 # Manifest key of the background music. Optional: without it the game plays
 # no music and hides the music volume control (it would control nothing --
 # the splash plays before the saved volumes are applied).
@@ -131,6 +134,20 @@ def format_volume(volume: float) -> str:
     return format_percent(round(clamp01(volume) * 100))
 
 
+logger = logging.getLogger(__name__)
+
+
+def set_window_icon(path: Path = WINDOW_ICON) -> None:
+    """Set the window and taskbar icon. A missing or unreadable file only costs the icon, so it
+    is logged and the game starts with the default one."""
+    try:
+        icon = pygame.image.load(path)
+    except (FileNotFoundError, pygame.error) as error:
+        logger.warning("Could not load the window icon %s: %s", path, error)
+        return
+    pygame.display.set_icon(icon)
+
+
 class Game(GameEventsMixin, GamePersistenceMixin, Application):
     # What _highlight_boosted_tiles last lit up (the booster and where it stood, and the board).
     _highlight_key: tuple | None = None
@@ -168,6 +185,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         # on_canvas_resized() rebuilds the panels only once they exist.
         self._panels_built = False
 
+        # Before the window exists: X11 and macOS apply the icon only if it is set before the
+        # first set_mode() (pygame.display.set_icon works before pygame.init()).
+        set_window_icon()
         super().__init__(tuple(window["size"]), window["title"], window["fps"])
 
         self.assets = AssetManager()
