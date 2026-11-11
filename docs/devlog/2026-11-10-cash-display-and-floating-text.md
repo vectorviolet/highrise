@@ -18,6 +18,8 @@ top and bottom line. The amount is right-aligned inside the plate.
 
 ![The three candidates side by side](img/48-cash-candidates.png)
 
+*Options shown before the pick (old number format, no thousands separator).*
+
 1. **Dark plate, coin, white text.** The UI Pack gray button plate, darkened, with a gold coin
    drawn in code (no new asset).
 2. **Button-style yellow plate, dark text.** The yellow gloss plate, like the buttons' own style.
@@ -27,16 +29,22 @@ Ten digits still fit, in every candidate:
 
 ![Candidates with a ten-digit amount](img/48-cash-large-amount.png)
 
-Alignment is checked at every UI scale (80 to 125 percent); candidate 1 at 80, 100 and 125 percent:
+*Options shown before the pick (old number format).*
+
+Alignment is checked at every UI scale (80 to 125 percent); the chosen look (candidate 1, current
+number format) at 80, 100 and 125 percent:
 
 ![Candidate 1 at 80, 100 and 125 percent](img/48-cash-alignment-scales.png)
 
 ### Floating text (#50)
 
-Frames at 0, 300, 700 and 1100 ms: a sale (+840$) over the sold building, two payouts (+12$, +6$)
-over the buildings that paid, and a spend (-400$) falling onto the cash display.
+Frames at 0, 300, 700 and 1100 ms: a sale (+840$) over the sold building, two payouts (+120$, +60$)
+over the buildings that paid, and a spend (-400$) falling from the cash amount.
 
 ![Floating text frames](img/50-floating-text-frames.png)
+
+The current look: gains at 24 pt, the red text falling from the digits' baseline (it passes the
+screen's bottom edge, drawn here on a dark extension), and the amount rolling to its new value.
 
 Neither pygamine nor Chokepoint has a reusable helper: Chokepoint's kill text lives inside its
 kill-feedback class (battle time, camera, coin flight). The Highrise version is a small
