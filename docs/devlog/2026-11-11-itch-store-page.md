@@ -1,5 +1,5 @@
 # itch.io store page text and checklist
-<!-- index | refs: #82 | area: Docs -->
+<!-- index | refs: #82, PR #83 | area: Docs -->
 
 **Date:** 2026-11-11 · **Area:** Docs · **Issue:** [#82](https://github.com/vectorviolet/highrise/issues/82)
 
