@@ -13,6 +13,7 @@ common:
   enabled: "ON"
   disabled: "OFF"
   percent: "{value}%"
+  decimal: "."
 
 menu:
   title: "Highrise"
@@ -64,6 +65,7 @@ money:
 game:
   expand: "EXPAND"
   build: "BUILD"
+  boost: "BOOST"
   next_age: "NEXT AGE"
   sell: "SELL"
   max_size: "MAX SIZE"
@@ -71,6 +73,7 @@ game:
   max_age: "MAX AGE"
   level: "Level: {value}"
   speed: "Speed: {value} $/sec"
+  booster_multiplier: "Boost: x{value}"
   cooldown: "Cooldown: {value} sec"
   sell_price: "Sell Price: {value}"
 

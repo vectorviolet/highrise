@@ -55,6 +55,7 @@ def make_panel_manager() -> tuple[FakePanelManager, dict[str, Any]]:
         "level_text": make_label("game.level"),
         "speed_text": make_label("game.speed"),
         "cooldown_text": make_label("game.cooldown"),
+        "boost_text": make_label("game.booster_multiplier"),
         "sell_price_text": make_label("game.sell_price"),
         "sell_button_text": FakeText(),
         "info_panel_building_image": FakeImage(),
@@ -186,3 +187,55 @@ def test_the_info_image_fits_the_box_for_every_level(assets):
         info_panel.refresh(building)
         assert image.surfaces["default"].get_size() == box
         assert panel["level_text"].text == f"Level: {level}"
+
+
+def _booster(level: int, multiplier: float) -> Building:
+    return Building(
+        level=level,
+        age_number=0,
+        tile=Tile(1, 1),
+        door_side="left",
+        on_payout=None,
+        booster_multiplier=multiplier,
+    )
+
+
+def test_a_booster_shows_its_level_and_multiplier_instead_of_speed_and_cooldown(assets):
+    manager, panel = make_panel_manager()
+    info_panel = InfoPanel(manager)
+
+    info_panel.refresh(_booster(3, 1.35))
+
+    assert panel["level_text"].text == "Level: 3"
+    assert panel["boost_text"].text == "Boost: x1.35"
+    assert panel["boost_text"].active is True
+    assert panel["speed_text"].active is False
+    assert panel["cooldown_text"].active is False
+
+
+def test_a_building_hides_the_boost_line_again(assets):
+    manager, panel = make_panel_manager()
+    info_panel = InfoPanel(manager)
+    building = Building(
+        level=1, age_number=0, tile=Tile(1, 1), door_side="left", on_payout=None
+    )
+
+    info_panel.refresh(_booster(1, 1.1))
+    info_panel.refresh(building)
+
+    assert panel["boost_text"].active is False
+    assert panel["speed_text"].active is True
+    assert panel["cooldown_text"].active is True
+    assert panel["speed_text"].text == f"Speed: {building.speed} $/sec"
+
+
+def test_the_multiplier_follows_a_language_switch(assets):
+    manager, panel = make_panel_manager()
+    info_panel = InfoPanel(manager)
+    info_panel.refresh(_booster(3, 1.35))
+    info_panel.open()
+
+    localization.set_language("tr")
+    info_panel.relocalize()
+
+    assert panel["boost_text"].text == "Artış: x1,35"

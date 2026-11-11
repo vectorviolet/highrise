@@ -9,6 +9,12 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Boosters**: a BOOST button next to BUILD puts a booster (hex ring with a red roof) on a random
+  empty tile. A booster earns nothing but raises the income of every building on the tiles it
+  covers (wood: 4 neighbors, rock: 4 diagonals, sand: all 8 around it, stone: its row and column);
+  overlapping boosters add up. Five levels, merged like buildings (booster with booster only);
+  saved with the game, placeholder numbers in `config/settings.yaml`
+  ([devlog](docs/devlog/2026-11-11-boosters.md)).
 - **Eleven building levels** (was six): sprites are now composed from Kenney pieces by recipes in
   `config/buildings.yaml`, and every level adds one visible change (door, window, gate, floor, roof).
   Each building has a door side (left or right) that stays through merges and age changes, saved

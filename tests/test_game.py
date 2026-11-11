@@ -122,6 +122,7 @@ def make_panels() -> FakePanelManager:
         {
             "game": {
                 "build_button_text": FakeText(),
+                "boost_button_text": FakeText(),
                 "money_text": FakeMoneyText(),
                 "money_panel": SimpleNamespace(rect=pygame.Rect(1420, 20, 280, 60)),
             },
@@ -386,7 +387,9 @@ def test_every_production_insertion_path_pays_the_player(assets, path, monkeypat
         monkeypatch.setattr("app.game.choice", lambda tiles: (1, 1))
         game.create_building()
     elif path == "load":
-        game.database = SimpleNamespace(execute_safely=lambda *a: [(2, 1, 1, "right")])
+        game.database = SimpleNamespace(
+            execute_safely=lambda *a: [(2, 1, 1, "right", 0)]
+        )
         game.load_buildings()
     elif path == "age":
         game.add_building(1, 1, 1)
@@ -665,7 +668,9 @@ def test_game_plays_the_merge_sound_through_the_collection_callback(assets):
 
 def test_loaded_buildings_have_payout_callbacks_without_an_update(assets):
     game = make_game(assets)
-    game.database = SimpleNamespace(execute_safely=lambda *args: [(2, 1, 1, "right")])
+    game.database = SimpleNamespace(
+        execute_safely=lambda *args: [(2, 1, 1, "right", 0)]
+    )
 
     game.load_buildings()
 
@@ -1143,6 +1148,7 @@ def make_playable_game(assets) -> Game:
         "level_text",
         "speed_text",
         "cooldown_text",
+        "boost_text",
         "sell_price_text",
     ):
         panel[name] = FakeLabel()
@@ -1155,6 +1161,7 @@ def make_playable_game(assets) -> Game:
         "selection_mode_button",
         "expand_button",
         "build_button",
+        "boost_button",
         "next_age_button",
     ):
         panel[name] = FakeButton()
@@ -1318,3 +1325,123 @@ def test_build_plays_the_sound_of_the_current_age(assets):
     game.create_building()
 
     assert game.audio.played == [game.action_sounds.build(2)]
+
+
+# ── boosters (issue #51) ─────────────────────────────────────────────────────
+
+
+def test_create_booster_places_a_level_1_booster_and_spends_its_price(
+    assets, monkeypatch
+):
+    game = make_game(assets, size=2, starting_money=100_000)
+    monkeypatch.setattr("app.game.choice", lambda seq: sorted(seq)[0])
+
+    game.create_booster()
+
+    (booster,) = game.buildings
+    assert booster.is_booster and booster.level == 1
+    assert (booster.tile.row_number, booster.tile.column_number) == (1, 1)
+    cost = game.buildings.get_booster_cost()
+    assert game.player.money == 100_000 - cost
+    assert game.audio.played == [game.action_sounds.build(0)]
+    assert _spend_texts(game) == [f"-{format_money(cost)}"]
+
+
+def test_create_booster_does_nothing_when_unaffordable(assets):
+    game = make_game(assets, size=2, starting_money=0)
+
+    game.create_booster()
+
+    assert len(game.buildings) == 0
+    assert _spend_texts(game) == []
+
+
+def test_create_booster_on_a_full_board_spends_nothing(assets):
+    game = make_game(assets, size=1, starting_money=100_000)
+    game.add_building(1, 1, 1)
+
+    game.create_booster()
+
+    assert len(game.buildings) == 1
+    assert game.player.money == 100_000
+    assert game.audio.played == []
+
+
+def test_create_booster_waits_for_the_unlock(assets):
+    game = make_game(assets, size=2, starting_money=100_000)
+    game.boosters_unlocked = False
+
+    game.create_booster()
+
+    assert len(game.buildings) == 0
+    assert game.player.money == 100_000
+
+
+def test_a_new_booster_in_the_current_age_is_that_age(assets):
+    game = make_game(assets, size=3, starting_money=100_000)
+    game.set_age(2)
+
+    game.create_booster()
+
+    assert game.buildings[0].age == "sand"
+
+
+def test_a_payout_on_a_boosted_tile_is_multiplied(assets):
+    game = make_game(assets, size=3, starting_money=0)
+    game.add_building(2, 1, 1, "left", booster=True)  # wood: (1, 2) and (2, 1)
+    game.add_building(1, 1, 2, "left")  # covered
+    game.add_building(1, 3, 3, "left")  # not covered
+    by_column = {b.tile.column_number: b for b in game.buildings}
+    boosted, plain = by_column[2], by_column[3]
+
+    for _ in range(10):
+        boosted._payout()
+    after_boosted = game.player.money
+    game.player.money = 0
+    for _ in range(10):
+        plain._payout()
+
+    base = plain.cooldown * plain.speed
+    assert game.player.money == 10 * base
+    # 10 payouts of the base amount at x1.2: the fractions that don't fit one payout
+    # add up across payouts instead of rounding away (a level 1 wood building pays 2$).
+    assert after_boosted == int(10 * base * game.buildings.boosters.multiplier(2))
+    assert after_boosted > 10 * base
+
+
+def test_the_highlight_covers_the_tiles_of_the_booster_the_info_panel_shows(assets):
+    game = make_game(assets, size=3)
+    game.add_building(1, 2, 2, "left", booster=True)
+    game.info_panel.is_active = True
+    game.info_panel.building = game.buildings[0]
+
+    game._highlight_boosted_tiles()
+
+    lit = {
+        (t.row_number, t.column_number) for t in game.tilemap.tiles() if t.highlighted
+    }
+    assert lit == {(1, 2), (3, 2), (2, 1), (2, 3)}
+
+
+def test_no_highlight_for_a_building_a_closed_panel_or_a_sold_booster(assets):
+    game = make_game(assets, size=3)
+    game.add_building(1, 2, 2, "left", booster=True)
+    game.add_building(1, 1, 1, "left")
+    booster = next(b for b in game.buildings if b.is_booster)
+    building = next(b for b in game.buildings if not b.is_booster)
+
+    def lit() -> int:
+        game._highlight_boosted_tiles()
+        return sum(t.highlighted for t in game.tilemap.tiles())
+
+    game.info_panel.building = booster
+    game.info_panel.is_active = True
+    assert lit() > 0
+    game.info_panel.is_active = False  # closed
+    assert lit() == 0
+    game.info_panel.is_active = True
+    game.info_panel.building = building  # a normal building
+    assert lit() == 0
+    game.info_panel.building = booster
+    game.buildings.remove(booster)  # sold
+    assert lit() == 0

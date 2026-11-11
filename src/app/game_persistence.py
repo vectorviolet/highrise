@@ -41,16 +41,22 @@ class GamePersistenceMixin:
         )
         self.database.execute_safely(
             "CREATE TABLE IF NOT EXISTS buildings(level INTEGER, row INTEGER, column INTEGER, "
-            "door_side TEXT)"
+            "door_side TEXT, booster INTEGER NOT NULL DEFAULT 0)"
         )
         building_columns = self.database.execute_safely(
             "PRAGMA table_info(buildings)", True
         )
         assert building_columns is not None
-        if "door_side" not in [column[1] for column in building_columns]:
+        building_column_names = [column[1] for column in building_columns]
+        if "door_side" not in building_column_names:
             # A buildings table from before door sides: its rows get a default when loaded.
             self.database.execute_safely(
                 "ALTER TABLE buildings ADD COLUMN door_side TEXT"
+            )
+        if "booster" not in building_column_names:
+            # A buildings table from before boosters: every old row is a plain building.
+            self.database.execute_safely(
+                "ALTER TABLE buildings ADD COLUMN booster INTEGER NOT NULL DEFAULT 0"
             )
         # A separate table, so saves made before these settings existed load
         # unchanged: the game table keeps its columns. Seeded with the
@@ -141,20 +147,25 @@ class GamePersistenceMixin:
     def load_buildings(self) -> None:
         self.buildings.clear()
         buildings = self.database.execute_safely(
-            "SELECT level, row, column, door_side FROM buildings", True
+            "SELECT level, row, column, door_side, booster FROM buildings", True
         )
         if not buildings:
             return
         assert self.tilemap is not None, "tilemap not loaded yet"
         rows = self.tilemap.row_count
         cols = self.tilemap.column_count
-        for level, row, column, door_side in buildings:
+        for level, row, column, door_side, booster in buildings:
             if 1 <= row <= rows and 1 <= column <= cols:
                 # A save from before door sides (or a damaged value) gets a fixed default.
                 if door_side not in DOOR_SIDES:
                     door_side = default_door_side(row, column)
+                is_booster = bool(booster)
                 self.add_building(
-                    self._valid_level(level, row, column), row, column, door_side
+                    self._valid_level(level, row, column, is_booster),
+                    row,
+                    column,
+                    door_side,
+                    booster=is_booster,
                 )
             else:
                 self.database.execute_safely(
@@ -162,10 +173,15 @@ class GamePersistenceMixin:
                     params=(level, row, column),
                 )
 
-    def _valid_level(self, level: int, row: int, column: int) -> int:
-        """A saved level held to 1..max_building_level (a damaged row, or a save made with a
+    def _valid_level(
+        self, level: int, row: int, column: int, booster: bool = False
+    ) -> int:
+        """A saved level held to 1..the kind's maximum (a damaged row, or a save made with a
         higher maximum, would otherwise have no sprite)."""
-        valid = min(max(level, 1), self.max_building_level)
+        maximum = (
+            self.buildings.boosters.max_level if booster else self.max_building_level
+        )
+        valid = min(max(level, 1), maximum)
         if valid != level:
             logger.warning(
                 "Saved building at row %s, column %s has level %s; using %s",
@@ -203,12 +219,14 @@ class GamePersistenceMixin:
 
         for building in self.buildings:
             self.database.execute_safely(
-                "INSERT INTO buildings(level, row, column, door_side) VALUES(?, ?, ?, ?)",
+                "INSERT INTO buildings(level, row, column, door_side, booster) "
+                "VALUES(?, ?, ?, ?, ?)",
                 params=(
                     building.level,
                     building.tile.row_number,
                     building.tile.column_number,
                     building.door_side,
+                    int(building.is_booster),
                 ),
             )
 

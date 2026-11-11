@@ -5,6 +5,10 @@ config/buildings.yaml, so a sheet shows exactly what the game draws. One sheet p
 level with the door on the left, then a few levels with the door on each side.
 
     uv run --group dev python scripts/render_building_styles.py [--out DIR] [--ages wood rock]
+    uv run --group dev python scripts/render_building_styles.py --boosters   # booster candidates
+
+`--boosters` renders the booster ladders instead (five levels per age): the candidates below
+side by side, and the one in config/buildings.yaml, which is the game's.
 """
 
 import argparse
@@ -89,15 +93,76 @@ def age_sheet(age: str) -> Image.Image:
     return sheet(rows)
 
 
+def _ring(count: int, roof: str) -> dict:
+    return {"floors": ["ring"] * count, "roof": roof}
+
+
+# Booster ladder candidates (the hex ring with a red roof, five levels each), for the owner to
+# pick from. A is the one in config/buildings.yaml.
+BOOSTER_CANDIDATES = {
+    "A": [
+        _ring(1, "Short"),
+        _ring(2, "Short"),
+        _ring(3, "Short"),
+        _ring(3, "Straight"),
+        _ring(3, "Pointy"),
+    ],
+    "B": [
+        _ring(1, "Short"),
+        _ring(1, "Straight"),
+        _ring(2, "Straight"),
+        _ring(2, "Tall"),
+        _ring(3, "Pointy"),
+    ],
+    "C": [
+        _ring(1, "Short"),
+        _ring(1, "Tall"),
+        _ring(1, "Pointy"),
+        _ring(2, "Pointy"),
+        _ring(3, "Pointy"),
+    ],
+}
+
+
+def booster_sheet(ages: list[str], names: list[str]) -> Image.Image:
+    """One row per (candidate, age); the recipes' booster levels are swapped for each
+    candidate in turn (and the sprite caches cleared), then restored."""
+    boosters = sprites.recipes()["boosters"]
+    original = boosters["levels"]
+    rows = []
+    try:
+        for name in names:
+            boosters["levels"] = BOOSTER_CANDIDATES[name]
+            sprites.compose.cache_clear()
+            for age in ages:
+                cells = [
+                    (str(n), to_pil(sprites.compose(age, n, "left", True)))
+                    for n in range(1, sprites.level_count(True) + 1)
+                ]
+                rows.append((f"{name} {age}", cells))
+    finally:
+        boosters["levels"] = original
+        sprites.compose.cache_clear()
+    return sheet(rows)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=ROOT / "docs/devlog/img")
     parser.add_argument("--ages", nargs="+", default=["wood", "rock", "stone"])
+    parser.add_argument(
+        "--boosters", action="store_true", help="render booster ladders"
+    )
     args = parser.parse_args()
     pygame.display.set_mode(
         (1, 1)
     )  # load_image converts surfaces, which needs a display
     args.out.mkdir(parents=True, exist_ok=True)
+    if args.boosters:
+        path = args.out / "booster-candidates.png"
+        booster_sheet(args.ages, list(BOOSTER_CANDIDATES)).save(path, optimize=True)
+        print("wrote", path)
+        return
     for age in args.ages:
         image = age_sheet(age)
         if image.width > MAX_WIDTH:

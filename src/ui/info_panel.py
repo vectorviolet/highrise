@@ -1,7 +1,7 @@
 from pygamine import GameObject
 from gameplay.buildings import sprites
 from gameplay.buildings.building import Building
-from ui.money_format import format_money
+from ui.money_format import format_money, format_multiplier
 
 
 class InfoPanel:
@@ -16,15 +16,26 @@ class InfoPanel:
         # These labels take their text from the language files; set_params
         # keeps them in the current language.
         panel["level_text"].set_params(value=building.level)
-        panel["speed_text"].set_params(value=building.speed)
-        panel["cooldown_text"].set_params(value=building.cooldown)
+        # A booster shows its multiplier instead of the speed and cooldown.
+        multiplier = building.booster_multiplier
+        panel["boost_text"].active = multiplier is not None
+        panel["speed_text"].active = panel["cooldown_text"].active = multiplier is None
+        if multiplier is None:
+            panel["speed_text"].set_params(value=building.speed)
+            panel["cooldown_text"].set_params(value=building.cooldown)
+        else:
+            panel["boost_text"].set_params(value=format_multiplier(multiplier))
         self.retext_prices(panel, building)
         image = panel["info_panel_building_image"]
         # The board's sprite at one panel scale for every level (see panel_sprite).
         image.add_surface(
             "default",
             sprites.panel_sprite(
-                building.age, building.level, building.door_side, tuple(image.rect.size)
+                building.age,
+                building.level,
+                building.door_side,
+                tuple(image.rect.size),
+                building.is_booster,
             ),
         )
         panel["info_panel_building_image"].set_state("default")
@@ -41,7 +52,12 @@ class InfoPanel:
     def relocalize(self) -> None:
         """Redoes the texts that hold formatted money after a language change."""
         if self.is_active and self.building is not None:
-            self.retext_prices(self.panel_manager["game"], self.building)
+            panel = self.panel_manager["game"]
+            self.retext_prices(panel, self.building)
+            if self.building.booster_multiplier is not None:
+                panel["boost_text"].set_params(
+                    value=format_multiplier(self.building.booster_multiplier)
+                )
 
     def open(self) -> None:
         self.root.active = True

@@ -113,7 +113,7 @@ turns them into booleans.
 ### Menu button colors
 
 Red (`red_button`) leaves, cancels or destroys (EXIT, every GO BACK, CANCEL, SELL), green goes (PLAY,
-CONTINUE, SAVE, BUILD), blue is the rest; `tests/test_menu_polish.py` lists every button's color, so add a
+CONTINUE, SAVE, BUILD, BOOST), blue is the rest; `tests/test_menu_polish.py` lists every button's color, so add a
 new button there.
 
 ### Credits page
@@ -146,6 +146,21 @@ survivor's side) and an age change. Each level adds one visible change (the `add
 recipes); shutter pieces are kept free for #72. `scripts/render_building_styles.py` renders the
 sprites for the devlog.
 
+Boosters (issue #51) are `Building`s with a `booster_multiplier` (None for a normal building;
+`is_booster`), no payout callback and speed 0. They come from `Buildings.create(..., booster=True)`
+(`Game.create_booster`, the BOOST button; `Game.boosters_unlocked` is the switch the quest of #52
+will use) and keep their kind through merges, age changes and saves. Their numbers (price per age,
+multiplier per level, shape per age) are `boosters` in `config/settings.yaml`, checked by
+`gameplay/buildings/boosters.py` (`BoosterConfig`; the shapes themselves are code, selected by
+name); their look is the `boosters` section of `config/buildings.yaml` (the ring piece with a red
+roof; the sprite cache key and the sprite functions take `booster`), and the level counts of both
+must match. The boost belongs to the tile: `Buildings.income_multiplier(building)` is 1 plus the
+bonuses (multiplier - 1) of every booster covering the building's tile, and
+`Game._on_building_payout` applies it (`Building.boosted_income` keeps the fractions a payout can't
+pay). Boosters merge only with a booster of the same level, up to their own maximum level; normal
+buildings never merge with them. While a booster's info panel is open, `Game` sets
+`Tile.highlighted` on the tiles it covers every frame.
+
 ### Cash display and floating money text
 
 The cash display is `money_panel` (plate), `money_icon` (coin) and `money_text` in `config/panels.yaml`,
@@ -162,7 +177,7 @@ World texts are hidden while the info panel is open. A building's
 
 ### Persistence
 
-SQLite database at `databases/database.db`. Three tables: `game` (age, map size, money, volumes), `buildings` (level, row, column, door side) and `settings` (language, skip intro, UI scale, master volume; the first three are saved the moment they change on the Game and Display settings pages, the master volume with the AUDIO page's SAVE; all kept by New Game). The database auto-initializes on first run. Save/load logic lives entirely in `GamePersistenceMixin`.
+SQLite database at `databases/database.db`. Three tables: `game` (age, map size, money, volumes), `buildings` (level, row, column, door side, booster flag; old tables are migrated, old rows are plain buildings) and `settings` (language, skip intro, UI scale, master volume; the first three are saved the moment they change on the Game and Display settings pages, the master volume with the AUDIO page's SAVE; all kept by New Game). The database auto-initializes on first run. Save/load logic lives entirely in `GamePersistenceMixin`.
 
 ### Audio
 

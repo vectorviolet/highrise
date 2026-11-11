@@ -10,6 +10,7 @@ common:
   enabled: "AÇIK"
   disabled: "KAPALI"
   percent: "%{value}"
+  decimal: ","
 
 menu:
   title: "Highrise"
@@ -59,6 +60,7 @@ money:
 game:
   expand: "GENİŞLET"
   build: "İNŞA ET"
+  boost: "GÜÇLENDİR"
   next_age: "SONRAKİ ÇAĞ"
   sell: "SAT"
   max_size: "MAKS. BOYUT"
@@ -66,6 +68,7 @@ game:
   max_age: "MAKS. ÇAĞ"
   level: "Seviye: {value}"
   speed: "Hız: {value} $/sn"
+  booster_multiplier: "Artış: x{value}"
   cooldown: "Bekleme: {value} sn"
   sell_price: "Satış Fiyatı: {value}"
 

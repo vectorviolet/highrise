@@ -14,7 +14,8 @@ from app.game_persistence import (
 )
 from domain.player import Player
 from gameplay.buildings import sprites
-from gameplay.buildings.building import Building, Buildings
+from gameplay.buildings.boosters import BoosterConfig
+from gameplay.buildings.building import AGES, Building, Buildings
 from gameplay.clouds.cloud_container import OneShotCloudAnimation, LoopingCloudAnimation
 from gameplay.tile_selector import TileSelector
 from gameplay.tilemap import Tilemap
@@ -86,6 +87,7 @@ INFO_PANEL_OBJECTS = (
     "sell_button",
     "sell_button_text",
     "info_panel_building_image",
+    "boost_text",
 )
 
 # Escape (or the window's close request) on these panels goes back to the
@@ -128,6 +130,10 @@ def format_volume(volume: float) -> str:
 
 
 class Game(GameEventsMixin, GamePersistenceMixin, Application):
+    # Whether BOOST works. Always for now: a quest unlocks it later (issue #52), which sets
+    # this on the instance; create_booster() is the one place that checks it.
+    boosters_unlocked = True
+
     def __init__(self) -> None:
         self.settings = yaml.safe_load(Path("config/settings.yaml").read_text())
         localization.load(LANG_FOLDER)
@@ -165,7 +171,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.database = Database("database")
 
         self.buildings = Buildings(
-            on_merge=self._on_buildings_merged, on_payout=self._on_building_payout
+            on_merge=self._on_buildings_merged,
+            on_payout=self._on_building_payout,
+            boosters=BoosterConfig.from_dict(self.settings["boosters"], AGES),
         )
         self.cloud_count = gameplay["cloud_count"]
         self.max_size = gameplay["max_map_size"]
@@ -461,6 +469,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         assert self.tilemap is not None, "tilemap not loaded yet"
         return self.tilemap
 
+    def _board_is_full(self) -> bool:
+        tilemap = self._tilemap
+        return len(self.buildings) == tilemap.row_count * tilemap.column_count
+
     def update_button_texts(self) -> None:
         panel = self.panel_manager["game"]
         tilemap = self._tilemap
@@ -472,11 +484,18 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
                 format_money(tilemap.get_expand_cost()), state="hover"
             )
 
-        if len(self.buildings) == tilemap.row_count * tilemap.column_count:
+        if self._board_is_full():
             panel["build_button_text"].set_text(tr("game.tiles_full"), state="hover")
         else:
             panel["build_button_text"].set_text(
                 format_money(self.buildings.get_build_cost()), state="hover"
+            )
+
+        if self._board_is_full():
+            panel["boost_button_text"].set_text(tr("game.tiles_full"), state="hover")
+        else:
+            panel["boost_button_text"].set_text(
+                format_money(self.buildings.get_booster_cost()), state="hover"
             )
 
         if self.buildings.age_number == self.buildings.max_age_number:
@@ -510,6 +529,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.floating_texts.update(pygame.time.get_ticks())
         self.sell_effect.update(pygame.time.get_ticks())
         self._close_stale_info_panel()
+        self._highlight_boosted_tiles()
         self.cloud_animation.update()
 
     def _close_stale_info_panel(self) -> None:
@@ -517,6 +537,26 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         # selling) one that's no longer on the board.
         if self.info_panel.is_active and self.info_panel.building not in self.buildings:
             self.info_panel.close()
+
+    def _highlight_boosted_tiles(self) -> None:
+        """Lights up the tiles of the booster the info panel shows (and nothing otherwise)."""
+        booster = self.info_panel.building
+        covered: set[tuple[int, int]] = set()
+        if (
+            self.info_panel.is_active
+            and booster is not None
+            and booster in self.buildings
+        ):
+            if booster.is_booster:
+                covered = {
+                    (tile.row_number, tile.column_number)
+                    for tile in self._tilemap.tiles()
+                    if self.buildings.covers(
+                        booster, tile.row_number, tile.column_number
+                    )
+                }
+        for tile in self._tilemap.tiles():
+            tile.highlighted = (tile.row_number, tile.column_number) in covered
 
     def _on_buildings_merged(self) -> None:
         self.audio.play_sfx(self.merge_sound_path)
@@ -573,12 +613,22 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.audio.play_sfx(self.click_sound_path)
 
     def add_building(
-        self, level, row_number, column_number, door_side: str | None = None
+        self,
+        level,
+        row_number,
+        column_number,
+        door_side: str | None = None,
+        *,
+        booster: bool = False,
     ) -> None:
-        """Add a building; `door_side=None` picks a random side (a newly built one)."""
+        """Add a building (or a booster); `door_side=None` picks a random side (a newly
+        built one)."""
         tilemap = self._tilemap
         new_building = self.buildings.create(
-            level, tilemap[row_number - 1][column_number - 1], door_side=door_side
+            level,
+            tilemap[row_number - 1][column_number - 1],
+            door_side=door_side,
+            booster=booster,
         )
         self.buildings.append(new_building)
         self.buildings.sort_by_column()
@@ -591,7 +641,19 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             self.update_button_texts()
 
     def create_building(self) -> None:
-        if not self.player.can_afford(self.buildings.get_build_cost()):
+        self._build_on_random_empty_tile(self.buildings.get_build_cost())
+
+    def create_booster(self) -> None:
+        if not self.boosters_unlocked:
+            return
+        self._build_on_random_empty_tile(
+            self.buildings.get_booster_cost(), booster=True
+        )
+
+    def _build_on_random_empty_tile(self, cost: int, *, booster: bool = False) -> None:
+        """Puts a level 1 building (or booster) of the current age on a random empty tile and
+        pays `cost`; nothing happens when the player can't pay or the board is full."""
+        if not self.player.can_afford(cost):
             return
 
         tilemap = self._tilemap
@@ -605,8 +667,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         if empty_tiles:
             row_number, column_number = choice(empty_tiles)
-            self.add_building(1, row_number, column_number)
-            self._spend(self.buildings.get_build_cost())
+            self.add_building(1, row_number, column_number, booster=booster)
+            self._spend(cost)
             self.audio.play_sfx(self.action_sounds.build(self.buildings.age_number))
 
     def set_age(self, age_number) -> None:
@@ -628,6 +690,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.buildings.move(rotation, self._tilemap, self.max_building_level)
 
     def _on_building_payout(self, building: Building, amount: int) -> None:
+        # The boosters covering the building's tile raise what it earns this moment.
+        amount = building.boosted_income(
+            amount, self.buildings.income_multiplier(building)
+        )
         self.player.earn(amount)
         self.show_gain(building, amount)
 

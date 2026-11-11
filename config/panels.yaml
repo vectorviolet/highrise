@@ -222,7 +222,7 @@ panels:
 
       expand_button:
         parent: game_toolbar
-        position: [560, 20]
+        position: [440, 20]
         size: [200, 60]
         asset: blue_button
         hover: yellow_button
@@ -234,7 +234,7 @@ panels:
           hover: "0$"
       build_button:
         parent: game_toolbar
-        position: [860, 20]
+        position: [660, 20]
         size: [200, 60]
         asset: green_button
         hover: yellow_button
@@ -244,9 +244,21 @@ panels:
         text_key: game.build
         states:
           hover: "0$"
+      boost_button:
+        parent: game_toolbar
+        position: [880, 20]
+        size: [200, 60]
+        asset: green_button
+        hover: yellow_button
+      boost_button_text:
+        extends: bottom_panel_btn_text
+        parent: boost_button
+        text_key: game.boost
+        states:
+          hover: "0$"
       next_age_button:
         parent: game_toolbar
-        position: [1160, 20]
+        position: [1100, 20]
         size: [200, 60]
         asset: green_button
         hover: yellow_button
@@ -313,6 +325,8 @@ panels:
         on_click_sound: back
       level_text: { extends: panel_text, position: [925, 322], text_key: game.level, text_params: { value: "" } }
       speed_text: { extends: panel_text, position: [925, 342], text_key: game.speed, text_params: { value: "" } }
+      # A booster's info panel shows this line instead of the speed and cooldown.
+      boost_text: { extends: panel_text, position: [925, 342], text_key: game.booster_multiplier, text_params: { value: "" } }
       cooldown_text: { extends: panel_text, position: [925, 362], text_key: game.cooldown, text_params: { value: "" } }
       sell_price_text: { extends: panel_text, position: [925, 382], text_key: game.sell_price, text_params: { value: "" } }
 

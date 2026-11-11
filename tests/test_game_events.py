@@ -154,6 +154,7 @@ def make_panels() -> FakePanelManager:
                 "selection_mode_button": FakeButton(),
                 "expand_button": FakeButton(),
                 "build_button": FakeButton(),
+                "boost_button": FakeButton(),
                 "next_age_button": FakeButton(),
             },
         }

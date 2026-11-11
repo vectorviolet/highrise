@@ -3,6 +3,7 @@ from typing import Callable
 
 from pygame import Vector2
 from gameplay.buildings import sprites
+from gameplay.buildings.boosters import BoosterConfig
 from gameplay.tiles.tile import Tile
 from pygamine import StateObject
 from pygamine import Rigidbody2D
@@ -42,9 +43,13 @@ class Building(StateObject):
         *,
         door_side: str,
         on_payout: Callable[["Building", int], None] | None,
+        booster_multiplier: float | None = None,
     ) -> None:
         # on_payout is required (keyword-only) so a building can't be built
         # without deciding where its income goes; pass None for no income.
+        # A booster is a building with a `booster_multiplier` (its level's, see BoosterConfig):
+        # it earns nothing itself, `Buildings.income_multiplier` applies it to the tiles it covers.
+        self.booster_multiplier = booster_multiplier
         self.tile = tile
         self.age_number = age_number
         self.age = AGES[age_number]
@@ -53,7 +58,7 @@ class Building(StateObject):
         self.cooldown = 2
         self.level = level
         self.door_side = door_side
-        self.speed = (self.level * 2 * (age_number + 1)) - 1
+        self.speed = 0 if self.is_booster else (self.level * 2 * (age_number + 1)) - 1
         self.sell_price = self.level * (self.age_number + 1) * 70
         self.__set_size()
         self.set_position_from_tile(self.tile)
@@ -65,11 +70,25 @@ class Building(StateObject):
         self.add_component(Rigidbody2D).set_velocity((0, 0))
         self.on_payout = on_payout
         self.merge_target: Building | None = None
+        self._income_fraction = 0.0
         self.invoke_repeating(self._payout, delay=self.cooldown, interval=self.cooldown)
 
     def _payout(self) -> None:
         if self.on_payout:
             self.on_payout(self, self.cooldown * self.speed)
+
+    def boosted_income(self, amount: int, multiplier: float) -> int:
+        """`amount` times `multiplier` in whole dollars. The cents a payout can't pay are kept
+        and paid with later ones, so a small boost still shows on a small income (2$ at x1.2
+        pays 2, 2, 3, 2, 3 ...) instead of rounding away."""
+        exact = round(amount * multiplier + self._income_fraction, 6)
+        paid = int(exact)
+        self._income_fraction = exact - paid
+        return paid
+
+    @property
+    def is_booster(self) -> bool:
+        return self.booster_multiplier is not None
 
     @property
     def rigidbody(self) -> Rigidbody2D:
@@ -77,7 +96,9 @@ class Building(StateObject):
 
     def __set_size(self) -> None:
         # Cached per (age, level, door side): nothing is composed per frame.
-        self.sprite = sprites.game_sprite(self.age, self.level, self.door_side)
+        self.sprite = sprites.game_sprite(
+            self.age, self.level, self.door_side, self.is_booster
+        )
         self.size = self.width, self.height = self.sprite.get_size()
 
     def set_position_from_tile(self, tile: Tile) -> None:
@@ -121,12 +142,14 @@ class Buildings(list[Building]):
         *,
         on_merge: Callable[[], None] | None = None,
         on_payout: Callable[[Building, int], None] | None = None,
+        boosters: BoosterConfig | None = None,
     ) -> None:
         super().__init__()
         self.max_age_number = len(AGES) - 1
         self.age_number = 0
         self.on_merge = on_merge
         self.on_payout = on_payout
+        self.boosters = boosters or BoosterConfig.load(AGES)
 
     def create(
         self,
@@ -135,14 +158,27 @@ class Buildings(list[Building]):
         *,
         age_number: int | None = None,
         door_side: str | None = None,
+        booster: bool = False,
     ) -> Building:
         """Construct a building with the collection's payout callback, without adding it.
 
         `door_side=None` means a new building: it gets a random side. Pass the side of an
-        existing building to keep it."""
+        existing building to keep it. A `booster` earns nothing (no payout callback) and
+        carries its level's multiplier."""
         age = self.age_number if age_number is None else age_number
-        side = sprites.random_door_side() if door_side is None else door_side
-        return Building(level, age, tile, door_side=side, on_payout=self.on_payout)
+        if door_side is not None:
+            side = door_side
+        else:
+            # A booster has no door: its sprite ignores the side, so it gets a fixed one.
+            side = sprites.DOOR_SIDES[0] if booster else sprites.random_door_side()
+        return Building(
+            level,
+            age,
+            tile,
+            door_side=side,
+            on_payout=None if booster else self.on_payout,
+            booster_multiplier=self.boosters.multiplier(level) if booster else None,
+        )
 
     def set_age(self, age_number) -> None:
         if age_number <= self.max_age_number:
@@ -150,7 +186,10 @@ class Buildings(list[Building]):
 
             for i, building in enumerate(self):
                 self[i] = self.create(
-                    building.level, building.tile, door_side=building.door_side
+                    building.level,
+                    building.tile,
+                    door_side=building.door_side,
+                    booster=building.is_booster,
                 )
 
     def is_moving(self) -> bool:
@@ -168,6 +207,32 @@ class Buildings(list[Building]):
 
     def get_build_cost(self) -> int:
         return (self.age_number + 1) * 100
+
+    def get_booster_cost(self) -> int:
+        return self.boosters.price[AGES[self.age_number]]
+
+    def covers(self, booster: Building, row: int, column: int) -> bool:
+        """Whether `booster` boosts the tile at `row`, `column`."""
+        assert booster.is_booster, "only a booster covers tiles"
+        return self.boosters.covers(
+            booster.age,
+            (booster.tile.row_number, booster.tile.column_number),
+            (row, column),
+        )
+
+    def income_multiplier(self, building: Building) -> float:
+        """What `building`'s income is multiplied by: 1 plus the bonus of every booster
+        covering its tile (the bonuses add up). A booster waiting to merge doesn't count:
+        it already stands on its survivor's tile."""
+        tile = building.tile
+        bonus = sum(
+            booster.booster_multiplier - 1
+            for booster in self
+            if booster.booster_multiplier is not None
+            and not booster.should_destroy
+            and self.covers(booster, tile.row_number, tile.column_number)
+        )
+        return 1 + bonus
 
     def control_moving(self) -> None:
         # Merges are collected and applied after the loop: removing from the
@@ -217,6 +282,7 @@ class Buildings(list[Building]):
                 building.tile,
                 age_number=building.age_number,
                 door_side=target.door_side,
+                booster=building.is_booster,
             )
         )
         if self.on_merge is not None:
@@ -260,14 +326,16 @@ class Buildings(list[Building]):
             reverse=reverse,
         )
 
-    @staticmethod
     def _can_merge(
-        previous: "Building | None", building: "Building", max_level: int
+        self, previous: "Building | None", building: "Building", max_level: int
     ) -> bool:
+        """Equal levels merge, a booster only with a booster (each kind has its own maximum)."""
         return (
             previous is not None
+            and previous.is_booster == building.is_booster
             and previous.level == building.level
-            and previous.level < max_level
+            and previous.level
+            < (self.boosters.max_level if building.is_booster else max_level)
         )
 
     def _resolve_line(self, line: int, axis: _MoveAxis, max_level: int) -> None:

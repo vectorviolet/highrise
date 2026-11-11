@@ -245,7 +245,7 @@ class GameEventsMixin:
     def _handle_toolbar(
         self, panel, event: pygame.event.Event, board_ready: bool
     ) -> None:
-        # expand/build/next_age call methods that play their own sfx, so
+        # expand/build/boost/next_age call methods that play their own sfx, so
         # these use raw is_clicked (not _activate) to avoid double-playing.
         if panel["expand_button"].is_clicked(event, self.mouse.position):
             self.expand()
@@ -253,6 +253,8 @@ class GameEventsMixin:
             return
         elif panel["build_button"].is_clicked(event, self.mouse.position):
             self.create_building()
+        elif panel["boost_button"].is_clicked(event, self.mouse.position):
+            self.create_booster()
         elif panel["next_age_button"].is_clicked(event, self.mouse.position):
             self.next_age()
 

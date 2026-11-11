@@ -64,10 +64,14 @@ class FakeGame(GamePersistenceMixin):
         self.buildings = Buildings()
         self.calls: list = []
 
-    def add_building(self, level, row, column, door_side=None) -> None:
+    def add_building(
+        self, level, row, column, door_side=None, *, booster=False
+    ) -> None:
         self.calls.append(("add_building", level, row, column))
         tile = self.tilemap[row - 1][column - 1]
-        self.buildings.append(self.buildings.create(level, tile, door_side=door_side))
+        self.buildings.append(
+            self.buildings.create(level, tile, door_side=door_side, booster=booster)
+        )
 
 
 def insert_building_row(game, level, row, column):
@@ -495,7 +499,7 @@ def test_a_save_from_before_door_sides_is_migrated_with_a_fixed_default(
     game.load_data()
 
     columns = game.database.execute_safely("PRAGMA table_info(buildings)", True)
-    assert [c[1] for c in columns] == ["level", "row", "column", "door_side"]
+    assert [c[1] for c in columns] == ["level", "row", "column", "door_side", "booster"]
     sides = {
         (b.tile.row_number, b.tile.column_number): b.door_side for b in game.buildings
     }
@@ -541,3 +545,67 @@ def test_a_saved_level_outside_the_recipes_is_held_to_the_valid_range(
     }
     assert levels == {(1, 1): 1, (1, 2): 11, (1, 3): 5}
     assert len(caplog.records) == 2  # the two bad rows, not the valid one
+
+
+# ── boosters (issue #51) ─────────────────────────────────────────────────────
+
+
+def test_boosters_are_saved_and_loaded(tmp_path, assets):
+    seed = FakeGame(tmp_path, assets)
+    seed.load_data()
+    tiles = seed.tilemap
+    seed.buildings.append(seed.buildings.create(3, tiles[0][0], booster=True))
+    seed.buildings.append(seed.buildings.create(2, tiles[1][1]))
+    seed.save_game()
+
+    game = FakeGame(tmp_path, assets)
+    game.load_data()
+
+    assert {(b.level, b.is_booster) for b in game.buildings} == {(3, True), (2, False)}
+    booster = next(b for b in game.buildings if b.is_booster)
+    assert booster.booster_multiplier == game.buildings.boosters.multiplier(3)
+    assert booster.on_payout is None
+
+
+def test_a_save_from_before_boosters_loads_with_no_boosters(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    # The buildings table as the version before boosters created it.
+    game.database.execute_safely(
+        "CREATE TABLE buildings(level INTEGER, row INTEGER, column INTEGER, door_side TEXT)"
+    )
+    game.database.execute_safely(
+        "INSERT INTO buildings VALUES (2, 1, 1, 'left'), (1, 1, 2, 'right')"
+    )
+
+    game.load_data()
+
+    columns = game.database.execute_safely("PRAGMA table_info(buildings)", True)
+    assert [c[1] for c in columns][-1] == "booster"
+    assert len(game.buildings) == 2
+    assert not any(b.is_booster for b in game.buildings)
+
+
+def test_a_saved_booster_level_is_held_to_the_booster_maximum(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    game.init_database()
+    maximum = game.buildings.boosters.max_level
+    game.database.execute_safely(
+        "INSERT INTO buildings VALUES (?, 1, 1, 'left', 1)", params=(maximum + 4,)
+    )
+
+    game.load_data()
+
+    assert game.buildings[0].is_booster
+    assert game.buildings[0].level == maximum
+
+
+def test_delete_data_removes_the_boosters_too(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    game.load_data()
+    game.buildings.append(game.buildings.create(1, game.tilemap[0][0], booster=True))
+    game.save_game()
+
+    game.delete_data()
+    game.load_data()
+
+    assert len(game.buildings) == 0
