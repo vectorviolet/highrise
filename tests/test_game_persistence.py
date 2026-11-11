@@ -15,6 +15,7 @@ from gameplay.buildings.sprites import DOOR_SIDES, default_door_side
 from ui.ui_scale import DEFAULT_UI_SCALE
 from gameplay.buildings.boosters import BoosterConfig
 from gameplay.buildings.building import AGES, Building, Buildings
+from gameplay.tasks import AgeTasks, TasksConfig
 from pygamine import Database
 
 
@@ -65,6 +66,7 @@ class FakeGame(GamePersistenceMixin):
         self.tilemap = None
         self.tile_selector = SimpleNamespace(tilemap=None)
         self.buildings = Buildings(boosters=BoosterConfig.load(AGES))
+        self.tasks = AgeTasks(TasksConfig.load(AGES), AGES)
         self.calls: list = []
 
     def add_building(
@@ -119,6 +121,94 @@ def test_get_game_data_returns_the_existing_row_on_later_calls(tmp_path, assets)
     second = game.get_game_data()
 
     assert second == first
+
+
+# ── age tasks ─────────────────────────────────────────────────────────────────
+
+
+def test_the_task_state_round_trips_through_a_save(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    game.load_data()
+    game.tasks.restore(0, {1}, False)
+    game.save_game()
+
+    other = FakeGame(tmp_path, assets)
+    other.load_data()
+
+    assert other.tasks.done == {1}
+    assert not other.tasks.boost_unlocked
+
+
+def test_an_unlocked_boost_is_saved(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    game.load_data()
+    game.tasks.restore(0, {0, 1}, True)
+    game.save_game()
+
+    other = FakeGame(tmp_path, assets)
+    other.load_data()
+
+    assert other.tasks.boost_unlocked
+    assert other.tasks.done == {0, 1}
+
+
+def _old_game_table(game, age_number) -> None:
+    """The database as the version before age tasks left it: no tasks table."""
+    game.database.execute_safely(
+        "CREATE TABLE game(age_number INTEGER, size INTEGER, money INTEGER, "
+        "music_volume INTEGER, sfx_volume INTEGER)"
+    )
+    game.database.execute_safely(
+        "INSERT INTO game VALUES (?, 3, 100, 1, 1)", params=(age_number,)
+    )
+
+
+def test_a_save_from_before_age_tasks_starts_fresh_with_boost_locked_in_age_one(
+    tmp_path, assets
+):
+    game = FakeGame(tmp_path, assets)
+    _old_game_table(game, 0)
+
+    game.load_data()
+
+    assert game.tasks.done == frozenset()
+    assert not game.tasks.boost_unlocked
+
+
+def test_a_save_from_before_age_tasks_past_the_first_age_has_boost_unlocked(
+    tmp_path, assets
+):
+    game = FakeGame(tmp_path, assets)
+    _old_game_table(game, 2)
+
+    game.load_data()
+
+    assert game.tasks.boost_unlocked
+    assert game.tasks.done == frozenset()
+    assert game.tasks.age_number == 2
+
+
+def test_damaged_saved_task_numbers_are_dropped(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    game.init_database()
+    game.database.execute_safely("UPDATE tasks SET done='0,x,,9,-1'")
+
+    game.load_data()
+
+    assert game.tasks.done == {0}
+
+
+def test_delete_data_resets_the_tasks(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    game.load_data()
+    game.tasks.restore(0, {0, 1}, True)
+    game.save_game()
+
+    game.delete_data()
+    game.load_data()
+
+    assert game.tasks.done == frozenset()
+    assert not game.tasks.boost_unlocked
 
 
 # ── load_data (top-level orchestrator) ──────────────────────────────────────

@@ -1,0 +1,30 @@
+# Age tasks (issue #52). All numbers are placeholders until the owner tunes them.
+#
+# Every age but the last has 2 or 3 tasks. NEXT AGE needs all of the current age's tasks done
+# (and its cost); a task, once done, stays done. Finishing the first age's tasks unlocks BOOST.
+#
+# Task types:
+#   building_level     own a building of level >= target
+#   income_per_second  earn >= target $ per second (every building's speed, boosts included)
+#   boosted_buildings  have >= target buildings standing on a booster's covered tiles
+
+# Where the progress shows (only one of the two is kept in the end):
+#   hover  a checklist over the NEXT AGE button while the mouse is on it
+#   panel  a small always-visible panel at the top left of the game
+ui: hover
+
+# NEXT AGE costs (current age number + 1) * this, the age number counting from 0.
+next_age_cost_factor: 500
+
+ages:
+  wood:
+    - { type: building_level, target: 3 }
+    - { type: income_per_second, target: 20 }
+  rock:
+    - { type: building_level, target: 5 }
+    - { type: income_per_second, target: 80 }
+    - { type: boosted_buildings, target: 2 }
+  sand:
+    - { type: building_level, target: 7 }
+    - { type: income_per_second, target: 200 }
+    - { type: boosted_buildings, target: 4 }

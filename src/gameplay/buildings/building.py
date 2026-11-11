@@ -222,9 +222,6 @@ class Buildings(list[Building]):
     def sort_by_column(self) -> None:
         self.sort(key=_column)
 
-    def get_age_cost(self) -> int:
-        return (self.age_number + 1) * 1000
-
     def get_build_cost(self) -> int:
         return (self.age_number + 1) * 100
 
