@@ -9,6 +9,9 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Game icon**: a pixel-art tower icon for the window and taskbar, the Windows executable (`highrise.spec`),
+  the README and the store page (`docs/store/icon.png`)
+  ([devlog](docs/devlog/2026-11-11-game-icon.md)).
 - **Age tasks**: every age has 2 or 3 tasks (own a building of a level, earn so much per second,
   have boosted buildings). NEXT AGE needs all of them and now costs (age + 1) x 500; finishing the
   first age's tasks unlocks BOOST, which is locked until then. Done tasks stay done and are saved
