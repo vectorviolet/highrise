@@ -34,6 +34,11 @@ comment right under its heading (see the READMEs' templates). The index tables i
 generated: add your entry file, run `uv run python scripts/gen_devlog_index.py`, and never edit
 the tables by hand. `tests/test_devlog_index.py` fails in CI if a table is out of date.
 
+**README media:** `docs/preview.gif` and `docs/screenshots/01-03` come from
+`uv run --group dev python scripts/capture_readme.py` (headless, seeded, saves in a temp folder; it
+also writes the devlog's candidate pictures). A PR that changes how the game looks reruns it and
+commits the changed pictures.
+
 **Type check and spelling:** CI also runs `uv run --group dev mypy` (lenient: `src/` only,
 `src/pygamine` excluded; config in `[tool.mypy]`) and `uv run --group dev codespell` (typos plus
 British to American spelling; config in `[tool.codespell]`, project dictionary in

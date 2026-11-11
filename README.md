@@ -163,6 +163,11 @@ git config blame.ignoreRevsFile .git-blame-ignore-revs
 4. Commit + push: `git commit -am "<message>" && git push origin feature/<your-feature>`
 5. Open a pull request.
 
+A pull request that changes how the game looks retakes the screenshots it affects (and the GIF if
+the loop changed): run `uv run --group dev python scripts/capture_readme.py` from the repo root and
+commit the changed files in `docs/`. The script drives the game headless with a seeded random
+generator and keeps its saves in a temporary folder, so it never touches your own save.
+
 ## Author
 
 Umutcan Ekinci — [umutcannekinci@gmail.com](mailto:umutcannekinci@gmail.com)
