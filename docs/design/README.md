@@ -1,0 +1,13 @@
+# Design masters
+
+Master art that is not loaded by the game at runtime. Same layout as chokepoint.
+
+- `icon.png`: the 1024 px game icon (shown in the README and on the store page).
+- `cover.png`: the 2304x1824 cover master. The 630x500 file to upload to itch.io is
+  `docs/store/cover-itchio.png`.
+- The executable's icon lives in `packaging/icon.ico` (6 sizes, a build input read by
+  `highrise.spec`, not bundled as an asset). The window icon is `assets/images/icon/icon_64.png`.
+
+**Provenance:** the icon (all sizes) is the only AI-generated graphic: the owner generated it with
+OpenAI Codex (image generation) from a text prompt, post-processed it with a NumPy script, and
+approved shipping it. Not CC0. See [the icon devlog entry](../devlog/2026-11-11-game-icon.md).

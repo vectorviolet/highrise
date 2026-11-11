@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/store/icon.png" alt="Highrise icon" width="128"></p>
+<p align="center"><img src="docs/design/icon.png" alt="Highrise icon" width="128"></p>
 
 # Highrise
 

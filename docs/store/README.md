@@ -45,8 +45,8 @@ Fields that live outside the description, following itch.io's
   (about `#54D8E7`) as the background, the icon's dark navy (about `#1E1D3B`) for text and
   panels, and the logo's yellow for links.
 - **Cover:** `docs/store/cover-itchio.png` (630x500, itch.io's cover size) goes on the edit page.
-  `docs/store/cover.png` (2304x1824) is the larger master.
-- **Icon:** `docs/store/icon.png` (1024x1024).
+  `docs/design/cover.png` (2304x1824) is the larger master.
+- **Icon:** `docs/design/icon.png` (1024x1024).
 - **Trailer:** none yet (the GIF only).
 
 When the game changes in a way players see (controls, features, ages), update
