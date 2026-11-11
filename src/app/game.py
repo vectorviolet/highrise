@@ -36,7 +36,7 @@ from pygamine import (
 from pygamine import MenuController
 from pygamine.util.localization import DEFAULT_LANGUAGE, localization, tr
 from ui.cash_display import apply_cash_display
-from ui.dust_effect import DustBursts, DustConfig
+from ui.dust_effect import DustBursts, DustConfig, DustLayer
 from ui.floating_text import FloatingTextConfig, FloatingTexts
 from ui.info_panel import InfoPanel
 from ui.money_format import format_money
@@ -311,13 +311,17 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self._refresh_ui_texts()
 
     def add_world_objects(self) -> None:
-        """Puts the clouds, tiles and buildings in the game panel. The UI scale
+        """Puts the clouds, tiles, buildings and the sell effect in the game panel. The UI scale
         never reaches them."""
         self.panel_manager.add_object(
             "game", "clouds", LoopingCloudAnimation(self.cloud_count, self.size)
         )
         self.panel_manager.add_object("game", "tiles", self.tilemap)
         self.panel_manager.add_object("game", "buildings", self.buildings)
+        # With the world, so the toolbar, the cash display and panels stay on top.
+        self.panel_manager.add_object(
+            "game", "sell_effect", DustLayer(self.sell_effect)
+        )
 
     def build_panels(self) -> None:
         """Loads config/panels.yaml into the panel manager and wires up what the
@@ -512,7 +516,6 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.panel_manager.draw(self.window)
         if self.panel_manager.current_panel == "game":
             self.odometer.draw(self.window, pygame.time.get_ticks())
-            self.sell_effect.draw(self.window, pygame.time.get_ticks())
             # A panel open over the world (the info panel) is never covered by the
             # texts floating over the world.
             self.floating_texts.draw(

@@ -7,7 +7,7 @@ import pygame
 import pytest
 import yaml
 
-from ui.dust_effect import DustBursts, DustConfig
+from ui.dust_effect import DustBursts, DustConfig, DustLayer
 
 
 def _values() -> dict:
@@ -107,3 +107,39 @@ def test_clear_removes_every_burst(effect):
 def test_a_bad_config_is_rejected(change):
     with pytest.raises(ValueError):
         DustConfig.from_dict(_values() | change)
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"dust_color": [1, 2]},
+        {"dust_color": [1, 2, 256]},
+        {"dust_color": [1, -2, 3]},
+        {"dust_color": [1.5, 2, 3]},
+        {"debris_colors": [[1, 2, 3], "red"]},
+        {"dust_count": -1},
+        {"debris_count": 2.5},
+        {"spread": -1},
+        {"gravity": -1},
+    ],
+)
+def test_bad_colors_and_counts_are_rejected_when_the_config_loads(change):
+    with pytest.raises(ValueError):
+        DustConfig.from_dict(_values() | change)
+
+
+def test_zero_counts_are_allowed():
+    cfg = DustConfig.from_dict(_values() | {"dust_count": 0, "debris_count": 0})
+    effect = DustBursts(cfg)
+    effect.spawn(RECT, 0)
+    assert effect.bursts[0].particles == []
+
+
+def test_the_world_layer_draws_the_bursts_at_the_current_time(effect, monkeypatch):
+    surface = pygame.Surface((600, 500), pygame.SRCALPHA)
+    monkeypatch.setattr(pygame.time, "get_ticks", lambda: 100)
+    effect.spawn(RECT, 0)
+
+    DustLayer(effect).draw(surface)
+
+    assert pygame.mask.from_surface(surface).count() > 0

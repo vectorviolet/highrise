@@ -151,10 +151,9 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
     game.player.money = starting_money
     game.odometer = Odometer(250)
     game.shown_money = starting_money
+    settings = yaml.safe_load(Path("config/settings.yaml").read_text())
     game.floating_texts = FloatingTexts(
-        FloatingTextConfig.from_dict(
-            yaml.safe_load(Path("config/settings.yaml").read_text())["floating_text"]
-        ),
+        FloatingTextConfig.from_dict(settings["floating_text"]),
         str(assets.font_path("titillium_black")),
     )
     game.buildings = Buildings(
@@ -169,7 +168,6 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
     game.click_sound_path = "assets/sfx/click.ogg"
     game.go_back_sound_path = "assets/sfx/back.ogg"
     game.merge_sound_path = assets.sound_path("merge")
-    settings = yaml.safe_load(Path("config/settings.yaml").read_text())
     game.action_sounds = ActionSounds.from_config(settings["action_sounds"], assets)
     game.sell_effect = DustBursts(DustConfig.from_dict(settings["sell_effect"]))
     game.panel_manager = make_panels()
@@ -1262,7 +1260,6 @@ def test_sell_through_the_info_panel_sells_a_settled_building(assets):
     ]
     # The destroy sound and the dust, not the UI click.
     assert game.audio.played[-1:] == [game.action_sounds.sell]
-    assert game.click_sound_path not in game.audio.played[-1:]
     assert len(game.sell_effect.bursts) == 1
 
 
@@ -1288,5 +1285,3 @@ def test_build_plays_the_sound_of_the_current_age(assets):
     game.create_building()
 
     assert game.audio.played == [game.action_sounds.build(2)]
-    assert game.audio.played != [game.action_sounds.build(0)]
-    assert game.click_sound_path not in game.audio.played

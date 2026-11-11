@@ -279,7 +279,7 @@ panels:
         size: [210, 50]
         asset: green_button
         hover: red_button
-        on_click_sound: back
+        # No on_click_sound: Game._sell plays the sell sound.
       sell_button_text:
         type: text
         font: titillium_bold

@@ -45,7 +45,8 @@ with the numbers in config and cost nothing per frame beyond the burst's life.
   music or a reserved channel. The sell button no longer plays the click.
 - `ui/dust_effect.py` makes each burst's particles once, fixes their paths at spawn, and draws
   cached circle and square pictures per size and opacity step, so a frame allocates no surface.
-  Numbers are in `sell_effect` in `config/settings.yaml`.
+  Numbers are in `sell_effect` in `config/settings.yaml`, checked when the config loads. The effect is
+  a world object of the game panel (with the tiles and buildings), so the HUD and panels stay on top.
 
 ## Result
 

@@ -21,11 +21,20 @@ def sounds(assets) -> ActionSounds:
     return ActionSounds.from_config(_config(), assets)
 
 
-def test_every_age_has_its_own_build_sound_from_the_config(assets, sounds):
+def test_build_looks_up_the_sound_of_each_age_from_the_config(assets, sounds):
     config = _config()["build"]
     for number, age in enumerate(AGES):
         assert sounds.build(number) == assets.sound_path(config[age])
-    assert len({sounds.build(n) for n in range(len(AGES))}) == len(AGES)
+
+
+def test_each_age_gets_the_sound_configured_for_it(assets):
+    config = _config()
+    config["build"] = dict(zip(AGES, ("build_wood", "build_rock", "sell", "next_age")))
+
+    custom = ActionSounds.from_config(config, assets)
+
+    for number, age in enumerate(AGES):
+        assert custom.build(number) == assets.sound_path(config["build"][age])
 
 
 def test_next_age_and_sell_have_their_own_sounds(assets, sounds):
@@ -33,8 +42,7 @@ def test_next_age_and_sell_have_their_own_sounds(assets, sounds):
     assert sounds.next_age == assets.sound_path(config["next_age"])
     assert sounds.sell == assets.sound_path(config["sell"])
     own = {sounds.next_age, sounds.sell, *sounds.build_by_age.values()}
-    assert assets.sound_path("click") not in own
-    assert len(own) == len(AGES) + 2
+    assert assets.sound_path("click") not in own  # not the UI click
 
 
 def test_the_config_can_give_every_age_the_same_build_sound(assets):

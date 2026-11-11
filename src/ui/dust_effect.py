@@ -21,6 +21,45 @@ ALPHA_STEPS = 8  # the fade-out is drawn in this many opacity steps
 PUFF_OPACITY = 0.75  # puffs are soft: this share of a chip's opacity
 
 
+def _check_color(color: object) -> None:
+    """Raises ValueError unless `color` is a list of 3 whole numbers from 0 to 255."""
+    ok = (
+        isinstance(color, (list, tuple))
+        and len(color) == 3
+        and all(isinstance(c, int) and 0 <= c <= 255 for c in color)
+    )
+    if not ok:
+        raise ValueError(
+            f"sell_effect colors must be [r, g, b] in 0-255, got {color!r}"
+        )
+
+
+def _validate(values: dict) -> None:
+    """Raises ValueError for a sell_effect section that would fail on a sale."""
+    if values["lifetime_ms"] <= 0:
+        raise ValueError("sell_effect.lifetime_ms must be greater than 0")
+    if values["max_bursts"] < 1:
+        raise ValueError("sell_effect.max_bursts must be at least 1")
+    for key in ("dust_count", "debris_count"):
+        if not isinstance(values[key], int) or values[key] < 0:
+            raise ValueError(f"sell_effect.{key} must be a whole number, 0 or more")
+    for key in ("dust_growth", "spread", "rise", "gravity"):
+        if values[key] < 0:
+            raise ValueError(f"sell_effect.{key} must be 0 or more")
+    for key in ("dust_radius", "debris_size"):
+        low, high = values[key]
+        if not 1 <= low <= high:
+            raise ValueError(f"sell_effect.{key} must be [min, max] with min >= 1")
+    _validate_colors(values)
+
+
+def _validate_colors(values: dict) -> None:
+    if not values["debris_colors"]:
+        raise ValueError("sell_effect.debris_colors needs at least one color")
+    for color in (values["dust_color"], *values["debris_colors"]):
+        _check_color(color)
+
+
 @dataclass(frozen=True)
 class DustConfig:
     lifetime_ms: int
@@ -38,16 +77,7 @@ class DustConfig:
 
     @classmethod
     def from_dict(cls, values: dict) -> "DustConfig":
-        if values["lifetime_ms"] <= 0:
-            raise ValueError("sell_effect.lifetime_ms must be greater than 0")
-        if values["max_bursts"] < 1:
-            raise ValueError("sell_effect.max_bursts must be at least 1")
-        for key in ("dust_radius", "debris_size"):
-            low, high = values[key]
-            if not 1 <= low <= high:
-                raise ValueError(f"sell_effect.{key} must be [min, max] with min >= 1")
-        if not values["debris_colors"]:
-            raise ValueError("sell_effect.debris_colors needs at least one color")
+        _validate(values)
         return cls(
             lifetime_ms=values["lifetime_ms"],
             dust_count=values["dust_count"],
@@ -181,3 +211,14 @@ class DustBursts:
                 image, (*color, round(alpha * PUFF_OPACITY)), (size, size), size
             )
         return image
+
+
+class DustLayer:
+    """The bursts as a world object: a panel draws it with the tiles and buildings, under
+    the HUD, at the current time."""
+
+    def __init__(self, bursts: DustBursts) -> None:
+        self.bursts = bursts
+
+    def draw(self, surface: pygame.Surface) -> None:
+        self.bursts.draw(surface, pygame.time.get_ticks())
