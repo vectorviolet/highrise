@@ -1,0 +1,73 @@
+# Building recipes (DRAFT for the style comparison in docs/devlog/2026-11-11-building-recipes.md;
+# nothing in the game loads this file yet).
+#
+# A building sprite is composed from Kenney "Hexagon Buildings" pieces (CC0): floors stacked
+# bottom to top, then one roof. Every age uses the same structure per level; only the piece
+# prefix differs.
+#
+# Piece file name = prefix + piece, e.g. floor prefix "rock" + "DoorWindow" -> rockDoorWindow.png,
+# roof prefix "red" + "Roof" + "Short" -> redRoofShort.png.
+
+pack_piece_size: [65, 89]  # every floor piece, pixels
+floor_step: 23             # how far each floor above the first sits higher (the game's own step)
+roof_base: 67              # y inside a roof piece that lands on the top floor's top edge
+
+# Prefixes per age. The rock age wears the pack's red roofs on grey walls.
+ages:
+  wood:  {floor: wood,  roof: wood}
+  rock:  {floor: rock,  roof: red}
+  sand:  {floor: sand,  roof: sand}
+  stone: {floor: stone, roof: stone}
+
+# Each style maps a level to `floors` (bottom to top) and a `roof`. A floor or roof is a list
+# of allowed variants; the first is the default, a building picks one per slot when it is built.
+styles:
+  # A: close to today's sprites. A door+window floor, plain windows above, three heights
+  # (levels 1-2, 3-4, 5-6). Even levels use the blinds pieces so they differ from odd ones.
+  # Variety is only the door side.
+  A:
+    1: {floors: [[DoorWindow, DoorWindowMirror]], roof: [Short]}
+    2: {floors: [[DoorWindowBlinds, DoorWindowBlindsMirror]], roof: [Short]}
+    3:
+      floors: [[DoorWindow, DoorWindowMirror], [Windows]]
+      roof: [Straight]
+    4:
+      floors: [[DoorWindowBlinds, DoorWindowBlindsMirror], [WindowBlinds]]
+      roof: [Straight]
+    5:
+      floors: [[DoorWindow, DoorWindowMirror], [Windows], [Windows]]
+      roof: [Pointy]
+    6:
+      floors: [[DoorWindowBlinds, DoorWindowBlindsMirror], [WindowBlinds], [WindowBlinds]]
+      roof: [Pointy]
+
+  # B: same heights, but every floor and roof draws from more of the pack.
+  B:
+    1:
+      floors: [[DoorLeft, DoorRight, DoorWindow, DoorWindowMirror]]
+      roof: [Short, Rounded]
+    2:
+      floors: [[DoorWindow, DoorWindowMirror, DoorWindowBlinds, DoorWindowBlindsMirror]]
+      roof: [Short, Rounded]
+    3:
+      floors:
+        - [DoorWindow, DoorWindowMirror, GateLeft, GateRight]
+        - [Windows, WindowBlinds, WindowLeft, WindowRight]
+      roof: [Straight, Tall]
+    4:
+      floors:
+        - [GateLeft, GateRight, DoorWindowBlinds, DoorWindowBlindsMirror]
+        - [WindowBlinds, WindowBlindsLeft, WindowBlindsRight, Windows]
+      roof: [Straight, Tall]
+    5:
+      floors:
+        - [DoorWindow, DoorWindowMirror, GateLeft, GateRight]
+        - [Windows, WindowBlinds]
+        - [Windows, WindowBlinds, WindowLeft, WindowRight]
+      roof: [Pointy, Tall]
+    6:
+      floors:
+        - [GateLeft, GateRight, DoorWindowBlinds, DoorWindowBlindsMirror]
+        - [WindowBlinds, WindowBlindsLeft, WindowBlindsRight]
+        - [WindowBlinds, WindowBlindsLeft, WindowBlindsRight, Windows]
+      roof: [Pointy]
