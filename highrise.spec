@@ -37,6 +37,15 @@ datas = [
     (str(ROOT / "licenses"), "licenses"),
 ]
 
+# Optional per-OS application icon. Windows: the committed packaging/icon.ico.
+# macOS: drop packaging/icon.icns there yourself. A missing icon is fine; the
+# build then uses the default.
+icon = None
+if sys.platform.startswith("win") and (ROOT / "packaging" / "icon.ico").exists():
+    icon = str(ROOT / "packaging" / "icon.ico")
+elif sys.platform == "darwin" and (ROOT / "packaging" / "icon.icns").exists():
+    icon = str(ROOT / "packaging" / "icon.icns")
+
 a = Analysis(
     ["__main__.py"],
     pathex=[str(ROOT / "src"), str(ROOT / "src" / "pygamine")],
@@ -67,7 +76,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=str(ROOT / "assets" / "images" / "icon" / "highrise.ico"),
+    icon=icon,
 )
 coll = COLLECT(
     exe,
@@ -94,6 +103,6 @@ if sys.platform == "darwin":
     app = BUNDLE(
         coll,
         name="Highrise.app",
-        icon=None,
+        icon=icon,
         bundle_identifier="com.umutcanekinci.highrise",
     )

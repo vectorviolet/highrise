@@ -14,7 +14,7 @@ import pygame
 from app.game import WINDOW_ICON, set_window_icon
 
 ROOT = Path(__file__).resolve().parent.parent
-ICO = ROOT / "assets" / "images" / "icon" / "highrise.ico"
+ICO = ROOT / "packaging" / "icon.ico"
 ICO_SIZES = {16, 32, 48, 64, 128, 256}
 
 _spec = importlib.util.spec_from_file_location(
@@ -68,8 +68,8 @@ def test_exe_icon_has_every_size_and_each_image_decodes():
     assert sizes == ICO_SIZES
 
 
-def test_store_icon_is_the_1024_master():
-    assert pygame.image.load(ROOT / "docs" / "store" / "icon.png").get_size() == (
+def test_design_icon_is_the_1024_master():
+    assert pygame.image.load(ROOT / "docs" / "design" / "icon.png").get_size() == (
         1024,
         1024,
     )
@@ -86,7 +86,10 @@ def test_spec_gives_the_executable_the_ico():
     ]
     assert len(exe_calls) == 1
     icon = {kw.arg: ast.unparse(kw.value) for kw in exe_calls[0].keywords}["icon"]
-    assert icon == "str(ROOT / 'assets' / 'images' / 'icon' / 'highrise.ico')"
+    assert icon == "icon"
+    source = ast.unparse(tree)
+    assert "ROOT / 'packaging' / 'icon.ico'" in source
+    assert "ROOT / 'packaging' / 'icon.icns'" in source
 
 
 def test_credits_group_own_files_by_folder_and_say_when_ai_generated():
