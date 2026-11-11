@@ -46,6 +46,11 @@ over the buildings that paid, and a spend (-400$) falling from the cash amount.
 The current look: gains at 24 pt, the red text falling from the digits' baseline (it passes the
 screen's bottom edge, drawn here on a dark extension), and the amount rolling to its new value.
 
+The same, as a short GIF from the current code at 100% UI scale (3 payouts, one sale at 0.4 s and
+one spend at 1.2 s; the dark band is below the real screen edge):
+
+![Floating texts: payouts, a sale and a spend, with the amount rolling](img/50-floating-text.gif)
+
 Neither pygamine nor Chokepoint has a reusable helper: Chokepoint's kill text lives inside its
 kill-feedback class (battle time, camera, coin flight). The Highrise version is a small
 self-contained class, `ui/floating_text.py`, driven by a time value passed in by the caller.
