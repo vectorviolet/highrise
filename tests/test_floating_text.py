@@ -185,18 +185,31 @@ def test_a_spend_is_right_aligned_with_its_position_and_gains_are_centered(texts
     assert abs(gain.centerx - 50) <= 2
 
 
-def test_a_text_that_would_leave_the_screen_is_pulled_back_in(texts):
-    texts.spend((195, 5), 1_000_000, now_ms=0)
+def test_a_gain_that_would_leave_the_screen_is_pulled_back_in(texts):
     texts.gain((-30, 2), 10, now_ms=0)
     surface = pygame.Surface((200, 100), pygame.SRCALPHA)
 
     texts.draw(surface, now_ms=0)
 
-    mask = pygame.mask.from_surface(surface)
-    assert mask.count() > 0
-    # Drawn on a surface of exactly the screen's size, so every pixel is inside; the clamp
-    # keeps the whole text, not just a part of it.
-    assert pygame.Rect(mask.get_bounding_rects()[0]).left >= 0
+    ink = pygame.mask.from_surface(surface).get_bounding_rects()[0]
+    # Pulled in whole, not cut off at the left edge.
+    assert ink.left <= 3
+    assert ink.width >= texts._render(texts.texts[0]).get_width() - 6
+
+
+def test_a_spend_starts_at_its_position_and_may_fall_off_the_screen(texts):
+    texts.spend((195, 80), 10, now_ms=0)
+    surface = pygame.Surface((200, 100), pygame.SRCALPHA)
+
+    texts.draw(surface, now_ms=0)
+
+    ink = pygame.mask.from_surface(surface).get_bounding_rects()[0]
+    # Not pulled up to fit: it starts at its position (its top at y 80), so the part of the
+    # text below the surface is cut off.
+    assert ink.top >= 80
+    assert ink.bottom == 100
+    assert texts._render(texts.texts[0]).get_height() > 20
+    assert texts.current_position(texts.texts[0], 1000).y > 100
 
 
 def test_gains_are_smaller_than_spends(texts):

@@ -181,8 +181,8 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
 def _spend_texts(game: Game) -> list[str]:
     """The red "-X$" texts floating from the cash display, in order."""
     texts = [t for t in game.floating_texts.texts if t.amount < 0]
-    # They start above the plate, at the right edge of the amount.
-    assert all(t.position == (1582, 20) for t in texts)
+    # They start just under the plate, at the right edge of the amount.
+    assert all(t.position == (1582, 80) for t in texts)
     return [t.text for t in texts]
 
 

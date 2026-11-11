@@ -53,9 +53,10 @@ self-contained class, `ui/floating_text.py`, driven by a time value passed in by
   `config/settings.yaml` under `floating_text`. Text size and distances scale with the UI scale.
   Every payout gets its own text: the owner dropped the per-building merge window after
   play-testing, so there is no merge code or setting.
-- **Spend text direction:** the cash display sits at the bottom screen edge, so a text falling
-  from it would leave the screen. The red text starts just above the plate and falls onto it,
-  fading out. This is the one deviation from the issue's wording; the owner can overrule it.
+- **Spend text direction:** the red text starts just under the plate's bottom edge,
+  right-aligned with the amount, and falls down while fading, as the issue says. The cash display
+  sits at the bottom screen edge, so it may fall partly off screen; the owner accepts that. (A
+  first version started above the plate and fell onto it, so it stayed on screen.)
 - **Payout callback:** `on_payout` now receives the building as well as the amount, so the
   floating text can find its source.
 
@@ -78,10 +79,13 @@ The cash display and the floating text work at every UI scale; tests cover the a
   English and "12.345$" in Turkish (a dot), set per language in the lang files.
 - Texts over the world are hidden while the info panel is open, so they never cover it.
 - After a play-test: gain texts are smaller (24 pt, `gain_font_size`; spends stay 30 pt,
-  `spend_font_size`), and the red spend text is right-aligned with the amount it falls onto. Texts
-  are also clamped to the screen.
+  `spend_font_size`), and the red spend text is right-aligned with the amount. Gain texts are
+  clamped to the screen; the spend text is not.
 
-![The spend text next to the plate at 80, 100 and 125 percent](img/50-spend-text-right-aligned.png)
+![The spend text under the plate at 80, 100 and 125 percent](img/50-spend-text-under-plate.png)
+
+The dark band is below the real screen edge (the picture is extended to show where the text
+goes). The game window ends right under the HUD bar, so the text leaves the screen as it falls.
 
 ## Odometer roll for the cash amount (#61)
 

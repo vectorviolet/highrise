@@ -73,7 +73,7 @@ def test_a_spend_text_lines_up_with_the_amount_and_stays_on_screen(game, ui_scal
 
     assert text.position == (
         panel["money_text"].rect.right,
-        panel["money_panel"].rect.top,
+        panel["money_panel"].rect.bottom,
     )
-    assert text.anchor == "bottomright"
+    assert text.anchor == "topright"
     assert game.window.get_rect().collidepoint(text.position)

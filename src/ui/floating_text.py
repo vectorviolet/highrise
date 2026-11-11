@@ -1,6 +1,6 @@
 """Floating money text: a green "+X$" that rises over a building that paid or was sold, and a
-red "-X$" that falls onto the cash display from just above it when the player spends (the
-display sits at the bottom screen edge, so there is no room below it).
+red "-X$" that falls from just under the cash display when the player spends (the display sits
+at the bottom screen edge, so it may fall partly off screen; the owner accepts that).
 
 Nothing here knows about the game: callers pass the screen position, the amount and the time
 (milliseconds, the same clock the building timers use), so the logic is testable without a
@@ -59,7 +59,7 @@ class FloatingText:
     amount: int  # positive: gained; negative: spent
     born_ms: int
     direction: int  # -1 moves up the screen, 1 moves down
-    anchor: str  # the pygame.Rect attribute `position` sets: "midbottom", "bottomright"
+    anchor: str  # the pygame.Rect attribute `position` sets: "midbottom", "topright"
 
     @property
     def over_world(self) -> bool:
@@ -92,10 +92,10 @@ class FloatingTexts:
         self._add(FloatingText(Vector2(position), amount, now_ms, -1, "midbottom"))
 
     def spend(self, position, amount: int, now_ms: int) -> None:
-        """A red "-amount" falling from `position`, its bottom right corner there (so it
-        lines up with the right edge of the number it falls onto)."""
+        """A red "-amount" falling from `position`, its top right corner there (so it
+        lines up with the right edge of the number above it). Not kept on screen."""
         assert amount > 0, "a spend must be positive"
-        self._add(FloatingText(Vector2(position), -amount, now_ms, 1, "bottomright"))
+        self._add(FloatingText(Vector2(position), -amount, now_ms, 1, "topright"))
 
     def _add(self, text: FloatingText) -> None:
         self.texts.append(text)
@@ -131,8 +131,9 @@ class FloatingTexts:
             position = self.current_position(text, now_ms)
             rect = image.get_rect()
             setattr(rect, text.anchor, (round(position.x), round(position.y)))
-            # Whatever the UI scale or the window, a text never leaves the screen.
-            rect.clamp_ip(surface.get_rect())
+            if text.over_world:
+                # A gain over the world is kept on screen; a spend may fall off the bottom.
+                rect.clamp_ip(surface.get_rect())
             surface.blit(image, rect)
 
     def _size(self, text: FloatingText) -> int:
