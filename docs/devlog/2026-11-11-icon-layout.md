@@ -1,5 +1,5 @@
 # Icon and design file layout
-<!-- index | refs: #84 | area: Packaging -->
+<!-- index | refs: #84, PR #87 | area: Packaging -->
 
 **Date:** 2026-11-11 · **Area:** Packaging · **Issue:** [#84](https://github.com/vectorviolet/highrise/issues/84)
 
