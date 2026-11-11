@@ -88,7 +88,7 @@ def test_reset_restores_the_default_and_saves_it():
     assert game.ui_scale == DEFAULT_UI_SCALE
     assert game.load_settings().ui_scale == DEFAULT_UI_SCALE
     assert game.panel_manager["display_settings"]["ui_scale_entry_text"].text == (
-        f"%{DEFAULT_UI_SCALE}"
+        f"{DEFAULT_UI_SCALE}%"
     )
     assert game.panel_manager.current_panel == "display_settings"
 

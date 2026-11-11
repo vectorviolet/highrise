@@ -12,6 +12,7 @@ common:
   save: "SAVE"
   enabled: "ON"
   disabled: "OFF"
+  percent: "{value}%"
 
 menu:
   title: "Highrise"

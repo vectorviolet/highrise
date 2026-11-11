@@ -9,6 +9,7 @@ common:
   save: "KAYDET"
   enabled: "AÇIK"
   disabled: "KAPALI"
+  percent: "%{value}"
 
 menu:
   title: "Highrise"
