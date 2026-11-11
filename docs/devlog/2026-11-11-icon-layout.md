@@ -16,6 +16,9 @@ Use chokepoint's layout in both repos:
   `highrise.spec` picks it per OS (`packaging/icon.icns` on macOS if present; a missing icon is fine).
 - `docs/design/` holds the master art (`icon.png`, `cover.png`) and the provenance note.
 - `docs/store/` keeps the page text and the cover to upload (`cover-itchio.png`).
+
+Current state: `docs/design/` has since gained `banner.png` and `art/`, and `docs/store/` the
+banner preview ([cover and banner](2026-11-11-cover-and-banner.md)).
 - The window icon stays in `assets/images/icon/icon_64.png`, loaded at runtime.
 
 ## Rejected

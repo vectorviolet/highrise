@@ -24,6 +24,7 @@ PR. "Owner" is the project owner; "Claude" is the Claude Code session that imple
 | 2026-11-11 | [Booster buildings](2026-11-11-boosters.md) | Buildings | #51, #10, #52, #59, PR #73 |
 | 2026-11-11 | [Building outline](2026-11-11-building-outline.md) | Buildings | #75 |
 | 2026-11-11 | [Building recipes](2026-11-11-building-recipes.md) | Buildings | #59, #72, PR #71 |
+| 2026-11-11 | [Cover and banner](2026-11-11-cover-and-banner.md) | Art | #89, PR #90 |
 | 2026-11-11 | [Game icon](2026-11-11-game-icon.md) | Art | #79 |
 | 2026-11-11 | [Icon and design file layout](2026-11-11-icon-layout.md) | Packaging | #84, PR #87 |
 | 2026-11-11 | [itch.io store page text and checklist](2026-11-11-itch-store-page.md) | Docs | #82, PR #83 |

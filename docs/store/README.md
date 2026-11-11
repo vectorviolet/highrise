@@ -3,6 +3,8 @@
 The itch.io page at <https://umutcanekinci.itch.io/highrise> is edited by hand on itch.io. This
 folder holds what goes into it:
 
+- `cover-itchio.png` and `banner-itchio.png`: the cover (630x500) and the banner preview
+  (960x300) to upload. Both are made by `scripts/make_cover.py` from the art in `docs/design/art/`.
 - `description.html`: the page's description. Paste it into the description field in HTML
   mode. It uses only headings, paragraphs, lists, links, `strong`, `code` and one image, with no inline
   styles or tables, so it reads well on phones.
@@ -30,9 +32,9 @@ Fields that live outside the description, following itch.io's
 - **Languages:** English, Turkish (the two the game ships).
 - **Inputs:** Keyboard, Mouse.
 - **AI disclosure (proposal):** answer it on the edit page to match the description's line. Claude Code
-  was a coding assistant (code). The game icon was generated with OpenAI Codex and post-processed
-  (graphics: the icon only). The other art is Kenney's CC0 packs and the music is by Sakura Girl, so
-  answer no AI for those. Check what itch.io's form asks about code, graphics, sound and text.
+  was a coding assistant (code). The game icon, the cover, the banner and the key arts were generated
+  with OpenAI Codex and post-processed (graphics: those pictures only). The in-game art is Kenney's
+  CC0 packs (not AI) and the music is by Sakura Girl (not AI), so answer no AI for those. Check what itch.io's form asks about code, graphics, sound and text.
 - **Screenshots:** at least 4 are wanted, uploaded to the page's gallery in this order (all in
   `docs/screenshots/`, 1920x1080): `02_build_mode.png`, `03_inspection.png` and
   `01_main_menu.png`. That is only three, so add a fourth (for example a later age or a boosted
@@ -41,11 +43,16 @@ Fields that live outside the description, following itch.io's
 - **Images:** `description.html` links the GIF from GitHub so it works when pasted as is. Better:
   upload `docs/preview.gif` through itch.io's editor and swap the image on the page for the
   uploaded one, so it loads fast and doesn't break if the file moves in the repo.
-- **Theme:** colors that match the game, not plain black on white: the cover's sky blue
-  (about `#54D8E7`) as the background, the icon's dark navy (about `#1E1D3B`) for text and
-  panels, and the logo's yellow for links.
+- **Theme (checklist item, proposal):** colors that match the cover and banner, not plain black on
+  white: the sky blue (about `#54D8E7`) as the page background, the dark navy (about `#1E1D3B`) for
+  text and panels, and the tagline's yellow (`#FFE278`) for links. Set it in the theme editor on the
+  live page and check that the text stays readable.
 - **Cover:** `docs/store/cover-itchio.png` (630x500, itch.io's cover size) goes on the edit page.
-  `docs/design/cover.png` (2304x1824) is the larger master.
+  `docs/design/cover.png` (1402x1122, the art's native size) is the larger master.
+- **Banner:** `docs/design/banner.png` (1920x600) goes in the page's banner field (itch.io shows it
+  about 960 px wide, some players 1200 px, so 1920 px is 2x). `docs/store/banner-itchio.png` (960x300)
+  is the preview. Keep the key content in the central 80% of the height, and check it in the theme
+  editor on the live page.
 - **Icon:** `docs/design/icon.png` (1024x1024).
 - **Trailer:** none yet (the GIF only).
 

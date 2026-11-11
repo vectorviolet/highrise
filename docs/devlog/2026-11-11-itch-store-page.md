@@ -18,7 +18,8 @@ re-upload the preview GIF to itch.io.
 Changed for Highrise: the pitch and how to play (BUILD, merge, BOOST, EXPAND, NEXT AGE with age
 tasks), the feature list, the controls, the install names and the Butler channels (`windows`,
 `linux`, `osx`), and the credits (Kenney CC0 packs, Titillium Web, the Sakura Girl track, and the
-AI-generated icon). Facts come from `README.md`, `config/`, `CHANGELOG.md` and `CREDITS.md`. The
+AI-generated icon; the cover, banner and key arts have since been added to that line, see
+[cover and banner](2026-11-11-cover-and-banner.md)). Facts come from `README.md`, `config/`, `CHANGELOG.md` and `CREDITS.md`. The
 screenshot list has only three images, so the checklist says a fourth is wanted.
 
 ## Decision

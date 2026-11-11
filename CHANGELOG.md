@@ -9,6 +9,10 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Cover and banner**: a new Codex-generated cover (replacing the Gemini one), the itch.io banner and
+  three text-free key arts in `docs/design/art/`, with the title drawn by `scripts/make_cover.py`
+  ([devlog](docs/devlog/2026-11-11-cover-and-banner.md)).
+- **README front page**, `CONTRIBUTING.md` and `docs/ARCHITECTURE.md`.
 - **Game icon**: a pixel-art tower icon for the window and taskbar, the Windows executable (`highrise.spec`),
   the README and the store page (`docs/design/icon.png`)
   ([devlog](docs/devlog/2026-11-11-game-icon.md)).
