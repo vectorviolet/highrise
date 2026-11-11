@@ -1,14 +1,13 @@
-"""Render the building style comparison images from config/buildings.yaml.
+"""Render the building ladder comparison images from config/buildings.yaml.
 
 Composes buildings from the raw Kenney "Hexagon Buildings" pieces and writes, per age, a sheet
-of today's sprite next to recipe styles A and B for levels 1-6, plus one mixed board per style.
+with today's six sprites, every ladder in the recipe file, and a door-left / door-right row.
 Dev tool for docs/devlog/2026-11-11-building-recipes.md; the game does not use it.
 
     uv run --group dev python scripts/render_building_styles.py [--pack DIR] [--out DIR]
 """
 
 import argparse
-import random
 from pathlib import Path
 
 import yaml
@@ -19,21 +18,12 @@ DEFAULT_PACK = (
     Path.home() / "Desktop/asset-library/kenney/hexagon-buildings/extracted/Tiles"
 )
 BG = (90, 120, 150, 255)
-LEVELS = range(1, 7)
-BOARD_SEED = 7
-SHEET_SCALE = 2
-BOARD_SCALE = 2
+TODAY_LEVELS = 6
+SCALE = 2
+PER_ROW = 7  # levels per row before a ladder wraps
 MAX_WIDTH = 1280
-TILE_STEP = (66, 33)  # isometric step between neighboring tiles of tile.png
-# The game draws a building 50 px wide at tile.x + 43 with its foot at tile.y + 52.
-GAME_SPRITE_WIDTH, GAME_SPRITE_X, GAME_FOOT_Y = 50, 43, 52
-SPRITE_WIDTH = 65
-BOARD_CELLS = [  # (age, level) per row of the 4x4 board
-    [("wood", 1), ("rock", 3), ("sand", 2), ("stone", 5)],
-    [("rock", 2), ("stone", 1), ("wood", 4), ("sand", 6)],
-    [("sand", 3), ("wood", 6), ("stone", 2), ("rock", 5)],
-    [("stone", 4), ("sand", 1), ("rock", 6), ("wood", 3)],
-]
+SIDE_DEMO = ("L1", [2, 5, 8])  # ladder and levels shown in both door sides
+LABEL_W, CELL_W, PAD = 90, 150, 12
 
 
 def load_recipes(path: Path) -> dict:
@@ -45,28 +35,24 @@ def piece(pack: Path, name: str) -> Image.Image:
     return Image.open(pack / f"{name}.png").convert("RGBA")
 
 
-def pick(options: list[str], rng: random.Random | None) -> str:
-    """The default (first) variant, or a seeded random one when `rng` is given."""
-    return options[0] if rng is None else rng.choice(options)
+def kind_piece(recipes: dict, kind: str, side: str) -> str:
+    entry = recipes["floor_kinds"][kind]
+    return entry if isinstance(entry, str) else entry[side]
 
 
 def compose(
-    recipes: dict,
-    style: str,
-    age: str,
-    level: int,
-    pack: Path,
-    rng: random.Random | None = None,
+    recipes: dict, ladder: str, age: str, level: int, pack: Path, side: str = "left"
 ) -> Image.Image:
-    """Stack the recipe's floors and roof into one sprite, its foot at the bottom edge."""
-    recipe = recipes["styles"][style][level]
+    """Stack a level's floors and roof into one sprite, its foot at the bottom edge."""
+    recipe = recipes["ladders"][ladder][level - 1]
     prefixes = recipes["ages"][age]
     width, floor_height = recipes["pack_piece_size"]
     step, roof_base = recipes["floor_step"], recipes["roof_base"]
     floors = [
-        piece(pack, prefixes["floor"] + pick(slot, rng)) for slot in recipe["floors"]
+        piece(pack, prefixes["floor"] + kind_piece(recipes, kind, side))
+        for kind in recipe["floors"]
     ]
-    roof = piece(pack, prefixes["roof"] + "Roof" + pick(recipe["roof"], rng))
+    roof = piece(pack, prefixes["roof"] + "Roof" + recipe["roof"])
     # y of each piece's top, 0 = the ground floor's top, negative = higher
     floor_tops = [-i * step for i in range(len(floors))]
     roof_top = floor_tops[-1] + roof_base - roof.height
@@ -84,70 +70,69 @@ def font(size: int) -> ImageFont.ImageFont | ImageFont.FreeTypeFont:
         return ImageFont.load_default()
 
 
-def age_sheet(recipes: dict, age: str, pack: Path) -> Image.Image:
-    """Rows: today, A, B. Columns: levels 1-6. Default variants only."""
-    cell_w, cell_h = (SPRITE_WIDTH + 5) * SHEET_SCALE, 170 * SHEET_SCALE
-    label_w, head = 70, 40
-    sheet = Image.new("RGBA", (label_w + cell_w * len(LEVELS), head + cell_h * 3), BG)
+def today_sprite(age: str, level: int) -> Image.Image:
+    return Image.open(ROOT / f"assets/images/buildings/{age}/level{level}.png").convert(
+        "RGBA"
+    )
+
+
+def draw_row(
+    sheet_rows: list[tuple[str, list[tuple[str, Image.Image]]]],
+) -> Image.Image:
+    """Lay out rows of (label, sprite) cells, wrapping each row after PER_ROW cells."""
+    lines: list[tuple[str, list[tuple[str, Image.Image]]]] = []
+    for title, cells in sheet_rows:
+        for start in range(0, len(cells), PER_ROW):
+            lines.append((title if start == 0 else "", cells[start : start + PER_ROW]))
+    heights = [
+        max(s.height for _, s in cells) * SCALE + 2 * PAD + 20 for _, cells in lines
+    ]
+    sheet = Image.new("RGBA", (LABEL_W + CELL_W * PER_ROW, sum(heights)), BG)
     draw = ImageDraw.Draw(sheet)
-    draw.text((8, 8), age.upper(), font=font(22), fill="white")
-    for col, level in enumerate(LEVELS):
-        draw.text(
-            (label_w + col * cell_w + 8, 12),
-            f"level {level}",
-            font=font(14),
-            fill="white",
-        )
-    for row, name in enumerate(["today", "A", "B"]):
-        draw.text(
-            (8, head + row * cell_h + cell_h // 2), name, font=font(18), fill="white"
-        )
-        for col, level in enumerate(LEVELS):
-            if name == "today":
-                path = ROOT / f"assets/images/buildings/{age}/level{level}.png"
-                sprite = Image.open(path).convert("RGBA")
-            else:
-                sprite = compose(recipes, name, age, level, pack)
-            size = (sprite.width * SHEET_SCALE, sprite.height * SHEET_SCALE)
-            sprite = sprite.resize(size, Image.NEAREST)
-            x = label_w + col * cell_w + (cell_w - sprite.width) // 2
-            sheet.alpha_composite(
-                sprite, (x, head + (row + 1) * cell_h - sprite.height - 8)
+    y = 0
+    for (title, cells), height in zip(lines, heights):
+        draw.text((8, y + height // 2 - 10), title, font=font(18), fill="white")
+        for col, (label, sprite) in enumerate(cells):
+            big = sprite.resize(
+                (sprite.width * SCALE, sprite.height * SCALE), Image.NEAREST
             )
+            x = LABEL_W + col * CELL_W + (CELL_W - big.width) // 2
+            sheet.alpha_composite(big, (x, y + height - 20 - PAD - big.height))
+            draw.text(
+                (x + big.width // 2 - 10, y + height - 22),
+                label,
+                font=font(14),
+                fill="white",
+            )
+        y += height
     return sheet
 
 
-def board(recipes: dict, style: str, pack: Path) -> Image.Image:
-    """A 4x4 isometric board on the game's tile.png, one seeded variant per building."""
-    tile = Image.open(ROOT / "assets/images/tile.png").convert("RGBA")
-    rng = random.Random(BOARD_SEED)
-    size = len(BOARD_CELLS)
-    ox, oy = (size - 1) * TILE_STEP[0], 90
-    canvas = Image.new(
-        "RGBA",
-        (2 * ox + tile.width, oy + (2 * size - 2) * TILE_STEP[1] + tile.height),
-        BG,
-    )
-    cells = sorted(
-        ((r, c) for r in range(size) for c in range(size)),
-        key=lambda rc: (sum(rc), rc[0]),
-    )
-    for r, c in cells:  # back to front
-        x, y = ox + (c - r) * TILE_STEP[0], oy + (c + r) * TILE_STEP[1]
-        canvas.alpha_composite(tile, (x, y))
-        age, level = BOARD_CELLS[r][c]
-        sprite = compose(recipes, style, age, level, pack, rng)
-        scaled = (
-            GAME_SPRITE_WIDTH,
-            round(sprite.height * GAME_SPRITE_WIDTH / sprite.width),
+def age_sheet(recipes: dict, age: str, pack: Path) -> Image.Image:
+    rows = [
+        (
+            "today",
+            [(str(n), today_sprite(age, n)) for n in range(1, TODAY_LEVELS + 1)],
         )
-        sprite = sprite.resize(scaled, Image.LANCZOS)
-        canvas.alpha_composite(
-            sprite, (x + GAME_SPRITE_X, y + GAME_FOOT_Y - sprite.height)
-        )
-    return canvas.resize(
-        (canvas.width * BOARD_SCALE, canvas.height * BOARD_SCALE), Image.NEAREST
-    )
+    ]
+    for ladder, levels in recipes["ladders"].items():
+        cells = [
+            (str(n), compose(recipes, ladder, age, n, pack))
+            for n in range(1, len(levels) + 1)
+        ]
+        rows.append((f"{ladder} ({len(levels)})", cells))
+    ladder, picks = SIDE_DEMO
+    demo = []
+    for level in picks:
+        for side in ("left", "right"):
+            demo.append(
+                (
+                    f"{level}{side[0].upper()}",
+                    compose(recipes, ladder, age, level, pack, side),
+                )
+            )
+    rows.append(("door side", demo))
+    return draw_row(rows)
 
 
 def save(image: Image.Image, path: Path) -> None:
@@ -167,16 +152,12 @@ def main() -> None:
     )
     parser.add_argument("--out", type=Path, default=ROOT / "docs/devlog/img")
     parser.add_argument("--recipes", type=Path, default=ROOT / "config/buildings.yaml")
+    parser.add_argument("--ages", nargs="+", default=["wood", "rock", "stone"])
     args = parser.parse_args()
     recipes = load_recipes(args.recipes)
-    for age in recipes["ages"]:
+    for age in args.ages:
         save(
-            age_sheet(recipes, age, args.pack), args.out / f"building-recipes-{age}.png"
-        )
-    for style in ("A", "B"):
-        save(
-            board(recipes, style, args.pack),
-            args.out / f"building-recipes-board-{style}.png",
+            age_sheet(recipes, age, args.pack), args.out / f"building-ladders-{age}.png"
         )
 
 
