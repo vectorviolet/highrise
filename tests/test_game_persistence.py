@@ -656,7 +656,7 @@ def test_a_save_from_before_income_fractions_loads_with_none(tmp_path, assets):
     assert game.buildings[0].income_fraction == 0
 
 
-@pytest.mark.parametrize("bad", [-0.5, 2.0, 1e9])
+@pytest.mark.parametrize("bad", [-0.5, 1.0, 2.0, 1e9, float("inf")])
 def test_a_damaged_income_fraction_is_dropped(tmp_path, assets, bad):
     game = FakeGame(tmp_path, assets)
     game.init_database()

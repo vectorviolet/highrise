@@ -460,3 +460,55 @@ def test_the_placed_highlight_time_must_be_a_whole_number_of_ms():
     for bad in (-1, 1.5, "1500", None):
         with pytest.raises(ValueError, match="placed_highlight_ms"):
             BoosterConfig.from_dict(_config(placed_highlight_ms=bad), AGES, 2)
+
+
+def _merge_pair(buildings, tilemap, row, level, fractions):
+    """Two buildings of `level` in `row` with held-back cents, merged by a slide to the left."""
+    first = place(buildings, tilemap, row, 1, level=level)
+    second = place(buildings, tilemap, row, 2, level=level)
+    first.income_fraction, second.income_fraction = fractions
+    buildings.move("left", tilemap, MAX_LEVEL)
+    buildings.finish_pending_merges()
+    return next(b for b in buildings if b.tile.row_number == row)
+
+
+def test_a_merge_pays_the_whole_dollar_of_two_fractions_and_keeps_the_cents():
+    buildings, tilemap = make_grid(3)
+    paid = []
+    buildings.on_carried_income = lambda b, amount: paid.append((b, amount))
+
+    merged = _merge_pair(buildings, tilemap, 1, 1, (0.6, 0.6))
+
+    assert paid == [(merged, 1)]
+    assert merged.income_fraction == pytest.approx(0.2)
+
+
+def test_a_merge_below_a_dollar_pays_nothing():
+    buildings, tilemap = make_grid(3)
+    paid = []
+    buildings.on_carried_income = lambda b, amount: paid.append(amount)
+
+    merged = _merge_pair(buildings, tilemap, 1, 1, (0.25, 0.5))
+
+    assert paid == []
+    assert merged.income_fraction == pytest.approx(0.75)
+
+
+def test_consecutive_merges_keep_every_cent_and_stay_below_a_dollar():
+    buildings, tilemap = make_grid(3)
+    paid = []
+    buildings.on_carried_income = lambda b, amount: paid.append(amount)
+    cents_in = 0.0
+
+    # Level 1 + 1 -> 2 in row 1 and row 2; then the two level 2 buildings merge in column 1.
+    first = _merge_pair(buildings, tilemap, 1, 1, (0.6, 0.6))
+    second = _merge_pair(buildings, tilemap, 2, 1, (0.7, 0.7))
+    cents_in = 0.6 + 0.6 + 0.7 + 0.7
+    assert first.income_fraction < 1 and second.income_fraction < 1
+    buildings.move("up", tilemap, MAX_LEVEL)
+    buildings.finish_pending_merges()
+
+    (survivor,) = [b for b in buildings if b.level == 3]
+    assert survivor.income_fraction < 1
+    assert sum(paid) + survivor.income_fraction == pytest.approx(cents_in)
+    assert sum(paid) == 2

@@ -179,6 +179,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.buildings = Buildings(
             on_merge=self._on_buildings_merged,
             on_payout=self._on_building_payout,
+            on_carried_income=self.show_gain_and_earn,
             boosters=BoosterConfig.from_dict(
                 self.settings["boosters"], AGES, sprites.level_count(booster=True)
             ),
@@ -729,6 +730,12 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         if self.tile_selector.is_active:
             return
         self.buildings.move(rotation, self._tilemap, self.max_building_level)
+
+    def show_gain_and_earn(self, building: Building, amount: int) -> None:
+        """Pays `amount` as it is (no booster multiplier) with its "+amount" text over
+        `building`: the whole dollar a merge makes of two buildings' held-back cents."""
+        self.player.earn(amount)
+        self.show_gain(building, amount)
 
     def _on_building_payout(self, building: Building, amount: int) -> None:
         # The boosters covering the building's tile raise what it earns this moment.

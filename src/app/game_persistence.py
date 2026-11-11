@@ -173,7 +173,7 @@ class GamePersistenceMixin:
                     column,
                     door_side,
                     booster=is_booster,
-                    income_fraction=self._valid_fraction(fraction),
+                    income_fraction=self._valid_fraction(fraction, row, column),
                 )
             else:
                 self.database.execute_safely(
@@ -182,10 +182,19 @@ class GamePersistenceMixin:
                 )
 
     @staticmethod
-    def _valid_fraction(fraction: float) -> float:
-        """A saved income fraction held to what a building can really hold (0 up to the sum
-        of two buildings' fractions): a damaged value must not pay out a windfall."""
-        return fraction if 0 <= fraction < 2 else 0.0
+    def _valid_fraction(fraction: float, row: int, column: int) -> float:
+        """A saved income fraction held to what a building can really hold (0 up to, not
+        including, 1$; a merge pays the whole dollars): a damaged value (also NaN or infinite)
+        becomes 0 instead of paying out a windfall."""
+        if 0 <= fraction < 1:
+            return fraction
+        logger.warning(
+            "Saved building at row %s, column %s has income fraction %s; using 0",
+            row,
+            column,
+            fraction,
+        )
+        return 0.0
 
     def _valid_level(
         self, level: int, row: int, column: int, booster: bool = False

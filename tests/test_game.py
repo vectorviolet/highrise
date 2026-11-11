@@ -1623,3 +1623,19 @@ def test_a_plain_build_does_not_light_anything(assets, monkeypatch):
     game._highlight_boosted_tiles()
 
     assert _lit(game) == set()
+
+
+def test_the_dollar_a_merge_makes_of_two_fractions_is_paid_with_its_text(assets):
+    game = make_game(assets, size=3, starting_money=0)
+    game.buildings.on_carried_income = game.show_gain_and_earn
+    first = game.add_building(1, 1, 1, "left")
+    second = game.add_building(1, 1, 2, "left")
+    first.income_fraction, second.income_fraction = 0.6, 0.6
+
+    game.buildings.move("left", game.tilemap, MAX_BUILDING_LEVEL)
+    game.buildings.finish_pending_merges()
+
+    assert game.player.money == 1  # no booster multiplier on it
+    (merged,) = game.buildings
+    assert merged.income_fraction == pytest.approx(0.2)
+    assert len(game.floating_texts.texts) == 1

@@ -155,6 +155,7 @@ class Buildings(list[Building]):
         *,
         on_merge: Callable[[], None] | None = None,
         on_payout: Callable[[Building, int], None] | None = None,
+        on_carried_income: Callable[[Building, int], None] | None = None,
         boosters: BoosterConfig,
     ) -> None:
         super().__init__()
@@ -162,6 +163,8 @@ class Buildings(list[Building]):
         self.age_number = 0
         self.on_merge = on_merge
         self.on_payout = on_payout
+        # Whole dollars a merge pays out of the two buildings' held-back cents (see _finish_merge).
+        self.on_carried_income = on_carried_income
         self.boosters = boosters
         self._booster_list: list[Building] | None = None
 
@@ -331,16 +334,21 @@ class Buildings(list[Building]):
         assert target is not None and target in self, "merge survivor left the board"
         self.remove(building)
         self.remove(target)
-        self.append(
-            self.create(
-                building.level + 1,
-                building.tile,
-                age_number=building.age_number,
-                door_side=target.door_side,
-                booster=building.is_booster,
-                income_fraction=building.income_fraction + target.income_fraction,
-            )
+        # Two held-back fractions (each under 1$) can add up to a whole dollar: that dollar is
+        # paid now, so the survivor keeps only the cents and a building never holds 1$ or more.
+        carried = building.income_fraction + target.income_fraction
+        whole = int(carried)
+        merged = self.create(
+            building.level + 1,
+            building.tile,
+            age_number=building.age_number,
+            door_side=target.door_side,
+            booster=building.is_booster,
+            income_fraction=carried - whole,
         )
+        self.append(merged)
+        if whole and self.on_carried_income is not None:
+            self.on_carried_income(merged, whole)
         if self.on_merge is not None:
             self.on_merge()
 
