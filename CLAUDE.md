@@ -122,7 +122,7 @@ The CREDITS page (`credits` panel) scrolls its sections with pygamine's `scrolli
 
 `Buildings` owns movement and replacement construction. Use `Buildings.create`
 for production building creation (purchase/load, merge and age change) so the
-collection's `on_payout` callback is passed in. `Building` requires `on_payout`
+collection's `on_payout` callback (`(building, amount)`) is passed in. `Building` requires `on_payout`
 as a keyword-only argument (`None` for no income), so it can't be forgotten.
 `on_merge` delegates the merge sound to `Game`; the collection has no
 asset/audio dependency. Merges are collected during movement checks and applied
@@ -130,6 +130,20 @@ after iteration, then sorted by column. Keep the existing next-frame merge after
 arrival. Board-changing actions (moves, build, sell, NEXT AGE) wait while
 `Buildings.is_busy()`; the one guard is in `GameEventsMixin.handle_game_events`.
 Saving finishes pending merges first. See ADR 0001.
+
+### Cash display and floating money text
+
+The cash display is `money_panel` (plate), `money_icon` (coin) and `money_text` in `config/panels.yaml`,
+on the buttons' top and bottom line. `ui/cash_display.py` paints the plate and coin. Money changes show `ui/floating_text.py` texts, numbers in
+`floating_text` in `config/settings.yaml`: `Game._on_building_payout` and `show_gain` (payouts, sales) and
+`Game._spend` (build, upgrade, expand, NEXT AGE; always spend through it, not `Player.spend`). Amounts are
+written by `ui/money_format.py` (`money.amount` and `money.thousands` in the language files: "12,345$", Turkish
+"12.345$"), for the cash display, the prices and the texts alike. Every payout gets its own text.
+The cash amount is drawn by `ui/odometer.py` (rolling digits, `ui.cash_roll_ms`): `money_text` is hidden and
+only gives the layout (anchored rectangle, font, color); the odometer owns the text, `Game._on_money_changed` feeds it,
+and a language change snaps it (`Game._on_language_changed`). A text too wide for the room right of the coin is scaled down.
+World texts are hidden while the info panel is open. A building's
+`on_payout` callback takes `(building, amount)`.
 
 ### Persistence
 

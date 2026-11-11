@@ -9,6 +9,7 @@ images:
     blue_button:    {folder: gui/Blue/Default, name: button_rectangle_depth_gloss}
     green_button:   {folder: gui/Green/Default, name: button_rectangle_depth_gloss}
     yellow_button:  {folder: gui/Yellow/Default, name: button_rectangle_depth_gloss}
+    grey_button:    {folder: gui/Grey/Default, name: button_rectangle_depth_gloss}
     blue_circle:    {folder: gui/Blue/Default, name: check_round_color}
     yellow_circle:  {folder: gui/Yellow//Default, name: check_round_color}
     red_button:     {folder: gui/Red//Default, name: button_rectangle_depth_flat}

@@ -219,6 +219,7 @@ class GameEventsMixin:
         if building in self.buildings:
             self.buildings.remove(building)
             self.player.earn(building.sell_price)
+            self.show_gain(building, building.sell_price)
         self.info_panel.close()
         self.update_button_texts()
 

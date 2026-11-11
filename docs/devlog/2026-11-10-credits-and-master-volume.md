@@ -18,7 +18,7 @@ MASTER VOLUME control that scales the music and every sound effect.
   appears with its license next to it; the Sakura Girl entry carries its two CC BY 3.0 attribution
   lines. `tests/test_sources.py` fails if a pack is missing from the page.
 - **Removed with the developer page:** the profile photo (`cv.png`), the GitHub and itch.io icons
-  and buttons, the unused `grey_button` manifest entry, the browser-opening handler, the lang keys,
+  and buttons, the browser-opening handler, the lang keys,
   and the Trademarks section of CREDITS.md. The mouse cursor image lived in `gui/developer/`; it is
   still used, so it moved to `gui/cursor/`.
 - **Master volume** is the first row of the AUDIO page, styled like the others (the page uses
