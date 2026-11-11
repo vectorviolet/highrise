@@ -42,10 +42,8 @@ Fields that live outside the description, following itch.io's
 - **Images:** `description.html` links the GIF from GitHub so it works when pasted as is. Better:
   upload `docs/preview.gif` through itch.io's editor and swap the image on the page for the
   uploaded one, so it loads fast and doesn't break if the file moves in the repo.
-- **Theme (checklist item, proposal):** colors that match the cover and banner, not plain black on
-  white: the sky blue (about `#54D8E7`) as the page background, the dark navy (about `#1E1D3B`) for
-  text and panels, and the tagline's yellow (`#FFE278`) for links. Set it in the theme editor on the
-  live page and check that the text stays readable.
+- **Theme:** colors that match the cover and banner, not plain black on white; the exact values set
+  in the theme editor are in [Theme settings](#theme-settings) below.
 - **Cover:** `docs/store/cover-itchio.png` (630x500, itch.io's cover size) goes on the edit page.
   `docs/design/cover.png` (1402x1122, the art's native size) is the larger master.
 - **Banner:** `docs/design/banner.png` (1920x600) goes in the page's banner field (itch.io shows it
@@ -93,6 +91,27 @@ Linux: run ./highrise/highrise from the unzipped folder.
 
 Your city is saved on this computer; press CONTINUE to resume it.
 ```
+
+## Theme settings
+
+Set in the theme editor of the live page ("Edit theme"), as the owner has them now:
+
+| Group | Setting | Value |
+|---|---|---|
+| Color | BG | `#54D8E7` (the cover's sky blue) |
+| Color | BG 2 | `#f5c399` (the banner's peach horizon) |
+| Color | Text | `#1E1D3B` (the icon's dark navy) |
+| Color | Link | `#FFE278` (the tagline's yellow) |
+| Text | Font | Anonymous Pro |
+| Text | Size | Large |
+| Layout | Screenshots | Auto (sidebar) |
+| Images | Banner | `docs/design/banner.png`, align Center |
+| Images | Background | none |
+
+Check after changing the theme: the yellow link color on the sky-blue background is low contrast
+(about 1.4 to 1), so links are hard to read. If that shows on the live page, use a darker link color
+such as a deep blue (`#1B4FD8`) or the navy with an underline; keep `#FFE278` for text on dark
+panels only.
 
 When the game changes in a way players see (controls, features, ages), update
 `description.html` in the same PR and paste it again.
