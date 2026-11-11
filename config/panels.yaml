@@ -32,12 +32,17 @@ object_templates:
     position: [CENTER, CENTER]
   # Button colors (issue #63): red leaves/cancels/destroys, green is the main
   # "go" action, blue is everything else. tests/test_menu_polish.py lists them.
+  # They repeat menu_btn's hover and nine_slice instead of extending it:
+  # pygamine resolves `extends` one level only (pygamine #46), so a template
+  # extending a template loses the grandparent's keys.
   menu_btn_red:
-    extends: menu_btn
     asset: red_button
+    hover: yellow_button
+    nine_slice: 20
   menu_btn_green:
-    extends: menu_btn
     asset: green_button
+    hover: yellow_button
+    nine_slice: 20
   title_btn:
     asset: blue_button
   title_btn_text:

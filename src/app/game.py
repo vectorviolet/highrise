@@ -499,6 +499,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def _on_buildings_merged(self) -> None:
         self.audio.play_sfx(self.merge_sound_path)
+        # A merge frees tiles: BUILD's hover text can't keep saying TILES FULL.
+        self.update_button_texts()
 
     def draw(self) -> None:
         self.panel_manager.draw(self.window)
@@ -557,14 +559,12 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.buildings.append(new_building)
         self.buildings.sort_by_column()
 
+        # Buildings are also added while a save loads, before the game panel exists.
         if (
-            len(self.buildings) == tilemap.row_count * tilemap.column_count
-            and "game" in self.panel_manager
+            "game" in self.panel_manager
             and "build_button_text" in self.panel_manager["game"]
         ):
-            self.panel_manager["game"]["build_button_text"].set_text(
-                tr("game.tiles_full"), state="hover"
-            )
+            self.update_button_texts()
 
     def create_building(self) -> None:
         if not self.player.can_afford(self.buildings.get_build_cost()):

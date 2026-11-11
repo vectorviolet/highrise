@@ -115,6 +115,42 @@ def test_a_new_button_must_be_added_to_the_color_table():
     assert unlisted == set()
 
 
+def test_no_object_template_extends_another_template():
+    # pygamine resolves `extends` one level only (pygamine #46), which dropped the
+    # hover image and nine_slice of the red and green buttons.
+    config = yaml.safe_load(PANELS_YAML.read_text(encoding="utf-8"))
+
+    extending = [n for n, t in config["object_templates"].items() if "extends" in t]
+
+    assert extending == []
+
+
+def test_every_colored_menu_button_has_a_hover_image():
+    game = started_game()
+    missing = []
+    for path in EXPECTED_BUTTON_COLORS:
+        panel, name = path.split(".")
+        # The hover artwork is the engine's private state; there is no public view.
+        if None not in game.panel_manager[panel][name]._hover_images:
+            missing.append(path)
+
+    assert missing == []
+
+
+def test_red_and_green_menu_buttons_load_with_the_blue_ones_nine_slice():
+    game = started_game()
+    # Red, green and blue buttons built from the menu_btn templates.
+    buttons = ("menu.play_button", "menu.exit_button", "menu.credits_button")
+    buttons += ("play.continue_button", "play.play_back_button")
+
+    slices = {}
+    for path in buttons:
+        panel, name = path.split(".")
+        slices[path] = game.panel_manager[panel][name]._nine_slice  # engine-private
+
+    assert slices == dict.fromkeys(buttons, 20)
+
+
 # ── CONTINUE first ────────────────────────────────────────────────────────
 
 
