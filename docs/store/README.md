@@ -66,7 +66,7 @@ owner edits the page by hand; this list is the source to copy from.
 | Short description or tagline | An isometric city-builder where same-level buildings merge 2048-style. (as on the page; it does not repeat the title) |
 | Classification / kind / release status | Games / Downloadable / Released |
 | Pricing | $0 or donate, suggested donation $2.00 (the owner's choice, as set) |
-| Uploads | `highrise-windows.zip`, `highrise-linux.zip`, `highrise-osx.zip` (uploaded by the release workflow's butler jobs). Tick the matching platform on each file's "Executable for" boxes (Windows, Linux, macOS), so itch.io shows the right download buttons and platform filters |
+| Uploads | `highrise-windows.zip`, `highrise-linux.zip`, `highrise-osx.zip`. The release workflow's butler jobs push the unpacked builds to the `windows`, `linux` and `osx` channels and itch.io names the files after the channels (the GitHub release zips are `highrise-windows.zip`, `highrise-linux.zip` and `highrise-macos.zip`). Tick the matching platform on each file's "Executable for" boxes (Windows, Linux, macOS), so itch.io shows the right download buttons and platform filters |
 | Description | paste `docs/store/description.html` in HTML mode |
 | Genre | Strategy |
 | Tags (max 10; itch.io says not to repeat the genre or platforms, so drop "strategy") | City Builder, Isometric, Puzzle, 2048, Casual, Relaxing, Idle, 2D, Singleplayer, Open Source. Prefer itch.io's own suggestions when it offers a near match; don't tag the game's own name |
