@@ -42,12 +42,11 @@ SEED = 44
 RESOLUTION = (1920, 1080)
 FPS = 25
 FRAME_MS = 1000 // FPS
-# README images are at most this wide.
-MAX_WIDTH = 1280
+# README and store media stay at the full canvas width; devlog images are at most 1280 wide.
+MAX_WIDTH = 1920
+DEVLOG_WIDTH = 1280
 # The GIF's width and its palette's sample frames (see save_gif).
-GIF_WIDTH = 1000
-# The GIF shows this part of the canvas (left, top, right, bottom): the board and the toolbar.
-GIF_CROP = (200, 170, 1720, 1080)
+GIF_WIDTH = 1920
 PALETTE_SAMPLES = 12
 # Where the mouse rests when it should touch nothing (over the bare sky).
 IDLE_MOUSE = (60, 60)
@@ -211,7 +210,11 @@ def resized(image: Image.Image, width: int) -> Image.Image:
 
 def save_png(image: Image.Image, path: Path, width: int = MAX_WIDTH) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    resized(image, width).save(path, optimize=True)
+    # Flat pixel art: one 256-color palette (no dithering) is a third of the size of RGB.
+    indexed = resized(image, width).quantize(
+        colors=256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE
+    )
+    indexed.save(path, optimize=True)
     print(f"Captured {path}")
 
 
@@ -226,7 +229,7 @@ def palette_indices(frame_count: int) -> list[int]:
 def save_gif(frames: list[Image.Image], path: Path, width: int = GIF_WIDTH) -> None:
     """One 256-color palette for the whole clip, built from frames spread over it, so colors
     that only appear later (a booster's roof, the coins) are in it too."""
-    frames = [resized(f.crop(GIF_CROP), width) for f in frames]
+    frames = [resized(f, width) for f in frames]
     samples = [frames[i] for i in palette_indices(len(frames))]
     w, h = samples[0].size
     sheet = Image.new("RGB", (w, h * len(samples)))
@@ -462,17 +465,23 @@ def capture_all(args: argparse.Namespace) -> None:
         save_png(inspection(studio), shots / "03_inspection.png")
         save_gif(preview_gif(studio), args.docs / "preview.gif")
         extra = args.candidates
-        save_png(merge_in_progress(studio), extra / "merge-in-progress.png")
-        save_png(sell_option(studio), extra / "inspect-sell.png")
-        save_png(booster_inspection(studio), extra / "inspect-booster.png")
+        save_png(
+            merge_in_progress(studio), extra / "merge-in-progress.png", DEVLOG_WIDTH
+        )
+        save_png(sell_option(studio), extra / "inspect-sell.png", DEVLOG_WIDTH)
+        save_png(
+            booster_inspection(studio), extra / "inspect-booster.png", DEVLOG_WIDTH
+        )
         before, after = expand_before_after(studio)
-        save_png(before, extra / "expand-before.png")
-        save_png(after, extra / "expand-after.png")
-        save_png(later_age(studio), extra / "later-age-sand.png")
-        save_png(next_age_checklist(studio), extra / "next-age-checklist.png")
+        save_png(before, extra / "expand-before.png", DEVLOG_WIDTH)
+        save_png(after, extra / "expand-after.png", DEVLOG_WIDTH)
+        save_png(later_age(studio), extra / "later-age-sand.png", DEVLOG_WIDTH)
+        save_png(
+            next_age_checklist(studio), extra / "next-age-checklist.png", DEVLOG_WIDTH
+        )
         display, game_page = settings_turkish(studio)
-        save_png(display, extra / "settings-display-tr-125.png")
-        save_png(game_page, extra / "settings-game-tr.png")
+        save_png(display, extra / "settings-display-tr-125.png", DEVLOG_WIDTH)
+        save_png(game_page, extra / "settings-game-tr.png", DEVLOG_WIDTH)
     finally:
         studio.close()
 

@@ -12,7 +12,7 @@ showed a different game (a different font, a "DEVELOPER" button, a plain black c
 ## What was retaken
 
 `docs/preview.gif`, `docs/screenshots/01_main_menu.png`, `02_build_mode.png` and
-`03_inspection.png` (same names, 1280 px wide at most). They come from
+`03_inspection.png` (same names, the full 1920x1080 canvas, as before: README and store media are never downscaled; the PNGs use one 256-color palette, 9 to 43 KB). They come from
 `scripts/capture_readme.py`: it boots the real `Game` headless, drives it by calling its own
 methods (BUILD, BOOST, the arrow-key moves, the inspection click), and writes the pictures. Saves
 go to a temporary folder (never `databases/`), the random numbers are seeded and the clock is a
@@ -28,11 +28,11 @@ uv run --group dev python scripts/capture_readme.py
   booster, so the tiles it covers are lit, and the payouts' texts float over the buildings.
 - **03 inspection:** a level 5 building's info panel with the SELL button.
 - **preview.gif:** BUILD twice, three slides that merge buildings, then BOOST and the payouts
-  coming in (about 8 s, 0.65 MB).
+  coming in (about 8 s, 1920x1080, 0.85 MB).
 
 ## Candidates (not in the README yet)
 
-All in `img/screenshots-2026-11/`, taken the same way. The issue's shot list, as candidates:
+All in `img/screenshots-2026-11/`, taken the same way and shrunk to 1280 px wide (devlog images; if one is picked for the README or the store page it is retaken at 1920). The issue's shot list, as candidates:
 
 Merge in progress, and inspecting a booster (its multiplier, covered tiles lit) next to a normal
 building with the sell option:
