@@ -7,6 +7,8 @@ creation path) on the real Tilemap load_game_data() constructs."""
 
 from types import SimpleNamespace
 
+import pytest
+
 
 from app.game_persistence import GamePersistenceMixin, GameSettings
 from gameplay.buildings.sprites import DOOR_SIDES, default_door_side
@@ -66,12 +68,18 @@ class FakeGame(GamePersistenceMixin):
         self.calls: list = []
 
     def add_building(
-        self, level, row, column, door_side=None, *, booster=False
+        self, level, row, column, door_side=None, *, booster=False, income_fraction=0.0
     ) -> None:
         self.calls.append(("add_building", level, row, column))
         tile = self.tilemap[row - 1][column - 1]
         self.buildings.append(
-            self.buildings.create(level, tile, door_side=door_side, booster=booster)
+            self.buildings.create(
+                level,
+                tile,
+                door_side=door_side,
+                booster=booster,
+                income_fraction=income_fraction,
+            )
         )
 
 
@@ -500,7 +508,14 @@ def test_a_save_from_before_door_sides_is_migrated_with_a_fixed_default(
     game.load_data()
 
     columns = game.database.execute_safely("PRAGMA table_info(buildings)", True)
-    assert [c[1] for c in columns] == ["level", "row", "column", "door_side", "booster"]
+    assert [c[1] for c in columns] == [
+        "level",
+        "row",
+        "column",
+        "door_side",
+        "booster",
+        "income_fraction",
+    ]
     sides = {
         (b.tile.row_number, b.tile.column_number): b.door_side for b in game.buildings
     }
@@ -581,7 +596,7 @@ def test_a_save_from_before_boosters_loads_with_no_boosters(tmp_path, assets):
     game.load_data()
 
     columns = game.database.execute_safely("PRAGMA table_info(buildings)", True)
-    assert [c[1] for c in columns][-1] == "booster"
+    assert "booster" in [c[1] for c in columns]
     assert len(game.buildings) == 2
     assert not any(b.is_booster for b in game.buildings)
 
@@ -591,7 +606,8 @@ def test_a_saved_booster_level_is_held_to_the_booster_maximum(tmp_path, assets):
     game.init_database()
     maximum = game.buildings.boosters.max_level
     game.database.execute_safely(
-        "INSERT INTO buildings VALUES (?, 1, 1, 'left', 1)", params=(maximum + 4,)
+        "INSERT INTO buildings(level, row, column, door_side, booster) VALUES (?, 1, 1, 'left', 1)",
+        params=(maximum + 4,),
     )
 
     game.load_data()
@@ -610,3 +626,44 @@ def test_delete_data_removes_the_boosters_too(tmp_path, assets):
     game.load_data()
 
     assert len(game.buildings) == 0
+
+
+def test_the_held_back_income_fraction_is_saved_and_loaded(tmp_path, assets):
+    seed = FakeGame(tmp_path, assets)
+    seed.load_data()
+    building = seed.buildings.create(2, seed.tilemap[0][0], income_fraction=0.4)
+    seed.buildings.append(building)
+    seed.save_game()
+
+    game = FakeGame(tmp_path, assets)
+    game.load_data()
+
+    assert game.buildings[0].income_fraction == pytest.approx(0.4)
+
+
+def test_a_save_from_before_income_fractions_loads_with_none(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    game.database.execute_safely(
+        "CREATE TABLE buildings(level INTEGER, row INTEGER, column INTEGER, "
+        "door_side TEXT, booster INTEGER NOT NULL DEFAULT 0)"
+    )
+    game.database.execute_safely("INSERT INTO buildings VALUES (2, 1, 1, 'left', 0)")
+
+    game.load_data()
+
+    columns = game.database.execute_safely("PRAGMA table_info(buildings)", True)
+    assert [c[1] for c in columns][-1] == "income_fraction"
+    assert game.buildings[0].income_fraction == 0
+
+
+@pytest.mark.parametrize("bad", [-0.5, 2.0, 1e9])
+def test_a_damaged_income_fraction_is_dropped(tmp_path, assets, bad):
+    game = FakeGame(tmp_path, assets)
+    game.init_database()
+    game.database.execute_safely(
+        "INSERT INTO buildings VALUES (1, 1, 1, 'left', 0, ?)", params=(bad,)
+    )
+
+    game.load_data()
+
+    assert game.buildings[0].income_fraction == 0

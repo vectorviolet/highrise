@@ -73,8 +73,7 @@ class Building(StateObject):
         self.on_payout = on_payout
         self.merge_target: Building | None = None
         # Cents a boosted payout couldn't pay yet (see boosted_income). Carried into the building
-        # that replaces this one on a merge or an age change; not saved, so a save and load drops
-        # them (under 1$).
+        # that replaces this one on a merge or an age change, and saved with the building.
         self.income_fraction = income_fraction
         if on_payout is not None:  # a booster has none: it earns nothing, so no timer
             self.invoke_repeating(

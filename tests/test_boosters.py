@@ -352,6 +352,7 @@ def _config(**changes) -> dict:
         "price": dict.fromkeys(AGES, 100),
         "multipliers": [1.1, 1.2],
         "shapes": dict.fromkeys(AGES, "around"),
+        "placed_highlight_ms": 1500,
     }
     data.update(changes)
     return data
@@ -440,3 +441,22 @@ def test_the_booster_list_follows_the_collection():
     assert buildings.income_multiplier(beside) > 1
     buildings.set_age(1)  # replaces every building in place: the diagonal shape
     assert buildings.income_multiplier(buildings[1]) == 1
+
+
+def test_a_price_that_is_not_a_positive_integer_is_refused():
+    for bad in (0, -5, 2.5, "100", True, None):
+        price = {**dict.fromkeys(AGES, 100), "wood": bad}
+        with pytest.raises(ValueError, match="positive integer"):
+            BoosterConfig.from_dict(_config(price=price), AGES, 2)
+
+
+@pytest.mark.parametrize("bad", [float("nan"), float("inf"), "1.5", None, True, 1])
+def test_a_multiplier_that_is_not_a_finite_number_above_1_is_refused(bad):
+    with pytest.raises(ValueError, match="finite numbers above 1"):
+        BoosterConfig.from_dict(_config(multipliers=[1.1, bad]), AGES, 2)
+
+
+def test_the_placed_highlight_time_must_be_a_whole_number_of_ms():
+    for bad in (-1, 1.5, "1500", None):
+        with pytest.raises(ValueError, match="placed_highlight_ms"):
+            BoosterConfig.from_dict(_config(placed_highlight_ms=bad), AGES, 2)

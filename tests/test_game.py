@@ -393,7 +393,7 @@ def test_every_production_insertion_path_pays_the_player(assets, path, monkeypat
         game.create_building()
     elif path == "load":
         game.database = SimpleNamespace(
-            execute_safely=lambda *a: [(2, 1, 1, "right", 0)]
+            execute_safely=lambda *a: [(2, 1, 1, "right", 0, 0.0)]
         )
         game.load_buildings()
     elif path == "age":
@@ -674,7 +674,7 @@ def test_game_plays_the_merge_sound_through_the_collection_callback(assets):
 def test_loaded_buildings_have_payout_callbacks_without_an_update(assets):
     game = make_game(assets)
     game.database = SimpleNamespace(
-        execute_safely=lambda *args: [(2, 1, 1, "right", 0)]
+        execute_safely=lambda *args: [(2, 1, 1, "right", 0, 0.0)]
     )
 
     game.load_buildings()
@@ -1569,3 +1569,57 @@ def test_the_hover_does_not_walk_the_tiles_while_nothing_changes(assets):
     game._highlight_boosted_tiles()
 
     assert not tile.highlighted
+
+
+def test_a_booster_placed_with_boost_stays_lit_for_a_moment(assets, monkeypatch):
+    game = make_game(assets, size=3, starting_money=100_000)
+    game.panel_manager.current_panel = "game"
+    game.mouse = SimpleNamespace(
+        position=(-1, -1)
+    )  # on the toolbar, far from the board
+    now = [10_000]
+    monkeypatch.setattr(pygame.time, "get_ticks", lambda: now[0])
+    monkeypatch.setattr("app.game.choice", lambda seq: (2, 2))
+
+    game.create_booster()
+    game._highlight_boosted_tiles()
+    lit_after_placing = _lit(game)
+    now[0] += game.buildings.boosters.placed_highlight_ms - 1
+    game._highlight_boosted_tiles()
+    lit_just_before_the_end = _lit(game)
+    now[0] += 1
+    game._highlight_boosted_tiles()
+
+    assert lit_after_placing == {(1, 2), (3, 2), (2, 1), (2, 3)}
+    assert lit_just_before_the_end == lit_after_placing
+    assert _lit(game) == set()
+
+
+def test_a_placed_highlight_gives_way_to_the_info_panel_and_ignores_buildings(
+    assets, monkeypatch
+):
+    game = make_game(assets, size=3, starting_money=100_000)
+    game.panel_manager.current_panel = "game"
+    game.mouse = SimpleNamespace(position=(-1, -1))
+    monkeypatch.setattr(pygame.time, "get_ticks", lambda: 10_000)
+    monkeypatch.setattr("app.game.choice", lambda seq: (2, 2))
+    game.create_booster()
+    building = game.add_building(1, 1, 1, "left")
+
+    game.info_panel.is_active = True
+    game.info_panel.building = building  # a normal building's panel owns the screen
+    game._highlight_boosted_tiles()
+
+    assert _lit(game) == set()
+
+
+def test_a_plain_build_does_not_light_anything(assets, monkeypatch):
+    game = make_game(assets, size=3, starting_money=100_000)
+    game.panel_manager.current_panel = "game"
+    game.mouse = SimpleNamespace(position=(-1, -1))
+    monkeypatch.setattr("app.game.choice", lambda seq: (2, 2))
+
+    game.create_building()
+    game._highlight_boosted_tiles()
+
+    assert _lit(game) == set()

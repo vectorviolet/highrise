@@ -136,6 +136,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     # What _highlight_boosted_tiles last lit up (the booster and where it stood, and the board).
     _highlight_key: tuple | None = None
     _highlight_tilemap: Tilemap | None = None
+    # The booster BOOST just placed and the time (ms) its tiles stay lit until.
+    _placed_booster: Building | None = None
+    _placed_until: int = 0
 
     def __init__(self) -> None:
         self.settings = yaml.safe_load(Path("config/settings.yaml").read_text())
@@ -543,7 +546,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def _highlighted_booster(self) -> Building | None:
         """The booster whose covered tiles light up: the one the open info panel shows, else
-        (no panel open) the one under the mouse, on the booster's sprite or its tile."""
+        (no panel open) the one under the mouse, on the booster's sprite or its tile, else
+        the one BOOST just placed while its short highlight lasts."""
         shown = self.info_panel.building
         if self.info_panel.is_active:
             return shown if shown is not None and shown.is_booster else None
@@ -555,6 +559,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
                 position
             ):
                 return booster
+        if pygame.time.get_ticks() < self._placed_until:
+            return self._placed_booster  # just placed with BOOST: lit for a moment
         return None
 
     def _highlight_boosted_tiles(self) -> None:
@@ -639,15 +645,17 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         door_side: str | None = None,
         *,
         booster: bool = False,
-    ) -> None:
-        """Add a building (or a booster); `door_side=None` picks a random side (a newly
-        built one)."""
+        income_fraction: float = 0.0,
+    ) -> Building:
+        """Add a building (or a booster) and return it; `door_side=None` picks a random side
+        (a newly built one)."""
         tilemap = self._tilemap
         new_building = self.buildings.create(
             level,
             tilemap[row_number - 1][column_number - 1],
             door_side=door_side,
             booster=booster,
+            income_fraction=income_fraction,
         )
         self.buildings.append(new_building)
         self.buildings.sort_by_column()
@@ -658,6 +666,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             and "build_button_text" in self.panel_manager["game"]
         ):
             self.update_button_texts()
+        return new_building
 
     def create_building(self) -> None:
         self._build_on_random_empty_tile(self.buildings.get_build_cost())
@@ -665,15 +674,24 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def create_booster(self) -> None:
         if not self.boosters_unlocked:
             return
-        self._build_on_random_empty_tile(
+        placed = self._build_on_random_empty_tile(
             self.buildings.get_booster_cost(), booster=True
         )
+        if placed is not None:
+            # Show what it covers for a moment, though the mouse is on the toolbar.
+            self._placed_booster = placed
+            self._placed_until = (
+                pygame.time.get_ticks() + self.buildings.boosters.placed_highlight_ms
+            )
 
-    def _build_on_random_empty_tile(self, cost: int, *, booster: bool = False) -> None:
+    def _build_on_random_empty_tile(
+        self, cost: int, *, booster: bool = False
+    ) -> Building | None:
         """Puts a level 1 building (or booster) of the current age on a random empty tile and
-        pays `cost`; nothing happens when the player can't pay or the board is full."""
+        pays `cost`, and returns it; nothing happens (None) when the player can't pay or the
+        board is full."""
         if not self.player.can_afford(cost):
-            return
+            return None
 
         tilemap = self._tilemap
         all_tiles = {
@@ -686,9 +704,13 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         if empty_tiles:
             row_number, column_number = choice(empty_tiles)
-            self.add_building(1, row_number, column_number, booster=booster)
+            new_building = self.add_building(
+                1, row_number, column_number, booster=booster
+            )
             self._spend(cost)
             self.audio.play_sfx(self.action_sounds.build(self.buildings.age_number))
+            return new_building
+        return None
 
     def set_age(self, age_number) -> None:
         if age_number <= self.buildings.max_age_number:

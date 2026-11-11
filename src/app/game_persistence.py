@@ -41,7 +41,8 @@ class GamePersistenceMixin:
         )
         self.database.execute_safely(
             "CREATE TABLE IF NOT EXISTS buildings(level INTEGER, row INTEGER, column INTEGER, "
-            "door_side TEXT, booster INTEGER NOT NULL DEFAULT 0)"
+            "door_side TEXT, booster INTEGER NOT NULL DEFAULT 0, "
+            "income_fraction REAL NOT NULL DEFAULT 0)"
         )
         building_columns = self.database.execute_safely(
             "PRAGMA table_info(buildings)", True
@@ -57,6 +58,11 @@ class GamePersistenceMixin:
             # A buildings table from before boosters: every old row is a plain building.
             self.database.execute_safely(
                 "ALTER TABLE buildings ADD COLUMN booster INTEGER NOT NULL DEFAULT 0"
+            )
+        if "income_fraction" not in building_column_names:
+            # Likewise for the cents a boosted payout held back (0 for every old row).
+            self.database.execute_safely(
+                "ALTER TABLE buildings ADD COLUMN income_fraction REAL NOT NULL DEFAULT 0"
             )
         # A separate table, so saves made before these settings existed load
         # unchanged: the game table keeps its columns. Seeded with the
@@ -147,14 +153,15 @@ class GamePersistenceMixin:
     def load_buildings(self) -> None:
         self.buildings.clear()
         buildings = self.database.execute_safely(
-            "SELECT level, row, column, door_side, booster FROM buildings", True
+            "SELECT level, row, column, door_side, booster, income_fraction FROM buildings",
+            True,
         )
         if not buildings:
             return
         assert self.tilemap is not None, "tilemap not loaded yet"
         rows = self.tilemap.row_count
         cols = self.tilemap.column_count
-        for level, row, column, door_side, booster in buildings:
+        for level, row, column, door_side, booster, fraction in buildings:
             if 1 <= row <= rows and 1 <= column <= cols:
                 # A save from before door sides (or a damaged value) gets a fixed default.
                 if door_side not in DOOR_SIDES:
@@ -166,12 +173,19 @@ class GamePersistenceMixin:
                     column,
                     door_side,
                     booster=is_booster,
+                    income_fraction=self._valid_fraction(fraction),
                 )
             else:
                 self.database.execute_safely(
                     "DELETE FROM buildings WHERE level=? AND row=? AND column=?",
                     params=(level, row, column),
                 )
+
+    @staticmethod
+    def _valid_fraction(fraction: float) -> float:
+        """A saved income fraction held to what a building can really hold (0 up to the sum
+        of two buildings' fractions): a damaged value must not pay out a windfall."""
+        return fraction if 0 <= fraction < 2 else 0.0
 
     def _valid_level(
         self, level: int, row: int, column: int, booster: bool = False
@@ -219,14 +233,15 @@ class GamePersistenceMixin:
 
         for building in self.buildings:
             self.database.execute_safely(
-                "INSERT INTO buildings(level, row, column, door_side, booster) "
-                "VALUES(?, ?, ?, ?, ?)",
+                "INSERT INTO buildings(level, row, column, door_side, booster, income_fraction) "
+                "VALUES(?, ?, ?, ?, ?, ?)",
                 params=(
                     building.level,
                     building.tile.row_number,
                     building.tile.column_number,
                     building.door_side,
                     int(building.is_booster),
+                    building.income_fraction,
                 ),
             )
 
