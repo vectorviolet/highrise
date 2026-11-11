@@ -201,7 +201,7 @@ class GamePersistenceMixin:
         assert rows, "tasks row missing: call init_database() first"
         done_text, boost_unlocked = rows[0]
         done = {int(i) for i in done_text.split(",") if i.strip().isdigit()}
-        self.tasks.restore(self.buildings.age_number, done, bool(boost_unlocked))
+        self.tasks.restore(done, bool(boost_unlocked))
 
     @staticmethod
     def _valid_fraction(fraction: float, row: int, column: int) -> float:

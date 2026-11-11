@@ -189,12 +189,16 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
                 self.settings["boosters"], AGES, sprites.level_count(booster=True)
             ),
         )
-        # The age tasks (config/tasks.yaml): they gate NEXT AGE and unlock BOOST.
-        self.tasks = AgeTasks(TasksConfig.load(AGES), AGES)
         self.cloud_count = gameplay["cloud_count"]
         self.max_size = gameplay["max_map_size"]
         self.max_building_level = sprites.checked_max_level(
             gameplay["max_building_level"]
+        )
+        # The age tasks (config/tasks.yaml): they gate NEXT AGE and unlock BOOST.
+        self.tasks = AgeTasks(
+            TasksConfig.load(AGES, self.max_building_level, self.max_size**2),
+            self.buildings,
+            AGES,
         )
         self.starting_money = gameplay["starting_money"]
 
@@ -502,11 +506,14 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         ):
             hover = tr("game.tiles_full") if full else format_money(cost)
             if name == "boost_button_text" and not self.tasks.boost_unlocked:
-                hover = tr("game.boost_locked")
+                hover = tr("game.locked")
             panel[name].set_text(hover, state="hover")
 
         if self.buildings.age_number == self.buildings.max_age_number:
             panel["next_age_button_text"].set_text(tr("game.max_age"), state="hover")
+        elif not self.tasks.all_done():
+            # Open tasks lock NEXT AGE however much cash there is.
+            panel["next_age_button_text"].set_text(tr("game.locked"), state="hover")
         else:
             panel["next_age_button_text"].set_text(
                 format_money(self.tasks.next_age_cost()), state="hover"
@@ -541,10 +548,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.cloud_animation.update()
 
     def _update_tasks(self) -> None:
-        """Latches the tasks the board meets; a newly unlocked BOOST updates its button text."""
-        unlocked = self.tasks.boost_unlocked
-        self.tasks.update(self.buildings)
-        if self.tasks.boost_unlocked != unlocked:
+        """Measures and latches the tasks; a newly done one updates the buttons' texts (BOOST
+        and NEXT AGE show LOCKED until their tasks are done)."""
+        if self.tasks.update():
             self.update_button_texts()
 
     def _close_stale_info_panel(self) -> None:
@@ -613,23 +619,32 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         super().draw()
 
     def _task_rows(self) -> list[TaskRow]:
+        """The checklist's rows, from the values the last tasks update measured."""
         return [
             TaskRow(
                 tr(f"tasks.{task.type}", target=task.target),
-                int(task.current(self.buildings)),
+                int(value),
                 task.target,
                 self.tasks.is_done(index),
             )
-            for index, task in enumerate(self.tasks.tasks)
+            for index, (task, value) in enumerate(
+                zip(self.tasks.tasks, self.tasks.values)
+            )
         ]
 
     def _task_list(self) -> pygame.Surface:
-        """The checklist, repainted only when its rows, the UI scale or the language change."""
-        rows = self._task_rows()
-        key = (tuple(rows), self.ui_scale, localization.language)
+        """The checklist, repainted only when a shown number, the UI scale or the language
+        change (the texts are looked up only then)."""
+        key = (
+            self.tasks.age_number,
+            tuple(int(v) for v in self.tasks.values),
+            self.tasks.done,
+            self.ui_scale,
+            localization.language,
+        )
         if key != self._task_list_key or self._task_list_surface is None:
             self._task_list_surface = render_task_list(
-                rows, self.money_font_path, self.ui_scale / 100
+                self._task_rows(), self.money_font_path, self.ui_scale / 100
             )
             self._task_list_key = key
         return self._task_list_surface
@@ -653,10 +668,26 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         rect = surface.get_rect(midbottom=(button.rect.centerx, button.rect.top - gap))
         self.window.blit(surface, rect)
 
+    def _task_panel_rect(self) -> pygame.Rect | None:
+        """Option B's place: the top left of the game. None when the panel isn't shown."""
+        if self.tasks.config.ui != "panel" or not self.tasks.tasks:
+            return None
+        margin = round(16 * self.ui_scale / 100)
+        return self._task_list().get_rect(topleft=(margin, margin))
+
     def _draw_task_panel(self) -> None:
         """Option B: the checklist always visible at the top left of the game."""
-        margin = round(16 * self.ui_scale / 100)
-        self.window.blit(self._task_list(), (margin, margin))
+        rect = self._task_panel_rect()
+        assert rect is not None
+        self.window.blit(self._task_list(), rect)
+
+    def _task_panel_covers(self, event: pygame.Event) -> bool:
+        """Whether `event` is a mouse click on the always-visible checklist, which swallows it
+        like the info panel does (it must not reach the board underneath)."""
+        if event.type not in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP):
+            return False
+        rect = self._task_panel_rect()
+        return rect is not None and rect.collidepoint(self.mouse.position)
 
     def on_exit_request(self) -> None:
         self.audio.play_sfx(self.go_back_sound_path)
@@ -771,15 +802,13 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def set_age(self, age_number) -> None:
         if age_number <= self.buildings.max_age_number:
             self.buildings.set_age(age_number)
-            if age_number != self.tasks.age_number:
-                self.tasks.start_age(age_number)
             self.update_button_texts()
 
     def next_age(self) -> None:
         if self.buildings.age_number >= self.buildings.max_age_number:
             return
         # Check everything first, then pay: a refused NEXT AGE costs nothing.
-        self.tasks.update(self.buildings)
+        self._update_tasks()
         cost = self.tasks.next_age_cost()
         if not self.tasks.all_done() or not self.player.can_afford(cost):
             return

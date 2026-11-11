@@ -66,7 +66,7 @@ game:
   expand: "EXPAND"
   build: "BUILD"
   boost: "BOOST"
-  boost_locked: "LOCKED"
+  locked: "LOCKED"
   next_age: "NEXT AGE"
   sell: "SELL"
   max_size: "MAX SIZE"

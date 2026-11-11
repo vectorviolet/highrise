@@ -61,7 +61,7 @@ game:
   expand: "GENİŞLET"
   build: "İNŞA ET"
   boost: "GÜÇLENDİR"
-  boost_locked: "KİLİTLİ"
+  locked: "KİLİTLİ"
   next_age: "SONRAKİ ÇAĞ"
   sell: "SAT"
   max_size: "MAKS. BOYUT"
@@ -75,7 +75,7 @@ game:
 
 tasks:
   title: "ÇAĞ GÖREVLERİ"
-  building_level: "{target}. seviye bir bina edin"
+  building_level: "{target}. seviye bir binanız olsun"
   income_per_second: "Saniyede {target}$ kazanın"
   boosted_buildings: "{target} güçlendirilmiş binanız olsun"
 

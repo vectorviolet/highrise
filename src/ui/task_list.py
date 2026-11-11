@@ -7,6 +7,7 @@ config/tasks.yaml.
 """
 
 from dataclasses import dataclass
+from functools import lru_cache
 
 import pygame
 
@@ -22,6 +23,11 @@ PADDING = 12
 ROW_GAP = 6
 BOX_GAP = 8
 COLUMN_GAP = 18
+
+
+@lru_cache(maxsize=None)
+def _font(path: str, size: int) -> pygame.font.Font:
+    return pygame.font.Font(path, size)
 
 
 @dataclass(frozen=True)
@@ -57,8 +63,8 @@ def render_task_list(
     rows: list[TaskRow], font_path: str, scale: float
 ) -> pygame.Surface:
     """The checklist as a surface, sized for UI scale `scale` (1.0 = 100%)."""
-    title_font = pygame.font.Font(font_path, round(TITLE_SIZE * scale))
-    row_font = pygame.font.Font(font_path, round(ROW_SIZE * scale))
+    title_font = _font(font_path, round(TITLE_SIZE * scale))
+    row_font = _font(font_path, round(ROW_SIZE * scale))
     pad = round(PADDING * scale)
     gap = round(ROW_GAP * scale)
     box_gap = round(BOX_GAP * scale)

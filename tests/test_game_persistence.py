@@ -66,7 +66,7 @@ class FakeGame(GamePersistenceMixin):
         self.tilemap = None
         self.tile_selector = SimpleNamespace(tilemap=None)
         self.buildings = Buildings(boosters=BoosterConfig.load(AGES))
-        self.tasks = AgeTasks(TasksConfig.load(AGES), AGES)
+        self.tasks = AgeTasks(TasksConfig.load(AGES, 11, 49), self.buildings, AGES)
         self.calls: list = []
 
     def add_building(
@@ -129,7 +129,7 @@ def test_get_game_data_returns_the_existing_row_on_later_calls(tmp_path, assets)
 def test_the_task_state_round_trips_through_a_save(tmp_path, assets):
     game = FakeGame(tmp_path, assets)
     game.load_data()
-    game.tasks.restore(0, {1}, False)
+    game.tasks.restore({1}, False)
     game.save_game()
 
     other = FakeGame(tmp_path, assets)
@@ -142,7 +142,7 @@ def test_the_task_state_round_trips_through_a_save(tmp_path, assets):
 def test_an_unlocked_boost_is_saved(tmp_path, assets):
     game = FakeGame(tmp_path, assets)
     game.load_data()
-    game.tasks.restore(0, {0, 1}, True)
+    game.tasks.restore({0, 1}, True)
     game.save_game()
 
     other = FakeGame(tmp_path, assets)
@@ -185,7 +185,6 @@ def test_a_save_from_before_age_tasks_past_the_first_age_has_boost_unlocked(
 
     assert game.tasks.boost_unlocked
     assert game.tasks.done == frozenset()
-    assert game.tasks.age_number == 2
 
 
 def test_damaged_saved_task_numbers_are_dropped(tmp_path, assets):
@@ -201,7 +200,7 @@ def test_damaged_saved_task_numbers_are_dropped(tmp_path, assets):
 def test_delete_data_resets_the_tasks(tmp_path, assets):
     game = FakeGame(tmp_path, assets)
     game.load_data()
-    game.tasks.restore(0, {0, 1}, True)
+    game.tasks.restore({0, 1}, True)
     game.save_game()
 
     game.delete_data()
