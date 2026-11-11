@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import Callable
 
 from pygame import Vector2
+from gameplay.buildings import sprites
 from gameplay.tiles.tile import Tile
-from pygamine import ImagePath
 from pygamine import StateObject
 from pygamine import Rigidbody2D
 
@@ -40,6 +40,7 @@ class Building(StateObject):
         age_number,
         tile: Tile,
         *,
+        door_side: str = "left",
         on_payout: Callable[["Building", int], None] | None,
     ) -> None:
         # on_payout is required (keyword-only) so a building can't be built
@@ -51,6 +52,7 @@ class Building(StateObject):
         self.should_destroy = False
         self.cooldown = 2
         self.level = level
+        self.door_side = door_side
         self.speed = (self.level * 2 * (age_number + 1)) - 1
         self.sell_price = self.level * (self.age_number + 1) * 70
         self.__set_size()
@@ -58,8 +60,8 @@ class Building(StateObject):
         super().__init__(
             pos=self.unselected_position,
             size=self.size,
-            image_path=self.get_image_path(),
         )
+        self.add_surface(None, self.sprite)
         self.add_component(Rigidbody2D).set_velocity((0, 0))
         self.on_payout = on_payout
         self.merge_target: Building | None = None
@@ -73,15 +75,14 @@ class Building(StateObject):
     def rigidbody(self) -> Rigidbody2D:
         return self.require_component(Rigidbody2D)
 
-    def get_image_path(self) -> ImagePath:
-        return ImagePath("level" + str(self.level), "buildings/" + self.age)
-
     def __set_size(self) -> None:
-        self.floor_count = (self.level + 1) // 2
-        self.size = self.width, self.height = (50, 75 + (self.floor_count - 1) * 23)
+        # Cached per (age, level, door side): nothing is composed per frame.
+        self.sprite = sprites.game_sprite(self.age, self.level, self.door_side)
+        self.size = self.width, self.height = self.sprite.get_size()
 
     def set_position_from_tile(self, tile: Tile) -> None:
-        x, y = tile.rect.x + 43, tile.rect.y - 23 - (self.floor_count - 1) * 23
+        # The foot stays 52 px below the tile's top whatever the height, so taller sprites grow up.
+        x, y = tile.rect.x + 43, tile.rect.y + 52 - self.height
         self.unselected_position = Vector2(x, y)
         self.selected_position = Vector2(x, y - 10)
 
@@ -128,18 +129,29 @@ class Buildings(list[Building]):
         self.on_payout = on_payout
 
     def create(
-        self, level: int, tile: Tile, *, age_number: int | None = None
+        self,
+        level: int,
+        tile: Tile,
+        *,
+        age_number: int | None = None,
+        door_side: str | None = None,
     ) -> Building:
-        """Construct a building with the collection's payout callback, without adding it."""
+        """Construct a building with the collection's payout callback, without adding it.
+
+        `door_side=None` means a new building: it gets a random side. Pass the side of an
+        existing building to keep it."""
         age = self.age_number if age_number is None else age_number
-        return Building(level, age, tile, on_payout=self.on_payout)
+        side = sprites.random_door_side() if door_side is None else door_side
+        return Building(level, age, tile, door_side=side, on_payout=self.on_payout)
 
     def set_age(self, age_number) -> None:
         if age_number <= self.max_age_number:
             self.age_number = age_number
 
             for i, building in enumerate(self):
-                self[i] = self.create(building.level, building.tile)
+                self[i] = self.create(
+                    building.level, building.tile, door_side=building.door_side
+                )
 
     def is_moving(self) -> bool:
         return any(b.rigidbody.velocity != Vector2(0, 0) for b in self)
@@ -201,7 +213,10 @@ class Buildings(list[Building]):
         self.remove(target)
         self.append(
             self.create(
-                building.level + 1, building.tile, age_number=building.age_number
+                building.level + 1,
+                building.tile,
+                age_number=building.age_number,
+                door_side=target.door_side,
             )
         )
         if self.on_merge is not None:

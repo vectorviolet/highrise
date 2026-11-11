@@ -386,7 +386,7 @@ def test_every_production_insertion_path_pays_the_player(assets, path, monkeypat
         monkeypatch.setattr("app.game.choice", lambda tiles: (1, 1))
         game.create_building()
     elif path == "load":
-        game.database = SimpleNamespace(execute_safely=lambda *a: [(2, 1, 1)])
+        game.database = SimpleNamespace(execute_safely=lambda *a: [(2, 1, 1, "right")])
         game.load_buildings()
     elif path == "age":
         game.add_building(1, 1, 1)
@@ -661,7 +661,7 @@ def test_game_plays_the_merge_sound_through_the_collection_callback(assets):
 
 def test_loaded_buildings_have_payout_callbacks_without_an_update(assets):
     game = make_game(assets)
-    game.database = SimpleNamespace(execute_safely=lambda *args: [(2, 1, 1)])
+    game.database = SimpleNamespace(execute_safely=lambda *args: [(2, 1, 1, "right")])
 
     game.load_buildings()
 

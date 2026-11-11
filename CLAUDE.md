@@ -137,6 +137,15 @@ arrival. Board-changing actions (moves, build, sell, NEXT AGE) wait while
 `Buildings.is_busy()`; the one guard is in `GameEventsMixin.handle_game_events`.
 Saving finishes pending merges first. See ADR 0001.
 
+Building sprites are composed from Kenney pieces (`assets/images/buildings/`) by the recipes in
+`config/buildings.yaml` (`gameplay/buildings/sprites.py`), cached per (age, level, door side);
+level N is entry N of `levels`, and `max_building_level` may not exceed the number of entries. The
+only variety is the door side (left or right): random when a building is built, saved in the
+`buildings` table (old saves get a fixed default from row and column), kept by a merge (the
+survivor's side) and an age change. Each level adds one visible change (the `adds` notes in the
+recipes); shutter pieces are kept free for #72. `scripts/render_building_styles.py` renders the
+sprites for the devlog.
+
 ### Cash display and floating money text
 
 The cash display is `money_panel` (plate), `money_icon` (coin) and `money_text` in `config/panels.yaml`,
@@ -153,7 +162,7 @@ World texts are hidden while the info panel is open. A building's
 
 ### Persistence
 
-SQLite database at `databases/database.db`. Three tables: `game` (age, map size, money, volumes), `buildings` (level, row, column) and `settings` (language, skip intro, UI scale, master volume; the first three are saved the moment they change on the Game and Display settings pages, the master volume with the AUDIO page's SAVE; all kept by New Game). The database auto-initializes on first run. Save/load logic lives entirely in `GamePersistenceMixin`.
+SQLite database at `databases/database.db`. Three tables: `game` (age, map size, money, volumes), `buildings` (level, row, column, door side) and `settings` (language, skip intro, UI scale, master volume; the first three are saved the moment they change on the Game and Display settings pages, the master volume with the AUDIO page's SAVE; all kept by New Game). The database auto-initializes on first run. Save/load logic lives entirely in `GamePersistenceMixin`.
 
 ### Audio
 

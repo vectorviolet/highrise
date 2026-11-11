@@ -9,6 +9,11 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Eleven building levels** (was six): sprites are now composed from Kenney pieces by recipes in
+  `config/buildings.yaml`, and every level adds one visible change (door, window, gate, floor, roof).
+  Each building has a door side (left or right) that stays through merges and age changes, saved
+  with the game (older saves get a fixed default). Levels 7-11 follow the same income and sell
+  price formulas for now ([devlog](docs/devlog/2026-11-11-building-recipes.md)).
 - Own sounds for **build** (one per age), **NEXT AGE** and **sell** instead of the UI click, and a dust and debris effect where a sold building stood. Sounds are set in `action_sounds` in `config/settings.yaml`; three Kenney sound packs (CC0) are credited
   ([devlog](docs/devlog/2026-11-11-action-sounds-and-sell-effect.md)).
 - The CREDITS page opens with the "a VECTORVIOLET game" lockup and closes with GitHub and itch.io

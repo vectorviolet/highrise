@@ -163,3 +163,16 @@ def test_relocalize_does_nothing_while_the_panel_is_closed(assets):
     info_panel.relocalize()  # no building: must not raise
 
     assert panel["sell_button_text"].text is None
+
+
+def test_the_info_image_fits_the_box_for_every_level(assets):
+    manager, panel = make_panel_manager()
+    info_panel = InfoPanel(manager)
+    image = panel["info_panel_building_image"]
+    box = tuple(image.rect.size)
+
+    for level in (1, 6, 7, 11):
+        building = Building(level=level, age_number=0, tile=Tile(1, 1), on_payout=None)
+        info_panel.refresh(building)
+        assert image.surfaces["default"].get_size() == box
+        assert panel["level_text"].text == f"Level: {level}"

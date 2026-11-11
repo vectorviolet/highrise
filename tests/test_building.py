@@ -3,7 +3,6 @@ import pytest
 
 from gameplay.buildings.building import AGES, Building
 from gameplay.tiles.tile import Tile
-from pygamine import ImagePath
 
 
 def make_building(level=1, age_number=0, row=1, col=1) -> Building:
@@ -30,23 +29,18 @@ def test_age_name_comes_from_the_ages_list(assets):
         assert make_building(age_number=age_number).age == name
 
 
-def test_floor_count_and_size_grow_every_two_levels(assets):
-    b1 = make_building(level=1)
-    b2 = make_building(level=2)
-    b3 = make_building(level=3)
-
-    assert b1.floor_count == 1
-    assert b2.floor_count == 1  # (2+1)//2 == 1
-    assert b3.floor_count == 2  # (3+1)//2 == 2
-    assert b1.size == (50, 75)
-    assert b3.size == (50, 75 + 23)  # one extra floor's worth of height
-
-
-def test_get_image_path_reflects_level_and_age(assets):
-    # AssetPath doesn't define __eq__, so compare the resolved filesystem
-    # path each produces rather than object identity.
-    b = make_building(level=3, age_number=1)
-    assert str(b.get_image_path()) == str(ImagePath("level3", "buildings/rock"))
+def test_size_follows_the_composed_sprite_and_the_foot_stays_put(assets):
+    # A one-floor sprite is 50x75 in the world; taller ones scale by the same factors.
+    heights = [make_building(level=level).height for level in range(1, 12)]
+    assert make_building(level=1).size == (50, 75)
+    assert heights == sorted(heights)  # never shorter than the level before
+    assert heights[3] > heights[2]  # level 4 adds a floor
+    for level in range(1, 12):
+        b = make_building(level=level)
+        assert b.rect.width == 50
+        assert (
+            b.rect.bottom == b.tile.rect.y + 52
+        )  # the foot is 52 px below the tile top
 
 
 def test_payout_calls_on_payout_with_cooldown_times_speed(assets):
@@ -103,3 +97,12 @@ def test_arrival_requires_each_moving_axis_to_reach_or_pass_target(
     building.rigidbody.set_velocity(velocity)
 
     assert building.has_arrived() is arrived
+
+
+def test_levels_seven_to_eleven_follow_the_same_income_and_price_curve(assets):
+    # Placeholders until the owner tunes them: the formulas are not capped at level 6.
+    for age_number in range(len(AGES)):
+        for level in range(7, 12):
+            b = make_building(level=level, age_number=age_number)
+            assert b.speed == level * 2 * (age_number + 1) - 1
+            assert b.sell_price == level * (age_number + 1) * 70

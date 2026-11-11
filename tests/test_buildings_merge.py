@@ -278,3 +278,42 @@ def test_finish_pending_merges_finishes_a_merge_that_is_still_sliding(assets):
     assert (merged.level, merged.tile) == (2, tilemap[0][0])
     assert not any(b.should_destroy for b in buildings)
     assert played == ["merge"]
+
+
+def test_a_merge_keeps_the_door_side_of_the_building_that_stays(assets):
+    buildings, tilemap = make_grid(assets)
+    tile = tilemap[0][0]
+    survivor = Building(2, 0, tile, door_side="right", on_payout=None)
+    sacrificial = Building(2, 0, tile, door_side="left", on_payout=None)
+    sacrificial.should_destroy = True
+    sacrificial.merge_target = survivor
+    buildings.extend([survivor, sacrificial])
+
+    buildings.control_moving()
+
+    assert buildings[0].level == 3
+    assert buildings[0].door_side == "right"
+
+
+def test_changing_the_age_keeps_every_door_side(assets):
+    buildings, tilemap = make_grid(assets)
+    buildings.append(Building(3, 0, tilemap[0][0], door_side="right", on_payout=None))
+    buildings.append(Building(3, 0, tilemap[1][1], door_side="left", on_payout=None))
+
+    buildings.set_age(2)
+
+    assert [b.door_side for b in buildings] == ["right", "left"]
+    assert [b.age for b in buildings] == ["sand", "sand"]
+
+
+def test_the_top_level_is_eleven_two_tens_merge_and_two_elevens_do_not(assets):
+    buildings, tilemap = make_grid(assets)
+    place(buildings, tilemap, level=10, row=1, col=1)
+    place(buildings, tilemap, level=10, row=1, col=2)
+    place(buildings, tilemap, level=11, row=2, col=1)
+    place(buildings, tilemap, level=11, row=2, col=2)
+
+    buildings.move("left", tilemap, 11)
+    buildings.finish_pending_merges()
+
+    assert sorted(b.level for b in buildings) == [11, 11, 11]
