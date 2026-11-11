@@ -23,12 +23,11 @@ Fields that live outside the description, following itch.io's
 
 - **Short description or tagline (proposal):** "Merge buildings 2048-style and grow a city through
   four ages."
-- **Classification:** Games. **Kind of project:** Downloadable. **Release status:** In
-  development until 1.0, then Released.
+- **Classification:** Games. **Kind of project:** Downloadable. **Release status:**
+  Released (1.0.0 is out).
 - **Platforms:** Windows, macOS, Linux (the three the release workflow builds).
 - **Genre:** Strategy. (Puzzle is the alternative.)
-- **Tags (proposal):** only relevant ones, preferring itch.io's suggestions: City Builder,
-  Isometric, Puzzle, 2048, Singleplayer, Relaxing, Open Source, Pygame. Don't tag the game's own name.
+- **Tags:** see [Field values](#field-values) below.
 - **Languages:** English, Turkish (the two the game ships).
 - **Inputs:** Keyboard, Mouse.
 - **AI disclosure (proposal):** answer it on the edit page to match the description's line. Claude Code
@@ -55,6 +54,45 @@ Fields that live outside the description, following itch.io's
   editor on the live page.
 - **Icon:** `docs/design/icon.png` (1024x1024).
 - **Trailer:** none yet (the GIF only).
+
+## Field values
+
+What the edit page holds today and what to set for the fields that are still empty or wrong. The
+owner edits the page by hand; this list is the source to copy from.
+
+| Field | Value |
+|---|---|
+| Title / project URL | Highrise / `highrise` |
+| Short description or tagline | An isometric city-builder where same-level buildings merge 2048-style. (as on the page; it does not repeat the title) |
+| Classification / kind / release status | Games / Downloadable / Released |
+| Pricing | $0 or donate, suggested donation $2.00 (the owner's choice, as set) |
+| Uploads | `highrise-windows.zip`, `highrise-linux.zip`, `highrise-osx.zip`. The release workflow's butler jobs push the unpacked builds to the `windows`, `linux` and `osx` channels and itch.io names the files after the channels (the GitHub release zips are `highrise-windows.zip`, `highrise-linux.zip` and `highrise-macos.zip`). Tick the matching platform on each file's "Executable for" boxes (Windows, Linux, macOS), so itch.io shows the right download buttons and platform filters |
+| Description | paste `docs/store/description.html` in HTML mode |
+| Genre | Strategy |
+| Tags (max 10; itch.io says not to repeat the genre or platforms, so drop "strategy") | City Builder, Isometric, Puzzle, 2048, Casual, Relaxing, Idle, 2D, Singleplayer, Open Source. Prefer itch.io's own suggestions when it offers a near match; don't tag the game's own name |
+| AI generation disclosure | **Yes.** Kinds: **Graphics** (the icon, cover, banner and key arts, made with OpenAI Codex), **Text & Dialog** (the store text, README and the Turkish strings were drafted with Claude and reviewed by the owner), **Code** (Claude Code as a coding assistant). Not Sounds: the sound effects are Kenney's CC0 packs and the music is by Sakura Girl. |
+| Statement of AI usage (shown publicly) | Built with Claude Code as a coding assistant; game design, art direction, playtesting and review by the developer. The game icon, the cover, the banner and the key arts were generated with OpenAI Codex and post-processed. The in-game buildings, UI and sounds are Kenney's CC0 packs. |
+| App store links | none |
+| Custom noun | leave blank (default "game") |
+| Download and install instructions | see the block below |
+| Community | Comments and the discussion board are both disabled now. Suggested: turn **Comments** on (a small game gets its feedback there) and leave the discussion board off; the owner decides |
+| Visibility and access | Draft until the page is ready (cover, banner, 4+ screenshots, tags, theme), then Public |
+| Cover image | `docs/store/cover-itchio.png` (630x500) |
+| Banner | `docs/design/banner.png` (1920x600) |
+| Gameplay video or trailer | none yet |
+| Screenshots (3 to 5) | `02_build_mode.png`, `03_inspection.png`, `01_main_menu.png`, plus one or two from the candidates in `docs/devlog/img/screenshots-2026-11/` (a later age, the NEXT AGE checklist, Turkish settings), retaken at 1920x1080 |
+
+**Download and install instructions** (paste into the field):
+
+```
+Download the zip for your system, unzip it and run the game. No Python or installer needed.
+
+Windows: run highrise.exe. The game isn't code-signed, so the first launch may show "Windows protected your PC": click More info, then Run anyway.
+macOS: open Highrise.app. The app isn't signed, so macOS blocks the first launch: open System Settings > Privacy & Security, click Open Anyway next to Highrise, then Open.
+Linux: run ./highrise/highrise from the unzipped folder.
+
+Your city is saved on this computer; press CONTINUE to resume it.
+```
 
 When the game changes in a way players see (controls, features, ages), update
 `description.html` in the same PR and paste it again.
