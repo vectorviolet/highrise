@@ -34,6 +34,9 @@ class FakeGuiObject:
 
     def __init__(self, active=False):
         self.active = active
+        self.rect = pygame.Rect(
+            0, 0, 0, 0
+        )  # where the panel is; empty: no click lands on it
 
 
 class FakeAudio:
@@ -154,6 +157,7 @@ def make_panels() -> FakePanelManager:
                 "selection_mode_button": FakeButton(),
                 "expand_button": FakeButton(),
                 "build_button": FakeButton(),
+                "boost_button": FakeButton(),
                 "next_age_button": FakeButton(),
             },
         }
@@ -985,3 +989,97 @@ def test_settings_snapshot_happens_only_for_the_audio_button():
     game.handle_settings_events(click_up())
 
     assert (game.old_music_volume, game.old_sfx_volume) == (0.0, 0.0)
+
+
+# ── switching the info panel to another building ─────────────────────────────
+
+
+def _open_panel_game(shown: object) -> FakeGame:
+    game = FakeGame()
+    game.panel_manager["game"]["info_panel"].active = True
+    game.tile_selector.is_active = True
+    game.info_panel.building = shown
+    game.info_panel.opened = True
+    return game
+
+
+def test_clicking_another_building_switches_the_open_panel_to_it():
+    normal = SimpleNamespace(name="house", is_booster=False)
+    booster = SimpleNamespace(name="booster", is_booster=True)
+    game = _open_panel_game(normal)
+    game.tile_selector._selected_building = booster
+
+    game.handle_game_events(click_up())
+
+    assert game.info_panel.building is booster  # normal -> booster
+    assert game.info_panel.opened is True
+    assert game.audio.played == [str(game.click_sound_path)]
+
+    game.tile_selector._selected_building = normal
+    game.handle_game_events(click_up())
+
+    assert game.info_panel.building is normal  # booster -> normal
+
+
+def test_the_sell_button_sells_the_building_the_panel_was_switched_to():
+    first = SimpleNamespace(sell_price=10, rect=pygame.Rect(0, 0, 1, 1))
+    second = SimpleNamespace(sell_price=77, rect=pygame.Rect(5, 6, 7, 8))
+    game = _open_panel_game(first)
+    game.tile_selector._selected_building = second
+    game.handle_game_events(click_up())
+
+    game.tile_selector._selected_building = None
+    game.panel_manager["game"]["sell_button"].clicked = True
+    game.handle_game_events(click_up())
+
+    assert ("remove", second) in game.calls
+    assert ("earn", 77) in game.calls
+    assert ("remove", first) not in game.calls
+
+
+def test_a_click_on_an_empty_tile_keeps_the_panel_as_it_is():
+    shown = SimpleNamespace(name="house")
+    game = _open_panel_game(shown)
+    game.tile_selector._selected_building = None  # the tile under the mouse is empty
+
+    game.handle_game_events(click_up())
+
+    assert game.info_panel.building is shown
+    assert game.info_panel.opened is True
+    assert game.info_panel.close_calls == 0
+    assert game.audio.played == []
+
+
+def test_a_click_on_the_panel_never_reaches_a_building_behind_it():
+    shown = SimpleNamespace(name="house")
+    behind = SimpleNamespace(name="behind the panel")
+    game = _open_panel_game(shown)
+    game.panel_manager["game"]["info_panel"].rect = pygame.Rect(0, 0, 300, 460)
+    game.mouse.position = (100, 100)  # on the panel
+    game.tile_selector._selected_building = behind
+
+    game.handle_game_events(click_up())
+
+    assert game.info_panel.building is shown
+    assert game.audio.played == []
+
+
+def test_an_open_panel_ignores_building_clicks_outside_selection_mode():
+    shown = SimpleNamespace(name="house")
+    game = _open_panel_game(shown)
+    game.tile_selector.is_active = False
+    game.tile_selector._selected_building = SimpleNamespace(name="other")
+
+    game.handle_game_events(click_up())
+
+    assert game.info_panel.building is shown
+
+
+def test_only_a_mouse_up_switches_the_panel():
+    shown = SimpleNamespace(name="house")
+    game = _open_panel_game(shown)
+    game.tile_selector._selected_building = SimpleNamespace(name="other")
+
+    game.handle_game_events(key_up(pygame.K_RIGHT))
+
+    assert game.info_panel.building is shown

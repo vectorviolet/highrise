@@ -1,6 +1,6 @@
 from typing import override
 
-from pygame import Surface
+from pygame import SRCALPHA, Surface
 from pygame.draw import polygon
 from pygamine import ImagePath
 from pygamine import load_image
@@ -15,10 +15,15 @@ class Tile(GameObject):
     GRID_COLOR = (128, 128, 128)
     GRID_HOVER_COLOR = "yellow"
     HOVER_SHIFT_Y = 10
+    # A tile a selected booster covers: a translucent red wash (the booster's roof color) with a
+    # lighter outline.
+    HIGHLIGHT_FILL = (230, 70, 60, 110)
+    HIGHLIGHT_OUTLINE = (255, 150, 130)
 
     def __init__(self, row_number, column_number) -> None:
         super().__init__()
         self.selected = False
+        self.highlighted = False
         self.is_empty = True
 
         self.row_number, self.column_number = row_number, column_number
@@ -46,6 +51,10 @@ class Tile(GameObject):
 
         polygon(self.selected_surface, self.GRID_HOVER_COLOR, local_corners, 1)
         polygon(self.unselected_surface, self.GRID_COLOR, local_corners, 1)
+        # Drawn over the tile's own surface (hover or not), so it shows in both states.
+        self.highlight_surface = Surface(image.get_size(), SRCALPHA)
+        polygon(self.highlight_surface, self.HIGHLIGHT_FILL, local_corners)
+        polygon(self.highlight_surface, self.HIGHLIGHT_OUTLINE, local_corners, 2)
 
         self.corners_of_unselected_polygon = [
             (x + self.rect.x, y + self.rect.y) for x, y in local_corners
@@ -82,3 +91,5 @@ class Tile(GameObject):
             self.selected_surface if self.selected else self.unselected_surface,
             self.rect,
         )
+        if self.highlighted:
+            window.blit(self.highlight_surface, self.rect)

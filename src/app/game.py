@@ -14,7 +14,8 @@ from app.game_persistence import (
 )
 from domain.player import Player
 from gameplay.buildings import sprites
-from gameplay.buildings.building import Building, Buildings
+from gameplay.buildings.boosters import BoosterConfig
+from gameplay.buildings.building import AGES, Building, Buildings
 from gameplay.clouds.cloud_container import OneShotCloudAnimation, LoopingCloudAnimation
 from gameplay.tile_selector import TileSelector
 from gameplay.tilemap import Tilemap
@@ -86,6 +87,7 @@ INFO_PANEL_OBJECTS = (
     "sell_button",
     "sell_button_text",
     "info_panel_building_image",
+    "boost_text",
 )
 
 # Escape (or the window's close request) on these panels goes back to the
@@ -128,6 +130,16 @@ def format_volume(volume: float) -> str:
 
 
 class Game(GameEventsMixin, GamePersistenceMixin, Application):
+    # Whether BOOST works. Always for now: a quest unlocks it later (issue #52), which sets
+    # this on the instance; create_booster() is the one place that checks it.
+    boosters_unlocked = True
+    # What _highlight_boosted_tiles last lit up (the booster and where it stood, and the board).
+    _highlight_key: tuple | None = None
+    _highlight_tilemap: Tilemap | None = None
+    # The booster BOOST just placed and the time (ms) its tiles stay lit until.
+    _placed_booster: Building | None = None
+    _placed_until: int = 0
+
     def __init__(self) -> None:
         self.settings = yaml.safe_load(Path("config/settings.yaml").read_text())
         localization.load(LANG_FOLDER)
@@ -165,7 +177,12 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.database = Database("database")
 
         self.buildings = Buildings(
-            on_merge=self._on_buildings_merged, on_payout=self._on_building_payout
+            on_merge=self._on_buildings_merged,
+            on_payout=self._on_building_payout,
+            on_carried_income=self.show_gain_and_earn,
+            boosters=BoosterConfig.from_dict(
+                self.settings["boosters"], AGES, sprites.level_count(booster=True)
+            ),
         )
         self.cloud_count = gameplay["cloud_count"]
         self.max_size = gameplay["max_map_size"]
@@ -461,6 +478,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         assert self.tilemap is not None, "tilemap not loaded yet"
         return self.tilemap
 
+    def _board_is_full(self) -> bool:
+        tilemap = self._tilemap
+        return len(self.buildings) == tilemap.row_count * tilemap.column_count
+
     def update_button_texts(self) -> None:
         panel = self.panel_manager["game"]
         tilemap = self._tilemap
@@ -472,12 +493,17 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
                 format_money(tilemap.get_expand_cost()), state="hover"
             )
 
-        if len(self.buildings) == tilemap.row_count * tilemap.column_count:
-            panel["build_button_text"].set_text(tr("game.tiles_full"), state="hover")
-        else:
-            panel["build_button_text"].set_text(
-                format_money(self.buildings.get_build_cost()), state="hover"
-            )
+        full = self._board_is_full()
+        for name, cost in (
+            ("build_button_text", self.buildings.get_build_cost()),
+            ("boost_button_text", self.buildings.get_booster_cost()),
+        ):
+            hover = tr("game.tiles_full") if full else format_money(cost)
+            if name == "boost_button_text" and not self.boosters_unlocked:
+                hover = (
+                    ""  # a locked BOOST shows no price (the locked look is #52's job)
+                )
+            panel[name].set_text(hover, state="hover")
 
         if self.buildings.age_number == self.buildings.max_age_number:
             panel["next_age_button_text"].set_text(tr("game.max_age"), state="hover")
@@ -510,6 +536,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.floating_texts.update(pygame.time.get_ticks())
         self.sell_effect.update(pygame.time.get_ticks())
         self._close_stale_info_panel()
+        self._highlight_boosted_tiles()
         self.cloud_animation.update()
 
     def _close_stale_info_panel(self) -> None:
@@ -517,6 +544,45 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         # selling) one that's no longer on the board.
         if self.info_panel.is_active and self.info_panel.building not in self.buildings:
             self.info_panel.close()
+
+    def _highlighted_booster(self) -> Building | None:
+        """The booster whose covered tiles light up: the one the open info panel shows, else
+        (no panel open) the one under the mouse, on the booster's sprite or its tile, else
+        the one BOOST just placed while its short highlight lasts."""
+        shown = self.info_panel.building
+        if self.info_panel.is_active:
+            return shown if shown is not None and shown.is_booster else None
+        if self.panel_manager.current_panel != "game":
+            return None
+        position = self.mouse.position
+        for booster in self.buildings.boosters_on_board():
+            if booster.rect.collidepoint(position) or booster.tile.is_mouse_over(
+                position
+            ):
+                return booster
+        if pygame.time.get_ticks() < self._placed_until:
+            return self._placed_booster  # just placed with BOOST: lit for a moment
+        return None
+
+    def _highlight_boosted_tiles(self) -> None:
+        """Lights up the tiles a booster covers while its info panel is open or the mouse is
+        over it, in one style (nothing otherwise). The tiles are only walked when the booster,
+        its tile or age, or the board changes: nothing shown costs one comparison per frame."""
+        booster = self._highlighted_booster()
+        shown = booster if booster is not None and booster in self.buildings else None
+        key = (
+            None
+            if shown is None
+            else (shown, shown.tile.row_number, shown.tile.column_number, shown.age)
+        )
+        tilemap = self._tilemap
+        if key == self._highlight_key and tilemap is self._highlight_tilemap:
+            return
+        self._highlight_key, self._highlight_tilemap = key, tilemap
+        for tile in tilemap.tiles():
+            tile.highlighted = shown is not None and self.buildings.covers(
+                shown, tile.row_number, tile.column_number
+            )
 
     def _on_buildings_merged(self) -> None:
         self.audio.play_sfx(self.merge_sound_path)
@@ -573,12 +639,24 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.audio.play_sfx(self.click_sound_path)
 
     def add_building(
-        self, level, row_number, column_number, door_side: str | None = None
-    ) -> None:
-        """Add a building; `door_side=None` picks a random side (a newly built one)."""
+        self,
+        level,
+        row_number,
+        column_number,
+        door_side: str | None = None,
+        *,
+        booster: bool = False,
+        income_fraction: float = 0.0,
+    ) -> Building:
+        """Add a building (or a booster) and return it; `door_side=None` picks a random side
+        (a newly built one)."""
         tilemap = self._tilemap
         new_building = self.buildings.create(
-            level, tilemap[row_number - 1][column_number - 1], door_side=door_side
+            level,
+            tilemap[row_number - 1][column_number - 1],
+            door_side=door_side,
+            booster=booster,
+            income_fraction=income_fraction,
         )
         self.buildings.append(new_building)
         self.buildings.sort_by_column()
@@ -589,10 +667,32 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             and "build_button_text" in self.panel_manager["game"]
         ):
             self.update_button_texts()
+        return new_building
 
     def create_building(self) -> None:
-        if not self.player.can_afford(self.buildings.get_build_cost()):
+        self._build_on_random_empty_tile(self.buildings.get_build_cost())
+
+    def create_booster(self) -> None:
+        if not self.boosters_unlocked:
             return
+        placed = self._build_on_random_empty_tile(
+            self.buildings.get_booster_cost(), booster=True
+        )
+        if placed is not None:
+            # Show what it covers for a moment, though the mouse is on the toolbar.
+            self._placed_booster = placed
+            self._placed_until = (
+                pygame.time.get_ticks() + self.buildings.boosters.placed_highlight_ms
+            )
+
+    def _build_on_random_empty_tile(
+        self, cost: int, *, booster: bool = False
+    ) -> Building | None:
+        """Puts a level 1 building (or booster) of the current age on a random empty tile and
+        pays `cost`, and returns it; nothing happens (None) when the player can't pay or the
+        board is full."""
+        if not self.player.can_afford(cost):
+            return None
 
         tilemap = self._tilemap
         all_tiles = {
@@ -605,9 +705,13 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         if empty_tiles:
             row_number, column_number = choice(empty_tiles)
-            self.add_building(1, row_number, column_number)
-            self._spend(self.buildings.get_build_cost())
+            new_building = self.add_building(
+                1, row_number, column_number, booster=booster
+            )
+            self._spend(cost)
             self.audio.play_sfx(self.action_sounds.build(self.buildings.age_number))
+            return new_building
+        return None
 
     def set_age(self, age_number) -> None:
         if age_number <= self.buildings.max_age_number:
@@ -627,7 +731,17 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             return
         self.buildings.move(rotation, self._tilemap, self.max_building_level)
 
+    def show_gain_and_earn(self, building: Building, amount: int) -> None:
+        """Pays `amount` as it is (no booster multiplier) with its "+amount" text over
+        `building`: the whole dollar a merge makes of two buildings' held-back cents."""
+        self.player.earn(amount)
+        self.show_gain(building, amount)
+
     def _on_building_payout(self, building: Building, amount: int) -> None:
+        # The boosters covering the building's tile raise what it earns this moment.
+        amount = building.boosted_income(
+            amount, self.buildings.income_multiplier(building)
+        )
         self.player.earn(amount)
         self.show_gain(building, amount)
 

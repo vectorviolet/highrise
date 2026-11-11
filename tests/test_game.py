@@ -19,7 +19,8 @@ from app.action_sounds import ActionSounds
 from app.game import Game, format_volume
 from app.game_persistence import GameSettings
 from domain.player import Player
-from gameplay.buildings.building import Building, Buildings
+from gameplay.buildings.boosters import BoosterConfig
+from gameplay.buildings.building import AGES, Building, Buildings
 from gameplay.tile_selector import TileSelector
 from gameplay.tilemap import Tilemap
 from pygamine import TextObject, Transform
@@ -122,6 +123,7 @@ def make_panels() -> FakePanelManager:
         {
             "game": {
                 "build_button_text": FakeText(),
+                "boost_button_text": FakeText(),
                 "money_text": FakeMoneyText(),
                 "money_panel": SimpleNamespace(rect=pygame.Rect(1420, 20, 280, 60)),
             },
@@ -157,7 +159,9 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
         str(assets.font_path("titillium_black")),
     )
     game.buildings = Buildings(
-        on_merge=game._on_buildings_merged, on_payout=game._on_building_payout
+        on_merge=game._on_buildings_merged,
+        on_payout=game._on_building_payout,
+        boosters=BoosterConfig.load(AGES),
     )
     game.tilemap = Tilemap(size, max_size)
     game.max_size = max_size
@@ -174,7 +178,9 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
     game.cloud_animation = SimpleNamespace(
         create_clouds=Spy(), update=Spy(), draw=Spy()
     )
-    game.info_panel = SimpleNamespace(is_active=False, close=Spy(), relocalize=Spy())
+    game.info_panel = SimpleNamespace(
+        is_active=False, building=None, close=Spy(), relocalize=Spy()
+    )
     game.old_master_volume = 1.0
     game.old_music_volume = 0.5
     game.old_sfx_volume = 0.5
@@ -386,7 +392,9 @@ def test_every_production_insertion_path_pays_the_player(assets, path, monkeypat
         monkeypatch.setattr("app.game.choice", lambda tiles: (1, 1))
         game.create_building()
     elif path == "load":
-        game.database = SimpleNamespace(execute_safely=lambda *a: [(2, 1, 1, "right")])
+        game.database = SimpleNamespace(
+            execute_safely=lambda *a: [(2, 1, 1, "right", 0, 0.0)]
+        )
         game.load_buildings()
     elif path == "age":
         game.add_building(1, 1, 1)
@@ -665,7 +673,9 @@ def test_game_plays_the_merge_sound_through_the_collection_callback(assets):
 
 def test_loaded_buildings_have_payout_callbacks_without_an_update(assets):
     game = make_game(assets)
-    game.database = SimpleNamespace(execute_safely=lambda *args: [(2, 1, 1, "right")])
+    game.database = SimpleNamespace(
+        execute_safely=lambda *args: [(2, 1, 1, "right", 0, 0.0)]
+    )
 
     game.load_buildings()
 
@@ -1143,6 +1153,7 @@ def make_playable_game(assets) -> Game:
         "level_text",
         "speed_text",
         "cooldown_text",
+        "boost_text",
         "sell_price_text",
     ):
         panel[name] = FakeLabel()
@@ -1155,6 +1166,7 @@ def make_playable_game(assets) -> Game:
         "selection_mode_button",
         "expand_button",
         "build_button",
+        "boost_button",
         "next_age_button",
     ):
         panel[name] = FakeButton()
@@ -1318,3 +1330,312 @@ def test_build_plays_the_sound_of_the_current_age(assets):
     game.create_building()
 
     assert game.audio.played == [game.action_sounds.build(2)]
+
+
+# ── boosters (issue #51) ─────────────────────────────────────────────────────
+
+
+def test_create_booster_places_a_level_1_booster_and_spends_its_price(
+    assets, monkeypatch
+):
+    game = make_game(assets, size=2, starting_money=100_000)
+    monkeypatch.setattr("app.game.choice", lambda seq: sorted(seq)[0])
+
+    game.create_booster()
+
+    (booster,) = game.buildings
+    assert booster.is_booster and booster.level == 1
+    assert (booster.tile.row_number, booster.tile.column_number) == (1, 1)
+    cost = game.buildings.get_booster_cost()
+    assert game.player.money == 100_000 - cost
+    assert game.audio.played == [game.action_sounds.build(0)]
+    assert _spend_texts(game) == [f"-{format_money(cost)}"]
+
+
+def test_create_booster_does_nothing_when_unaffordable(assets):
+    game = make_game(assets, size=2, starting_money=0)
+
+    game.create_booster()
+
+    assert len(game.buildings) == 0
+    assert _spend_texts(game) == []
+
+
+def test_create_booster_on_a_full_board_spends_nothing(assets):
+    game = make_game(assets, size=1, starting_money=100_000)
+    game.add_building(1, 1, 1)
+
+    game.create_booster()
+
+    assert len(game.buildings) == 1
+    assert game.player.money == 100_000
+    assert game.audio.played == []
+
+
+def test_create_booster_waits_for_the_unlock(assets):
+    game = make_game(assets, size=2, starting_money=100_000)
+    game.boosters_unlocked = False
+
+    game.create_booster()
+
+    assert len(game.buildings) == 0
+    assert game.player.money == 100_000
+
+
+def test_a_new_booster_in_the_current_age_is_that_age(assets):
+    game = make_game(assets, size=3, starting_money=100_000)
+    game.set_age(2)
+
+    game.create_booster()
+
+    assert game.buildings[0].age == "sand"
+
+
+def test_a_payout_on_a_boosted_tile_is_multiplied(assets):
+    game = make_game(assets, size=3, starting_money=0)
+    game.add_building(2, 1, 1, "left", booster=True)  # wood: (1, 2) and (2, 1)
+    game.add_building(1, 1, 2, "left")  # covered
+    game.add_building(1, 3, 3, "left")  # not covered
+    by_column = {b.tile.column_number: b for b in game.buildings}
+    boosted, plain = by_column[2], by_column[3]
+
+    for _ in range(10):
+        boosted._payout()
+    after_boosted = game.player.money
+    game.player.money = 0
+    for _ in range(10):
+        plain._payout()
+
+    base = plain.cooldown * plain.speed
+    assert game.player.money == 10 * base
+    # 10 payouts of the base amount at x1.2: the fractions that don't fit one payout
+    # add up across payouts instead of rounding away (a level 1 wood building pays 2$).
+    assert after_boosted == int(10 * base * game.buildings.boosters.multiplier(2))
+    assert after_boosted > 10 * base
+
+
+def test_the_highlight_covers_the_tiles_of_the_booster_the_info_panel_shows(assets):
+    game = make_game(assets, size=3)
+    game.add_building(1, 2, 2, "left", booster=True)
+    game.info_panel.is_active = True
+    game.info_panel.building = game.buildings[0]
+
+    game._highlight_boosted_tiles()
+
+    lit = {
+        (t.row_number, t.column_number) for t in game.tilemap.tiles() if t.highlighted
+    }
+    assert lit == {(1, 2), (3, 2), (2, 1), (2, 3)}
+
+
+def test_no_highlight_for_a_building_a_closed_panel_or_a_sold_booster(assets):
+    game = make_game(assets, size=3)
+    game.add_building(1, 2, 2, "left", booster=True)
+    game.add_building(1, 1, 1, "left")
+    booster = next(b for b in game.buildings if b.is_booster)
+    building = next(b for b in game.buildings if not b.is_booster)
+
+    def lit() -> int:
+        game._highlight_boosted_tiles()
+        return sum(t.highlighted for t in game.tilemap.tiles())
+
+    game.info_panel.building = booster
+    game.info_panel.is_active = True
+    assert lit() > 0
+    game.info_panel.is_active = False  # closed
+    assert lit() == 0
+    game.info_panel.is_active = True
+    game.info_panel.building = building  # a normal building
+    assert lit() == 0
+    game.info_panel.building = booster
+    game.buildings.remove(booster)  # sold
+    assert lit() == 0
+
+
+def test_a_locked_boost_button_shows_no_price(assets):
+    game = make_game(assets, size=3)
+    _use_real_button_texts(game)
+    game.panel_manager["game"]["boost_button_text"] = FakeText()
+    game.panel_manager["game"]["expand_button_text"] = FakeText()
+    game.panel_manager["game"]["next_age_button_text"] = FakeText()
+
+    game.update_button_texts()
+    unlocked = game.panel_manager["game"]["boost_button_text"].text
+    game.boosters_unlocked = False
+    game.update_button_texts()
+
+    assert unlocked == format_money(game.buildings.get_booster_cost())
+    assert game.panel_manager["game"]["boost_button_text"].text == ""
+    assert game.panel_manager["game"]["build_button_text"].text == format_money(
+        game.buildings.get_build_cost()
+    )
+
+
+def test_the_highlight_is_recomputed_only_when_the_shown_booster_changes(assets):
+    game = make_game(assets, size=3)
+    game.add_building(1, 2, 2, "left", booster=True)
+    game.info_panel.is_active = True
+    game.info_panel.building = game.buildings[0]
+    game._highlight_boosted_tiles()
+    tile = game.tilemap[0][1]
+    assert tile.highlighted
+
+    tile.highlighted = False  # a recompute would light it again
+    game._highlight_boosted_tiles()
+    assert not tile.highlighted
+
+    game.buildings[0].tile = game.tilemap[0][0]  # the booster moved: recompute
+    game._highlight_boosted_tiles()
+    assert game.tilemap[0][1].highlighted
+
+
+def _hover_game(assets):
+    game = make_game(assets, size=3)
+    game.panel_manager.current_panel = "game"
+    game.mouse = SimpleNamespace(position=(-1, -1))
+    game.add_building(1, 2, 2, "left", booster=True)
+    game.add_building(1, 1, 1, "left")
+    booster = next(b for b in game.buildings if b.is_booster)
+    return game, booster
+
+
+def _lit(game) -> set[tuple[int, int]]:
+    return {
+        (t.row_number, t.column_number) for t in game.tilemap.tiles() if t.highlighted
+    }
+
+
+def test_hovering_a_booster_lights_its_tiles_without_a_panel(assets):
+    game, booster = _hover_game(assets)
+
+    game._highlight_boosted_tiles()
+    assert _lit(game) == set()  # the mouse is elsewhere
+
+    game.mouse.position = booster.rect.center
+    game._highlight_boosted_tiles()
+    assert _lit(game) == {
+        (1, 2),
+        (3, 2),
+        (2, 1),
+        (2, 3),
+    }  # the same style as the panel's
+
+    game.mouse.position = (-1, -1)
+    game._highlight_boosted_tiles()
+    assert _lit(game) == set()
+
+
+def test_hovering_a_building_or_the_ground_lights_nothing(assets):
+    game, _ = _hover_game(assets)
+    building = next(b for b in game.buildings if not b.is_booster)
+
+    game.mouse.position = building.rect.center
+    game._highlight_boosted_tiles()
+
+    assert _lit(game) == set()
+
+
+def test_hover_highlights_only_on_the_game_panel(assets):
+    game, booster = _hover_game(assets)
+    game.panel_manager.current_panel = "menu"
+    game.mouse.position = booster.rect.center
+
+    game._highlight_boosted_tiles()
+
+    assert _lit(game) == set()
+
+
+def test_an_open_info_panel_owns_the_highlight_over_the_hover(assets):
+    game, booster = _hover_game(assets)
+    building = next(b for b in game.buildings if not b.is_booster)
+    game.info_panel.is_active = True
+    game.info_panel.building = (
+        building  # a normal building's panel: no highlight at all
+    )
+    game.mouse.position = booster.rect.center
+
+    game._highlight_boosted_tiles()
+
+    assert _lit(game) == set()
+
+
+def test_the_hover_does_not_walk_the_tiles_while_nothing_changes(assets):
+    game, booster = _hover_game(assets)
+    game.mouse.position = booster.rect.center
+    game._highlight_boosted_tiles()
+    tile = game.tilemap[0][1]
+    tile.highlighted = False  # a recompute would light it again
+
+    game._highlight_boosted_tiles()
+
+    assert not tile.highlighted
+
+
+def test_a_booster_placed_with_boost_stays_lit_for_a_moment(assets, monkeypatch):
+    game = make_game(assets, size=3, starting_money=100_000)
+    game.panel_manager.current_panel = "game"
+    game.mouse = SimpleNamespace(
+        position=(-1, -1)
+    )  # on the toolbar, far from the board
+    now = [10_000]
+    monkeypatch.setattr(pygame.time, "get_ticks", lambda: now[0])
+    monkeypatch.setattr("app.game.choice", lambda seq: (2, 2))
+
+    game.create_booster()
+    game._highlight_boosted_tiles()
+    lit_after_placing = _lit(game)
+    now[0] += game.buildings.boosters.placed_highlight_ms - 1
+    game._highlight_boosted_tiles()
+    lit_just_before_the_end = _lit(game)
+    now[0] += 1
+    game._highlight_boosted_tiles()
+
+    assert lit_after_placing == {(1, 2), (3, 2), (2, 1), (2, 3)}
+    assert lit_just_before_the_end == lit_after_placing
+    assert _lit(game) == set()
+
+
+def test_a_placed_highlight_gives_way_to_the_info_panel_and_ignores_buildings(
+    assets, monkeypatch
+):
+    game = make_game(assets, size=3, starting_money=100_000)
+    game.panel_manager.current_panel = "game"
+    game.mouse = SimpleNamespace(position=(-1, -1))
+    monkeypatch.setattr(pygame.time, "get_ticks", lambda: 10_000)
+    monkeypatch.setattr("app.game.choice", lambda seq: (2, 2))
+    game.create_booster()
+    building = game.add_building(1, 1, 1, "left")
+
+    game.info_panel.is_active = True
+    game.info_panel.building = building  # a normal building's panel owns the screen
+    game._highlight_boosted_tiles()
+
+    assert _lit(game) == set()
+
+
+def test_a_plain_build_does_not_light_anything(assets, monkeypatch):
+    game = make_game(assets, size=3, starting_money=100_000)
+    game.panel_manager.current_panel = "game"
+    game.mouse = SimpleNamespace(position=(-1, -1))
+    monkeypatch.setattr("app.game.choice", lambda seq: (2, 2))
+
+    game.create_building()
+    game._highlight_boosted_tiles()
+
+    assert _lit(game) == set()
+
+
+def test_the_dollar_a_merge_makes_of_two_fractions_is_paid_with_its_text(assets):
+    game = make_game(assets, size=3, starting_money=0)
+    game.buildings.on_carried_income = game.show_gain_and_earn
+    first = game.add_building(1, 1, 1, "left")
+    second = game.add_building(1, 1, 2, "left")
+    first.income_fraction, second.income_fraction = 0.6, 0.6
+
+    game.buildings.move("left", game.tilemap, MAX_BUILDING_LEVEL)
+    game.buildings.finish_pending_merges()
+
+    assert game.player.money == 1  # no booster multiplier on it
+    (merged,) = game.buildings
+    assert merged.income_fraction == pytest.approx(0.2)
+    assert len(game.floating_texts.texts) == 1

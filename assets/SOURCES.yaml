@@ -108,6 +108,9 @@ files:
   "images/buildings/rockGateRight.png":
     source: kenney-hexagon-buildings
     original: "Tiles/rockGateRight.png"
+  "images/buildings/rockRing.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/rockRing.png"
   "images/buildings/rockWindowLeft.png":
     source: kenney-hexagon-buildings
     original: "Tiles/rockWindowLeft.png"
@@ -135,6 +138,9 @@ files:
   "images/buildings/sandGateRight.png":
     source: kenney-hexagon-buildings
     original: "Tiles/sandGateRight.png"
+  "images/buildings/sandRing.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/sandRing.png"
   "images/buildings/sandRoofPointy.png":
     source: kenney-hexagon-buildings
     original: "Tiles/sandRoofPointy.png"
@@ -174,6 +180,9 @@ files:
   "images/buildings/stoneGateRight.png":
     source: kenney-hexagon-buildings
     original: "Tiles/stoneGateRight.png"
+  "images/buildings/stoneRing.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/stoneRing.png"
   "images/buildings/stoneRoofPointy.png":
     source: kenney-hexagon-buildings
     original: "Tiles/stoneRoofPointy.png"
@@ -213,6 +222,9 @@ files:
   "images/buildings/woodGateRight.png":
     source: kenney-hexagon-buildings
     original: "Tiles/woodGateRight.png"
+  "images/buildings/woodRing.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/woodRing.png"
   "images/buildings/woodRoofPointy.png":
     source: kenney-hexagon-buildings
     original: "Tiles/woodRoofPointy.png"

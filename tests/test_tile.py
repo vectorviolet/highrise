@@ -46,3 +46,17 @@ def test_building_a_tile_leaves_the_cached_image_unchanged(assets):
     assert tile.selected_surface is not cached
     # The outline went onto the tile's own copy.
     assert tobytes(tile.unselected_surface, "RGBA") != before
+
+
+def test_a_highlighted_tile_draws_its_wash_over_the_ground(assets):
+    from pygame import Surface
+
+    tile = Tile(1, 1)
+    plain, lit = Surface((400, 300)), Surface((400, 300))
+    tile.rect.topleft = (0, 0)
+    tile.draw(plain)
+    tile.highlighted = True
+    tile.draw(lit)
+
+    center = (tile.rect.width // 2, tile.rect.height // 2 - 16)
+    assert lit.get_at(center) != plain.get_at(center)

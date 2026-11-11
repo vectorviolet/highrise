@@ -7,6 +7,7 @@ import pytest
 import yaml
 
 from gameplay.buildings import sprites
+from gameplay.buildings.boosters import BoosterConfig
 from gameplay.buildings.building import AGES, Building, Buildings
 from gameplay.tiles.tile import Tile
 
@@ -190,7 +191,7 @@ def test_panel_sprite_is_cached(assets):
 
 
 def test_new_buildings_get_a_random_side_and_a_given_side_is_kept(assets, monkeypatch):
-    buildings = Buildings()
+    buildings = Buildings(boosters=BoosterConfig.load(AGES))
     tile = Tile(1, 1)
     monkeypatch.setattr(sprites, "choice", lambda sides: sides[1])
     assert buildings.create(1, tile).door_side == "right"

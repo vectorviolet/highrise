@@ -106,3 +106,18 @@ def test_levels_seven_to_eleven_follow_the_same_income_and_price_curve(assets):
             b = make_building(level=level, age_number=age_number)
             assert b.speed == level * 2 * (age_number + 1) - 1
             assert b.sell_price == level * (age_number + 1) * 70
+
+
+def test_boosted_income_keeps_the_cents_a_payout_cannot_pay(assets):
+    b = make_building()
+
+    paid = [b.boosted_income(2, 1.2) for _ in range(5)]
+
+    assert paid == [2, 2, 3, 2, 3]  # 2.4 each: 12 in all
+    assert sum(paid) == 12
+
+
+def test_boosted_income_without_a_boost_is_the_amount(assets):
+    b = make_building()
+
+    assert [b.boosted_income(7, 1) for _ in range(3)] == [7, 7, 7]

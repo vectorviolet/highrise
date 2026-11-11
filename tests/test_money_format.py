@@ -38,3 +38,12 @@ def test_the_floating_text_uses_the_same_format():
 
     assert FloatingText(Vector2(), 12345, 0, -1, "midbottom").text == "+12.345$"
     assert FloatingText(Vector2(), -1200, 0, 1, "bottomright").text == "-1.200$"
+
+
+def test_a_multiplier_uses_the_languages_decimal_mark():
+    from ui.money_format import format_multiplier
+
+    assert format_multiplier(1.35) == "1.35"
+    assert format_multiplier(2.0) == "2"
+    localization.set_language("tr")
+    assert format_multiplier(1.35) == "1,35"

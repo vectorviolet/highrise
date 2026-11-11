@@ -9,6 +9,29 @@ gameplay:
   max_building_level: 11
   cloud_count: 30
 
+# Boosters (issue #51). All numbers are placeholders until the owner balances them (#10).
+boosters:
+  # What the BOOST button costs in each age.
+  price:
+    wood: 250
+    rock: 500
+    sand: 750
+    stone: 1000
+  # Income multiplier of each booster level (five levels: as many as config/buildings.yaml's
+  # `boosters.levels`). Every building on a covered tile earns this much more; where boosters
+  # overlap, their bonuses add up (x1.1 and x1.2 make x1.3).
+  multipliers: [1.1, 1.2, 1.35, 1.5, 1.75]
+  # A booster placed with BOOST shows the tiles it covers for this long (ms), even though the
+  # mouse is on the toolbar. An open info panel or a hovered booster takes over at once.
+  placed_highlight_ms: 1500
+  # The tiles a booster covers, by age: orthogonal (4 neighbors), diagonal (4 corners),
+  # around (all 8 surrounding tiles), row_and_column (its whole row and column).
+  shapes:
+    wood: orthogonal
+    rock: diagonal
+    sand: around
+    stone: row_and_column
+
 audio:
   default_music_volume: 1.0
   default_sfx_volume: 1.0

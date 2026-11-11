@@ -1,7 +1,9 @@
 """Building sprites composed from pack pieces by the recipes in config/buildings.yaml.
 
-A sprite is cached per (age, level, door side), so composing happens once per combination, never
-per frame. `compose` builds the full-size sprite, `game_sprite` the one drawn in the world.
+A sprite is cached per (age, level, door side, booster), so composing happens once per
+combination, never per frame. `compose` builds the full-size sprite, `game_sprite` the one drawn
+in the world. A booster (`booster=True`) uses the `boosters` recipes instead of the building
+levels; its sprite has no door, so the door side makes no difference to it.
 """
 
 from functools import cache
@@ -24,9 +26,19 @@ def recipes() -> dict:
         return yaml.safe_load(file)
 
 
-def level_count() -> int:
-    """How many levels the recipes define."""
-    return len(recipes()["levels"])
+def level_count(booster: bool = False) -> int:
+    """How many levels the recipes define (for the building ladder, or the booster's)."""
+    return len(_level_recipes(booster))
+
+
+def _level_recipes(booster: bool) -> list[dict]:
+    config = recipes()
+    return config["boosters"]["levels"] if booster else config["levels"]
+
+
+def _age_prefixes(age: str, booster: bool) -> dict:
+    config = recipes()
+    return (config["boosters"] if booster else config)["ages"][age]
 
 
 def checked_max_level(max_level: int) -> int:
@@ -48,12 +60,14 @@ def default_door_side(row: int, column: int) -> str:
     return DOOR_SIDES[(row + column) % 2]
 
 
-def piece_names(age: str, level: int, door_side: str) -> tuple[list[str], str]:
+def piece_names(
+    age: str, level: int, door_side: str, booster: bool = False
+) -> tuple[list[str], str]:
     """The floor piece names (bottom to top) and the roof piece name of one sprite."""
     assert door_side in DOOR_SIDES, door_side
     config = recipes()
-    prefixes = config["ages"][age]
-    level_recipe = config["levels"][level - 1]
+    prefixes = _age_prefixes(age, booster)
+    level_recipe = _level_recipes(booster)[level - 1]
     floors = []
     for kind in level_recipe["floors"]:
         entry = config["floor_kinds"][kind]
@@ -66,11 +80,12 @@ def piece_names(age: str, level: int, door_side: str) -> tuple[list[str], str]:
 def all_piece_names() -> set[str]:
     """Every piece file name (without extension) the recipes can ask for."""
     names: set[str] = set()
-    for age in recipes()["ages"]:
-        for level in range(1, level_count() + 1):
-            for side in DOOR_SIDES:
-                floors, roof = piece_names(age, level, side)
-                names.update(floors, [roof])
+    for booster in (False, True):
+        for age in recipes()["ages"]:
+            for level in range(1, level_count(booster) + 1):
+                for side in DOOR_SIDES:
+                    floors, roof = piece_names(age, level, side, booster)
+                    names.update(floors, [roof])
     return names
 
 
@@ -79,17 +94,23 @@ def piece(name: str) -> pygame.Surface:
 
 
 @cache
-def compose(age: str, level: int, door_side: str) -> pygame.Surface:
+def compose(
+    age: str, level: int, door_side: str, booster: bool = False
+) -> pygame.Surface:
     """The full-size sprite: floors stacked and the roof on top, its foot at the bottom edge."""
     config = recipes()
-    floor_names, roof_name = piece_names(age, level, door_side)
+    floor_names, roof_name = piece_names(age, level, door_side, booster)
     floors = [piece(name) for name in floor_names]
     roof = piece(roof_name)
-    # y of each piece's top, 0 = the ground floor's top, negative = higher
-    floor_tops = [-i * config["floor_step"] for i in range(len(floors))]
-    roof_base = config["ages"][age]["roof_base"]
+    # y of each piece's top, 0 = a full-height (floor_size) ground floor's top, negative =
+    # higher. A shorter piece (the ring) keeps its foot on the same line as the others.
+    floor_tops = [
+        floor_height_gap(image) - i * config["floor_step"]
+        for i, image in enumerate(floors)
+    ]
+    roof_base = _age_prefixes(age, booster)["roof_base"]
     roof_top = floor_tops[-1] + roof_base - roof.get_height()
-    top = min(roof_top, floor_tops[-1])
+    top = min(roof_top, *floor_tops)
     pieces = [*zip(floors, floor_tops), (roof, roof_top)]
     # Some pieces are a pixel wider than the floors: the sprite fits the widest, pieces centered.
     width = max(image.get_width() for image, _ in pieces)
@@ -97,6 +118,11 @@ def compose(age: str, level: int, door_side: str) -> pygame.Surface:
     for image, y in pieces:
         sprite.blit(image, ((width - image.get_width()) // 2, y - top))
     return sprite
+
+
+def floor_height_gap(image: pygame.Surface) -> int:
+    """How much shorter than a full floor (`floor_size`) a floor piece is."""
+    return recipes()["floor_size"][1] - image.get_height()
 
 
 def world_size(sprite: pygame.Surface) -> tuple[int, int]:
@@ -108,38 +134,41 @@ def world_size(sprite: pygame.Surface) -> tuple[int, int]:
 
 
 @cache
-def game_sprite(age: str, level: int, door_side: str) -> pygame.Surface:
+def game_sprite(
+    age: str, level: int, door_side: str, booster: bool = False
+) -> pygame.Surface:
     """The sprite at its size in the world (see `game_size` in the recipes)."""
-    sprite = compose(age, level, door_side)
+    sprite = compose(age, level, door_side, booster)
     return pygame.transform.scale(sprite, world_size(sprite))
 
 
 @cache
 def tallest_world_height() -> int:
-    """The height of the tallest sprite in the world, over every age and level."""
+    """The height of the tallest sprite in the world, over every age and level (boosters too)."""
     return max(
-        game_sprite(age, level, "left").get_height()
+        game_sprite(age, level, "left", booster).get_height()
+        for booster in (False, True)
         for age in recipes()["ages"]
-        for level in range(1, level_count() + 1)
+        for level in range(1, level_count(booster) + 1)
     )
 
 
 @cache
 def panel_sprite(
-    age: str, level: int, door_side: str, box: tuple[int, int]
+    age: str, level: int, door_side: str, box: tuple[int, int], booster: bool = False
 ) -> pygame.Surface:
     """The building as the info panel shows it: the board's own sprite, enlarged by one factor
     for every level (the tallest sprite just fits the box's height, so level growth shows like
     on the board), on a transparent surface of the box's size, centered, its roof tip at the
     top (every building hangs from the same line)."""
-    world = game_sprite(age, level, door_side).get_size()
+    world = game_sprite(age, level, door_side, booster).get_size()
     factor = min(box[1] / tallest_world_height(), box[0] / recipes()["game_size"][0])
     size = (round(world[0] * factor), round(world[1] * factor))
     result = pygame.Surface(box, pygame.SRCALPHA)
     result.blit(
         # Scaled once from the full-size sprite (not the board's already scaled one), to the
         # board's proportions times the panel factor, so it stays as sharp as it can.
-        pygame.transform.scale(compose(age, level, door_side), size),
+        pygame.transform.scale(compose(age, level, door_side, booster), size),
         ((box[0] - size[0]) // 2, 0),
     )
     return result

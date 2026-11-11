@@ -79,6 +79,7 @@ EXPECTED_BUTTON_COLORS = {
     "play.continue_button": "green_button",
     "audio_settings.save_button": "green_button",
     "game.build_button": "green_button",
+    "game.boost_button": "green_button",
     # blue: everything else
     "menu.settings_button": "blue_button",
     "menu.credits_button": "blue_button",

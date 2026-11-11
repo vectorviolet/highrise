@@ -219,6 +219,15 @@ class GameEventsMixin:
             self._sell(self.info_panel.building)
         elif self._activate(panel["close_button"], event):
             self.info_panel.close()
+        elif (
+            self.tile_selector.is_active
+            and event.type == pygame.MOUSEBUTTONUP
+            and not panel["info_panel"].rect.collidepoint(self.mouse.position)
+        ):
+            # A click on another building switches the panel to it (content, image, highlight
+            # and the SELL target). A click on the panel itself never reaches the board behind
+            # it, and a click on an empty tile changes nothing: the panel stays as it is.
+            self._pick_tile()
 
     def _sell(self, building) -> None:
         if building in self.buildings:
@@ -245,7 +254,7 @@ class GameEventsMixin:
     def _handle_toolbar(
         self, panel, event: pygame.event.Event, board_ready: bool
     ) -> None:
-        # expand/build/next_age call methods that play their own sfx, so
+        # expand/build/boost/next_age call methods that play their own sfx, so
         # these use raw is_clicked (not _activate) to avoid double-playing.
         if panel["expand_button"].is_clicked(event, self.mouse.position):
             self.expand()
@@ -253,6 +262,8 @@ class GameEventsMixin:
             return
         elif panel["build_button"].is_clicked(event, self.mouse.position):
             self.create_building()
+        elif panel["boost_button"].is_clicked(event, self.mouse.position):
+            self.create_booster()
         elif panel["next_age_button"].is_clicked(event, self.mouse.position):
             self.next_age()
 

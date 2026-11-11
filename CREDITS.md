@@ -14,7 +14,7 @@ freely available. The CREDITS page in the game lists the same assets and softwar
 | Pack | Author | License | Used for | Files |
 |---|---|---|---|---|
 | [UI Pack](https://kenney.nl/assets/ui-pack) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | buttons, panel backgrounds, sounds | 879 |
-| [Hexagon Buildings](https://kenney.nl/assets/hexagon-buildings) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | buildings | 52 |
+| [Hexagon Buildings](https://kenney.nl/assets/hexagon-buildings) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | buildings | 56 |
 | [Impact Sounds](https://kenney.nl/assets/impact-sounds) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | build sounds | 4 |
 | [Titillium Web](https://fonts.google.com/specimen/Titillium+Web) | Accademia di Belle Arti di Urbino | [SIL OFL 1.1](https://openfontlicense.org) | all text: Regular, Bold and Black | 3 |
 | [Game Icons](https://kenney.nl/assets/game-icons) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | info, plus and minus icons | 3 |

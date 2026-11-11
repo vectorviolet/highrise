@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 
-from gameplay.buildings.building import Building, Buildings
+from gameplay.buildings.boosters import BoosterConfig
+from gameplay.buildings.building import AGES, Building, Buildings
 from gameplay.tile_selector import TileSelector
 from gameplay.tilemap import Tilemap
 
@@ -10,7 +11,7 @@ def make_selector(
 ) -> tuple[TileSelector, Tilemap, SimpleNamespace, Buildings]:
     tilemap = Tilemap(size=3, max_size=7)
     mouse = SimpleNamespace(position=(-9999, -9999))
-    buildings = Buildings()
+    buildings = Buildings(boosters=BoosterConfig.load(AGES))
     selector = TileSelector(tilemap, mouse, buildings)
     selector.is_active = active
     return selector, tilemap, mouse, buildings

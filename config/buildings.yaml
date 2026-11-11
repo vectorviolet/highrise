@@ -34,6 +34,9 @@ floor_kinds:
   gate:     {left: GateLeft, right: GateRight}
   window:   {left: WindowLeft, right: WindowRight}
   windows:  Windows
+  # The hex ring is a hollow floor, 13 pixels shorter than a full floor: it keeps its foot on
+  # the same line. Only boosters use it.
+  ring:     Ring
 
 # Level N is entry N: the full stack (`floors` bottom to top, then a `roof`). `adds` is the one
 # visible change from the level before. Shutter pieces are kept free on purpose (issue #72).
@@ -49,3 +52,21 @@ levels:
   - {floors: [gate, windows, windows], roof: Tall, adds: "the roof grows taller"}
   - {floors: [gate, windows, windows], roof: Pointy, adds: "the roof becomes a curved spire"}
   - {floors: [gate, windows, windows, windows], roof: Pointy, adds: "a fourth floor"}
+
+# Boosters (issue #51): the hex ring with a red roof, so they read as "not a building" in every
+# age. Same structure as above: level N is entry N of `levels` (the booster's own ladder, five
+# levels: the multipliers in settings.yaml `boosters` must have exactly this many). A booster has
+# no door, so its sprite doesn't depend on the door side. The look grows like the building
+# ladder: one visible change per level.
+boosters:
+  ages:
+    wood:  {floor: wood,  roof: red, roof_base: 67}
+    rock:  {floor: rock,  roof: red, roof_base: 67}
+    sand:  {floor: sand,  roof: red, roof_base: 67}
+    stone: {floor: stone, roof: red, roof_base: 67}
+  levels:
+    - {floors: [ring], roof: Short, adds: "a single ring under a low red roof"}
+    - {floors: [ring, ring], roof: Short, adds: "a second ring"}
+    - {floors: [ring, ring, ring], roof: Short, adds: "a third ring"}
+    - {floors: [ring, ring, ring], roof: Straight, adds: "the roof rises to a point"}
+    - {floors: [ring, ring, ring], roof: Pointy, adds: "the roof becomes a curved spire"}
