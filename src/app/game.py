@@ -499,6 +499,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def _on_buildings_merged(self) -> None:
         self.audio.play_sfx(self.merge_sound_path)
+        # A merge frees tiles: BUILD's hover text can't keep saying TILES FULL.
+        self.update_button_texts()
 
     def draw(self) -> None:
         self.panel_manager.draw(self.window)

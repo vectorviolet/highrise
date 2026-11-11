@@ -45,6 +45,9 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- The BUILD button's hover text shows the price again after a merge frees tiles, instead of
+  staying on TILES FULL.
+- The red and green menu buttons turn yellow on hover like the blue ones.
 - Percent values follow the language: "60%" in English, "%60" in Turkish.
 - The GO BACK buttons on the settings pages are centered (they sat about 8 px to the right) and
   red like the other panels; the AUDIO page's rows are spaced like the DISPLAY page's.

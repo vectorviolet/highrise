@@ -258,6 +258,24 @@ def test_add_building_marks_tiles_full_once_the_grid_is_saturated(assets):
     assert game.panel_manager["game"]["build_button_text"].text == "TILES FULL"
 
 
+def test_a_merge_that_frees_tiles_restores_the_build_price_hover_text(assets):
+    game = make_game(assets, size=1)
+    panel = game.panel_manager["game"]
+    panel["expand_button_text"] = FakeText()
+    panel["next_age_button_text"] = FakeText()
+    game.update_button_texts = Game.update_button_texts.__get__(game)
+    game.add_building(1, 1, 1)
+    assert panel["build_button_text"].text == "TILES FULL"
+
+    game.buildings.clear()  # a merge removes a building
+    game._on_buildings_merged()
+
+    assert panel["build_button_text"].text == format_money(
+        game.buildings.get_build_cost()
+    )
+    assert panel["build_button_text"].state == "hover"
+
+
 # ── create_building ──────────────────────────────────────────────────────────
 
 
