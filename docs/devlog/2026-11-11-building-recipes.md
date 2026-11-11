@@ -57,8 +57,19 @@ How a sprite is composed: the ground floor piece (65x89) at the bottom, each fur
 higher (the game's own floor step), the roof aligned so its base lands on the top floor's top edge.
 A one-floor sprite is drawn 50x75 in the world as before; taller sprites use the same scale
 factors, so the foot stays 52 px below the tile top and buildings grow upward. Sprites are cached
-per (age, level, door side). The info panel shrinks tall sprites to fit its 65x89 box instead of
-stretching them.
+per (age, level, door side). A sprite is as wide as its widest piece (the sand and stone straight
+roofs are one pixel wider than the floors) with pieces centered, and each age aligns its roof by its
+own `roof_base` (the sand and stone roofs are a pixel taller), so a one-floor sprite is 50x75 in
+every age.
+
+The info panel shows the same building as the board: same pieces, door side and proportions, at one
+fixed scale (1.2x) for every level, foot at the bottom of the box, so level growth shows there too.
+Its box in `config/panels.yaml` is 60x185 (the tallest sprite, level 11, is 154 px in the world and
+fits at 1.2x); the image scales with the UI scale. Left to right for each level: the board, then
+the open info panel.
+
+![info panel, wood levels 1, 6 and 11](img/info-panel-wood.png)
+![info panel, rock levels 1, 6 and 11](img/info-panel-rock.png)
 
 Levels 7 to 11 use the same income (`speed = level * 2 * (age + 1) - 1`) and sell price
 (`level * (age + 1) * 70`) formulas as levels 1 to 6; these are placeholders for the owner's

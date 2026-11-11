@@ -20,10 +20,10 @@ class InfoPanel:
         panel["cooldown_text"].set_params(value=building.cooldown)
         self.retext_prices(panel, building)
         image = panel["info_panel_building_image"]
-        # Taller sprites shrink to fit the box instead of stretching.
+        # The board's sprite at one panel scale for every level (see panel_sprite).
         image.add_surface(
             "default",
-            sprites.fit_sprite(
+            sprites.panel_sprite(
                 building.age, building.level, building.door_side, tuple(image.rect.size)
             ),
         )

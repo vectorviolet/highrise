@@ -24,6 +24,15 @@ def test_every_piece_the_recipes_ask_for_exists_as_a_file():
     assert [n for n in sorted(names) if not (PIECES / f"{n}.png").is_file()] == []
 
 
+def test_every_floor_piece_has_the_recipe_floor_size(assets):
+    floor_size = tuple(sprites.recipes()["floor_size"])
+    for age in AGES:
+        for level in range(1, sprites.level_count() + 1):
+            for side in sprites.DOOR_SIDES:
+                for name in sprites.piece_names(age, level, side)[0]:
+                    assert sprites.piece(name).get_size() == floor_size, name
+
+
 def test_every_asset_piece_is_used_by_a_recipe():
     assert {p.stem for p in PIECES.glob("*.png")} == sprites.all_piece_names()
 
@@ -39,7 +48,7 @@ def test_recipes_cover_every_age_and_the_configured_max_level(assets):
     for age in AGES:
         for level in range(1, max_level + 1):
             for side in sprites.DOOR_SIDES:
-                assert sprites.compose(age, level, side).get_width() == 65
+                assert sprites.compose(age, level, side).get_width() in (65, 66)
 
 
 def test_checked_max_level_rejects_a_level_without_a_recipe():
@@ -96,32 +105,88 @@ def test_sprites_are_composed_once_per_age_level_and_side(assets):
         "sand", 4, "left"
     )
     assert sprites.compose("sand", 4, "left") is not sprites.compose("sand", 4, "right")
-    first = Building(4, 2, Tile(1, 1), on_payout=None)
-    second = Building(4, 2, Tile(2, 2), on_payout=None)
+    first = Building(4, 2, Tile(1, 1), door_side="left", on_payout=None)
+    second = Building(4, 2, Tile(2, 2), door_side="left", on_payout=None)
     assert first.sprite is second.sprite  # no compositing per building
 
 
-def test_game_sprite_is_the_one_floor_size_scaled_in_both_directions(assets):
-    assert sprites.game_sprite("wood", 1, "left").get_size() == (50, 75)
-    full = sprites.compose("wood", 11, "left")
-    assert sprites.game_sprite("wood", 11, "left").get_size() == (
-        50,
-        round(full.get_height() * 75 / 89),
+def test_every_sprite_is_as_wide_as_its_widest_piece(assets):
+    # Sand and stone RoofStraight are a pixel wider than the floors: nothing is clipped.
+    widest = {}
+    for age in AGES:
+        for level in range(1, sprites.level_count() + 1):
+            floors, roof = sprites.piece_names(age, level, "left")
+            width = max(sprites.piece(n).get_width() for n in [*floors, roof])
+            assert sprites.compose(age, level, "left").get_width() == width
+            widest[age] = max(widest.get(age, 0), width)
+    assert widest["sand"] == widest["stone"] == 66
+    assert widest["wood"] == widest["rock"] == 65
+
+
+def test_a_one_floor_sprite_is_75_tall_in_every_age(assets):
+    for age in AGES:
+        for level in (1, 2, 3):
+            assert sprites.game_sprite(age, level, "left").get_size() == (50, 75), age
+
+
+def test_taller_sprites_scale_by_the_same_factor_and_keep_the_width(assets):
+    for age in AGES:
+        for level in range(1, sprites.level_count() + 1):
+            full = sprites.compose(age, level, "left")
+            assert sprites.game_sprite(age, level, "left").get_size() == (
+                50,
+                round(full.get_height() * 75 / 89),
+            )
+
+
+def covered(surface: pygame.Surface) -> pygame.Rect:
+    """The bounding box of the opaque pixels."""
+    return (
+        pygame.mask.from_surface(surface)
+        .get_bounding_rects()[0]
+        .unionall(pygame.mask.from_surface(surface).get_bounding_rects())
     )
 
 
-def test_fit_sprite_keeps_the_aspect_and_stands_on_the_bottom_edge(assets):
-    box = (65, 89)
-    short = sprites.fit_sprite("wood", 1, "left", box)
-    tall = sprites.fit_sprite("wood", 11, "left", box)
-    assert short.get_size() == tall.get_size() == box
-    full = sprites.compose("wood", 11, "left")
-    # The tall sprite shrinks (never stretches): it is narrower than the box.
-    columns = [
-        x for x in range(box[0]) if any(tall.get_at((x, y)).a for y in range(box[1]))
-    ]
-    assert len(columns) == pytest.approx(box[0] * box[1] / full.get_height(), abs=2)
-    assert any(tall.get_at((x, box[1] - 1)).a for x in range(box[0]))
+def test_panel_sprite_is_the_board_sprite_at_one_scale_for_every_level(assets):
+    for box in [(60, 185), (66, 204), (75, 231)]:  # the info image at 100%, 110%, 125%
+        factor = box[1] / sprites.tallest_world_height()
+        for age in AGES:
+            for side in sprites.DOOR_SIDES:
+                for level in range(1, sprites.level_count() + 1):
+                    shown = sprites.panel_sprite(age, level, side, box)
+                    world = sprites.game_sprite(age, level, side)
+                    assert shown.get_size() == box
+                    bounds = covered(shown)
+                    assert bounds.height == pytest.approx(
+                        world.get_height() * factor, abs=6
+                    )
+                    assert bounds.width == pytest.approx(
+                        world.get_width() * factor, abs=6
+                    )
+                    assert box[1] - bounds.bottom <= 2  # the foot is at the bottom
+                    assert abs(bounds.centerx - box[0] / 2) <= 2
+
+
+def test_the_tallest_building_fills_the_panel_box_height(assets):
+    box = (60, 185)
+    tallest = max(
+        covered(sprites.panel_sprite(age, 11, "left", box)).height for age in AGES
+    )
+    assert tallest == pytest.approx(box[1], abs=4)
+
+
+def test_panel_sprite_has_the_boards_door_side(assets):
+    box = (60, 185)
+    left = pygame.image.tobytes(sprites.panel_sprite("rock", 5, "left", box), "RGBA")
+    right = pygame.image.tobytes(sprites.panel_sprite("rock", 5, "right", box), "RGBA")
+    assert left != right
+
+
+def test_panel_sprite_is_cached(assets):
+    assert sprites.panel_sprite("rock", 5, "right", (60, 185)) is sprites.panel_sprite(
+        "rock", 5, "right", (60, 185)
+    )
 
 
 def test_new_buildings_get_a_random_side_and_a_given_side_is_kept(assets, monkeypatch):

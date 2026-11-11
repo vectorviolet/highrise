@@ -58,6 +58,7 @@ class FakeGame(GamePersistenceMixin):
         self.max_size = max_size
         self.player = SimpleNamespace(money=0)
         self.audio = FakeAudio(default_music, default_sfx)
+        self.max_building_level = 11
         self.tilemap = None
         self.tile_selector = SimpleNamespace(tilemap=None)
         self.buildings = Buildings()
@@ -126,7 +127,9 @@ def test_load_data_restores_a_previously_saved_game(tmp_path, assets):
     seed.load_data()
     seed.player.money = 999
     seed.buildings.age_number = 2
-    seed.buildings.append(Building(3, 2, seed.tilemap[0][0], on_payout=None))
+    seed.buildings.append(
+        Building(3, 2, seed.tilemap[0][0], door_side="left", on_payout=None)
+    )
     seed.save_game()
 
     game = FakeGame(tmp_path, assets, starting_money=250)
@@ -203,7 +206,7 @@ def test_load_buildings_clears_any_existing_in_memory_buildings_first(tmp_path, 
     game.init_database()
     game.load_game_data([(0, 3, 0, 0.5, 0.5)])
     game.buildings.append(
-        Building(1, 0, game.tilemap[0][0], on_payout=None)
+        Building(1, 0, game.tilemap[0][0], door_side="left", on_payout=None)
     )  # stale in-memory state
 
     game.load_buildings()
@@ -236,7 +239,9 @@ def test_save_game_persists_state_and_buildings(tmp_path, assets):
     game.load_game_data([(0, 3, 0, 0.5, 0.5)])
     game.player.money = 900
     game.buildings.age_number = 2
-    game.buildings.append(Building(3, 2, game.tilemap[1][1], on_payout=None))
+    game.buildings.append(
+        Building(3, 2, game.tilemap[1][1], door_side="left", on_payout=None)
+    )
 
     game.save_game()
 
@@ -274,11 +279,15 @@ def test_save_game_replaces_rather_than_accumulates_building_rows(tmp_path, asse
     game.init_database()
     game.get_game_data()
     game.load_game_data([(0, 3, 0, 0.5, 0.5)])
-    game.buildings.append(Building(1, 0, game.tilemap[0][0], on_payout=None))
+    game.buildings.append(
+        Building(1, 0, game.tilemap[0][0], door_side="left", on_payout=None)
+    )
     game.save_game()
 
     game.buildings.clear()
-    game.buildings.append(Building(2, 0, game.tilemap[2][2], on_payout=None))
+    game.buildings.append(
+        Building(2, 0, game.tilemap[2][2], door_side="left", on_payout=None)
+    )
     game.save_game()
 
     building_rows = game.database.execute_safely(
@@ -292,7 +301,9 @@ def test_delete_data_resets_the_game_row_and_clears_buildings(tmp_path, assets):
     game.init_database()
     game.get_game_data()
     game.load_game_data([(0, 3, 0, 0.5, 0.5)])
-    game.buildings.append(Building(1, 0, game.tilemap[0][0], on_payout=None))
+    game.buildings.append(
+        Building(1, 0, game.tilemap[0][0], door_side="left", on_payout=None)
+    )
     game.save_game()
 
     game.delete_data()
@@ -510,3 +521,23 @@ def test_an_unknown_saved_door_side_falls_back_to_the_default(tmp_path, assets):
     game.load_buildings()
 
     assert game.buildings[0].door_side == default_door_side(2, 2)
+
+
+def test_a_saved_level_outside_the_recipes_is_held_to_the_valid_range(
+    tmp_path, assets, caplog
+):
+    game = FakeGame(tmp_path, assets)
+    game.init_database()
+    game.load_game_data([(0, 3, 0, 0.5, 0.5)])
+    insert_building_row(game, 0, 1, 1)
+    insert_building_row(game, 12, 1, 2)
+    insert_building_row(game, 5, 1, 3)
+
+    with caplog.at_level("WARNING"):
+        game.load_buildings()
+
+    levels = {
+        (b.tile.row_number, b.tile.column_number): b.level for b in game.buildings
+    }
+    assert levels == {(1, 1): 1, (1, 2): 11, (1, 3): 5}
+    assert len(caplog.records) == 2  # the two bad rows, not the valid one

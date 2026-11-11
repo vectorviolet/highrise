@@ -40,7 +40,7 @@ class Building(StateObject):
         age_number,
         tile: Tile,
         *,
-        door_side: str = "left",
+        door_side: str,
         on_payout: Callable[["Building", int], None] | None,
     ) -> None:
         # on_payout is required (keyword-only) so a building can't be built

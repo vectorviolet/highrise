@@ -6,7 +6,7 @@ from gameplay.tiles.tile import Tile
 
 
 def make_building(level=1, age_number=0, row=1, col=1) -> Building:
-    return Building(level, age_number, Tile(row, col), on_payout=None)
+    return Building(level, age_number, Tile(row, col), door_side="left", on_payout=None)
 
 
 def test_speed_scales_with_level_and_age(assets):

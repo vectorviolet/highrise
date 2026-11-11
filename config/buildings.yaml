@@ -12,17 +12,20 @@
 # a symmetric piece is written once.
 
 floor_step: 23   # how far each floor above the first sits higher (pack pixels)
-roof_base: 67    # y inside a roof piece that lands on the top floor's top edge (pack pixels)
-# A one-floor sprite (a 65x89 pack floor) is drawn this big in the world; taller sprites are
-# scaled by the same factors, so the foot stays where it is and floors keep their proportions.
+floor_size: [65, 89]  # every floor piece, pack pixels
+# A one-floor sprite (a 65x89 pack floor) is drawn this big in the world. Taller sprites use
+# the same x and y factors (the info panel too), so the foot stays where it is and every
+# one-floor sprite is this size in every age.
 game_size: [50, 75]
 
-# Prefixes per age. The rock age wears the pack's red roofs on grey walls.
+# Prefixes per age. The rock age wears the pack's red roofs on grey walls. `roof_base` is the
+# y inside that age's roof pieces which lands on the top floor's top edge (the sand and
+# stone roofs are one pixel taller than the others).
 ages:
-  wood:  {floor: wood,  roof: wood}
-  rock:  {floor: rock,  roof: red}
-  sand:  {floor: sand,  roof: sand}
-  stone: {floor: stone, roof: stone}
+  wood:  {floor: wood,  roof: wood,  roof_base: 67}
+  rock:  {floor: rock,  roof: red,   roof_base: 67}
+  sand:  {floor: sand,  roof: sand,  roof_base: 68}
+  stone: {floor: stone, roof: stone, roof_base: 68}
 
 floor_kinds:
   door:     {left: DoorLeft, right: DoorRight}

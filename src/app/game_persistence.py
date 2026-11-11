@@ -1,9 +1,12 @@
+import logging
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 from gameplay.buildings.sprites import DOOR_SIDES, default_door_side
 from gameplay.tilemap import Tilemap
 from pygamine.util.localization import DEFAULT_LANGUAGE
 from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES
+
+logger = logging.getLogger(__name__)
 
 # The master volume a fresh database starts with (also its column default).
 DEFAULT_MASTER_VOLUME = 1.0
@@ -150,12 +153,28 @@ class GamePersistenceMixin:
                 # A save from before door sides (or a damaged value) gets a fixed default.
                 if door_side not in DOOR_SIDES:
                     door_side = default_door_side(row, column)
-                self.add_building(level, row, column, door_side)
+                self.add_building(
+                    self._valid_level(level, row, column), row, column, door_side
+                )
             else:
                 self.database.execute_safely(
                     "DELETE FROM buildings WHERE level=? AND row=? AND column=?",
                     params=(level, row, column),
                 )
+
+    def _valid_level(self, level: int, row: int, column: int) -> int:
+        """A saved level held to 1..max_building_level (a damaged row, or a save made with a
+        higher maximum, would otherwise have no sprite)."""
+        valid = min(max(level, 1), self.max_building_level)
+        if valid != level:
+            logger.warning(
+                "Saved building at row %s, column %s has level %s; using %s",
+                row,
+                column,
+                level,
+                valid,
+            )
+        return valid
 
     def save_audio_settings(self) -> None:
         self.database.execute_safely(
