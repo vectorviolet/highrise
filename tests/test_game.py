@@ -26,6 +26,7 @@ from pygamine.util.localization import localization
 from ui.floating_text import FloatingTextConfig, FloatingTexts
 from ui.info_panel import InfoPanel
 from ui.money_format import format_money
+from ui.odometer import Odometer
 from ui.ui_scale import DEFAULT_UI_SCALE
 
 MAX_SIZE = 7
@@ -137,6 +138,8 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
     game.assets = assets
     game.player = Player()
     game.player.money = starting_money
+    game.odometer = Odometer(250)
+    game.shown_money = starting_money
     game.floating_texts = FloatingTexts(
         FloatingTextConfig.from_dict(
             yaml.safe_load(Path("config/settings.yaml").read_text())["floating_text"]

@@ -29,6 +29,7 @@ from ui.cash_display import apply_cash_display
 from ui.floating_text import FloatingTextConfig, FloatingTexts
 from ui.info_panel import InfoPanel
 from ui.money_format import format_money
+from ui.odometer import Odometer
 from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES, step_ui_scale
 from util.paths import LANG_FOLDER
 
@@ -102,6 +103,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         ui = self.settings["ui"]
 
         self.cursor_size = tuple(ui["cursor_size"])
+        self.odometer = Odometer(ui["cash_roll_ms"])
+        self.shown_money = 0
         self.floating_text_config = FloatingTextConfig.from_dict(
             self.settings["floating_text"]
         )
@@ -379,10 +382,22 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         money_text = panel["money_text"]
         if self.money_listener is not None:
             self.player.remove_money_listener(self.money_listener)
-        self.money_listener = lambda m: money_text.set_text(format_money(m))
+        # money_text keeps the real text and the layout; the odometer draws it, rolling.
+        money_text.active = False
+        self.odometer.bind(money_text, panel["money_panel"].rect)
+        self.shown_money = self.player.money
+        self.money_listener = self._on_money_changed
         self.player.add_money_listener(self.money_listener)
         money_text.set_text(format_money(self.player.money))
+        self.odometer.snap(money_text.text)
         self._panels_built = True
+
+    def _on_money_changed(self, money: int) -> None:
+        text = format_money(money)
+        self.panel_manager["game"]["money_text"].set_text(text)
+        direction = 1 if money > self.shown_money else -1
+        self.odometer.set_target(text, direction, pygame.time.get_ticks())
+        self.shown_money = money
 
     @property
     def _tilemap(self) -> Tilemap:
@@ -442,6 +457,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def draw(self) -> None:
         self.panel_manager.draw(self.window)
         if self.panel_manager.current_panel == "game":
+            self.odometer.draw(self.window, pygame.time.get_ticks())
             # A panel open over the world (the info panel) is never covered by the
             # texts floating over the world.
             self.floating_texts.draw(
@@ -595,9 +611,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def _refresh_ui_texts(self) -> None:
         """Re-texts what panels.yaml cannot: the toolbar hover texts and the
         labels the game sets from code. Touches nothing but texts."""
-        self.panel_manager["game"]["money_text"].set_text(
-            format_money(self.player.money)
-        )
+        money_text = self.panel_manager["game"]["money_text"]
+        money_text.set_text(format_money(self.player.money))
+        self.odometer.snap(money_text.text)
         self.update_button_texts()
         self.set_music_label(self.audio.music_volume())
         self.set_sfx_label(self.audio.sfx_volume())

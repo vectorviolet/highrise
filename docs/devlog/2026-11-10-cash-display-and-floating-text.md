@@ -1,7 +1,7 @@
 # Cash display restyle and floating money text
-<!-- index | refs: #48, #50, PR #54 -->
+<!-- index | refs: #48, #50, #61, PR #54 -->
 
-**Date:** 2026-11-10 · **Area:** UI · **Issues:** [#48](https://github.com/vectorviolet/highrise/issues/48), [#50](https://github.com/vectorviolet/highrise/issues/50)  · **PR:** [#54](https://github.com/vectorviolet/highrise/pull/54)
+**Date:** 2026-11-10 · **Area:** UI · **Issues:** [#48](https://github.com/vectorviolet/highrise/issues/48), [#50](https://github.com/vectorviolet/highrise/issues/50), [#61](https://github.com/vectorviolet/highrise/issues/61) · **PR:** [#54](https://github.com/vectorviolet/highrise/pull/54)
 
 ## Context
 
@@ -82,3 +82,28 @@ The cash display and the floating text work at every UI scale; tests cover the a
   are also clamped to the screen.
 
 ![The spend text next to the plate at 80, 100 and 125 percent](img/50-spend-text-right-aligned.png)
+
+## Odometer roll for the cash amount (#61)
+
+The cash amount rolls like an odometer: only the digits that change roll, the new digit comes in
+from the bottom when money goes up and from the top when it goes down, and separators and the "$"
+stay still. The owner approved the spec; the roll takes 0.25 s (`ui.cash_roll_ms`).
+
+![The cash amount rolling, 1,998 to 1,999, as frames 25 ms apart](img/61-cash-odometer-frames.png)
+
+The GIF (slowed to 40 ms per frame) goes through 1,998 to 1,999 to 2,000 (a carry), up to 2,300,
+down to 2,250 and down to 999 (a digit leaves at the left):
+
+![The cash amount rolling](img/61-cash-odometer.gif)
+
+- `ui/odometer.py` draws the text one character at a time over the plate. `money_text` stays the
+  source of truth (it holds the real text at once, and its rectangle is the layout), but is
+  hidden; the odometer draws in its place.
+- Characters match from the right, so a number gaining or losing a digit rolls that digit in or out
+  at its left end. Every digit is clipped to its own cell and to the plate.
+- A change during a roll retargets to the newest text; nothing is queued, so the display never lags
+  behind the real money. A digit already rolling toward the right character keeps its clock; one
+  that changes again starts over from the character it was heading for, so a mid-roll digit can
+  jump a little on a fast retarget.
+- A new session and a language change show the text at once, with no roll. The format (separator,
+  sign) comes from `format_money`, so the roll follows the language.

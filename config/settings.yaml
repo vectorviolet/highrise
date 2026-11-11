@@ -25,6 +25,8 @@ floating_text:
   max_texts: 40            # alive at once
 
 ui:
+  cash_roll_ms: 250         # how long a changing digit of the cash amount rolls
+  cash_roll_ms: 250         # how long a changing digit of the cash amount rolls
   cursor_size: [32, 32]  # the Kenney Cursor Pack sprite's native size: crisp pixel art
   background_colors:
     menu: yellow

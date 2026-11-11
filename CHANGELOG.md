@@ -22,6 +22,10 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Every player-visible string lives in `config/lang/en.yaml`, with a draft Turkish translation in
   `config/lang/tr.yaml`. Tests check that both files have the same keys and that the font has every
   character ([devlog](docs/devlog/2026-11-04-language-and-skip-intro.md)).
+- The cash amount **rolls like an odometer**: only the digits that change roll (up from the
+  bottom when money goes up, down from the top when it goes down), 0.25 s per change
+  (`ui.cash_roll_ms`); a change during a roll retargets to the newest amount
+  ([devlog](docs/devlog/2026-11-10-cash-display-and-floating-text.md)).
 - **Floating money text**: a green "+X$" rises over a building that paid or was sold, and a red
   "-X$" falls onto the cash display when you build, upgrade (NEXT AGE) or expand. Every payout
   gets its own number. Colors, sizes, speed and lifetime are in `config/settings.yaml`
