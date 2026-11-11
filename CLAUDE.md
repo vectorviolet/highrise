@@ -135,8 +135,9 @@ on the buttons' top and bottom line. `ui/cash_display.py` paints the plate and c
 `Game._spend` (build, upgrade, expand, NEXT AGE; always spend through it, not `Player.spend`). Amounts are
 written by `ui/money_format.py` (`money.amount` and `money.thousands` in the language files: "12,345$", Turkish
 "12.345$"), for the cash display, the prices and the texts alike. Every payout gets its own text.
-The cash amount is drawn by `ui/odometer.py` (rolling digits, `ui.cash_roll_ms`): `money_text` is hidden but keeps
-the real text and the layout, and `Game._on_money_changed` feeds the odometer.
+The cash amount is drawn by `ui/odometer.py` (rolling digits, `ui.cash_roll_ms`): `money_text` is hidden and
+only gives the layout (anchored rectangle, font, color); the odometer owns the text, `Game._on_money_changed` feeds it,
+and a language change snaps it (`Game._on_language_changed`). A text too wide for the room right of the coin is scaled down.
 World texts are hidden while the info panel is open. A building's
 `on_payout` callback takes `(building, amount)`.
 

@@ -382,21 +382,29 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         money_text = panel["money_text"]
         if self.money_listener is not None:
             self.player.remove_money_listener(self.money_listener)
-        # money_text keeps the real text and the layout; the odometer draws it, rolling.
+        # money_text is only the layout (its anchored rectangle, font and color): the
+        # odometer owns the text and draws it, rolling.
         money_text.active = False
-        self.odometer.bind(money_text, panel["money_panel"].rect)
+        money_text.set_text("0")
+        gap = round(6 * self.ui_scale / 100)
+        self.odometer.bind(
+            money_text.rect,
+            money_text.font,
+            money_text.color,
+            panel["money_panel"].rect,
+            panel["money_icon"].rect.right + gap,
+        )
         self.shown_money = self.player.money
         self.money_listener = self._on_money_changed
         self.player.add_money_listener(self.money_listener)
-        money_text.set_text(format_money(self.player.money))
-        self.odometer.snap(money_text.text)
+        self.odometer.snap(format_money(self.player.money))
         self._panels_built = True
 
     def _on_money_changed(self, money: int) -> None:
-        text = format_money(money)
-        self.panel_manager["game"]["money_text"].set_text(text)
         direction = 1 if money > self.shown_money else -1
-        self.odometer.set_target(text, direction, pygame.time.get_ticks())
+        self.odometer.set_target(
+            format_money(money), direction, pygame.time.get_ticks()
+        )
         self.shown_money = money
 
     @property
@@ -611,9 +619,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def _refresh_ui_texts(self) -> None:
         """Re-texts what panels.yaml cannot: the toolbar hover texts and the
         labels the game sets from code. Touches nothing but texts."""
-        money_text = self.panel_manager["game"]["money_text"]
-        money_text.set_text(format_money(self.player.money))
-        self.odometer.snap(money_text.text)
+        self.odometer.snap(format_money(self.player.money))
         self.update_button_texts()
         self.set_music_label(self.audio.music_volume())
         self.set_sfx_label(self.audio.sfx_volume())
@@ -725,7 +731,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def _on_language_changed(self, code: str) -> None:
         """Re-texts what panels.yaml cannot: the toolbar hover texts and the
-        labels the game sets from code (the other labels follow their key)."""
+        labels the game sets from code (the other labels follow their key). The cash
+        amount and an open info panel's prices change their number format too."""
+        self.odometer.snap(format_money(self.player.money))
+        self.info_panel.relocalize()
         self.update_button_texts()
         self.set_window_mode_label()
         self.set_language_label()

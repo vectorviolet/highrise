@@ -94,7 +94,10 @@ def test_refresh_writes_every_field_from_the_building(assets):
     assert panel["level_text"].text == f"Level: {building.level}"
     assert panel["speed_text"].text == f"Speed: {building.speed} $/sec"
     assert panel["cooldown_text"].text == f"Cooldown: {building.cooldown} sec"
-    assert panel["sell_price_text"].text == f"Sell Price: {building.sell_price}"
+    assert (
+        panel["sell_price_text"].text
+        == f"Sell Price: {format_money(building.sell_price)}"
+    )
     assert panel["sell_button_text"].text == format_money(building.sell_price)
     assert panel["sell_button_text"].state == "hover"
     assert panel["info_panel_building_image"].state == "default"
@@ -133,3 +136,30 @@ def test_refresh_texts_follow_a_language_switch():
 
     assert panel["level_text"].text == f"Seviye: {building.level}"
     assert panel["cooldown_text"].text == f"Bekleme: {building.cooldown} sn"
+
+
+def test_relocalize_redoes_the_formatted_prices_of_an_open_panel(assets):
+    manager, panel = make_panel_manager()
+    manager.current_panel = "game"
+    info_panel = InfoPanel(manager)
+    building = Building(level=5, age_number=3, tile=Tile(1, 1), on_payout=None)
+    building.sell_price = 12345
+    info_panel.refresh(building)
+    info_panel.open()
+    assert panel["sell_price_text"].text == "Sell Price: 12,345$"
+
+    localization.set_language("tr")
+    info_panel.relocalize()
+
+    assert panel["sell_price_text"].text == "Satış Fiyatı: 12.345$"
+    assert panel["sell_button_text"].text == "12.345$"
+
+
+def test_relocalize_does_nothing_while_the_panel_is_closed(assets):
+    manager, panel = make_panel_manager()
+    info_panel = InfoPanel(manager)
+    info_panel.close()
+
+    info_panel.relocalize()  # no building: must not raise
+
+    assert panel["sell_button_text"].text is None

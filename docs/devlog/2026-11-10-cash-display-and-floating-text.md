@@ -96,14 +96,19 @@ down to 2,250 and down to 999 (a digit leaves at the left):
 
 ![The cash amount rolling](img/61-cash-odometer.gif)
 
-- `ui/odometer.py` draws the text one character at a time over the plate. `money_text` stays the
-  source of truth (it holds the real text at once, and its rectangle is the layout), but is
-  hidden; the odometer draws in its place.
+- `ui/odometer.py` owns the cash text and draws it one character at a time over the plate.
+  `money_text` is hidden and only gives the layout (its anchored rectangle, font and color), so it
+  isn't re-rendered on every change.
 - Characters match from the right, so a number gaining or losing a digit rolls that digit in or out
-  at its left end. Every digit is clipped to its own cell and to the plate.
+  at its left end; a separator that goes away waits until the digits next to it have rolled out
+  (no "1999$" frame), and a digit that was leaving rolls back in if the number grows again. The
+  cell of a rolling digit grows or shrinks between the old and new glyph, so neighbors don't jump.
+  Every digit is clipped to its own cell and to the plate. A text too wide for the room right of
+  the coin ("100,000,000$" at 125%) is scaled down to fit.
 - A change during a roll retargets to the newest text; nothing is queued, so the display never lags
   behind the real money. A digit already rolling toward the right character keeps its clock; one
   that changes again starts over from the character it was heading for, so a mid-roll digit can
   jump a little on a fast retarget.
-- A new session and a language change show the text at once, with no roll. The format (separator,
+- A new session and a language change show the text at once, with no roll (an open info panel's
+  prices follow the language too). The format (separator,
   sign) comes from `format_money`, so the roll follows the language.

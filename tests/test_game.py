@@ -162,7 +162,7 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
     game.cloud_animation = SimpleNamespace(
         create_clouds=Spy(), update=Spy(), draw=Spy()
     )
-    game.info_panel = SimpleNamespace(is_active=False, close=Spy())
+    game.info_panel = SimpleNamespace(is_active=False, close=Spy(), relocalize=Spy())
     game.old_music_volume = 0.5
     game.old_sfx_volume = 0.5
     game.update_button_texts = Spy()
