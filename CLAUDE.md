@@ -143,7 +143,10 @@ level N is entry N of `levels`, and `max_building_level` may not exceed the numb
 only variety is the door side (left or right): random when a building is built, saved in the
 `buildings` table (old saves get a fixed default from row and column), kept by a merge (the
 survivor's side) and an age change. Each level adds one visible change (the `adds` notes in the
-recipes); shutter pieces are kept free for #72. `scripts/render_building_styles.py` renders the
+recipes); shutter pieces are kept free for #72. The world and info panel sprites get a thin outline
+(`sprites.outline`, `outline` in the recipes: width and darken factor): the silhouette's outermost
+pixels recolored darker, inside the surface so size, anchor and click area don't change; built once
+with the cached sprite. `scripts/render_building_styles.py` renders the
 sprites for the devlog.
 
 Boosters (issue #51) are `Building`s with a `booster_multiplier` (None for a normal building;

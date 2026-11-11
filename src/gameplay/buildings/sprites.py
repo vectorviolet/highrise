@@ -4,6 +4,10 @@ A sprite is cached per (age, level, door side, booster), so composing happens on
 combination, never per frame. `compose` builds the full-size sprite, `game_sprite` the one drawn
 in the world. A booster (`booster=True`) uses the `boosters` recipes instead of the building
 levels; its sprite has no door, so the door side makes no difference to it.
+
+Every sprite the game draws (world and info panel) gets a thin outline, applied once when the
+sprite is built and cached with it. It is drawn inside the sprite's own surface, on the silhouette's
+outermost pixels, so size, anchor and click area stay what they were (see `outline`).
 """
 
 from functools import cache
@@ -49,6 +53,63 @@ def checked_max_level(max_level: int) -> int:
             f"in {RECIPES_PATH.as_posix()}"
         )
     return max_level
+
+
+def outline_settings() -> tuple[int, float]:
+    """The outline's width in pixels (0 = none) and the factor its edge pixels' color is multiplied
+    by (`outline` in the recipes)."""
+    config = recipes()["outline"]
+    width, factor = config["width"], config["darken"]
+    if not isinstance(width, int) or isinstance(width, bool) or width < 0:
+        raise ValueError(
+            f"outline width in {RECIPES_PATH.as_posix()} must be a whole number, 0 or more"
+        )
+    if isinstance(factor, bool) or not isinstance(factor, (int, float)):
+        raise ValueError(
+            f"outline darken in {RECIPES_PATH.as_posix()} must be a number"
+        )
+    if not 0 < factor <= 1:
+        raise ValueError(
+            f"outline darken in {RECIPES_PATH.as_posix()} must be in (0, 1]"
+        )
+    return width, float(factor)
+
+
+def _eroded(solid: pygame.Mask) -> pygame.Mask:
+    """`solid` without the pixels that have a non-solid 4-neighbor (the surface's edge counts as
+    non-solid)."""
+    size = solid.get_size()
+    result = solid
+    for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+        shifted = pygame.Mask(size)
+        shifted.draw(solid, (dx, dy))
+        result = result.overlap_mask(shifted, (0, 0))
+    return result
+
+
+def outline(sprite: pygame.Surface) -> pygame.Surface:
+    """A copy of `sprite` with an outline that follows its alpha silhouette. The outline is the
+    outermost `width` pixels of the silhouette (also where it touches the surface's edge),
+    recolored to a darker shade of their own color (each channel times `darken`), so it stays
+    part of the art instead of being black or gray. Alpha is kept, so the size, the anchor and the
+    opaque area are exactly the sprite's. Width 0 returns the sprite unchanged. Built from masks
+    and one blit, but still a pass over the sprite: only call it when a sprite is built, never
+    per frame."""
+    width, factor = outline_settings()
+    if width == 0:
+        return sprite
+    core = pygame.mask.from_surface(sprite, 127)  # alpha 128 or more is solid
+    for _ in range(width):
+        core = _eroded(core)
+    # Every visible pixel (soft edge included) that is not in the core is the outline.
+    rim = pygame.mask.from_surface(sprite, 0)
+    rim.erase(core, (0, 0))
+    shade = round(255 * factor)
+    darker = sprite.copy()
+    darker.fill((shade, shade, shade, 255), special_flags=pygame.BLEND_RGBA_MULT)
+    result = sprite.copy()
+    rim.to_surface(result, setsurface=darker, unsetcolor=None)
+    return result
 
 
 def random_door_side() -> str:
@@ -139,14 +200,15 @@ def game_sprite(
 ) -> pygame.Surface:
     """The sprite at its size in the world (see `game_size` in the recipes)."""
     sprite = compose(age, level, door_side, booster)
-    return pygame.transform.scale(sprite, world_size(sprite))
+    return outline(pygame.transform.scale(sprite, world_size(sprite)))
 
 
 @cache
 def tallest_world_height() -> int:
     """The height of the tallest sprite in the world, over every age and level (boosters too)."""
+    # Heights come from the un-outlined sprites: reading a size must not outline all of them.
     return max(
-        game_sprite(age, level, "left", booster).get_height()
+        world_size(compose(age, level, "left", booster))[1]
         for booster in (False, True)
         for age in recipes()["ages"]
         for level in range(1, level_count(booster) + 1)
@@ -161,14 +223,14 @@ def panel_sprite(
     for every level (the tallest sprite just fits the box's height, so level growth shows like
     on the board), on a transparent surface of the box's size, centered, its roof tip at the
     top (every building hangs from the same line)."""
-    world = game_sprite(age, level, door_side, booster).get_size()
+    world = world_size(compose(age, level, door_side, booster))
     factor = min(box[1] / tallest_world_height(), box[0] / recipes()["game_size"][0])
     size = (round(world[0] * factor), round(world[1] * factor))
     result = pygame.Surface(box, pygame.SRCALPHA)
     result.blit(
         # Scaled once from the full-size sprite (not the board's already scaled one), to the
         # board's proportions times the panel factor, so it stays as sharp as it can.
-        pygame.transform.scale(compose(age, level, door_side, booster), size),
+        outline(pygame.transform.scale(compose(age, level, door_side, booster), size)),
         ((box[0] - size[0]) // 2, 0),
     )
     return result
