@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/store/icon.png" alt="Highrise icon" width="128"></p>
+
 # Highrise
 
 [![CI](https://github.com/vectorviolet/highrise/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/vectorviolet/highrise/actions/workflows/ci.yml)

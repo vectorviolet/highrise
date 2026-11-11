@@ -56,7 +56,7 @@ def render(data: dict) -> str:
             "Made for this game by its developer: "
             + ", ".join(rel.split("/")[-1] for rel in own)
             + " (in assets/"
-            + ", assets/".join(rel.rsplit("/", 1)[0] for rel in own)
+            + ", assets/".join(sorted({rel.rsplit("/", 1)[0] for rel in own}))
             + ").",
             "",
         ]

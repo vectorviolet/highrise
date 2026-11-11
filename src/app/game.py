@@ -51,6 +51,8 @@ from util.paths import LANG_FOLDER
 # Manifest key of the background music. Optional: without it the game plays
 # no music and hides the music volume control (it would control nothing --
 # the splash plays before the saved volumes are applied).
+# The window and taskbar icon: the plate-less tower, crisp at the small sizes the OS shows.
+WINDOW_ICON = "assets/images/icon/icon_64.png"
 MUSIC_KEY = "bg"
 MUSIC_VOLUME_OBJECTS = (
     "music_volume_text",
@@ -169,6 +171,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self._panels_built = False
 
         super().__init__(tuple(window["size"]), window["title"], window["fps"])
+        pygame.display.set_icon(pygame.image.load(WINDOW_ICON))
 
         self.assets = AssetManager()
         self.assets.load_manifest("config/assets.yaml")
