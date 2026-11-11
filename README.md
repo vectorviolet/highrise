@@ -18,7 +18,7 @@ An isometric city-builder where same-level buildings merge `2048`-style: slide t
 
 ## Gameplay
 
-Place buildings on the isometric grid, then slide them with WASD or the arrow keys to merge same-level neighbors into a higher-level building, just like 2048. Higher-level buildings earn more income. Spend it to build, expand the land, or advance to the **next age** for better-looking buildings; each age's tasks (reach a building level, earn so much per second, boost some buildings) must be done first. **BOOST** puts a booster on the board that raises the income of the buildings on the tiles it covers. English and Turkish, with display, audio and game settings; leaving the board for the menu saves your game, and CONTINUE resumes it.
+Place buildings on the isometric grid, then slide them with WASD or the arrow keys to merge same-level neighbors into a higher-level building, just like 2048. Higher-level buildings earn more income. Spend it to build, expand the land, or advance to the **next age** for better-looking buildings; each age's tasks (reach a building level, earn so much per second, and in later ages boost some buildings) must be done first. **BOOST** puts a booster on the board that raises the income of the buildings on the tiles it covers. English and Turkish, with display, audio and game settings; leaving the board for the menu saves your game, and CONTINUE resumes it.
 
 ## Screenshots
 
