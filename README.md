@@ -1,6 +1,6 @@
-<p align="center"><img src="docs/design/icon.png" alt="Highrise icon" width="128"></p>
-
-# Highrise
+<h1 align="center">
+  <img src="docs/design/cover.png" alt="Highrise: merge. build. rise." width="640">
+</h1>
 
 <div align="center">
 

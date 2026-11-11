@@ -23,12 +23,13 @@ Fields that live outside the description, following itch.io's
 
 - **Short description or tagline (proposal):** "Merge buildings 2048-style and grow a city through
   four ages."
-- **Classification:** Games. **Kind of project:** Downloadable. **Release status:** In
-  development until 1.0, then Released.
+- **Classification:** Games. **Kind of project:** Downloadable. **Release status:**
+  Released (1.0.0 is out).
 - **Platforms:** Windows, macOS, Linux (the three the release workflow builds).
 - **Genre:** Strategy. (Puzzle is the alternative.)
-- **Tags (proposal):** only relevant ones, preferring itch.io's suggestions: City Builder,
-  Isometric, Puzzle, 2048, Singleplayer, Relaxing, Open Source, Pygame. Don't tag the game's own name.
+- **Tags (proposal, 10, itch.io's limit):** City Builder, Isometric, Puzzle, 2048, Casual, Relaxing,
+  Colorful, Singleplayer, Open Source, Pygame. Prefer itch.io's own suggestions when it offers a
+  near match; don't tag the game's own name.
 - **Languages:** English, Turkish (the two the game ships).
 - **Inputs:** Keyboard, Mouse.
 - **AI disclosure (proposal):** answer it on the edit page to match the description's line. Claude Code
