@@ -13,6 +13,7 @@ from app.game_persistence import (
     GameSettings,
 )
 from domain.player import Player
+from gameplay.buildings import sprites
 from gameplay.buildings.building import Building, Buildings
 from gameplay.clouds.cloud_container import OneShotCloudAnimation, LoopingCloudAnimation
 from gameplay.tile_selector import TileSelector
@@ -168,7 +169,9 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         )
         self.cloud_count = gameplay["cloud_count"]
         self.max_size = gameplay["max_map_size"]
-        self.max_building_level = gameplay["max_building_level"]
+        self.max_building_level = sprites.checked_max_level(
+            gameplay["max_building_level"]
+        )
         self.starting_money = gameplay["starting_money"]
 
         self.audio = GameAudio()
@@ -569,10 +572,13 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.update_button_texts()
         self.audio.play_sfx(self.click_sound_path)
 
-    def add_building(self, level, row_number, column_number) -> None:
+    def add_building(
+        self, level, row_number, column_number, door_side: str | None = None
+    ) -> None:
+        """Add a building; `door_side=None` picks a random side (a newly built one)."""
         tilemap = self._tilemap
         new_building = self.buildings.create(
-            level, tilemap[row_number - 1][column_number - 1]
+            level, tilemap[row_number - 1][column_number - 1], door_side=door_side
         )
         self.buildings.append(new_building)
         self.buildings.sort_by_column()

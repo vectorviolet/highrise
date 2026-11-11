@@ -1,0 +1,51 @@
+# Building recipes: how each age's building sprite is composed from Kenney "Hexagon Buildings"
+# pieces (CC0, assets/images/buildings/), read by src/gameplay/buildings/sprites.py and
+# scripts/render_building_styles.py. Level N needs entry N of `levels`, and
+# `gameplay.max_building_level` in settings.yaml may not exceed the number of levels.
+#
+# A sprite is floors stacked bottom to top, then one roof. Every age uses the same structure per
+# level; only the piece prefix differs. Piece file name = prefix + piece, e.g. floor prefix "rock"
+# + "DoorWindow" -> rockDoorWindow.png, roof prefix "red" + "Roof" + "Short" -> redRoofShort.png.
+#
+# The only per-building variety is the door side (left or right), picked when the building is
+# first built and kept through every level and age. A floor kind names its piece for each side;
+# a symmetric piece is written once.
+
+floor_step: 23   # how far each floor above the first sits higher (pack pixels)
+floor_size: [65, 89]  # every floor piece, pack pixels
+# A one-floor sprite (a 65x89 pack floor) is drawn this big in the world. Taller sprites use
+# the same x and y factors (the info panel too), so the foot stays where it is and every
+# one-floor sprite is this size in every age.
+game_size: [50, 75]
+
+# Prefixes per age. The rock age wears the pack's red roofs on grey walls. `roof_base` is the
+# y inside that age's roof pieces which lands on the top floor's top edge (the sand and
+# stone roofs are one pixel taller than the others).
+ages:
+  wood:  {floor: wood,  roof: wood,  roof_base: 67}
+  rock:  {floor: rock,  roof: red,   roof_base: 67}
+  sand:  {floor: sand,  roof: sand,  roof_base: 68}
+  stone: {floor: stone, roof: stone, roof_base: 68}
+
+floor_kinds:
+  door:     {left: DoorLeft, right: DoorRight}
+  # The pack's "DoorWindow" has its door on the right face, so the left version is the mirror.
+  door_window: {left: DoorWindowMirror, right: DoorWindow}
+  gate:     {left: GateLeft, right: GateRight}
+  window:   {left: WindowLeft, right: WindowRight}
+  windows:  Windows
+
+# Level N is entry N: the full stack (`floors` bottom to top, then a `roof`). `adds` is the one
+# visible change from the level before. Shutter pieces are kept free on purpose (issue #72).
+levels:
+  - {floors: [door], roof: Short, adds: "a plain door under a low roof"}
+  - {floors: [door_window], roof: Short, adds: "a window beside the door"}
+  - {floors: [gate], roof: Short, adds: "the door becomes a wide gate"}
+  - {floors: [gate, window], roof: Short, adds: "a second floor with a window"}
+  - {floors: [gate, windows], roof: Short, adds: "the second floor gets a second window"}
+  - {floors: [gate, windows], roof: Straight, adds: "the roof rises to a point"}
+  - {floors: [gate, windows, window], roof: Straight, adds: "a third floor with a window"}
+  - {floors: [gate, windows, windows], roof: Straight, adds: "the third floor gets a second window"}
+  - {floors: [gate, windows, windows], roof: Tall, adds: "the roof grows taller"}
+  - {floors: [gate, windows, windows], roof: Pointy, adds: "the roof becomes a curved spire"}
+  - {floors: [gate, windows, windows, windows], roof: Pointy, adds: "a fourth floor"}

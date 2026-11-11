@@ -9,6 +9,7 @@ from types import SimpleNamespace
 
 
 from app.game_persistence import GamePersistenceMixin, GameSettings
+from gameplay.buildings.sprites import DOOR_SIDES, default_door_side
 from ui.ui_scale import DEFAULT_UI_SCALE
 from gameplay.buildings.building import Building, Buildings
 from pygamine import Database
@@ -57,15 +58,16 @@ class FakeGame(GamePersistenceMixin):
         self.max_size = max_size
         self.player = SimpleNamespace(money=0)
         self.audio = FakeAudio(default_music, default_sfx)
+        self.max_building_level = 11
         self.tilemap = None
         self.tile_selector = SimpleNamespace(tilemap=None)
         self.buildings = Buildings()
         self.calls: list = []
 
-    def add_building(self, level, row, column) -> None:
+    def add_building(self, level, row, column, door_side=None) -> None:
         self.calls.append(("add_building", level, row, column))
         tile = self.tilemap[row - 1][column - 1]
-        self.buildings.append(self.buildings.create(level, tile))
+        self.buildings.append(self.buildings.create(level, tile, door_side=door_side))
 
 
 def insert_building_row(game, level, row, column):
@@ -125,7 +127,9 @@ def test_load_data_restores_a_previously_saved_game(tmp_path, assets):
     seed.load_data()
     seed.player.money = 999
     seed.buildings.age_number = 2
-    seed.buildings.append(Building(3, 2, seed.tilemap[0][0], on_payout=None))
+    seed.buildings.append(
+        Building(3, 2, seed.tilemap[0][0], door_side="left", on_payout=None)
+    )
     seed.save_game()
 
     game = FakeGame(tmp_path, assets, starting_money=250)
@@ -202,7 +206,7 @@ def test_load_buildings_clears_any_existing_in_memory_buildings_first(tmp_path, 
     game.init_database()
     game.load_game_data([(0, 3, 0, 0.5, 0.5)])
     game.buildings.append(
-        Building(1, 0, game.tilemap[0][0], on_payout=None)
+        Building(1, 0, game.tilemap[0][0], door_side="left", on_payout=None)
     )  # stale in-memory state
 
     game.load_buildings()
@@ -235,7 +239,9 @@ def test_save_game_persists_state_and_buildings(tmp_path, assets):
     game.load_game_data([(0, 3, 0, 0.5, 0.5)])
     game.player.money = 900
     game.buildings.age_number = 2
-    game.buildings.append(Building(3, 2, game.tilemap[1][1], on_payout=None))
+    game.buildings.append(
+        Building(3, 2, game.tilemap[1][1], door_side="left", on_payout=None)
+    )
 
     game.save_game()
 
@@ -273,11 +279,15 @@ def test_save_game_replaces_rather_than_accumulates_building_rows(tmp_path, asse
     game.init_database()
     game.get_game_data()
     game.load_game_data([(0, 3, 0, 0.5, 0.5)])
-    game.buildings.append(Building(1, 0, game.tilemap[0][0], on_payout=None))
+    game.buildings.append(
+        Building(1, 0, game.tilemap[0][0], door_side="left", on_payout=None)
+    )
     game.save_game()
 
     game.buildings.clear()
-    game.buildings.append(Building(2, 0, game.tilemap[2][2], on_payout=None))
+    game.buildings.append(
+        Building(2, 0, game.tilemap[2][2], door_side="left", on_payout=None)
+    )
     game.save_game()
 
     building_rows = game.database.execute_safely(
@@ -291,7 +301,9 @@ def test_delete_data_resets_the_game_row_and_clears_buildings(tmp_path, assets):
     game.init_database()
     game.get_game_data()
     game.load_game_data([(0, 3, 0, 0.5, 0.5)])
-    game.buildings.append(Building(1, 0, game.tilemap[0][0], on_payout=None))
+    game.buildings.append(
+        Building(1, 0, game.tilemap[0][0], door_side="left", on_payout=None)
+    )
     game.save_game()
 
     game.delete_data()
@@ -447,3 +459,85 @@ def test_a_settings_table_from_before_the_master_volume_gets_the_column(
     old.init_database()
 
     assert old.load_settings() == GameSettings("tr", True, 110, 1.0)
+
+
+def test_door_sides_are_saved_and_loaded(tmp_path, assets):
+    seed = FakeGame(tmp_path, assets)
+    seed.load_data()
+    tiles = seed.tilemap
+    seed.buildings.append(
+        Building(2, 0, tiles[0][0], door_side="right", on_payout=None)
+    )
+    seed.buildings.append(Building(1, 0, tiles[1][1], door_side="left", on_payout=None))
+    seed.save_game()
+
+    game = FakeGame(tmp_path, assets)
+    game.load_data()
+
+    assert {(b.level, b.door_side) for b in game.buildings} == {
+        (2, "right"),
+        (1, "left"),
+    }
+
+
+def test_a_save_from_before_door_sides_is_migrated_with_a_fixed_default(
+    tmp_path, assets
+):
+    game = FakeGame(tmp_path, assets)
+    # The buildings table as older versions created it: no door_side column.
+    game.database.execute_safely(
+        "CREATE TABLE buildings(level INTEGER, row INTEGER, column INTEGER)"
+    )
+    game.database.execute_safely(
+        "INSERT INTO buildings(level, row, column) VALUES (2, 1, 1), (1, 1, 2)"
+    )
+
+    game.load_data()
+
+    columns = game.database.execute_safely("PRAGMA table_info(buildings)", True)
+    assert [c[1] for c in columns] == ["level", "row", "column", "door_side"]
+    sides = {
+        (b.tile.row_number, b.tile.column_number): b.door_side for b in game.buildings
+    }
+    assert sides == {(1, 1): default_door_side(1, 1), (1, 2): default_door_side(1, 2)}
+    assert set(sides.values()) == set(DOOR_SIDES)
+
+    # A second start gives the same sides.
+    again = FakeGame(tmp_path, assets)
+    again.load_data()
+    assert {
+        (b.tile.row_number, b.tile.column_number): b.door_side for b in again.buildings
+    } == sides
+
+
+def test_an_unknown_saved_door_side_falls_back_to_the_default(tmp_path, assets):
+    game = FakeGame(tmp_path, assets)
+    game.init_database()
+    game.load_game_data([(0, 3, 0, 0.5, 0.5)])
+    game.database.execute_safely(
+        "INSERT INTO buildings(level, row, column, door_side) VALUES (1, 2, 2, 'sideways')"
+    )
+
+    game.load_buildings()
+
+    assert game.buildings[0].door_side == default_door_side(2, 2)
+
+
+def test_a_saved_level_outside_the_recipes_is_held_to_the_valid_range(
+    tmp_path, assets, caplog
+):
+    game = FakeGame(tmp_path, assets)
+    game.init_database()
+    game.load_game_data([(0, 3, 0, 0.5, 0.5)])
+    insert_building_row(game, 0, 1, 1)
+    insert_building_row(game, 12, 1, 2)
+    insert_building_row(game, 5, 1, 3)
+
+    with caplog.at_level("WARNING"):
+        game.load_buildings()
+
+    levels = {
+        (b.tile.row_number, b.tile.column_number): b.level for b in game.buildings
+    }
+    assert levels == {(1, 1): 1, (1, 2): 11, (1, 3): 5}
+    assert len(caplog.records) == 2  # the two bad rows, not the valid one

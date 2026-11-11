@@ -208,7 +208,7 @@ def _spend_texts(game: Game) -> list[str]:
 def test_expand_grows_the_map_and_relocates_building_tiles(assets):
     game = make_game(assets, size=3, starting_money=100_000)
     tile = game.tilemap[1][1]
-    building = Building(1, 0, tile, on_payout=None)
+    building = Building(1, 0, tile, door_side="left", on_payout=None)
     game.buildings.append(building)
     cost = game.tilemap.get_expand_cost()
 
@@ -386,7 +386,7 @@ def test_every_production_insertion_path_pays_the_player(assets, path, monkeypat
         monkeypatch.setattr("app.game.choice", lambda tiles: (1, 1))
         game.create_building()
     elif path == "load":
-        game.database = SimpleNamespace(execute_safely=lambda *a: [(2, 1, 1)])
+        game.database = SimpleNamespace(execute_safely=lambda *a: [(2, 1, 1, "right")])
         game.load_buildings()
     elif path == "age":
         game.add_building(1, 1, 1)
@@ -404,7 +404,7 @@ def test_every_production_insertion_path_pays_the_player(assets, path, monkeypat
 
 def test_a_building_cannot_be_constructed_without_choosing_a_payout(assets):
     with pytest.raises(TypeError):
-        Building(1, 0, Tilemap(3, 3)[0][0])
+        Building(1, 0, Tilemap(3, 3)[0][0], door_side="left")
 
 
 # ── move_buildings ───────────────────────────────────────────────────────────
@@ -493,7 +493,9 @@ def test_has_save_data_true_with_buildings_or_advanced_age(assets):
     game = make_game(assets, size=3)
     assert game.has_save_data() is False
 
-    game.buildings.append(Building(1, 0, game.tilemap[0][0], on_payout=None))
+    game.buildings.append(
+        Building(1, 0, game.tilemap[0][0], door_side="left", on_payout=None)
+    )
     assert game.has_save_data() is True
 
     game2 = make_game(assets, size=3)
@@ -503,7 +505,9 @@ def test_has_save_data_true_with_buildings_or_advanced_age(assets):
 
 def test_play_opens_the_play_panel_when_a_save_exists(assets):
     game = make_game(assets, size=3)
-    game.buildings.append(Building(1, 0, game.tilemap[0][0], on_payout=None))
+    game.buildings.append(
+        Building(1, 0, game.tilemap[0][0], door_side="left", on_payout=None)
+    )
 
     game.play()
 
@@ -661,7 +665,7 @@ def test_game_plays_the_merge_sound_through_the_collection_callback(assets):
 
 def test_loaded_buildings_have_payout_callbacks_without_an_update(assets):
     game = make_game(assets)
-    game.database = SimpleNamespace(execute_safely=lambda *args: [(2, 1, 1)])
+    game.database = SimpleNamespace(execute_safely=lambda *args: [(2, 1, 1, "right")])
 
     game.load_buildings()
 

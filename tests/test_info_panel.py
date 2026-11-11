@@ -24,7 +24,7 @@ class FakeImage:
     def __init__(self):
         self.surfaces = {}
         self.state = None
-        self.rect = Transform((0, 0), (65, 89))  # the size the panel was loaded at
+        self.rect = Transform((0, 0), (60, 185))  # the size the panel was loaded at
 
     def add_surface(self, name, surface) -> None:
         self.surfaces[name] = surface
@@ -86,7 +86,9 @@ def test_open_and_close_toggle_is_active(assets):
 def test_refresh_writes_every_field_from_the_building(assets):
     manager, panel = make_panel_manager()
     info_panel = InfoPanel(manager)
-    building = Building(level=2, age_number=1, tile=Tile(1, 1), on_payout=None)
+    building = Building(
+        level=2, age_number=1, tile=Tile(1, 1), door_side="left", on_payout=None
+    )
 
     info_panel.refresh(building)
 
@@ -110,7 +112,9 @@ def test_refresh_reads_from_whichever_panel_is_currently_open(assets):
     manager["other"] = other_panel
     manager.current_panel = "other"
     info_panel = InfoPanel(manager)
-    building = Building(level=1, age_number=0, tile=Tile(1, 1), on_payout=None)
+    building = Building(
+        level=1, age_number=0, tile=Tile(1, 1), door_side="left", on_payout=None
+    )
 
     info_panel.refresh(building)
 
@@ -129,7 +133,9 @@ def test_refresh_reads_from_whichever_panel_is_currently_open(assets):
 def test_refresh_texts_follow_a_language_switch():
     manager, panel = make_panel_manager()
     info_panel = InfoPanel(manager)
-    building = Building(level=2, age_number=1, tile=Tile(1, 1), on_payout=None)
+    building = Building(
+        level=2, age_number=1, tile=Tile(1, 1), door_side="left", on_payout=None
+    )
     info_panel.refresh(building)
 
     localization.set_language("tr")
@@ -142,7 +148,9 @@ def test_relocalize_redoes_the_formatted_prices_of_an_open_panel(assets):
     manager, panel = make_panel_manager()
     manager.current_panel = "game"
     info_panel = InfoPanel(manager)
-    building = Building(level=5, age_number=3, tile=Tile(1, 1), on_payout=None)
+    building = Building(
+        level=5, age_number=3, tile=Tile(1, 1), door_side="left", on_payout=None
+    )
     building.sell_price = 12345
     info_panel.refresh(building)
     info_panel.open()
@@ -163,3 +171,18 @@ def test_relocalize_does_nothing_while_the_panel_is_closed(assets):
     info_panel.relocalize()  # no building: must not raise
 
     assert panel["sell_button_text"].text is None
+
+
+def test_the_info_image_fits_the_box_for_every_level(assets):
+    manager, panel = make_panel_manager()
+    info_panel = InfoPanel(manager)
+    image = panel["info_panel_building_image"]
+    box = tuple(image.rect.size)
+
+    for level in (1, 6, 7, 11):
+        building = Building(
+            level=level, age_number=0, tile=Tile(1, 1), door_side="left", on_payout=None
+        )
+        info_panel.refresh(building)
+        assert image.surfaces["default"].get_size() == box
+        assert panel["level_text"].text == f"Level: {level}"

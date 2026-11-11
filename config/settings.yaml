@@ -6,7 +6,7 @@ window:
 gameplay:
   starting_money: 1000
   max_map_size: 7
-  max_building_level: 6
+  max_building_level: 11
   cloud_count: 30
 
 audio:

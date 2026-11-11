@@ -1,8 +1,12 @@
+import logging
 from typing import TYPE_CHECKING, Any, NamedTuple
 
+from gameplay.buildings.sprites import DOOR_SIDES, default_door_side
 from gameplay.tilemap import Tilemap
 from pygamine.util.localization import DEFAULT_LANGUAGE
 from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES
+
+logger = logging.getLogger(__name__)
 
 # The master volume a fresh database starts with (also its column default).
 DEFAULT_MASTER_VOLUME = 1.0
@@ -36,8 +40,18 @@ class GamePersistenceMixin:
             "CREATE TABLE IF NOT EXISTS game(age_number INTEGER, size INTEGER, money INTEGER, music_volume INTEGER, sfx_volume INTEGER)"
         )
         self.database.execute_safely(
-            "CREATE TABLE IF NOT EXISTS buildings(level INTEGER, row INTEGER, column INTEGER)"
+            "CREATE TABLE IF NOT EXISTS buildings(level INTEGER, row INTEGER, column INTEGER, "
+            "door_side TEXT)"
         )
+        building_columns = self.database.execute_safely(
+            "PRAGMA table_info(buildings)", True
+        )
+        assert building_columns is not None
+        if "door_side" not in [column[1] for column in building_columns]:
+            # A buildings table from before door sides: its rows get a default when loaded.
+            self.database.execute_safely(
+                "ALTER TABLE buildings ADD COLUMN door_side TEXT"
+            )
         # A separate table, so saves made before these settings existed load
         # unchanged: the game table keeps its columns. Seeded with the
         # defaults (English, intro shown; the column defaults the UI scale) so the UPDATEs
@@ -126,20 +140,41 @@ class GamePersistenceMixin:
 
     def load_buildings(self) -> None:
         self.buildings.clear()
-        buildings = self.database.execute_safely("SELECT * FROM buildings", True)
+        buildings = self.database.execute_safely(
+            "SELECT level, row, column, door_side FROM buildings", True
+        )
         if not buildings:
             return
         assert self.tilemap is not None, "tilemap not loaded yet"
         rows = self.tilemap.row_count
         cols = self.tilemap.column_count
-        for level, row, column in buildings:
+        for level, row, column, door_side in buildings:
             if 1 <= row <= rows and 1 <= column <= cols:
-                self.add_building(level, row, column)
+                # A save from before door sides (or a damaged value) gets a fixed default.
+                if door_side not in DOOR_SIDES:
+                    door_side = default_door_side(row, column)
+                self.add_building(
+                    self._valid_level(level, row, column), row, column, door_side
+                )
             else:
                 self.database.execute_safely(
                     "DELETE FROM buildings WHERE level=? AND row=? AND column=?",
                     params=(level, row, column),
                 )
+
+    def _valid_level(self, level: int, row: int, column: int) -> int:
+        """A saved level held to 1..max_building_level (a damaged row, or a save made with a
+        higher maximum, would otherwise have no sprite)."""
+        valid = min(max(level, 1), self.max_building_level)
+        if valid != level:
+            logger.warning(
+                "Saved building at row %s, column %s has level %s; using %s",
+                row,
+                column,
+                level,
+                valid,
+            )
+        return valid
 
     def save_audio_settings(self) -> None:
         self.database.execute_safely(
@@ -168,11 +203,12 @@ class GamePersistenceMixin:
 
         for building in self.buildings:
             self.database.execute_safely(
-                "INSERT INTO buildings(level, row, column) VALUES(?, ?, ?)",
+                "INSERT INTO buildings(level, row, column, door_side) VALUES(?, ?, ?, ?)",
                 params=(
                     building.level,
                     building.tile.row_number,
                     building.tile.column_number,
+                    building.door_side,
                 ),
             )
 

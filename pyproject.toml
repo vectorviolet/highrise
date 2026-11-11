@@ -21,6 +21,8 @@ dev = [
     "types-pyyaml>=6.0.12.20261030",
     # Same version as `uvx codespell@...` in ci.yml's spelling job.
     "codespell==2.4.3",
+    # Only scripts/render_building_styles.py (devlog images) uses it.
+    "pillow>=11",
 ]
 
 [tool.ruff]

@@ -78,6 +78,162 @@ packs:
     license_check: "The track's SoundCloud page (the url above) lists its license as CC BY 3.0; the owner verified this on 2026-11-04. The file itself comes from the artist's free Hypeddit download, https://hypeddit.com/sakuragirl/dayoff."
 
 files:
+  "images/buildings/redRoofPointy.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/redRoofPointy.png"
+  "images/buildings/redRoofShort.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/redRoofShort.png"
+  "images/buildings/redRoofStraight.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/redRoofStraight.png"
+  "images/buildings/redRoofTall.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/redRoofTall.png"
+  "images/buildings/rockDoorLeft.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/rockDoorLeft.png"
+  "images/buildings/rockDoorRight.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/rockDoorRight.png"
+  "images/buildings/rockDoorWindow.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/rockDoorWindow.png"
+  "images/buildings/rockDoorWindowMirror.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/rockDoorWindowMirror.png"
+  "images/buildings/rockGateLeft.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/rockGateLeft.png"
+  "images/buildings/rockGateRight.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/rockGateRight.png"
+  "images/buildings/rockWindowLeft.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/rockWindowLeft.png"
+  "images/buildings/rockWindowRight.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/rockWindowRight.png"
+  "images/buildings/rockWindows.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/rockWindows.png"
+  "images/buildings/sandDoorLeft.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/sandDoorLeft.png"
+  "images/buildings/sandDoorRight.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/sandDoorRight.png"
+  "images/buildings/sandDoorWindow.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/sandDoorWindow.png"
+  "images/buildings/sandDoorWindowMirror.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/sandDoorWindowMirror.png"
+  "images/buildings/sandGateLeft.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/sandGateLeft.png"
+  "images/buildings/sandGateRight.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/sandGateRight.png"
+  "images/buildings/sandRoofPointy.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/sandRoofPointy.png"
+  "images/buildings/sandRoofShort.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/sandRoofShort.png"
+  "images/buildings/sandRoofStraight.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/sandRoofStraight.png"
+  "images/buildings/sandRoofTall.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/sandRoofTall.png"
+  "images/buildings/sandWindowLeft.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/sandWindowLeft.png"
+  "images/buildings/sandWindowRight.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/sandWindowRight.png"
+  "images/buildings/sandWindows.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/sandWindows.png"
+  "images/buildings/stoneDoorLeft.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/stoneDoorLeft.png"
+  "images/buildings/stoneDoorRight.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/stoneDoorRight.png"
+  "images/buildings/stoneDoorWindow.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/stoneDoorWindow.png"
+  "images/buildings/stoneDoorWindowMirror.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/stoneDoorWindowMirror.png"
+  "images/buildings/stoneGateLeft.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/stoneGateLeft.png"
+  "images/buildings/stoneGateRight.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/stoneGateRight.png"
+  "images/buildings/stoneRoofPointy.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/stoneRoofPointy.png"
+  "images/buildings/stoneRoofShort.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/stoneRoofShort.png"
+  "images/buildings/stoneRoofStraight.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/stoneRoofStraight.png"
+  "images/buildings/stoneRoofTall.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/stoneRoofTall.png"
+  "images/buildings/stoneWindowLeft.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/stoneWindowLeft.png"
+  "images/buildings/stoneWindowRight.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/stoneWindowRight.png"
+  "images/buildings/stoneWindows.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/stoneWindows.png"
+  "images/buildings/woodDoorLeft.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/woodDoorLeft.png"
+  "images/buildings/woodDoorRight.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/woodDoorRight.png"
+  "images/buildings/woodDoorWindow.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/woodDoorWindow.png"
+  "images/buildings/woodDoorWindowMirror.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/woodDoorWindowMirror.png"
+  "images/buildings/woodGateLeft.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/woodGateLeft.png"
+  "images/buildings/woodGateRight.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/woodGateRight.png"
+  "images/buildings/woodRoofPointy.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/woodRoofPointy.png"
+  "images/buildings/woodRoofShort.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/woodRoofShort.png"
+  "images/buildings/woodRoofStraight.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/woodRoofStraight.png"
+  "images/buildings/woodRoofTall.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/woodRoofTall.png"
+  "images/buildings/woodWindowLeft.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/woodWindowLeft.png"
+  "images/buildings/woodWindowRight.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/woodWindowRight.png"
+  "images/buildings/woodWindows.png":
+    source: kenney-hexagon-buildings
+    original: "Tiles/woodWindows.png"
   "fonts/TitilliumWeb-Black.ttf":
     source: font-titillium-web
     original: "ofl/titilliumweb/TitilliumWeb-Black.ttf"
@@ -87,78 +243,6 @@ files:
   "fonts/TitilliumWeb-Regular.ttf":
     source: font-titillium-web
     original: "ofl/titilliumweb/TitilliumWeb-Regular.ttf"
-  "images/buildings/rock/level1.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/redRoofShort.png"]
-  "images/buildings/rock/level2.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/redRoofShort.png"]
-  "images/buildings/rock/level3.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/redRoofTall.png"]
-  "images/buildings/rock/level4.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/redRoofTall.png"]
-  "images/buildings/rock/level5.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/redRoofShort.png"]
-  "images/buildings/rock/level6.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/redRoofShort.png"]
-  "images/buildings/sand/level1.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/sandRoofShort.png"]
-  "images/buildings/sand/level2.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/sandRoofShort.png"]
-  "images/buildings/sand/level3.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/sandRoofTall.png"]
-  "images/buildings/sand/level4.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/sandRoofTall.png"]
-  "images/buildings/sand/level5.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/sandRoofPointy.png"]
-  "images/buildings/sand/level6.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/sandRoofPointy.png"]
-  "images/buildings/stone/level1.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/stoneRoofShort.png"]
-  "images/buildings/stone/level2.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/stoneRoofShort.png"]
-  "images/buildings/stone/level3.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/stoneRoofTall.png"]
-  "images/buildings/stone/level4.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/stoneRoofTall.png"]
-  "images/buildings/stone/level5.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/stoneRoofPointy.png"]
-  "images/buildings/stone/level6.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/stoneRoofPointy.png"]
-  "images/buildings/wood/level1.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/woodRoofShort.png"]
-  "images/buildings/wood/level2.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/woodRoofShort.png"]
-  "images/buildings/wood/level3.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/woodRoofTall.png"]
-  "images/buildings/wood/level4.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/woodRoofTall.png"]
-  "images/buildings/wood/level5.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/woodRoofShort.png"]
-  "images/buildings/wood/level6.png":
-    source: kenney-hexagon-buildings
-    composited_from: ["Tiles/woodRoofShort.png"]
   "images/cloud.png":
     source: kenney-background-elements-remastered
     original: "PNG/Retina/cloud4.png"

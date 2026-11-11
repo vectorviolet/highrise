@@ -1,5 +1,5 @@
-from pygamine import load_image
 from pygamine import GameObject
+from gameplay.buildings import sprites
 from gameplay.buildings.building import Building
 from ui.money_format import format_money
 
@@ -20,8 +20,12 @@ class InfoPanel:
         panel["cooldown_text"].set_params(value=building.cooldown)
         self.retext_prices(panel, building)
         image = panel["info_panel_building_image"]
+        # The board's sprite at one panel scale for every level (see panel_sprite).
         image.add_surface(
-            "default", load_image(building.get_image_path(), tuple(image.rect.size))
+            "default",
+            sprites.panel_sprite(
+                building.age, building.level, building.door_side, tuple(image.rect.size)
+            ),
         )
         panel["info_panel_building_image"].set_state("default")
 

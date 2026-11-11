@@ -20,7 +20,7 @@ def make_grid(assets, size=3) -> tuple[Buildings, Tilemap]:
 def place(
     buildings: Buildings, tilemap: Tilemap, level: int, row: int, col: int
 ) -> Building:
-    b = Building(level, 0, tilemap[row - 1][col - 1], on_payout=None)
+    b = Building(level, 0, tilemap[row - 1][col - 1], door_side="left", on_payout=None)
     buildings.append(b)
     return b
 
@@ -117,8 +117,8 @@ def test_move_is_a_no_op_while_a_previous_move_is_still_animating(assets):
 def test_control_moving_finalizes_a_settled_merge_into_a_leveled_up_building(assets):
     buildings, tilemap = make_grid(assets)
     tile = tilemap[0][0]
-    survivor = Building(2, 0, tile, on_payout=None)
-    sacrificial = Building(2, 0, tile, on_payout=None)
+    survivor = Building(2, 0, tile, door_side="left", on_payout=None)
+    sacrificial = Building(2, 0, tile, door_side="left", on_payout=None)
     sacrificial.should_destroy = True
     sacrificial.merge_target = survivor
     # Both still have their construction-time (0, 0) velocity -- simulates
@@ -152,8 +152,8 @@ def test_control_moving_settles_a_building_that_reached_its_target(assets):
 
 def _settled_merge(tile) -> tuple[Building, Building]:
     """A survivor and a sacrificial building that already glided onto its tile."""
-    survivor = Building(1, 0, tile, on_payout=None)
-    sacrificial = Building(1, 0, tile, on_payout=None)
+    survivor = Building(1, 0, tile, door_side="left", on_payout=None)
+    sacrificial = Building(1, 0, tile, door_side="left", on_payout=None)
     sacrificial.should_destroy = True
     sacrificial.merge_target = survivor
     return survivor, sacrificial
@@ -185,7 +185,7 @@ def test_control_moving_does_not_skip_the_building_after_a_merge(assets):
     tile = tilemap[0][2]
     tile.selected = True
     tile.rect = tile.selected_rect
-    other = Building(1, 0, tile, on_payout=None)
+    other = Building(1, 0, tile, door_side="left", on_payout=None)
     assert tuple(other.rect.topleft) != tuple(map(int, other.selected_position))
     buildings.extend([survivor, sacrificial, other])
 
@@ -278,3 +278,42 @@ def test_finish_pending_merges_finishes_a_merge_that_is_still_sliding(assets):
     assert (merged.level, merged.tile) == (2, tilemap[0][0])
     assert not any(b.should_destroy for b in buildings)
     assert played == ["merge"]
+
+
+def test_a_merge_keeps_the_door_side_of_the_building_that_stays(assets):
+    buildings, tilemap = make_grid(assets)
+    tile = tilemap[0][0]
+    survivor = Building(2, 0, tile, door_side="right", on_payout=None)
+    sacrificial = Building(2, 0, tile, door_side="left", on_payout=None)
+    sacrificial.should_destroy = True
+    sacrificial.merge_target = survivor
+    buildings.extend([survivor, sacrificial])
+
+    buildings.control_moving()
+
+    assert buildings[0].level == 3
+    assert buildings[0].door_side == "right"
+
+
+def test_changing_the_age_keeps_every_door_side(assets):
+    buildings, tilemap = make_grid(assets)
+    buildings.append(Building(3, 0, tilemap[0][0], door_side="right", on_payout=None))
+    buildings.append(Building(3, 0, tilemap[1][1], door_side="left", on_payout=None))
+
+    buildings.set_age(2)
+
+    assert [b.door_side for b in buildings] == ["right", "left"]
+    assert [b.age for b in buildings] == ["sand", "sand"]
+
+
+def test_the_top_level_is_eleven_two_tens_merge_and_two_elevens_do_not(assets):
+    buildings, tilemap = make_grid(assets)
+    place(buildings, tilemap, level=10, row=1, col=1)
+    place(buildings, tilemap, level=10, row=1, col=2)
+    place(buildings, tilemap, level=11, row=2, col=1)
+    place(buildings, tilemap, level=11, row=2, col=2)
+
+    buildings.move("left", tilemap, 11)
+    buildings.finish_pending_merges()
+
+    assert sorted(b.level for b in buildings) == [11, 11, 11]
