@@ -151,8 +151,7 @@ sprites for the devlog.
 
 Boosters (issue #51) are `Building`s with a `booster_multiplier` (None for a normal building;
 `is_booster`), no payout callback and speed 0. They come from `Buildings.create(..., booster=True)`
-(`Game.create_booster`, the BOOST button; `Game.boosters_unlocked` is the switch the quest of #52
-will use) and keep their kind through merges, age changes and saves. Their numbers (price per age,
+(`Game.create_booster`, the BOOST button, locked until `Game.tasks.boost_unlocked`, see Age tasks) and keep their kind through merges, age changes and saves. Their numbers (price per age,
 multiplier per level, shape per age) are `boosters` in `config/settings.yaml`, checked by
 `gameplay/buildings/boosters.py` (`BoosterConfig`; the shapes themselves are code, selected by
 name); their look is the `boosters` section of `config/buildings.yaml` (the ring piece with a red
@@ -171,6 +170,24 @@ with BOOST also stays lit for `boosters.placed_highlight_ms` (the open panel and
 window's right edge (`anchor: right` in `config/panels.yaml`, its content parented to it) so the
 board stays visible; `tests/test_info_panel_layout.py` checks it at every UI scale.
 
+### Age tasks
+
+Issue #52. `config/tasks.yaml` gives every age but the last 2 or 3 tasks (`building_level`,
+`income_per_second`, `boosted_buildings`; the measures are `MEASURES` in `gameplay/tasks.py`, the
+texts are `tasks.<type>` in the language files), the NEXT AGE cost factor (`next_age_cost_factor`: cost
+is (age number + 1) x factor) and `ui`. Targets are checked at load
+(`TasksConfig.load(ages, max_level, max_tiles)`: a target the game can't reach is a ValueError).
+`AgeTasks` (`Game.tasks`) reads the age from `Buildings.age_number` (no copy) and holds the done tasks
+(latched, keyed by age: a done task stays done), `boost_unlocked` (latched when the first age's tasks are
+done; any later age counts too) and the cost. `Game._update_tasks` runs every frame: `AgeTasks.update()`
+measures each task once and stores `values` (the checklist reads them), and a newly done task refreshes
+the button texts (BOOST and NEXT AGE show `game.locked` until their tasks are done). `Game.next_age`
+checks tasks and cash before paying. State is saved in the `tasks` table (`GamePersistenceMixin.load_tasks`
+/ `save_tasks`); an old save starts its tasks fresh and has BOOST unlocked past age 1. `ui` picks how the
+checklist (`ui/task_list.py`) shows: `hover` over the NEXT AGE button, or `panel` at the top left (it
+swallows mouse clicks like the info panel); the owner is choosing one (see the devlog), the other is then
+removed.
+
 ### Cash display and floating money text
 
 The cash display is `money_panel` (plate), `money_icon` (coin) and `money_text` in `config/panels.yaml`,
@@ -187,7 +204,7 @@ World texts are hidden while the info panel is open. A building's
 
 ### Persistence
 
-SQLite database at `databases/database.db`. Three tables: `game` (age, map size, money, volumes), `buildings` (level, row, column, door side, booster flag, held-back income fraction; old tables are migrated, old rows are plain buildings with no fraction) and `settings` (language, skip intro, UI scale, master volume; the first three are saved the moment they change on the Game and Display settings pages, the master volume with the AUDIO page's SAVE; all kept by New Game). The database auto-initializes on first run. Save/load logic lives entirely in `GamePersistenceMixin`.
+SQLite database at `databases/database.db`. Four tables: `game` (age, map size, money, volumes), `tasks` (done tasks of the current age, BOOST unlocked; one row), `buildings` (level, row, column, door side, booster flag, held-back income fraction; old tables are migrated, old rows are plain buildings with no fraction) and `settings` (language, skip intro, UI scale, master volume; the first three are saved the moment they change on the Game and Display settings pages, the master volume with the AUDIO page's SAVE; all kept by New Game). The database auto-initializes on first run. Save/load logic lives entirely in `GamePersistenceMixin`.
 
 ### Audio
 

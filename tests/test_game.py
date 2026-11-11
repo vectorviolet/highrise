@@ -21,6 +21,7 @@ from app.game_persistence import GameSettings
 from domain.player import Player
 from gameplay.buildings.boosters import BoosterConfig
 from gameplay.buildings.building import AGES, Building, Buildings
+from gameplay.tasks import AgeTasks, TasksConfig
 from gameplay.tile_selector import TileSelector
 from gameplay.tilemap import Tilemap
 from pygamine import TextObject, Transform
@@ -163,6 +164,10 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
         on_payout=game._on_building_payout,
         boosters=BoosterConfig.load(AGES),
     )
+    game.tasks = AgeTasks(
+        TasksConfig.load(AGES, MAX_BUILDING_LEVEL, max_size**2), game.buildings, AGES
+    )
+    game.tasks.unlock_boost()
     game.tilemap = Tilemap(size, max_size)
     game.max_size = max_size
     game.max_building_level = MAX_BUILDING_LEVEL
@@ -324,24 +329,140 @@ def test_set_age_beyond_max_is_a_no_op(assets):
     assert game.buildings.age_number == 0
 
 
+def _finish_the_tasks(game: Game) -> None:
+    """Marks every task of the current age done (for tests that need NEXT AGE to work)."""
+    tasks = game.tasks
+    tasks.restore(set(range(len(tasks.tasks))), tasks.boost_unlocked)
+
+
+def _meet_the_first_age_tasks(game: Game) -> None:
+    """Level 3 buildings, four of them: a level 3 building and 4 x 5 = 20 $/sec."""
+    for column in range(1, 5):
+        game.add_building(3, 1, column)
+
+
 def test_next_age_advances_and_spends_money(assets):
-    game = make_game(assets, size=3, starting_money=100_000)
-    cost = game.buildings.get_age_cost()
+    game = make_game(assets, size=4, starting_money=100_000)
+    _meet_the_first_age_tasks(game)
 
     game.next_age()
 
     assert game.buildings.age_number == 1
+    assert game.tasks.age_number == game.buildings.age_number == 1
     assert game.audio.played == [game.action_sounds.next_age]
-    assert _spend_texts(game) == [f"-{format_money(cost)}"]
+    assert _spend_texts(game) == [f"-{format_money(500)}"]
+    assert game.player.money == 100_000 - 500
+
+
+def test_next_age_costs_age_plus_one_times_500(assets):
+    game = make_game(assets, size=4, starting_money=100_000)
+    game.buildings.age_number = 2
+
+    assert game.tasks.next_age_cost() == 1500
 
 
 def test_next_age_does_nothing_when_unaffordable(assets):
-    game = make_game(assets, size=3, starting_money=0)
+    game = make_game(assets, size=4, starting_money=499)
+    _meet_the_first_age_tasks(game)
 
     game.next_age()
 
     assert game.buildings.age_number == 0
+    assert game.player.money == 499
     assert _spend_texts(game) == []
+
+
+def test_next_age_does_nothing_while_a_task_is_missing(assets):
+    game = make_game(assets, size=4, starting_money=100_000)
+    game.add_building(3, 1, 1)  # the level task is met, the income task is not
+
+    game.next_age()
+
+    assert game.buildings.age_number == 0
+    assert game.player.money == 100_000
+    assert game.audio.played == []
+    assert _spend_texts(game) == []
+
+
+def test_next_age_with_tasks_missing_and_no_money_does_nothing(assets):
+    game = make_game(assets, size=4, starting_money=0)
+
+    game.next_age()
+
+    assert game.buildings.age_number == 0
+
+
+def test_the_tasks_of_the_new_age_start_open(assets):
+    game = make_game(assets, size=4, starting_money=100_000)
+    _meet_the_first_age_tasks(game)
+
+    game.next_age()
+
+    assert game.tasks.done == frozenset()
+    assert not game.tasks.all_done()
+
+
+def test_updating_the_tasks_unlocks_boost_and_refreshes_the_button_text(assets):
+    game = make_game(assets, size=4, starting_money=0)
+    game.tasks.reset()
+    _meet_the_first_age_tasks(game)
+    game.update_button_texts.calls.clear()
+
+    game._update_tasks()
+
+    assert game.tasks.boost_unlocked
+    assert len(game.update_button_texts.calls) == 1
+
+
+def _task_drawing_game(assets, mouse_at) -> Game:
+    game = make_game(assets, size=3)
+    game.window = pygame.Surface((1280, 720))
+    game.money_font_path = str(assets.font_path("titillium_black"))
+    game.mouse = SimpleNamespace(position=mouse_at)
+    game.panel_manager["game"]["next_age_button"] = SimpleNamespace(
+        rect=pygame.Rect(600, 640, 200, 60)
+    )
+    return game
+
+
+def test_the_task_rows_show_each_tasks_text_and_progress(assets):
+    game = make_game(assets, size=3)
+    game.add_building(3, 1, 1)
+    game.tasks.update()
+
+    rows = game._task_rows()
+
+    assert [(r.text, r.current, r.target, r.done) for r in rows] == [
+        ("Own a level 3 building", 3, 3, True),
+        ("Earn 20$ per second", 5, 20, False),
+    ]
+
+
+def _window_changed(game: Game) -> bool:
+    blank = pygame.Surface(game.window.get_size())
+    return pygame.image.tobytes(game.window, "RGB") != pygame.image.tobytes(
+        blank, "RGB"
+    )
+
+
+def test_the_checklist_shows_only_over_the_next_age_button(assets):
+    away = _task_drawing_game(assets, (10, 10))
+    over = _task_drawing_game(assets, (650, 660))
+
+    away._draw_task_list()
+    over._draw_task_list()
+
+    assert not _window_changed(away)
+    assert _window_changed(over)
+
+
+def test_no_checklist_is_drawn_in_the_last_age(assets):
+    game = _task_drawing_game(assets, (0, 0))
+    game.buildings.age_number = len(AGES) - 1
+
+    game._draw_task_list()
+
+    assert not _window_changed(game)
 
 
 def test_next_age_does_nothing_at_max_age(assets):
@@ -378,6 +499,7 @@ def test_next_age_works_again_once_the_merge_has_finished(assets):
     game = make_game(assets, size=3, starting_money=100_000)
     _start_merge(game)
     _run_until_settled(game)
+    _finish_the_tasks(game)
 
     game.next_age()
 
@@ -398,6 +520,7 @@ def test_every_production_insertion_path_pays_the_player(assets, path, monkeypat
         game.load_buildings()
     elif path == "age":
         game.add_building(1, 1, 1)
+        _finish_the_tasks(game)
         game.next_age()
     else:
         _start_merge(game)
@@ -1231,6 +1354,7 @@ def test_board_changing_input_works_again_once_the_board_settles(assets):
     game = make_playable_game(assets)
     _start_merge(game)
     _run_until_settled(game)
+    _finish_the_tasks(game)
 
     _click(game, "next_age_button")
     _key(game, pygame.K_RIGHT)
@@ -1374,7 +1498,7 @@ def test_create_booster_on_a_full_board_spends_nothing(assets):
 
 def test_create_booster_waits_for_the_unlock(assets):
     game = make_game(assets, size=2, starting_money=100_000)
-    game.boosters_unlocked = False
+    game.tasks.reset()
 
     game.create_booster()
 
@@ -1452,7 +1576,52 @@ def test_no_highlight_for_a_building_a_closed_panel_or_a_sold_booster(assets):
     assert lit() == 0
 
 
-def test_a_locked_boost_button_shows_no_price(assets):
+def test_next_age_shows_locked_while_tasks_are_open_and_the_price_once_done(assets):
+    game = make_game(assets, size=4, starting_money=100_000)
+    _use_real_button_texts(game)
+    game.panel_manager["game"]["boost_button_text"] = FakeText()
+
+    game.update_button_texts()
+    locked = game.panel_manager["game"]["next_age_button_text"].text
+    _finish_the_tasks(game)
+    game.update_button_texts()
+    done = game.panel_manager["game"]["next_age_button_text"].text
+
+    assert locked == "LOCKED"
+    assert done == format_money(500)
+
+
+def test_a_newly_done_task_refreshes_the_button_texts(assets):
+    game = make_game(assets, size=4, starting_money=0)
+    _meet_the_first_age_tasks(game)
+    game.update_button_texts.calls.clear()
+
+    game._update_tasks()
+    game._update_tasks()  # nothing new the second time
+
+    assert len(game.update_button_texts.calls) == 1
+
+
+def test_the_checklist_looks_up_its_texts_only_when_something_changed(
+    assets, monkeypatch
+):
+    game = make_playable_game(assets)
+    game.money_font_path = str(assets.font_path("titillium_black"))
+    lookups = []
+    monkeypatch.setattr("app.game.tr", lambda key, **kw: lookups.append(key) or key)
+    game.tasks.update()
+    game._task_list()
+    first = len(lookups)
+
+    game._task_list()
+    game.tasks.update()
+    game._task_list()
+
+    assert first > 0
+    assert len(lookups) == first
+
+
+def test_a_locked_boost_button_shows_the_locked_text(assets):
     game = make_game(assets, size=3)
     _use_real_button_texts(game)
     game.panel_manager["game"]["boost_button_text"] = FakeText()
@@ -1461,11 +1630,11 @@ def test_a_locked_boost_button_shows_no_price(assets):
 
     game.update_button_texts()
     unlocked = game.panel_manager["game"]["boost_button_text"].text
-    game.boosters_unlocked = False
+    game.tasks.reset()
     game.update_button_texts()
 
     assert unlocked == format_money(game.buildings.get_booster_cost())
-    assert game.panel_manager["game"]["boost_button_text"].text == ""
+    assert game.panel_manager["game"]["boost_button_text"].text == "LOCKED"
     assert game.panel_manager["game"]["build_button_text"].text == format_money(
         game.buildings.get_build_cost()
     )

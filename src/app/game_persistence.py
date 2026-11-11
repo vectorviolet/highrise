@@ -34,6 +34,7 @@ class GamePersistenceMixin:
         self.init_database()
         self.load_game_data(self.get_game_data())
         self.load_buildings()
+        self.load_tasks()
 
     def init_database(self) -> None:
         self.database.execute_safely(
@@ -64,6 +65,16 @@ class GamePersistenceMixin:
             self.database.execute_safely(
                 "ALTER TABLE buildings ADD COLUMN income_fraction REAL NOT NULL DEFAULT 0"
             )
+        # The age tasks (done ones of the current age, BOOST unlocked): a separate table with one
+        # row, so older saves load unchanged (their tasks start fresh, see load_tasks).
+        self.database.execute_safely(
+            "CREATE TABLE IF NOT EXISTS tasks(done TEXT NOT NULL DEFAULT '', "
+            "boost_unlocked INTEGER NOT NULL DEFAULT 0)"
+        )
+        self.database.execute_safely(
+            "INSERT INTO tasks(done, boost_unlocked) "
+            "SELECT '', 0 WHERE NOT EXISTS (SELECT 1 FROM tasks)"
+        )
         # A separate table, so saves made before these settings existed load
         # unchanged: the game table keeps its columns. Seeded with the
         # defaults (English, intro shown; the column defaults the UI scale) so the UPDATEs
@@ -181,6 +192,17 @@ class GamePersistenceMixin:
                     params=(level, row, column),
                 )
 
+    def load_tasks(self) -> None:
+        """The saved task state, for the age that was loaded. A save from before age tasks has an
+        empty row: its tasks start fresh and BOOST is unlocked if the age is past the first."""
+        rows = self.database.execute_safely(
+            "SELECT done, boost_unlocked FROM tasks", True
+        )
+        assert rows, "tasks row missing: call init_database() first"
+        done_text, boost_unlocked = rows[0]
+        done = {int(i) for i in done_text.split(",") if i.strip().isdigit()}
+        self.tasks.restore(done, bool(boost_unlocked))
+
     @staticmethod
     def _valid_fraction(fraction: float, row: int, column: int) -> float:
         """A saved income fraction held to what a building can really hold (0 up to, not
@@ -239,6 +261,7 @@ class GamePersistenceMixin:
             ),
         )
         self.database.execute_safely("DELETE FROM buildings")
+        self.save_tasks()
 
         for building in self.buildings:
             self.database.execute_safely(
@@ -254,9 +277,19 @@ class GamePersistenceMixin:
                 ),
             )
 
+    def save_tasks(self) -> None:
+        self.database.execute_safely(
+            "UPDATE tasks SET done=?, boost_unlocked=?",
+            params=(
+                ",".join(str(i) for i in sorted(self.tasks.done)),
+                int(self.tasks.boost_unlocked),
+            ),
+        )
+
     def delete_data(self) -> None:
         self.database.execute_safely(
             "UPDATE game SET age_number=?, size=?, money=?",
             params=(0, 2, self.starting_money),
         )
         self.database.execute_safely("DELETE FROM buildings")
+        self.database.execute_safely("UPDATE tasks SET done='', boost_unlocked=0")
