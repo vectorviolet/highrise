@@ -292,7 +292,7 @@ panels:
         size: [210, 50]
         asset: red_button
         hover: yellow_button
-        on_click_sound: back
+        # No on_click_sound: Game._sell plays the sell sound.
       sell_button_text:
         type: text
         font: titillium_bold
@@ -662,6 +662,9 @@ panels:
           - credits_ui_2
           - credits_sound_heading
           - credits_sound_1
+          - credits_sound_2
+          - credits_sound_3
+          - credits_sound_4
           - credits_music_heading
           - credits_music_1
           - credits_music_2
@@ -729,41 +732,53 @@ panels:
         extends: credits_entry
         position: [CENTER, 606]
         text: "Kenney - UI Pack (CC0)"
+      credits_sound_2:
+        extends: credits_entry
+        position: [CENTER, 640]
+        text: "Kenney - Impact Sounds (CC0)"
+      credits_sound_3:
+        extends: credits_entry
+        position: [CENTER, 674]
+        text: "Kenney - Interface Sounds (CC0)"
+      credits_sound_4:
+        extends: credits_entry
+        position: [CENTER, 708]
+        text: "Kenney - Sci-Fi Sounds (CC0)"
       credits_music_heading:
         extends: credits_heading
-        position: [CENTER, 676]
+        position: [CENTER, 778]
         text_key: "credits.music"
       credits_music_1:
         extends: credits_entry
-        position: [CENTER, 716]
+        position: [CENTER, 818]
         text: "Music : Sakura Girl - Day Off"
       credits_music_2:
         extends: credits_entry
-        position: [CENTER, 750]
+        position: [CENTER, 852]
         text: "Link : youtu.be/vAv9KtrU_5c"
       credits_music_3:
         extends: credits_entry
-        position: [CENTER, 784]
+        position: [CENTER, 886]
         text: "CC BY 3.0"
       credits_fonts_heading:
         extends: credits_heading
-        position: [CENTER, 854]
+        position: [CENTER, 956]
         text_key: "credits.fonts"
       credits_fonts_1:
         extends: credits_entry
-        position: [CENTER, 894]
+        position: [CENTER, 996]
         text: "Titillium Web - Accademia di Belle Arti di Urbino (SIL OFL 1.1)"
       credits_built_heading:
         extends: credits_heading
-        position: [CENTER, 964]
+        position: [CENTER, 1066]
         text_key: "credits.built_with"
       credits_built_1:
         extends: credits_entry
-        position: [CENTER, 1004]
+        position: [CENTER, 1106]
         text: "pygame-ce (LGPL 2.1)"
       credits_built_2:
         extends: credits_entry
-        position: [CENTER, 1038]
+        position: [CENTER, 1140]
         text: "pygamine (MIT)"
       # Profile links, closing the scroll a little apart from the sections:
       # platform icon + username, each pair centered as a row. The engine's layout
@@ -773,20 +788,20 @@ panels:
       # start at x=914 and each icon ends 14 px before it, around the page center
       # 960. tests/test_menu_polish.py checks the pairs stay centered.
       credits_github_icon:
-        position: [869, 1120]
+        position: [869, 1222]
         size: [31, 30]
         asset: github_icon
       credits_github_name:
         extends: credits_entry
-        position: [914, 1118]
+        position: [914, 1220]
         text: "umutcanekinci"
       credits_itch_icon:
-        position: [867, 1166]
+        position: [867, 1268]
         size: [33, 30]
         asset: itch_icon
       credits_itch_name:
         extends: credits_entry
-        position: [914, 1164]
+        position: [914, 1266]
         text: "umutcanekinci"
 
       credits_back_button:

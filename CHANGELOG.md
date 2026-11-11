@@ -9,6 +9,8 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Own sounds for **build** (one per age), **NEXT AGE** and **sell** instead of the UI click, and a dust and debris effect where a sold building stood. Sounds are set in `action_sounds` in `config/settings.yaml`; three Kenney sound packs (CC0) are credited
+  ([devlog](docs/devlog/2026-11-11-action-sounds-and-sell-effect.md)).
 - The CREDITS page opens with the "a VECTORVIOLET game" lockup and closes with GitHub and itch.io
   rows (`umutcanekinci`), using pygamine's bundled logos.
 - **Menu polish** ([devlog](docs/devlog/2026-11-11-menu-polish.md)): buttons follow one color scheme

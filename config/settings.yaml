@@ -13,6 +13,32 @@ audio:
   default_music_volume: 1.0
   default_sfx_volume: 1.0
 
+# Sounds of the main actions: manifest keys in config/assets.yaml. Give every age the same
+# build sound if you prefer one; every age needs an entry.
+action_sounds:
+  build:
+    wood: build_wood
+    rock: build_rock
+    sand: build_sand
+    stone: build_stone
+  next_age: next_age
+  sell: sell
+
+# The dust and debris where a sold building stood (pixels in the game world).
+sell_effect:
+  lifetime_ms: 700
+  dust_count: 12           # soft puffs per sale
+  debris_count: 16         # small falling chips per sale
+  dust_radius: [9, 16]     # a puff's starting radius, min and max
+  dust_growth: 1.8         # a puff's radius at the end of its life, times the start
+  debris_size: [4, 8]      # a chip's side, min and max
+  spread: 85               # most pixels a particle moves sideways
+  rise: 50                 # most pixels a puff drifts up
+  gravity: 90              # pixels a chip falls over its life
+  dust_color: [214, 204, 186]
+  debris_colors: [[120, 96, 72], [150, 130, 104], [96, 96, 104], [176, 160, 128]]
+  max_bursts: 12           # alive at once
+
 floating_text:
   gain_font_size: 24       # +X$ over a building, pixels at 100% UI scale
   spend_font_size: 30      # -X$ falling from the cash amount, pixels at 100% UI scale

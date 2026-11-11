@@ -36,14 +36,18 @@ class GameEventsMixin:
         # Attributes / methods supplied by the host class (Game).
         def __getattr__(self, name: str) -> Any: ...
 
-    def _activate(self, button, event) -> bool:
-        """True when the button was activated (click or focused-Space/Enter).
-        Plays the button's `on_click_sound` (or the default click) on success."""
-        activated = button.is_clicked(event, self.mouse.position) or (
+    def _is_activated(self, button, event) -> bool:
+        """True when the button was activated (click or focused-Space/Enter); silent."""
+        return button.is_clicked(event, self.mouse.position) or (
             event.type == pygame.KEYUP
             and event.key in (pygame.K_SPACE, pygame.K_RETURN)
             and getattr(button, "focused", False)
         )
+
+    def _activate(self, button, event) -> bool:
+        """True when the button was activated (click or focused-Space/Enter).
+        Plays the button's `on_click_sound` (or the default click) on success."""
+        activated = self._is_activated(button, event)
         if activated:
             sound = getattr(button, "on_click_sound", None) or self.click_sound_path
             if sound is not None:
@@ -210,7 +214,8 @@ class GameEventsMixin:
     def _handle_info_panel_event(
         self, panel, event: pygame.event.Event, board_ready: bool
     ) -> None:
-        if board_ready and self._activate(panel["sell_button"], event):
+        # Selling plays its own sound (in _sell), not the click.
+        if board_ready and self._is_activated(panel["sell_button"], event):
             self._sell(self.info_panel.building)
         elif self._activate(panel["close_button"], event):
             self.info_panel.close()
@@ -220,6 +225,8 @@ class GameEventsMixin:
             self.buildings.remove(building)
             self.player.earn(building.sell_price)
             self.show_gain(building, building.sell_price)
+            self.sell_effect.spawn(building.rect, pygame.time.get_ticks())
+            self.audio.play_sfx(self.action_sounds.sell)
         self.info_panel.close()
         self.update_button_texts()
 

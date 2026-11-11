@@ -15,6 +15,7 @@ import pygame
 import pytest
 import yaml
 
+from app.action_sounds import ActionSounds
 from app.game import Game, format_volume
 from app.game_persistence import GameSettings
 from domain.player import Player
@@ -23,6 +24,7 @@ from gameplay.tile_selector import TileSelector
 from gameplay.tilemap import Tilemap
 from pygamine import TextObject, Transform
 from pygamine.util.localization import localization
+from ui.dust_effect import DustBursts, DustConfig
 from ui.floating_text import FloatingTextConfig, FloatingTexts
 from ui.info_panel import InfoPanel
 from ui.money_format import format_money
@@ -149,10 +151,9 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
     game.player.money = starting_money
     game.odometer = Odometer(250)
     game.shown_money = starting_money
+    settings = yaml.safe_load(Path("config/settings.yaml").read_text())
     game.floating_texts = FloatingTexts(
-        FloatingTextConfig.from_dict(
-            yaml.safe_load(Path("config/settings.yaml").read_text())["floating_text"]
-        ),
+        FloatingTextConfig.from_dict(settings["floating_text"]),
         str(assets.font_path("titillium_black")),
     )
     game.buildings = Buildings(
@@ -167,6 +168,8 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
     game.click_sound_path = "assets/sfx/click.ogg"
     game.go_back_sound_path = "assets/sfx/back.ogg"
     game.merge_sound_path = assets.sound_path("merge")
+    game.action_sounds = ActionSounds.from_config(settings["action_sounds"], assets)
+    game.sell_effect = DustBursts(DustConfig.from_dict(settings["sell_effect"]))
     game.panel_manager = make_panels()
     game.cloud_animation = SimpleNamespace(
         create_clouds=Spy(), update=Spy(), draw=Spy()
@@ -281,7 +284,7 @@ def test_create_building_places_on_an_empty_tile_and_spends_money(assets, monkey
         1,
     )
     assert game.player.money == 100_000 - game.buildings.get_build_cost()
-    assert game.audio.played == [game.click_sound_path]
+    assert game.audio.played == [game.action_sounds.build(0)]
     assert _spend_texts(game) == [f"-{format_money(game.buildings.get_build_cost())}"]
 
 
@@ -322,7 +325,7 @@ def test_next_age_advances_and_spends_money(assets):
     game.next_age()
 
     assert game.buildings.age_number == 1
-    assert game.audio.played == [game.click_sound_path]
+    assert game.audio.played == [game.action_sounds.next_age]
     assert _spend_texts(game) == [f"-{format_money(cost)}"]
 
 
@@ -1284,6 +1287,9 @@ def test_sell_through_the_info_panel_sells_a_settled_building(assets):
     assert [(t.text, t.position) for t in game.floating_texts.texts] == [
         (f"+{format_money(building.sell_price)}", building.rect.midtop)
     ]
+    # The destroy sound and the dust, not the UI click.
+    assert game.audio.played[-1:] == [game.action_sounds.sell]
+    assert len(game.sell_effect.bursts) == 1
 
 
 def test_a_sale_right_after_a_payout_gets_its_own_text(assets):
@@ -1299,3 +1305,12 @@ def test_a_sale_right_after_a_payout_gets_its_own_text(assets):
         "+10$",
         f"+{format_money(building.sell_price)}",
     ]
+
+
+def test_build_plays_the_sound_of_the_current_age(assets):
+    game = make_game(assets, size=3, starting_money=100_000)
+    game.set_age(2)
+
+    game.create_building()
+
+    assert game.audio.played == [game.action_sounds.build(2)]

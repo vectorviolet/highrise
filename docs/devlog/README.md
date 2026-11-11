@@ -19,6 +19,7 @@ PR. "Owner" is the project owner; "Claude" is the Claude Code session that imple
 | 2026-11-04 | [UI scale setting](2026-11-04-ui-scale.md) | UI | #38, PR #41 |
 | 2026-11-10 | [Cash display restyle and floating money text](2026-11-10-cash-display-and-floating-text.md) | UI | #48, #50, #61, PR #54 |
 | 2026-11-10 | [CREDITS page and a master volume](2026-11-10-credits-and-master-volume.md) | UI, Audio | #46, #47, PR #49 |
+| 2026-11-11 | [Own sounds for build, NEXT AGE and sell, and a sell effect](2026-11-11-action-sounds-and-sell-effect.md) | Audio, effects | #53 |
 | 2026-11-11 | [Menu polish](2026-11-11-menu-polish.md) | UI | #55, #62, #63, #66, PR #67 |
 <!-- index:end -->
 

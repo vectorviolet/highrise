@@ -183,6 +183,10 @@ class FakeGame(GameEventsMixin):
         self.mouse = SimpleNamespace(position=(0, 0))
         self.audio = FakeAudio()
         self.click_sound_path = "assets/sfx/click.ogg"
+        self.action_sounds = SimpleNamespace(sell="assets/sfx/sell.ogg")
+        self.sell_effect = SimpleNamespace(
+            spawn=lambda rect, now: self.calls.append(("spawn_effect", rect))
+        )
         self.background_music_sound_path = (
             "assets/sounds/music.ogg"  # a game with music: its controls work
         )
@@ -519,7 +523,9 @@ def test_game_events_updates_selection_while_the_selector_is_active():
 def test_game_events_info_panel_open_sell_button_sells_the_building():
     game = FakeGame()
     game.panel_manager["game"]["info_panel"].active = True
-    game.info_panel.building = SimpleNamespace(sell_price=42)
+    game.info_panel.building = SimpleNamespace(
+        sell_price=42, rect=pygame.Rect(1, 2, 3, 4)
+    )
     game.panel_manager["game"]["sell_button"].clicked = True
 
     game.handle_game_events(click_up())
@@ -527,6 +533,9 @@ def test_game_events_info_panel_open_sell_button_sells_the_building():
     assert ("remove", game.info_panel.building) in game.calls
     assert ("earn", 42) in game.calls
     assert ("show_gain", game.info_panel.building, 42) in game.calls
+    assert ("spawn_effect", pygame.Rect(1, 2, 3, 4)) in game.calls
+    # The sale has its own sound, not the UI click.
+    assert game.audio.played == [game.action_sounds.sell]
     assert game.info_panel.close_calls == 1
     assert "update_button_texts" in game.calls
 
@@ -650,7 +659,9 @@ def test_game_events_info_panel_sell_wins_over_close():
     game = FakeGame()
     panel = game.panel_manager["game"]
     panel["info_panel"].active = True
-    game.info_panel.building = SimpleNamespace(sell_price=5)
+    game.info_panel.building = SimpleNamespace(
+        sell_price=5, rect=pygame.Rect(0, 0, 1, 1)
+    )
     panel["sell_button"].clicked = True
     panel["close_button"].clicked = True
 
@@ -660,10 +671,11 @@ def test_game_events_info_panel_sell_wins_over_close():
         ("remove", game.info_panel.building),
         ("earn", 5),
         ("show_gain", game.info_panel.building, 5),
+        ("spawn_effect", pygame.Rect(0, 0, 1, 1)),
         "update_button_texts",
     ]
     assert game.info_panel.close_calls == 1
-    assert game.audio.played == [game.click_sound_path]
+    assert game.audio.played == [game.action_sounds.sell]
 
 
 def test_game_events_info_panel_open_ignores_everything_else():
