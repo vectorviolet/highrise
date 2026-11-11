@@ -9,6 +9,9 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- With a building's info panel open, clicking another building (in selection mode) switches the
+  panel to it; clicks on the panel never reach the board behind it, and a click on an empty tile
+  leaves the panel as it is.
 - **Boosters**: a BOOST button next to BUILD puts a booster (hex ring with a red roof) on a random
   empty tile. A booster earns nothing but raises the income of every building on the tiles it
   covers (wood: 4 neighbors, rock: 4 diagonals, sand: all 8 around it, stone: its row and column);

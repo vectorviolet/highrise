@@ -219,6 +219,15 @@ class GameEventsMixin:
             self._sell(self.info_panel.building)
         elif self._activate(panel["close_button"], event):
             self.info_panel.close()
+        elif (
+            self.tile_selector.is_active
+            and event.type == pygame.MOUSEBUTTONUP
+            and not panel["info_panel"].rect.collidepoint(self.mouse.position)
+        ):
+            # A click on another building switches the panel to it (content, image, highlight
+            # and the SELL target). A click on the panel itself never reaches the board behind
+            # it, and a click on an empty tile changes nothing: the panel stays as it is.
+            self._pick_tile()
 
     def _sell(self, building) -> None:
         if building in self.buildings:
