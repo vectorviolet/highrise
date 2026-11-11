@@ -261,7 +261,8 @@ class FakeGame(GameEventsMixin):
     def next_age(self):
         self.calls.append("next_age")
 
-    def _task_panel_covers(self, event):
+    @staticmethod
+    def _task_panel_covers(event):
         return False  # the always-visible checklist is Game's (tests/test_game.py)
 
     def move_buildings(self, rotation):
