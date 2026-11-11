@@ -1,7 +1,7 @@
 # README screenshots and preview GIF
-<!-- index | refs: #44 | area: Docs -->
+<!-- index | refs: #44, PR #81 | area: Docs -->
 
-**Date:** 2026-11-11 · **Area:** Docs · **Issue:** [#44](https://github.com/vectorviolet/highrise/issues/44)
+**Date:** 2026-11-11 · **Area:** Docs · **Issue:** [#44](https://github.com/vectorviolet/highrise/issues/44)  · **PR:** [#81](https://github.com/vectorviolet/highrise/pull/81)
 
 ## Context
 
