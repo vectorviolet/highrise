@@ -164,7 +164,7 @@ def test_panel_sprite_is_the_board_sprite_at_one_scale_for_every_level(assets):
                     assert bounds.width == pytest.approx(
                         world.get_width() * factor, abs=6
                     )
-                    assert box[1] - bounds.bottom <= 2  # the foot is at the bottom
+                    assert bounds.top <= 2  # the roof tip is at the top
                     assert abs(bounds.centerx - box[0] / 2) <= 2
 
 

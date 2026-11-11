@@ -63,7 +63,7 @@ own `roof_base` (the sand and stone roofs are a pixel taller), so a one-floor sp
 every age.
 
 The info panel shows the same building as the board: same pieces, door side and proportions, at one
-fixed scale (1.2x) for every level, foot at the bottom of the box, so level growth shows there too.
+fixed scale (1.2x) for every level, roof tip at the top of the box (the same line as the first text line), so level growth shows there too.
 Its box in `config/panels.yaml` is 60x185, top-aligned with the first text line just under the panel top (the tallest sprite, level 11, is 154 px in the world and
 fits at 1.2x); the image scales with the UI scale. Left to right for each level: the board, then
 the open info panel.

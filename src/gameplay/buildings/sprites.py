@@ -130,7 +130,8 @@ def panel_sprite(
 ) -> pygame.Surface:
     """The building as the info panel shows it: the board's own sprite, enlarged by one factor
     for every level (the tallest sprite just fits the box's height, so level growth shows like
-    on the board), on a transparent surface of the box's size, foot at the bottom center."""
+    on the board), on a transparent surface of the box's size, centered, its roof tip at the
+    top (every building hangs from the same line)."""
     world = game_sprite(age, level, door_side).get_size()
     factor = min(box[1] / tallest_world_height(), box[0] / recipes()["game_size"][0])
     size = (round(world[0] * factor), round(world[1] * factor))
@@ -139,6 +140,6 @@ def panel_sprite(
         # Scaled once from the full-size sprite (not the board's already scaled one), to the
         # board's proportions times the panel factor, so it stays as sharp as it can.
         pygame.transform.scale(compose(age, level, door_side), size),
-        ((box[0] - size[0]) // 2, box[1] - size[1]),
+        ((box[0] - size[0]) // 2, 0),
     )
     return result
