@@ -26,7 +26,6 @@ MAX_TILES = 49
 def make_tasks(buildings: Buildings, wood_tasks: list[dict]) -> AgeTasks:
     """Tasks for the age of `buildings` (wood first); the other ages get two easy ones."""
     data = {
-        "ui": "hover",
         "next_age_cost_factor": 500,
         "ages": {
             "wood": wood_tasks,
@@ -276,7 +275,6 @@ def test_the_last_age_has_no_tasks():
 def test_the_shipped_config_loads_and_every_age_but_the_last_has_two_or_three_tasks():
     config = TasksConfig.load(AGES, MAX_LEVEL, MAX_TILES)
 
-    assert config.ui == "hover"
     assert set(config.ages) == set(AGES[:-1])
     assert all(2 <= len(tasks) <= 3 for tasks in config.ages.values())
 
@@ -289,7 +287,6 @@ def test_the_first_age_asks_for_a_level_3_building_and_20_dollars_a_second():
 
 def _data(**changes) -> dict:
     data = {
-        "ui": "hover",
         "next_age_cost_factor": 500,
         "ages": {age: [LEVEL_3, INCOME_20] for age in AGES[:-1]},
     }
@@ -300,7 +297,6 @@ def _data(**changes) -> dict:
 @pytest.mark.parametrize(
     "changes",
     [
-        {"ui": "sidebar"},
         {"next_age_cost_factor": 0},
         {"next_age_cost_factor": True},
         {"ages": {age: [LEVEL_3] for age in AGES[:-1]}},  # one task
@@ -349,7 +345,6 @@ def test_the_highest_reachable_targets_are_accepted():
 @pytest.mark.parametrize(
     ("drop", "message"),
     [
-        ("ui", "'ui'"),
         ("next_age_cost_factor", "next_age_cost_factor"),
         ("ages", "'ages'"),
     ],

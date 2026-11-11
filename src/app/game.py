@@ -650,16 +650,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         return self._task_list_surface
 
     def _draw_task_list(self) -> None:
-        """Shows the age's tasks as `ui` in config/tasks.yaml says. Nothing in the last age."""
+        """The checklist over the NEXT AGE button while the mouse is on it. Nothing in the last
+        age, which has no tasks."""
         if not self.tasks.tasks:
             return
-        if self.tasks.config.ui == "panel":
-            self._draw_task_panel()
-        else:
-            self._draw_task_hover()
-
-    def _draw_task_hover(self) -> None:
-        """Option A: the checklist over the NEXT AGE button while the mouse is on it."""
         button = self.panel_manager["game"]["next_age_button"]
         if not button.rect.collidepoint(self.mouse.position):
             return
@@ -667,27 +661,6 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         gap = round(10 * self.ui_scale / 100)
         rect = surface.get_rect(midbottom=(button.rect.centerx, button.rect.top - gap))
         self.window.blit(surface, rect)
-
-    def _task_panel_rect(self) -> pygame.Rect | None:
-        """Option B's place: the top left of the game. None when the panel isn't shown."""
-        if self.tasks.config.ui != "panel" or not self.tasks.tasks:
-            return None
-        margin = round(16 * self.ui_scale / 100)
-        return self._task_list().get_rect(topleft=(margin, margin))
-
-    def _draw_task_panel(self) -> None:
-        """Option B: the checklist always visible at the top left of the game."""
-        rect = self._task_panel_rect()
-        assert rect is not None
-        self.window.blit(self._task_list(), rect)
-
-    def _task_panel_covers(self, event: pygame.Event) -> bool:
-        """Whether `event` is a mouse click on the always-visible checklist, which swallows it
-        like the info panel does (it must not reach the board underneath)."""
-        if event.type not in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP):
-            return False
-        rect = self._task_panel_rect()
-        return rect is not None and rect.collidepoint(self.mouse.position)
 
     def on_exit_request(self) -> None:
         self.audio.play_sfx(self.go_back_sound_path)

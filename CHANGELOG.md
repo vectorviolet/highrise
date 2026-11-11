@@ -13,8 +13,7 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   have boosted buildings). NEXT AGE needs all of them and now costs (age + 1) x 500; finishing the
   first age's tasks unlocks BOOST, which is locked until then. Done tasks stay done and are saved
   (older saves start the current age's tasks fresh; BOOST is unlocked past age 1). Progress shows
-  as a hover checklist over NEXT AGE or an always-visible panel, switched by `ui` in
-  `config/tasks.yaml` until the owner picks one
+  as a checklist over NEXT AGE while the mouse is on it
   ([devlog](docs/devlog/2026-11-11-age-tasks.md)).
 - With a building's info panel open, clicking another building (in selection mode) switches the
   panel to it; clicks on the panel never reach the board behind it, and a click on an empty tile

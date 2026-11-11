@@ -16,7 +16,6 @@ from gameplay.buildings.building import Building, Buildings
 
 MIN_TASKS = 2
 MAX_TASKS = 3
-UI_MODES = ("hover", "panel")
 
 
 def _plain_buildings(buildings: Buildings) -> list[Building]:
@@ -74,7 +73,6 @@ class Task:
 class TasksConfig:
     """config/tasks.yaml, checked."""
 
-    ui: str
     next_age_cost_factor: int
     ages: dict[str, tuple[Task, ...]]
 
@@ -88,9 +86,6 @@ class TasksConfig:
         level (`max_level`) and a `boosted_buildings` target needs room on the biggest board
         (`max_tiles`) for a booster besides the buildings. An `income_per_second` target can't
         be checked: it depends on how the player builds."""
-        ui = _need(data, "ui", "the file")
-        if ui not in UI_MODES:
-            raise ValueError(f"tasks: ui must be one of {UI_MODES}, not {ui!r}")
         factor = _need(data, "next_age_cost_factor", "the file")
         if not _is_positive_int(factor):
             raise ValueError("tasks: next_age_cost_factor must be a positive integer")
@@ -110,7 +105,7 @@ class TasksConfig:
         unknown = set(age_entries) - set(tasks)
         if unknown:
             raise ValueError(f"tasks: no tasks wanted for the ages {sorted(unknown)}")
-        return cls(ui, factor, tasks)
+        return cls(factor, tasks)
 
     @classmethod
     def load(cls, ages: list[str], max_level: int, max_tiles: int) -> "TasksConfig":

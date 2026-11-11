@@ -191,9 +191,6 @@ class GameEventsMixin:
         if self.tile_selector.is_active:
             self.tile_selector.update_selection()
 
-        if self._task_panel_covers(event):
-            return
-
         # The one guard for board-changing actions (sell, build, NEXT AGE,
         # moves): they wait while buildings slide or a merge is pending.
         board_ready = not self.buildings.is_busy()

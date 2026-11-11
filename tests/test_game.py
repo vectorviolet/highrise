@@ -8,7 +8,6 @@ under test, small fakes for pure UI/plumbing (panel_manager, audio, ...).
 """
 
 from collections.abc import KeysView
-from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -415,9 +414,8 @@ def test_updating_the_tasks_unlocks_boost_and_refreshes_the_button_text(assets):
     assert len(game.update_button_texts.calls) == 1
 
 
-def _task_drawing_game(assets, ui: str, mouse_at) -> Game:
+def _task_drawing_game(assets, mouse_at) -> Game:
     game = make_game(assets, size=3)
-    game.tasks.config = replace(game.tasks.config, ui=ui)
     game.window = pygame.Surface((1280, 720))
     game.money_font_path = str(assets.font_path("titillium_black"))
     game.mouse = SimpleNamespace(position=mouse_at)
@@ -447,9 +445,9 @@ def _window_changed(game: Game) -> bool:
     )
 
 
-def test_hover_mode_shows_the_checklist_only_over_the_next_age_button(assets):
-    away = _task_drawing_game(assets, "hover", (10, 10))
-    over = _task_drawing_game(assets, "hover", (650, 660))
+def test_the_checklist_shows_only_over_the_next_age_button(assets):
+    away = _task_drawing_game(assets, (10, 10))
+    over = _task_drawing_game(assets, (650, 660))
 
     away._draw_task_list()
     over._draw_task_list()
@@ -458,17 +456,8 @@ def test_hover_mode_shows_the_checklist_only_over_the_next_age_button(assets):
     assert _window_changed(over)
 
 
-def test_panel_mode_always_shows_the_checklist_at_the_top_left(assets):
-    game = _task_drawing_game(assets, "panel", (650, 660))
-
-    game._draw_task_list()
-
-    assert game.window.get_at((20, 20)) != pygame.Color(0, 0, 0)
-    assert game.window.get_at((1000, 600)) == pygame.Color(0, 0, 0)
-
-
 def test_no_checklist_is_drawn_in_the_last_age(assets):
-    game = _task_drawing_game(assets, "panel", (0, 0))
+    game = _task_drawing_game(assets, (0, 0))
     game.buildings.age_number = len(AGES) - 1
 
     game._draw_task_list()
@@ -1613,45 +1602,11 @@ def test_a_newly_done_task_refreshes_the_button_texts(assets):
     assert len(game.update_button_texts.calls) == 1
 
 
-def _panel_mode_game(assets) -> Game:
-    game = make_playable_game(assets)
-    game.tasks.config = replace(game.tasks.config, ui="panel")
-    game.money_font_path = str(assets.font_path("titillium_black"))
-    return game
-
-
-def test_a_click_on_the_always_visible_checklist_is_swallowed(assets):
-    game = _panel_mode_game(assets)
-    game.mouse.position = (20, 20)  # on the checklist, top left
-    game.panel_manager["game"]["build_button"].clicked = True
-
-    game.handle_game_events(pygame.event.Event(pygame.MOUSEBUTTONUP, button=1))
-
-    assert len(game.buildings) == 0
-
-
-def test_a_click_elsewhere_still_reaches_the_toolbar_in_panel_mode(assets, monkeypatch):
-    game = _panel_mode_game(assets)
-    game.mouse.position = (1000, 600)
-    monkeypatch.setattr("app.game.choice", lambda tiles: (1, 1))
-    game.panel_manager["game"]["build_button"].clicked = True
-
-    game.handle_game_events(pygame.event.Event(pygame.MOUSEBUTTONUP, button=1))
-
-    assert len(game.buildings) == 1
-
-
-def test_hover_mode_has_no_checklist_to_click(assets):
-    game = make_playable_game(assets)
-    game.mouse.position = (20, 20)
-
-    assert game._task_panel_rect() is None
-
-
 def test_the_checklist_looks_up_its_texts_only_when_something_changed(
     assets, monkeypatch
 ):
-    game = _panel_mode_game(assets)
+    game = make_playable_game(assets)
+    game.money_font_path = str(assets.font_path("titillium_black"))
     lookups = []
     monkeypatch.setattr("app.game.tr", lambda key, **kw: lookups.append(key) or key)
     game.tasks.update()

@@ -8,11 +8,6 @@
 #   income_per_second  earn >= target $ per second (every building's speed, boosts included)
 #   boosted_buildings  have >= target buildings standing on a booster's covered tiles
 
-# Where the progress shows (only one of the two is kept in the end):
-#   hover  a checklist over the NEXT AGE button while the mouse is on it
-#   panel  a small always-visible panel at the top left of the game
-ui: hover
-
 # NEXT AGE costs (current age number + 1) * this, the age number counting from 0.
 next_age_cost_factor: 500
 
