@@ -31,6 +31,8 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- The GO BACK buttons on the settings pages are centered (they sat about 8 px to the right) and
+  red like the other panels; the AUDIO page's rows are spaced like the DISPLAY page's.
 - Moves, building, selling and NEXT AGE wait until buildings stop sliding and merging, so a merge
   can no longer leave two buildings stacked on one tile. Saving mid-merge saves the finished merge,
   and selling from an info panel whose building just merged no longer crashes the game.

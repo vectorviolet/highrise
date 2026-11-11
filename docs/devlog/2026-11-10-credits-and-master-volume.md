@@ -33,3 +33,21 @@ MASTER VOLUME control that scales the music and every sound effect.
 
 ![The CREDITS page, mid-scroll](img/46-47-credits.png)
 ![The AUDIO page with MASTER VOLUME at 60 %](img/46-47-audio.png)
+
+## Play-test follow-up
+
+The owner play-tested the PR and asked for layout changes:
+
+- **CREDITS:** the header plate now overlaps the body panel by 10 px, like the other pages, and the
+  red GO BACK button sits inside the panel at the bottom. The scrolling area is shorter to make room.
+- **Every settings page:** SETTINGS, DISPLAY, AUDIO and GAME back buttons are the same red button,
+  placed with `position: [CENTER, y]`. The old hard-coded x of 810 put the 315 px wide buttons about
+  8 px off-center ([#60](https://github.com/vectorviolet/highrise/issues/60)); CANCEL and SAVE on
+  AUDIO had the same offset as a pair. A test checks every one at every UI scale and at two window sizes.
+- **AUDIO spacing:** rows now use the DISPLAY page's 85 px step and the header gap, and the panel is
+  405 px high instead of 640. Without music the rows close up under a 320 px panel.
+
+![The CREDITS page after the follow-up](img/46-47-credits.png)
+![The AUDIO page after the follow-up](img/46-47-audio.png)
+![The DISPLAY page, for comparison](img/46-47-display.png)
+![The SETTINGS page with its red GO BACK](img/46-47-settings.png)

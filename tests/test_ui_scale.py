@@ -203,3 +203,30 @@ def test_on_a_taller_canvas_the_layout_follows_the_canvas(scale):
     hud = game.panel_manager["game"]
     assert hud["game_panel"].rect.bottom == 1200 - round(15 * scale / 100)
     assert hud["expand_button"].rect.y - toolbar.y == 120
+
+
+BACK_BUTTONS = (
+    ("settings", "settings_panel", ("settings_back_button",)),
+    ("display_settings", "display_settings_panel", ("display_back_button",)),
+    # CANCEL and SAVE are a pair, centered together.
+    ("audio_settings", "audio_settings_panel", ("cancel_button", "save_button")),
+    ("game_settings", "game_settings_panel", ("game_settings_back_button",)),
+    ("credits", "credits_panel", ("credits_back_button",)),
+)
+
+
+@pytest.mark.parametrize("resolution", [(1280, 720), (1920, 1080)])
+@pytest.mark.parametrize("scale", UI_SCALES)
+def test_every_back_button_is_centered_on_its_page(resolution, scale):
+    game = started_game(resolution)
+    game.set_ui_scale(scale)
+
+    window = pygame.Rect((0, 0), game.size)
+    for panel, body_name, names in BACK_BUTTONS:
+        page = game.panel_manager[panel]
+        rects = [page[name].rect for name in names]
+        row = rects[0].unionall(rects[1:])
+        assert abs(row.centerx - window.centerx) <= 1, (panel, scale, row)
+        # The page's own panel is centered too, so they share one center line.
+        body = page[body_name].rect
+        assert abs(body.centerx - window.centerx) <= 1, (panel, scale, body)

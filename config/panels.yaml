@@ -138,11 +138,14 @@ panels:
           display_settings_button: { extends: menu_btn, size: [400, 60] }
           audio_settings_button:   { extends: menu_btn, size: [400, 60] }
           game_settings_button:    { extends: menu_btn, size: [400, 60] }
-          settings_back_button:    { extends: menu_btn, size: [400, 60] }
+      settings_back_button:
+        extends: go_back_btn
+        parent: settings_panel
+        position: [CENTER, 270]
       display_settings_button_text: { extends: menu_btn_text, parent: display_settings_button, text_key: settings.display }
       audio_settings_button_text:   { extends: menu_btn_text, parent: audio_settings_button,   text_key: settings.audio }
       game_settings_button_text:    { extends: menu_btn_text, parent: game_settings_button,    text_key: settings.game }
-      settings_back_button_text:    { extends: menu_btn_text, parent: settings_back_button,    text_key: common.go_back }
+      settings_back_button_text:    { extends: go_back_btn_text, parent: settings_back_button }
 
   play:
     objects:
@@ -392,7 +395,7 @@ panels:
 
       display_back_button:
         extends: go_back_btn
-        position: [810, 715]
+        position: [CENTER, 715]
       display_back_button_text:
         extends: go_back_btn_text
         parent: display_back_button
@@ -413,86 +416,86 @@ panels:
         position: [CENTER, CENTER]
       audio_settings_panel:
         position: [740, 320]
-        size: [440, 640]
+        size: [440, 405]
         extends: menu_panel
       # Replaces the panel above when there is no music (the music row is
       # hidden and the rows below it move up; see Game._show_music_controls).
       audio_settings_panel_no_music:
         position: [740, 320]
-        size: [440, 470]
+        size: [440, 320]
         extends: menu_panel
       master_volume_text:
         extends: settings_text
-        position: [CENTER, 380]
+        position: [CENTER, 345]
         text_key: audio_settings.master_volume
       music_volume_text:
         extends: settings_text
-        position: [CENTER, 550]
+        position: [CENTER, 430]
         text_key: audio_settings.music_volume
       sfx_volume_text:
         extends: settings_text
-        position: [CENTER, 720]
+        position: [CENTER, 515]
         text_key: audio_settings.sfx_volume
 
       master_volume_minus_button:
         extends: volume_button
-        position: [840, 430]
+        position: [840, 390]
       master_volume_plus_button:
         extends: volume_button
-        position: [1054, 430]
+        position: [1054, 390]
       master_volume_entry:
         extends: volume_entry
-        position: [885, 430]
+        position: [885, 390]
       master_volume_entry_text:
         extends: volume_entry_text
         parent: master_volume_entry
       master_volume_minus_icon:
         extends: minus_icon_template
-        position: [850, 440]
+        position: [850, 400]
       master_volume_plus_icon:
         extends: plus_icon_template
-        position: [1064, 440]
+        position: [1064, 400]
 
       music_volume_minus_button:
         extends: volume_button
-        position: [840, 600]
+        position: [840, 475]
       music_volume_plus_button:
         extends: volume_button
-        position: [1054, 600]
+        position: [1054, 475]
       music_volume_entry:
         extends: volume_entry
-        position: [885, 600]
+        position: [885, 475]
       music_volume_entry_text:
         extends: volume_entry_text
         parent: music_volume_entry
       music_volume_minus_icon:
         extends: minus_icon_template
-        position: [850, 610]
+        position: [850, 485]
       music_volume_plus_icon:
         extends: plus_icon_template
-        position: [1064, 610]
+        position: [1064, 485]
 
       sfx_volume_minus_button:
         extends: volume_button
-        position: [840, 770]
+        position: [840, 560]
       sfx_volume_plus_button:
         extends: volume_button
-        position: [1054, 770]
+        position: [1054, 560]
       sfx_volume_entry:
         extends: volume_entry
-        position: [885, 770]
+        position: [885, 560]
       sfx_volume_entry_text:
         extends: volume_entry_text
         parent: sfx_volume_entry
       sfx_volume_minus_icon:
         extends: minus_icon_template
-        position: [850, 780]
+        position: [850, 570]
       sfx_volume_plus_icon:
         extends: plus_icon_template
-        position: [1064, 780]
+        position: [1064, 570]
 
       cancel_button:
-        position: [810, 880]
+        position: [805, 635]
         size: [150, 60]
         asset: red_button
         hover: yellow_button
@@ -506,7 +509,7 @@ panels:
         parent: cancel_button
         text_key: common.cancel
       save_button:
-        position: [975, 880]
+        position: [965, 635]
         size: [150, 60]
         asset: green_button
         hover: yellow_button
@@ -589,7 +592,7 @@ panels:
 
       game_settings_back_button:
         extends: go_back_btn
-        position: [810, 680]
+        position: [CENTER, 680]
       game_settings_back_button_text:
         extends: go_back_btn_text
         parent: game_settings_back_button
@@ -597,7 +600,7 @@ panels:
   credits:
     objects:
       credits_title:
-        position: [740, 130]
+        position: [740, 140]
         size: [440, 70]
         asset: blue_button
       credits_title_text:
@@ -618,7 +621,7 @@ panels:
       credits_scroller:
         type: scrolling_panel
         position: [660, 220]
-        size: [600, 600]
+        size: [600, 520]
         speed: 40
         targets:
           - credits_dev_heading
@@ -730,7 +733,7 @@ panels:
 
       credits_back_button:
         extends: go_back_btn
-        position: [CENTER, 880]
+        position: [CENTER, 765]
       credits_back_button_text:
         extends: go_back_btn_text
         parent: credits_back_button
