@@ -26,6 +26,7 @@ PR. "Owner" is the project owner; "Claude" is the Claude Code session that imple
 | 2026-11-11 | [Building recipes](2026-11-11-building-recipes.md) | Buildings | #59, #72, PR #71 |
 | 2026-11-11 | [Game icon](2026-11-11-game-icon.md) | Art | #79 |
 | 2026-11-11 | [Menu polish](2026-11-11-menu-polish.md) | UI | #55, #62, #63, #66, PR #67 |
+| 2026-11-11 | [README screenshots and preview GIF](2026-11-11-readme-screenshots.md) | Docs | #44, PR #81 |
 <!-- index:end -->
 
 ## Adding an entry
