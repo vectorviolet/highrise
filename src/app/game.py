@@ -8,7 +8,7 @@ import yaml
 from app.game_events import GameEventsMixin
 from app.game_persistence import GamePersistenceMixin, GameSettings
 from domain.player import Player
-from gameplay.buildings.building import Buildings
+from gameplay.buildings.building import Building, Buildings
 from gameplay.clouds.cloud_container import OneShotCloudAnimation, LoopingCloudAnimation
 from gameplay.tile_selector import TileSelector
 from gameplay.tilemap import Tilemap
@@ -25,7 +25,11 @@ from pygamine import StateObject
 from pygamine import make_factory, make_text_factory, make_animated_factory
 from pygamine import MenuController
 from pygamine.util.localization import DEFAULT_LANGUAGE, localization, tr
+from ui.cash_display import apply_cash_display
+from ui.floating_text import FloatingTextConfig, FloatingTexts
 from ui.info_panel import InfoPanel
+from ui.money_format import format_money
+from ui.odometer import Odometer
 from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES, step_ui_scale
 from util.paths import LANG_FOLDER
 
@@ -99,6 +103,11 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         ui = self.settings["ui"]
 
         self.cursor_size = tuple(ui["cursor_size"])
+        self.odometer = Odometer(ui["cash_roll_ms"])
+        self.shown_money = 0
+        self.floating_text_config = FloatingTextConfig.from_dict(
+            self.settings["floating_text"]
+        )
 
         # Every panel position in config/panels.yaml is an absolute pixel
         # coordinate authored against this size -- set before super().__init__()
@@ -131,6 +140,11 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         self.audio = GameAudio()
         self.player = Player()
+        # The font of the coin's dollar sign and of the floating money text.
+        self.money_font_path = str(self.assets.font_path("titillium_black"))
+        self.floating_texts = FloatingTexts(
+            self.floating_text_config, self.money_font_path
+        )
         # The listener add_objects() registered last; replaced on every
         # rebuild so new games don't pile up listeners on the same player.
         self.money_listener: Callable[[int], None] | None = None
@@ -357,13 +371,41 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             ),
         }
 
-        money_text = self.panel_manager["game"]["money_text"]
+        apply_cash_display(
+            panel["money_panel"],
+            panel["money_icon"],
+            panel["money_text"],
+            self.assets,
+            self.money_font_path,
+        )
+        self.floating_texts.scale = self.ui_scale / 100
+        money_text = panel["money_text"]
         if self.money_listener is not None:
             self.player.remove_money_listener(self.money_listener)
-        self.money_listener = lambda m: money_text.set_text(f"{m}$")
+        # money_text is only the layout (its anchored rectangle, font and color): the
+        # odometer owns the text and draws it, rolling.
+        money_text.active = False
+        money_text.set_text("0")
+        gap = round(6 * self.ui_scale / 100)
+        self.odometer.bind(
+            money_text.rect,
+            money_text.font,
+            money_text.color,
+            panel["money_panel"].rect,
+            panel["money_icon"].rect.right + gap,
+        )
+        self.shown_money = self.player.money
+        self.money_listener = self._on_money_changed
         self.player.add_money_listener(self.money_listener)
-        money_text.set_text(f"{self.player.money}$")
+        self.odometer.snap(format_money(self.player.money))
         self._panels_built = True
+
+    def _on_money_changed(self, money: int) -> None:
+        direction = 1 if money > self.shown_money else -1
+        self.odometer.set_target(
+            format_money(money), direction, pygame.time.get_ticks()
+        )
+        self.shown_money = money
 
     @property
     def _tilemap(self) -> Tilemap:
@@ -378,21 +420,21 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             panel["expand_button_text"].set_text(tr("game.max_size"), state="hover")
         else:
             panel["expand_button_text"].set_text(
-                f"{tilemap.get_expand_cost()}$", state="hover"
+                format_money(tilemap.get_expand_cost()), state="hover"
             )
 
         if len(self.buildings) == tilemap.row_count * tilemap.column_count:
             panel["build_button_text"].set_text(tr("game.tiles_full"), state="hover")
         else:
             panel["build_button_text"].set_text(
-                f"{self.buildings.get_build_cost()}$", state="hover"
+                format_money(self.buildings.get_build_cost()), state="hover"
             )
 
         if self.buildings.age_number == self.buildings.max_age_number:
             panel["next_age_button_text"].set_text(tr("game.max_age"), state="hover")
         else:
             panel["next_age_button_text"].set_text(
-                f"{self.buildings.get_age_cost()}$", state="hover"
+                format_money(self.buildings.get_age_cost()), state="hover"
             )
 
     def handle_event(self, event: pygame.Event) -> None:
@@ -407,6 +449,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def update(self) -> None:
         self.panel_manager.update()
         self.buildings.update()
+        self.floating_texts.update(pygame.time.get_ticks())
         self._close_stale_info_panel()
         self.cloud_animation.update()
 
@@ -421,6 +464,15 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def draw(self) -> None:
         self.panel_manager.draw(self.window)
+        if self.panel_manager.current_panel == "game":
+            self.odometer.draw(self.window, pygame.time.get_ticks())
+            # A panel open over the world (the info panel) is never covered by the
+            # texts floating over the world.
+            self.floating_texts.draw(
+                self.window,
+                pygame.time.get_ticks(),
+                over_world=not self.info_panel.is_active,
+            )
         self.cloud_animation.draw(self.window)
         super().draw()
 
@@ -446,7 +498,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def expand(self) -> None:
         tilemap = self._tilemap
-        if tilemap.is_max_size() or not self.player.spend(tilemap.get_expand_cost()):
+        if tilemap.is_max_size() or not self._spend(tilemap.get_expand_cost()):
             return
 
         tilemap.expand()
@@ -492,7 +544,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         if empty_tiles:
             row_number, column_number = choice(empty_tiles)
             self.add_building(1, row_number, column_number)
-            self.player.spend(self.buildings.get_build_cost())
+            self._spend(self.buildings.get_build_cost())
             self.audio.play_sfx(self.click_sound_path)
 
     def set_age(self, age_number) -> None:
@@ -503,7 +555,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def next_age(self) -> None:
         if self.buildings.age_number >= self.buildings.max_age_number:
             return
-        if not self.player.spend(self.buildings.get_age_cost()):
+        if not self._spend(self.buildings.get_age_cost()):
             return
         self.set_age(self.buildings.age_number + 1)
         self.audio.play_sfx(self.click_sound_path)
@@ -513,8 +565,34 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             return
         self.buildings.move(rotation, self._tilemap, self.max_building_level)
 
-    def _on_building_payout(self, amount: int) -> None:
+    def _on_building_payout(self, building: Building, amount: int) -> None:
         self.player.earn(amount)
+        self.show_gain(building, amount)
+
+    def show_gain(self, building: Building, amount: int) -> None:
+        """A green "+amount" over `building`: a payout or a sale."""
+        if amount > 0:
+            self.floating_texts.gain(
+                building.rect.midtop,
+                amount,
+                pygame.time.get_ticks(),
+            )
+
+    def _spend(self, amount: int) -> bool:
+        """Pays `amount` if the player can afford it, and floats a red "-amount" down
+        from the bottom of the digits, right-aligned with it (it may fall past
+        the bottom of the screen). Returns whether it was paid."""
+        if not self.player.spend(amount):
+            return False
+        if amount > 0:
+            # The text's top starts at the bottom of the digits: the baseline.
+            label = self.panel_manager["game"]["money_text"]
+            self.floating_texts.spend(
+                (label.rect.right, label.rect.top + label.font.get_ascent()),
+                amount,
+                pygame.time.get_ticks(),
+            )
+        return True
 
     def open_panel(self, tab: str) -> None:
         if tab == "exit":
@@ -534,6 +612,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def _reset_session_ui(self) -> None:
         """Brings the UI in line with a freshly loaded session: the age, a closed
         info panel, the toolbar hover texts and the settings labels."""
+        self.floating_texts.clear()
         self.set_age(self.buildings.age_number)
         self.info_panel.close()
         self._refresh_ui_texts()
@@ -541,6 +620,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     def _refresh_ui_texts(self) -> None:
         """Re-texts what panels.yaml cannot: the toolbar hover texts and the
         labels the game sets from code. Touches nothing but texts."""
+        self.odometer.snap(format_money(self.player.money))
         self.update_button_texts()
         self.set_music_label(self.audio.music_volume())
         self.set_sfx_label(self.audio.sfx_volume())
@@ -652,7 +732,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def _on_language_changed(self, code: str) -> None:
         """Re-texts what panels.yaml cannot: the toolbar hover texts and the
-        labels the game sets from code (the other labels follow their key)."""
+        labels the game sets from code (the other labels follow their key). The cash
+        amount and an open info panel's prices change their number format too."""
+        self.odometer.snap(format_money(self.player.money))
+        self.info_panel.relocalize()
         self.update_button_texts()
         self.set_window_mode_label()
         self.set_language_label()

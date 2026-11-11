@@ -8,10 +8,12 @@ under test, small fakes for pure UI/plumbing (panel_manager, audio, ...).
 """
 
 from collections.abc import KeysView
+from pathlib import Path
 from types import SimpleNamespace
 
 import pygame
 import pytest
+import yaml
 
 from app.game import Game, format_volume
 from app.game_persistence import GameSettings
@@ -21,7 +23,10 @@ from gameplay.tile_selector import TileSelector
 from gameplay.tilemap import Tilemap
 from pygamine import TextObject, Transform
 from pygamine.util.localization import localization
+from ui.floating_text import FloatingTextConfig, FloatingTexts
 from ui.info_panel import InfoPanel
+from ui.money_format import format_money
+from ui.odometer import Odometer
 from ui.ui_scale import DEFAULT_UI_SCALE
 
 MAX_SIZE = 7
@@ -44,6 +49,13 @@ class FakeText:
     def set_text(self, text, state=None) -> None:
         self.text = text
         self.state = state
+
+
+class FakeMoneyText(FakeText):
+    def __init__(self):
+        super().__init__()
+        self.rect = pygame.Rect(1480, 30, 102, 40)  # right edge 1582
+        self.font = pygame.font.Font(None, 32)
 
 
 class FakePanelManager(dict):
@@ -99,7 +111,11 @@ class FakeLabel(FakeText):
 def make_panels() -> FakePanelManager:
     panel = FakePanelManager(
         {
-            "game": {"build_button_text": FakeText()},
+            "game": {
+                "build_button_text": FakeText(),
+                "money_text": FakeMoneyText(),
+                "money_panel": SimpleNamespace(rect=pygame.Rect(1420, 20, 280, 60)),
+            },
             "audio_settings": {
                 "music_volume_entry_text": FakeText(),
                 "sfx_volume_entry_text": FakeText(),
@@ -123,6 +139,14 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
     game.assets = assets
     game.player = Player()
     game.player.money = starting_money
+    game.odometer = Odometer(250)
+    game.shown_money = starting_money
+    game.floating_texts = FloatingTexts(
+        FloatingTextConfig.from_dict(
+            yaml.safe_load(Path("config/settings.yaml").read_text())["floating_text"]
+        ),
+        str(assets.font_path("titillium_black")),
+    )
     game.buildings = Buildings(
         on_merge=game._on_buildings_merged, on_payout=game._on_building_payout
     )
@@ -139,7 +163,7 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
     game.cloud_animation = SimpleNamespace(
         create_clouds=Spy(), update=Spy(), draw=Spy()
     )
-    game.info_panel = SimpleNamespace(is_active=False, close=Spy())
+    game.info_panel = SimpleNamespace(is_active=False, close=Spy(), relocalize=Spy())
     game.old_music_volume = 0.5
     game.old_sfx_volume = 0.5
     game.update_button_texts = Spy()
@@ -155,6 +179,17 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
     return game
 
 
+def _spend_texts(game: Game) -> list[str]:
+    """The red "-X$" texts floating from the cash display, in order."""
+    texts = [t for t in game.floating_texts.texts if t.amount < 0]
+    # They start at the bottom of the digits (the baseline), at the amount's right edge.
+    label = game.panel_manager["game"]["money_text"]
+    assert all(
+        t.position == (1582, label.rect.top + label.font.get_ascent()) for t in texts
+    )
+    return [t.text for t in texts]
+
+
 # ── expand ───────────────────────────────────────────────────────────────────
 
 
@@ -163,9 +198,11 @@ def test_expand_grows_the_map_and_relocates_building_tiles(assets):
     tile = game.tilemap[1][1]
     building = Building(1, 0, tile, on_payout=None)
     game.buildings.append(building)
+    cost = game.tilemap.get_expand_cost()
 
     game.expand()
 
+    assert _spend_texts(game) == [f"-{format_money(cost)}"]
     assert (game.tilemap.row_count, game.tilemap.column_count) == (4, 4)
     # Same logical (row, col) on the new, bigger grid -- a fresh Tile object.
     assert building.tile is game.tilemap[1][1]
@@ -189,6 +226,7 @@ def test_expand_does_nothing_when_unaffordable(assets):
 
     assert (game.tilemap.row_count, game.tilemap.column_count) == (3, 3)
     assert game.player.money == 0
+    assert _spend_texts(game) == []
 
 
 # ── add_building ─────────────────────────────────────────────────────────────
@@ -227,6 +265,7 @@ def test_create_building_places_on_an_empty_tile_and_spends_money(assets, monkey
     )
     assert game.player.money == 100_000 - game.buildings.get_build_cost()
     assert game.audio.played == [game.click_sound_path]
+    assert _spend_texts(game) == [f"-{format_money(game.buildings.get_build_cost())}"]
 
 
 def test_create_building_does_nothing_when_unaffordable(assets):
@@ -235,6 +274,7 @@ def test_create_building_does_nothing_when_unaffordable(assets):
     game.create_building()
 
     assert len(game.buildings) == 0
+    assert _spend_texts(game) == []
 
 
 # ── age progression ──────────────────────────────────────────────────────────
@@ -260,11 +300,13 @@ def test_set_age_beyond_max_is_a_no_op(assets):
 
 def test_next_age_advances_and_spends_money(assets):
     game = make_game(assets, size=3, starting_money=100_000)
+    cost = game.buildings.get_age_cost()
 
     game.next_age()
 
     assert game.buildings.age_number == 1
     assert game.audio.played == [game.click_sound_path]
+    assert _spend_texts(game) == [f"-{format_money(cost)}"]
 
 
 def test_next_age_does_nothing_when_unaffordable(assets):
@@ -273,6 +315,7 @@ def test_next_age_does_nothing_when_unaffordable(assets):
     game.next_age()
 
     assert game.buildings.age_number == 0
+    assert _spend_texts(game) == []
 
 
 def test_next_age_does_nothing_at_max_age(assets):
@@ -372,8 +415,24 @@ def test_move_buildings_is_a_no_op_while_the_tile_selector_is_active(assets):
 def test_on_building_payout_credits_the_player(assets):
     game = make_game(assets, size=3)
 
-    game._on_building_payout(15)
+    game.add_building(1, 1, 1)
+    building = game.buildings[0]
 
+    game._on_building_payout(building, 15)
+
+    assert game.player.money == 500 + 15
+    assert [t.text for t in game.floating_texts.texts] == ["+15$"]
+
+
+def test_every_payout_of_a_building_gets_its_own_text(assets):
+    game = make_game(assets, size=3)
+    game.add_building(1, 1, 1)
+    building = game.buildings[0]
+
+    game._on_building_payout(building, 10)
+    game._on_building_payout(building, 5)
+
+    assert [t.text for t in game.floating_texts.texts] == ["+10$", "+5$"]
     assert game.player.money == 500 + 15
 
 
@@ -517,6 +576,9 @@ def test_add_building_assigns_payout_before_the_first_update(assets):
     money = game.player.money
     building._payout()
     assert game.player.money == money + building.cooldown * building.speed
+    assert [(t.text, t.position) for t in game.floating_texts.texts] == [
+        (f"+{format_money(building.cooldown * building.speed)}", building.rect.midtop)
+    ]
 
 
 def test_game_plays_the_merge_sound_through_the_collection_callback(assets):
@@ -1144,3 +1206,21 @@ def test_sell_through_the_info_panel_sells_a_settled_building(assets):
     assert len(game.buildings) == 0
     assert game.player.money == money + building.sell_price
     assert not game.info_panel.is_active
+    assert [(t.text, t.position) for t in game.floating_texts.texts] == [
+        (f"+{format_money(building.sell_price)}", building.rect.midtop)
+    ]
+
+
+def test_a_sale_right_after_a_payout_gets_its_own_text(assets):
+    game = make_playable_game(assets)
+    game.add_building(2, 2, 2)
+    building = game.buildings[0]
+    _pick(game, game.tilemap[1][1])
+    game._on_building_payout(building, 10)
+
+    _click(game, "sell_button")
+
+    assert [t.text for t in game.floating_texts.texts] == [
+        "+10$",
+        f"+{format_money(building.sell_price)}",
+    ]

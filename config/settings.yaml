@@ -13,7 +13,19 @@ audio:
   default_music_volume: 1.0
   default_sfx_volume: 1.0
 
+floating_text:
+  gain_font_size: 24       # +X$ over a building, pixels at 100% UI scale
+  spend_font_size: 30      # -X$ falling from the cash amount, pixels at 100% UI scale
+  gain_color: [96, 232, 96]    # +$X over a building that paid or was sold
+  spend_color: [255, 90, 80]   # -$X falling from the cash display
+  outline_color: [24, 32, 24]
+  lifetime_ms: 1400
+  rise: 70                 # pixels a gain moves up over its life, at 100% UI scale
+  fall: 44                 # pixels a spend moves down over its life, at 100% UI scale
+  max_texts: 40            # alive at once
+
 ui:
+  cash_roll_ms: 250         # how long a changing digit of the cash amount rolls
   cursor_size: [32, 32]  # the Kenney Cursor Pack sprite's native size: crisp pixel art
   background_colors:
     menu: yellow

@@ -40,7 +40,7 @@ class Building(StateObject):
         age_number,
         tile: Tile,
         *,
-        on_payout: Callable[[int], None] | None,
+        on_payout: Callable[["Building", int], None] | None,
     ) -> None:
         # on_payout is required (keyword-only) so a building can't be built
         # without deciding where its income goes; pass None for no income.
@@ -67,7 +67,7 @@ class Building(StateObject):
 
     def _payout(self) -> None:
         if self.on_payout:
-            self.on_payout(self.cooldown * self.speed)
+            self.on_payout(self, self.cooldown * self.speed)
 
     @property
     def rigidbody(self) -> Rigidbody2D:
@@ -119,7 +119,7 @@ class Buildings(list[Building]):
         self,
         *,
         on_merge: Callable[[], None] | None = None,
-        on_payout: Callable[[int], None] | None = None,
+        on_payout: Callable[[Building, int], None] | None = None,
     ) -> None:
         super().__init__()
         self.max_age_number = len(AGES) - 1

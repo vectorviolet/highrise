@@ -49,6 +49,11 @@ game_settings:
   language: "DİL"
   skip_intro: "GİRİŞİ ATLA"
 
+# Binlik ayracı nokta: "12.345$" (ui/money_format.py; ayrıntılar en.yaml'da).
+money:
+  amount: "{amount}$"
+  thousands: "."
+
 game:
   expand: "GENİŞLET"
   build: "İNŞA ET"
