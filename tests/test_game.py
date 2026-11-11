@@ -250,30 +250,20 @@ def test_add_building_appends_and_sorts_by_column(assets):
     assert [b.tile.column_number for b in game.buildings] == [1, 3]
 
 
-def test_add_building_marks_tiles_full_once_the_grid_is_saturated(assets):
-    game = make_game(assets, size=1)  # a single tile
-
-    game.add_building(1, 1, 1)
-
-    assert game.panel_manager["game"]["build_button_text"].text == "TILES FULL"
-
-
-def test_a_merge_that_frees_tiles_restores_the_build_price_hover_text(assets):
-    game = make_game(assets, size=1)
+def _use_real_button_texts(game) -> None:
     panel = game.panel_manager["game"]
     panel["expand_button_text"] = FakeText()
     panel["next_age_button_text"] = FakeText()
     game.update_button_texts = Game.update_button_texts.__get__(game)
+
+
+def test_add_building_marks_tiles_full_once_the_grid_is_saturated(assets):
+    game = make_game(assets, size=1)  # a single tile
+    _use_real_button_texts(game)
+
     game.add_building(1, 1, 1)
-    assert panel["build_button_text"].text == "TILES FULL"
 
-    game.buildings.clear()  # a merge removes a building
-    game._on_buildings_merged()
-
-    assert panel["build_button_text"].text == format_money(
-        game.buildings.get_build_cost()
-    )
-    assert panel["build_button_text"].state == "hover"
+    assert game.panel_manager["game"]["build_button_text"].text == "TILES FULL"
 
 
 # ── create_building ──────────────────────────────────────────────────────────
@@ -630,6 +620,27 @@ def test_add_building_assigns_payout_before_the_first_update(assets):
     assert [(t.text, t.position) for t in game.floating_texts.texts] == [
         (f"+{format_money(building.cooldown * building.speed)}", building.rect.midtop)
     ]
+
+
+def test_a_real_merge_that_frees_tiles_restores_the_build_price_hover_text(assets):
+    game = make_game(assets, size=2)
+    _use_real_button_texts(game)
+    text = game.panel_manager["game"]["build_button_text"]
+    for row, column in ((1, 1), (1, 2), (2, 1), (2, 2)):
+        game.add_building(1, row, column)
+    assert text.text == "TILES FULL"
+
+    _start_merge_of_full_board(game)
+    _run_until_settled(game)
+
+    assert len(game.buildings) < 4
+    assert text.text == format_money(game.buildings.get_build_cost())
+    assert text.state == "hover"
+
+
+def _start_merge_of_full_board(game) -> None:
+    game.move_buildings("left")
+    assert any(b.merge_target is not None for b in game.buildings)
 
 
 def test_game_plays_the_merge_sound_through_the_collection_callback(assets):

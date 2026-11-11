@@ -137,6 +137,20 @@ def test_every_colored_menu_button_has_a_hover_image():
     assert missing == []
 
 
+def test_red_and_green_menu_buttons_load_with_the_blue_ones_nine_slice():
+    game = started_game()
+    # Red, green and blue buttons built from the menu_btn templates.
+    buttons = ("menu.play_button", "menu.exit_button", "menu.credits_button")
+    buttons += ("play.continue_button", "play.play_back_button")
+
+    slices = {}
+    for path in buttons:
+        panel, name = path.split(".")
+        slices[path] = game.panel_manager[panel][name]._nine_slice  # engine-private
+
+    assert slices == dict.fromkeys(buttons, 20)
+
+
 # ── CONTINUE first ────────────────────────────────────────────────────────
 
 
