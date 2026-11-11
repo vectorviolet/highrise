@@ -178,7 +178,9 @@ def make_game(assets, *, size=3, max_size=MAX_SIZE, starting_money=500) -> Game:
     game.cloud_animation = SimpleNamespace(
         create_clouds=Spy(), update=Spy(), draw=Spy()
     )
-    game.info_panel = SimpleNamespace(is_active=False, close=Spy(), relocalize=Spy())
+    game.info_panel = SimpleNamespace(
+        is_active=False, building=None, close=Spy(), relocalize=Spy()
+    )
     game.old_master_volume = 1.0
     game.old_music_volume = 0.5
     game.old_sfx_volume = 0.5
@@ -1485,3 +1487,85 @@ def test_the_highlight_is_recomputed_only_when_the_shown_booster_changes(assets)
     game.buildings[0].tile = game.tilemap[0][0]  # the booster moved: recompute
     game._highlight_boosted_tiles()
     assert game.tilemap[0][1].highlighted
+
+
+def _hover_game(assets):
+    game = make_game(assets, size=3)
+    game.panel_manager.current_panel = "game"
+    game.mouse = SimpleNamespace(position=(-1, -1))
+    game.add_building(1, 2, 2, "left", booster=True)
+    game.add_building(1, 1, 1, "left")
+    booster = next(b for b in game.buildings if b.is_booster)
+    return game, booster
+
+
+def _lit(game) -> set[tuple[int, int]]:
+    return {
+        (t.row_number, t.column_number) for t in game.tilemap.tiles() if t.highlighted
+    }
+
+
+def test_hovering_a_booster_lights_its_tiles_without_a_panel(assets):
+    game, booster = _hover_game(assets)
+
+    game._highlight_boosted_tiles()
+    assert _lit(game) == set()  # the mouse is elsewhere
+
+    game.mouse.position = booster.rect.center
+    game._highlight_boosted_tiles()
+    assert _lit(game) == {
+        (1, 2),
+        (3, 2),
+        (2, 1),
+        (2, 3),
+    }  # the same style as the panel's
+
+    game.mouse.position = (-1, -1)
+    game._highlight_boosted_tiles()
+    assert _lit(game) == set()
+
+
+def test_hovering_a_building_or_the_ground_lights_nothing(assets):
+    game, _ = _hover_game(assets)
+    building = next(b for b in game.buildings if not b.is_booster)
+
+    game.mouse.position = building.rect.center
+    game._highlight_boosted_tiles()
+
+    assert _lit(game) == set()
+
+
+def test_hover_highlights_only_on_the_game_panel(assets):
+    game, booster = _hover_game(assets)
+    game.panel_manager.current_panel = "menu"
+    game.mouse.position = booster.rect.center
+
+    game._highlight_boosted_tiles()
+
+    assert _lit(game) == set()
+
+
+def test_an_open_info_panel_owns_the_highlight_over_the_hover(assets):
+    game, booster = _hover_game(assets)
+    building = next(b for b in game.buildings if not b.is_booster)
+    game.info_panel.is_active = True
+    game.info_panel.building = (
+        building  # a normal building's panel: no highlight at all
+    )
+    game.mouse.position = booster.rect.center
+
+    game._highlight_boosted_tiles()
+
+    assert _lit(game) == set()
+
+
+def test_the_hover_does_not_walk_the_tiles_while_nothing_changes(assets):
+    game, booster = _hover_game(assets)
+    game.mouse.position = booster.rect.center
+    game._highlight_boosted_tiles()
+    tile = game.tilemap[0][1]
+    tile.highlighted = False  # a recompute would light it again
+
+    game._highlight_boosted_tiles()
+
+    assert not tile.highlighted

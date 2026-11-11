@@ -245,13 +245,13 @@ class Buildings(list[Building]):
         tile = building.tile
         bonus = sum(
             booster.boost_bonus
-            for booster in self._boosters()
+            for booster in self.boosters_on_board()
             if not booster.should_destroy
             and self.covers(booster, tile.row_number, tile.column_number)
         )
         return 1 + bonus
 
-    def _boosters(self) -> list[Building]:
+    def boosters_on_board(self) -> list[Building]:
         """The boosters on the board, kept until the collection changes (every payout asks)."""
         if self._booster_list is None:
             self._booster_list = [b for b in self if b.is_booster]

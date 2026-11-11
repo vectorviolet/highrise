@@ -160,8 +160,11 @@ bonuses (multiplier - 1) of every booster covering the building's tile, and
 pay; a merge adds both buildings' fractions, an age change keeps them, a save drops them). `Buildings`
 needs its `BoosterConfig` passed in (`Game` builds it once, checking the multiplier count against the
 booster sprite levels; tests use `BoosterConfig.load`); a booster has no payout timer. Boosters merge only with a booster of the same level, up to their own maximum level; normal
-buildings never merge with them. While a booster's info panel is open, `Game` sets
-`Tile.highlighted` on the tiles it covers every frame.
+buildings never merge with them. While a booster's info panel is open, or the mouse is over a booster (info panel closed, game
+panel), `Game._highlight_boosted_tiles` sets `Tile.highlighted` on the tiles it covers; it walks the
+tiles only when the shown booster, its tile or age, or the board changes. The info panel sits at the
+window's right edge (`anchor: right` in `config/panels.yaml`, its content parented to it) so the
+board stays visible; `tests/test_info_panel_layout.py` checks it at every UI scale.
 
 ### Cash display and floating money text
 

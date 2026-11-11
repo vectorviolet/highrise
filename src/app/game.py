@@ -541,19 +541,28 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         if self.info_panel.is_active and self.info_panel.building not in self.buildings:
             self.info_panel.close()
 
+    def _highlighted_booster(self) -> Building | None:
+        """The booster whose covered tiles light up: the one the open info panel shows, else
+        (no panel open) the one under the mouse, on the booster's sprite or its tile."""
+        shown = self.info_panel.building
+        if self.info_panel.is_active:
+            return shown if shown is not None and shown.is_booster else None
+        if self.panel_manager.current_panel != "game":
+            return None
+        position = self.mouse.position
+        for booster in self.buildings.boosters_on_board():
+            if booster.rect.collidepoint(position) or booster.tile.is_mouse_over(
+                position
+            ):
+                return booster
+        return None
+
     def _highlight_boosted_tiles(self) -> None:
-        """Lights up the tiles of the booster the info panel shows (and nothing otherwise).
-        The tiles are only walked when the shown booster, its tile or age, or the board
-        changes: a closed panel costs one comparison per frame."""
-        booster = self.info_panel.building
-        shown = (
-            booster
-            if self.info_panel.is_active
-            and booster is not None
-            and booster.is_booster
-            and booster in self.buildings
-            else None
-        )
+        """Lights up the tiles a booster covers while its info panel is open or the mouse is
+        over it, in one style (nothing otherwise). The tiles are only walked when the booster,
+        its tile or age, or the board changes: nothing shown costs one comparison per frame."""
+        booster = self._highlighted_booster()
+        shown = booster if booster is not None and booster in self.buildings else None
         key = (
             None
             if shown is None
