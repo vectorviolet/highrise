@@ -13,16 +13,16 @@ The release workflow (`.github/workflows/release.yml`) uploads the builds with B
 `windows`, `linux` and `osx` channels; it never touches the page text. The same builds are on the
 [GitHub releases](https://github.com/vectorviolet/highrise/releases/latest).
 
-The tagline, tags and AI disclosure answers below are **proposals**: the owner approves them
-before they go on the page.
+The [Field values](#field-values) table at the end lists what each edit-page field holds or should
+hold; the checklist items below explain the reasoning.
 
 ## Checklist for the edit page
 
 Fields that live outside the description, following itch.io's
 [quality guidelines](https://itch.io/docs/creators/quality-guidelines):
 
-- **Short description or tagline (proposal):** "Merge buildings 2048-style and grow a city through
-  four ages."
+- **Short description or tagline:** "An isometric city-builder where same-level buildings merge
+  2048-style." (as on the page; it does not repeat the title).
 - **Classification:** Games. **Kind of project:** Downloadable. **Release status:**
   Released (1.0.0 is out).
 - **Platforms:** Windows, macOS, Linux (the three the release workflow builds).
@@ -30,10 +30,10 @@ Fields that live outside the description, following itch.io's
 - **Tags:** see [Field values](#field-values) below.
 - **Languages:** English, Turkish (the two the game ships).
 - **Inputs:** Keyboard, Mouse.
-- **AI disclosure (proposal):** answer it on the edit page to match the description's line. Claude Code
+- **AI disclosure:** answer it on the edit page to match the description's line. Claude Code
   was a coding assistant (code). The game icon, the cover, the banner and the key arts were generated
   with OpenAI Codex and post-processed (graphics: those pictures only). The in-game art is Kenney's
-  CC0 packs (not AI) and the music is by Sakura Girl (not AI), so answer no AI for those. Check what itch.io's form asks about code, graphics, sound and text.
+  CC0 packs (not AI) and the music is by Sakura Girl (not AI), so answer no AI for those. The text answer is yes too: the store text and the Turkish strings were drafted with Claude (see Field values).
 - **Screenshots:** at least 4 are wanted, uploaded to the page's gallery in this order (all in
   `docs/screenshots/`, 1920x1080): `02_build_mode.png`, `03_inspection.png` and
   `01_main_menu.png`. That is only three, so add a fourth (for example a later age or a boosted
