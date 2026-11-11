@@ -25,7 +25,6 @@ floating_text:
   max_texts: 40            # alive at once
 
 ui:
-  header_style: a          # the sub-page header: a (plate) or b (banner); see config/header_styles/
   cash_roll_ms: 250         # how long a changing digit of the cash amount rolls
   cursor_size: [32, 32]  # the Kenney Cursor Pack sprite's native size: crisp pixel art
   background_colors:

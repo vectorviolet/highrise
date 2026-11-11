@@ -110,13 +110,11 @@ font in `assets/fonts/` lacks a character of any language (Titillium Web has no 
 one). Quote every value: a bare `yes` or `10` is not a string. Don't write `on:`/`off:` as keys: YAML
 turns them into booleans.
 
-### Menu buttons and page headers
+### Menu button colors
 
-Button colors: red (`red_button`) leaves, cancels or destroys, green goes (PLAY, CONTINUE, SAVE, BUILD),
-blue is the rest; `tests/test_menu_polish.py` lists them, so add a new button there. Every sub-page header
-(`<page>_title`, extends `page_header`) is one plate at one place with no hover; its image is `header_plate`,
-defined by the manifest `config/header_styles/<style>.yaml` that `ui.header_style` in `config/settings.yaml`
-picks (`a` plate, `b` banner; the images come from `scripts/gen_header_art.py`). The main menu has no title.
+Red (`red_button`) leaves, cancels or destroys (EXIT, every GO BACK, CANCEL, SELL), green goes (PLAY,
+CONTINUE, SAVE, BUILD), blue is the rest; `tests/test_menu_polish.py` lists every button's color, so add a
+new button there.
 
 ### Credits page
 

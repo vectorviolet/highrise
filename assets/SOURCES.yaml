@@ -2801,10 +2801,3 @@ files:
   "sounds/tap-b.ogg":
     source: kenney-ui-pack
     original: "Sounds/tap-b.ogg"
-  "images/gui/header/banner.png":
-    source: own
-    note: "page-header style b, drawn by scripts/gen_header_art.py"
-  "images/gui/header/plate.png":
-    source: kenney-ui-pack
-    original: "PNG/Blue/Default/button_rectangle_depth_flat.png"
-    modified: "hue shifted from blue to purple by scripts/gen_header_art.py (page-header style a)"

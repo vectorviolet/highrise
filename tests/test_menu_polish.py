@@ -8,30 +8,16 @@ import pygame
 import pytest
 import yaml
 
-import app.game as game_module
 import pygamine
 from app.game import (
-    HEADER_STYLES_FOLDER,
     Game,
     format_percent,
     format_volume,
-    header_style_manifest,
 )
-from pygamine import TextObject
-from pygamine.ecs.state_object import HoverableStateObject
 from pygamine.util.localization import localization
 from ui.ui_scale import UI_SCALES
 
 PANELS_YAML = Path("config/panels.yaml")
-HEADER_STYLES = sorted(p.stem for p in HEADER_STYLES_FOLDER.glob("*.yaml"))
-SUB_PAGES = (
-    "play",
-    "settings",
-    "display_settings",
-    "audio_settings",
-    "game_settings",
-    "credits",
-)
 
 
 @pytest.fixture(autouse=True)
@@ -40,13 +26,8 @@ def headless_run(monkeypatch) -> None:
     monkeypatch.setattr(Game, "show_splash", lambda self: None)
 
 
-def started_game(monkeypatch, style: str | None = None) -> Game:
-    """A real Game on its first page; `style` overrides settings.yaml's header style."""
-    if style is not None:
-        real = game_module.header_style_manifest
-        monkeypatch.setattr(
-            game_module, "header_style_manifest", lambda _style: real(style)
-        )
+def started_game() -> Game:
+    """A real Game on its first page."""
     game = Game()
     game.set_windowed()
     game.set_resolution((1920, 1080))
@@ -138,8 +119,8 @@ def test_a_new_button_must_be_added_to_the_color_table():
 
 
 @pytest.mark.parametrize("scale", UI_SCALES)
-def test_continue_is_above_new_game_above_go_back(monkeypatch, scale):
-    game = started_game(monkeypatch)
+def test_continue_is_above_new_game_above_go_back(scale):
+    game = started_game()
     game.set_ui_scale(scale)
     page = game.panel_manager["play"]
 
@@ -150,8 +131,8 @@ def test_continue_is_above_new_game_above_go_back(monkeypatch, scale):
     )
 
 
-def test_the_keyboard_focus_order_follows_the_buttons(monkeypatch):
-    game = started_game(monkeypatch)
+def test_the_keyboard_focus_order_follows_the_buttons():
+    game = started_game()
     page = game.panel_manager["play"]
 
     assert game.menu_controllers["play"].buttons == [
@@ -159,72 +140,6 @@ def test_the_keyboard_focus_order_follows_the_buttons(monkeypatch):
         page["new_game_button"],
         page["play_back_button"],
     ]
-
-
-# ── page headers ──────────────────────────────────────────────────────────
-
-
-def test_the_main_menu_has_no_title(monkeypatch):
-    game = started_game(monkeypatch)
-    assert "menu_title" not in game.panel_manager["menu"]
-
-
-@pytest.mark.parametrize("style", HEADER_STYLES)
-@pytest.mark.parametrize("scale", UI_SCALES)
-def test_every_sub_page_header_sits_in_the_same_place(monkeypatch, style, scale):
-    game = started_game(monkeypatch, style)
-    game.set_ui_scale(scale)
-    window = pygame.Rect((0, 0), game.size)
-
-    rects = {
-        page: tuple(game.panel_manager[page][f"{page}_title"].rect)
-        for page in SUB_PAGES
-    }
-    assert len(set(rects.values())) == 1, rects
-    assert abs(pygame.Rect(rects["play"]).centerx - window.centerx) <= 1
-
-
-@pytest.mark.parametrize("style", HEADER_STYLES)
-def test_a_header_has_no_hover_state(monkeypatch, style):
-    game = started_game(monkeypatch, style)
-    for page in SUB_PAGES:
-        header = game.panel_manager[page][f"{page}_title"]
-        assert not isinstance(header, HoverableStateObject), page
-
-
-@pytest.mark.parametrize("style", HEADER_STYLES)
-@pytest.mark.parametrize("language", ["en", "tr"])
-@pytest.mark.parametrize("scale", UI_SCALES)
-def test_header_text_fits_its_plate(monkeypatch, style, language, scale):
-    game = started_game(monkeypatch, style)
-    localization.set_language(language)
-    game.set_ui_scale(scale)
-
-    for page in SUB_PAGES:
-        game.open_panel(page)
-        header = game.panel_manager[page][f"{page}_title"].rect
-        text = game.panel_manager[page][f"{page}_title_text"]
-        assert isinstance(text, TextObject)
-        where = (style, page, language, scale)
-        assert header.left < text.rect.left and text.rect.right < header.right, where
-        assert abs(header.centery - text.rect.centery) <= 2, where
-
-
-@pytest.mark.parametrize(("style", "image"), [("a", "plate"), ("b", "banner")])
-def test_a_style_picks_the_header_image(monkeypatch, style, image):
-    game = started_game(monkeypatch, style)
-    assert Path(str(game.assets.image_path("header_plate"))).stem == image
-
-
-def test_the_default_style_is_a():
-    settings = yaml.safe_load(Path("config/settings.yaml").read_text(encoding="utf-8"))
-    assert settings["ui"]["header_style"] == "a"
-    assert HEADER_STYLES == ["a", "b"]
-
-
-def test_an_unknown_header_style_is_refused():
-    with pytest.raises(ValueError, match="Unknown header style 'z'"):
-        header_style_manifest("z")
 
 
 # ── percent format ────────────────────────────────────────────────────────
@@ -240,8 +155,8 @@ def test_percent_text_follows_the_language(language, text):
 @pytest.mark.parametrize(
     ("language", "template"), [("tr", "%{value}"), ("en", "{value}%")]
 )
-def test_open_values_re_text_when_the_language_changes(monkeypatch, language, template):
-    game = started_game(monkeypatch)
+def test_open_values_re_text_when_the_language_changes(language, template):
+    game = started_game()
     game.set_ui_scale(110)
     other = "en" if language == "tr" else "tr"
     game.watch_language()
@@ -254,6 +169,7 @@ def test_open_values_re_text_when_the_language_changes(monkeypatch, language, te
     audio = game.panel_manager["audio_settings"]
     shown = {
         "master_volume_entry_text": game.audio.master_volume(),
+        "music_volume_entry_text": game.audio.music_volume(),
         "sfx_volume_entry_text": game.audio.sfx_volume(),
     }
     for name, volume in shown.items():
@@ -267,14 +183,13 @@ def test_open_values_re_text_when_the_language_changes(monkeypatch, language, te
 
 @pytest.mark.parametrize("language", ["en", "tr"])
 @pytest.mark.parametrize("scale", UI_SCALES)
-def test_the_credits_lockup_and_profile_rows_fit_and_are_centered(
-    monkeypatch, language, scale
-):
-    game = started_game(monkeypatch)
+def test_the_credits_lockup_and_profile_rows_fit_and_are_centered(language, scale):
+    game = started_game()
     localization.set_language(language)
     game.set_ui_scale(scale)
     scroller = game.panel_manager["credits"]["credits_scroller"]
-    # The scroller takes its targets out of the panel; it has no public way to list them.
+    # The scroller takes its targets out of the panel and has no public way to list
+    # them, so this reads its private lists (the objects are otherwise unreachable).
     page = {
         obj_name: obj
         for obj_name, obj in zip(scroller._target_names, scroller._targets)
@@ -293,5 +208,7 @@ def test_the_credits_lockup_and_profile_rows_fit_and_are_centered(
         pair = page[icon].rect.union(page[name].rect)
         where = (icon, language, scale)
         assert viewport.left <= pair.left and pair.right <= viewport.right, where
-        assert abs(pair.centerx - window.centerx) <= 4, where
+        assert abs(pair.centerx - window.centerx) <= 4, (
+            where
+        )  # hand-placed x, rounded by the scale
         assert page[icon].rect.right < page[name].rect.left, where

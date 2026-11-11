@@ -95,25 +95,12 @@ BACK_TARGETS = {
     "credits": "menu",
 }
 
-# One manifest per page-header style; `ui.header_style` in settings.yaml picks one.
-HEADER_STYLES_FOLDER = Path("config/header_styles")
-
 # Localization keys (config/lang/*.yaml) of the window-mode labels.
 WINDOW_MODE_KEYS = {
     "fullscreen": "display_settings.modes.fullscreen",
     "borderless": "display_settings.modes.borderless",
     "windowed": "display_settings.modes.windowed",
 }
-
-
-def header_style_manifest(style: str) -> Path:
-    """The asset manifest of a page-header style: it defines `header_plate`, the
-    image every sub-page header uses (config/header_styles/<style>.yaml)."""
-    path = HEADER_STYLES_FOLDER / f"{style}.yaml"
-    if not path.is_file():
-        known = sorted(p.stem for p in HEADER_STYLES_FOLDER.glob("*.yaml"))
-        raise ValueError(f"Unknown header style {style!r}; expected one of {known}")
-    return path
 
 
 def has_sound(assets: AssetManager, key: str) -> bool:
@@ -165,7 +152,6 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         self.assets = AssetManager()
         self.assets.load_manifest("config/assets.yaml")
-        self.assets.load_manifest(header_style_manifest(ui["header_style"]))
         missing = self.assets.validate()
         if missing:
             raise RuntimeError("Missing assets:\n" + "\n".join(missing))
@@ -696,7 +682,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         else:
             self.new_game()
 
-    # ── audio-settings UI labels (volume → "%NN" text on a panel widget) ──
+    # ── audio-settings UI labels (volume → `format_percent` text on a panel widget) ──
 
     def set_master_label(self, volume: float) -> None:
         self.panel_manager["audio_settings"]["master_volume_entry_text"].set_text(

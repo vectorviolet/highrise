@@ -13,7 +13,7 @@ freely available. The CREDITS page in the game lists the same assets and softwar
 
 | Pack | Author | License | Used for | Files |
 |---|---|---|---|---|
-| [UI Pack](https://kenney.nl/assets/ui-pack) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | buttons, panel backgrounds, sounds | 880 |
+| [UI Pack](https://kenney.nl/assets/ui-pack) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | buttons, panel backgrounds, sounds | 879 |
 | [Hexagon Buildings](https://kenney.nl/assets/hexagon-buildings) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | buildings | 24 |
 | [Titillium Web](https://fonts.google.com/specimen/Titillium+Web) | Accademia di Belle Arti di Urbino | [SIL OFL 1.1](https://openfontlicense.org) | all text: Regular, Bold and Black | 3 |
 | [Game Icons](https://kenney.nl/assets/game-icons) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | info, plus and minus icons | 3 |
@@ -21,8 +21,6 @@ freely available. The CREDITS page in the game lists the same assets and softwar
 | [Cursor Pack](https://kenney.nl/assets/cursor-pack) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | mouse cursor | 1 |
 | [Isometric Landscape](https://kenney.nl/assets/isometric-tiles-landscape) | Kenney | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | ground tile | 1 |
 | [Day Off](https://soundcloud.com/sakuragirl_official/dayoff) | Sakura Girl | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | menu and in-game music | 1 |
-
-Made for this game by its developer: banner.png (in assets/images/gui/header).
 
 CC0 assets need no attribution; they are credited here anyway. The OFL fonts are
 bundled unmodified with their license text. CC BY assets require attribution:

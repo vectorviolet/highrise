@@ -1,3 +1,0 @@
-# Header style a, "plate": the UI Pack's button plate, recolored purple.
-images:
-    header_plate: { folder: gui/header, name: plate }

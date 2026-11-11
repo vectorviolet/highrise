@@ -31,24 +31,18 @@ object_templates:
     color: [251, 254, 255]
     position: [CENTER, CENTER]
   # Button colors (issue #63): red leaves/cancels/destroys, green is the main
-  # "go" action, blue is everything else. tests/test_button_colors.py lists them.
+  # "go" action, blue is everything else. tests/test_menu_polish.py lists them.
   menu_btn_red:
     extends: menu_btn
     asset: red_button
   menu_btn_green:
     extends: menu_btn
     asset: green_button
-  # Page header (issue #56): one plate at one place on every sub-page, with no
-  # hover state. Its image is the `header_plate` asset of the style that
-  # `ui.header_style` in settings.yaml picks (config/header_styles/).
-  page_header:
-    asset: header_plate
-    nine_slice: 20
-    position: [640, 140]
-    size: [640, 70]
-  page_header_text:
+  title_btn:
+    asset: blue_button
+  title_btn_text:
     type: text
-    font: titillium_black
+    font: titillium_bold
     font_size: 30
     color: white
     position: [CENTER, CENTER]
@@ -98,9 +92,21 @@ object_templates:
 panels:
   menu:
     objects:
+      menu_title:
+        position: [740, 320]
+        size: [440, 70]
+        asset: blue_button
+      menu_title_text:
+        parent: menu_title
+        type: text
+        text_key: menu.title
+        font: titillium_black
+        font_size: 30
+        color: white
+        position: [CENTER, CENTER]
       menu_panel:
         extends: menu_panel
-        position: [740, 350]
+        position: [740, 380]
         size: [440, 380]
       menu_buttons:
         parent: menu_panel
@@ -117,8 +123,18 @@ panels:
 
   settings:
     objects:
-      settings_title: { extends: page_header }
-      settings_title_text: { extends: page_header_text, parent: settings_title, text_key: settings.title }
+      settings_title:
+        position: [740, 320]
+        size: [440, 70]
+        asset: blue_button
+      settings_title_text:
+        parent: settings_title
+        type: text
+        text_key: settings.title
+        font: titillium_black
+        font_size: 30
+        color: white
+        position: [CENTER, CENTER]
       settings_panel:
         extends: menu_panel
         position: [740, 380]
@@ -141,8 +157,18 @@ panels:
 
   play:
     objects:
-      play_title: { extends: page_header }
-      play_title_text: { extends: page_header_text, parent: play_title, text_key: play.title }
+      play_title:
+        position: [740, 320]
+        size: [440, 70]
+        asset: blue_button
+      play_title_text:
+        parent: play_title
+        type: text
+        text_key: play.title
+        font: titillium_black
+        font_size: 30
+        color: white
+        position: [CENTER, CENTER]
       play_panel:
         extends: menu_panel
         position: [740, 380]
@@ -285,8 +311,18 @@ panels:
 
   display_settings:
     objects:
-      display_settings_title: { extends: page_header }
-      display_settings_title_text: { extends: page_header_text, parent: display_settings_title, text_key: display_settings.title }
+      display_settings_title:
+        position: [740, 275]
+        size: [440, 70]
+        asset: blue_button
+      display_settings_title_text:
+        parent: display_settings_title
+        type: text
+        text_key: display_settings.title
+        font: titillium_black
+        font_size: 30
+        color: white
+        position: [CENTER, CENTER]
       display_settings_panel:
         position: [740, 335]
         size: [440, 470]
@@ -386,8 +422,18 @@ panels:
 
   audio_settings:
     objects:
-      audio_settings_title: { extends: page_header }
-      audio_settings_title_text: { extends: page_header_text, parent: audio_settings_title, text_key: audio_settings.title }
+      audio_settings_title:
+        position: [740, 260]
+        size: [440, 70]
+        asset: blue_button
+      audio_settings_title_text:
+        parent: audio_settings_title
+        type: text
+        text_key: audio_settings.title
+        font: titillium_black
+        font_size: 30
+        color: white
+        position: [CENTER, CENTER]
       audio_settings_panel:
         position: [740, 320]
         size: [440, 405]
@@ -499,8 +545,18 @@ panels:
 
   game_settings:
     objects:
-      game_settings_title: { extends: page_header }
-      game_settings_title_text: { extends: page_header_text, parent: game_settings_title, text_key: game_settings.title }
+      game_settings_title:
+        position: [740, 300]
+        size: [440, 70]
+        asset: blue_button
+      game_settings_title_text:
+        parent: game_settings_title
+        type: text
+        text_key: game_settings.title
+        font: titillium_black
+        font_size: 30
+        color: white
+        position: [CENTER, CENTER]
       game_settings_panel:
         position: [740, 360]
         size: [440, 400]
@@ -563,8 +619,18 @@ panels:
 
   credits:
     objects:
-      credits_title: { extends: page_header }
-      credits_title_text: { extends: page_header_text, parent: credits_title, text_key: credits.title }
+      credits_title:
+        position: [640, 140]
+        size: [640, 70]
+        asset: blue_button
+      credits_title_text:
+        parent: credits_title
+        type: text
+        text_key: credits.title
+        font: titillium_black
+        font_size: 30
+        color: white
+        position: [CENTER, CENTER]
       credits_panel:
         extends: menu_panel
         position: [640, 200]
@@ -695,8 +761,12 @@ panels:
         position: [CENTER, 1038]
         text: "pygamine (MIT)"
       # Profile links, closing the scroll a little apart from the sections:
-      # platform icon + username, each pair centered as a row (the names start
-      # at x=914, the icons end 14 px before it).
+      # platform icon + username, each pair centered as a row. The engine's layout
+      # blocks only stack from a start point and can't center a row of mixed widths,
+      # so the x positions are computed by hand from the rendered width of
+      # "umutcanekinci" (137 px at 22 pt, the same in every language): the names
+      # start at x=914 and each icon ends 14 px before it, around the page center
+      # 960. tests/test_menu_polish.py checks the pairs stay centered.
       credits_github_icon:
         position: [869, 1120]
         size: [31, 30]

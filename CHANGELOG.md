@@ -12,9 +12,8 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - The CREDITS page opens with the "a VECTORVIOLET game" lockup and closes with GitHub and itch.io
   rows (`umutcanekinci`), using pygamine's bundled logos.
 - **Menu polish** ([devlog](docs/devlog/2026-11-11-menu-polish.md)): buttons follow one color scheme
-  (red leaves, cancels or destroys; green goes; blue is the rest), CONTINUE is above NEW GAME, and
-  sub-page headers are one plate in one place that doesn't look like a button, with two styles to
-  pick from (`ui.header_style`). The main menu has no title.
+  (red leaves, cancels or destroys; green goes; blue is the rest), and CONTINUE is above
+  NEW GAME on the PLAY page.
 - A **CREDITS** page replaces the DEVELOPER page: scrolling sections for the developer, art, UI,
   sound, music, fonts and software, every pack with its license and the Day Off attribution. The
   social link buttons, the photo and their assets are gone

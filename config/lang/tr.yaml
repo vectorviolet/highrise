@@ -12,6 +12,7 @@ common:
   percent: "%{value}"
 
 menu:
+  title: "Highrise"
   play: "OYNA"
   settings: "AYARLAR"
   credits: "YAPIMCILAR"

@@ -43,9 +43,7 @@ def game(monkeypatch, tmp_path: Path) -> Game:
     monkeypatch.setattr(
         pygamine.AssetManager,
         "load_manifest",
-        lambda self, path: real_load(
-            self, trimmed if Path(path) == Path(MANIFEST) else path
-        ),
+        lambda self, path: real_load(self, trimmed),
     )
     return Game()
 
