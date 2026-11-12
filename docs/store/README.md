@@ -108,10 +108,10 @@ Set in the theme editor of the live page ("Edit theme"), as the owner has them n
 | Images | Banner | `docs/design/banner.png`, align Center |
 | Images | Background | none |
 
-Check after changing the theme: the yellow link color on the sky-blue background is low contrast
-(about 1.4 to 1), so links are hard to read. If that shows on the live page, use a darker link color
-such as a deep blue (`#1B4FD8`) or the navy with an underline; keep `#FFE278` for text on dark
-panels only.
+Contrast (WCAG ratio, 4.5 is the readable minimum for body text): the navy text is fine (9.6 on BG,
+10.2 on BG 2), but the yellow link `#FFE278` is not (1.3 on BG, 1.3 on BG 2), so links are hard to
+read. A darker link color fixes it: `#0A3AA8` (a deep blue, 5.7 on BG and 6.0 on BG 2) keeps the
+palette. Keep `#FFE278` for text on dark panels only. Check the result on the live page.
 
 When the game changes in a way players see (controls, features, ages), update
 `description.html` in the same PR and paste it again.
