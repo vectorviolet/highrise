@@ -13,16 +13,16 @@ The release workflow (`.github/workflows/release.yml`) uploads the builds with B
 `windows`, `linux` and `osx` channels; it never touches the page text. The same builds are on the
 [GitHub releases](https://github.com/vectorviolet/highrise/releases/latest).
 
-The tagline, tags and AI disclosure answers below are **proposals**: the owner approves them
-before they go on the page.
+The [Field values](#field-values) table at the end lists what each edit-page field holds or should
+hold; the checklist items below explain the reasoning.
 
 ## Checklist for the edit page
 
 Fields that live outside the description, following itch.io's
 [quality guidelines](https://itch.io/docs/creators/quality-guidelines):
 
-- **Short description or tagline (proposal):** "Merge buildings 2048-style and grow a city through
-  four ages."
+- **Short description or tagline:** "An isometric city-builder where same-level buildings merge
+  2048-style." (as on the page; it does not repeat the title).
 - **Classification:** Games. **Kind of project:** Downloadable. **Release status:**
   Released (1.0.0 is out).
 - **Platforms:** Windows, macOS, Linux (the three the release workflow builds).
@@ -30,10 +30,10 @@ Fields that live outside the description, following itch.io's
 - **Tags:** see [Field values](#field-values) below.
 - **Languages:** English, Turkish (the two the game ships).
 - **Inputs:** Keyboard, Mouse.
-- **AI disclosure (proposal):** answer it on the edit page to match the description's line. Claude Code
+- **AI disclosure:** answer it on the edit page to match the description's line. Claude Code
   was a coding assistant (code). The game icon, the cover, the banner and the key arts were generated
   with OpenAI Codex and post-processed (graphics: those pictures only). The in-game art is Kenney's
-  CC0 packs (not AI) and the music is by Sakura Girl (not AI), so answer no AI for those. Check what itch.io's form asks about code, graphics, sound and text.
+  CC0 packs (not AI) and the music is by Sakura Girl (not AI), so answer no AI for those. The text answer is yes too: the store text and the Turkish strings were drafted with Claude (see Field values).
 - **Screenshots:** at least 4 are wanted, uploaded to the page's gallery in this order (all in
   `docs/screenshots/`, 1920x1080): `02_build_mode.png`, `03_inspection.png` and
   `01_main_menu.png`. That is only three, so add a fourth (for example a later age or a boosted
@@ -42,10 +42,8 @@ Fields that live outside the description, following itch.io's
 - **Images:** `description.html` links the GIF from GitHub so it works when pasted as is. Better:
   upload `docs/preview.gif` through itch.io's editor and swap the image on the page for the
   uploaded one, so it loads fast and doesn't break if the file moves in the repo.
-- **Theme (checklist item, proposal):** colors that match the cover and banner, not plain black on
-  white: the sky blue (about `#54D8E7`) as the page background, the dark navy (about `#1E1D3B`) for
-  text and panels, and the tagline's yellow (`#FFE278`) for links. Set it in the theme editor on the
-  live page and check that the text stays readable.
+- **Theme:** colors that match the cover and banner, not plain black on white; the exact values set
+  in the theme editor are in [Theme settings](#theme-settings) below.
 - **Cover:** `docs/store/cover-itchio.png` (630x500, itch.io's cover size) goes on the edit page.
   `docs/design/cover.png` (1402x1122, the art's native size) is the larger master.
 - **Banner:** `docs/design/banner.png` (1920x600) goes in the page's banner field (itch.io shows it
@@ -68,8 +66,8 @@ owner edits the page by hand; this list is the source to copy from.
 | Pricing | $0 or donate, suggested donation $2.00 (the owner's choice, as set) |
 | Uploads | `highrise-windows.zip`, `highrise-linux.zip`, `highrise-osx.zip`. The release workflow's butler jobs push the unpacked builds to the `windows`, `linux` and `osx` channels and itch.io names the files after the channels (the GitHub release zips are `highrise-windows.zip`, `highrise-linux.zip` and `highrise-macos.zip`). Tick the matching platform on each file's "Executable for" boxes (Windows, Linux, macOS), so itch.io shows the right download buttons and platform filters |
 | Description | paste `docs/store/description.html` in HTML mode |
-| Genre | Strategy |
-| Tags (max 10; itch.io says not to repeat the genre or platforms, so drop "strategy") | City Builder, Isometric, Puzzle, 2048, Casual, Relaxing, Idle, 2D, Singleplayer, Open Source. Prefer itch.io's own suggestions when it offers a near match; don't tag the game's own name |
+| Genre | Strategy, Puzzle (as on the live page) |
+| Tags (max 10; itch.io says not to repeat the genre or platforms; the live page has these 9) | City Builder, Isometric, 2048, Casual, Relaxing, Idle, 2D, Singleplayer, Open Source. Prefer itch.io's own suggestions when it offers a near match; don't tag the game's own name |
 | AI generation disclosure | **Yes.** Kinds: **Graphics** (the icon, cover, banner and key arts, made with OpenAI Codex), **Text & Dialog** (the store text, README and the Turkish strings were drafted with Claude and reviewed by the owner), **Code** (Claude Code as a coding assistant). Not Sounds: the sound effects are Kenney's CC0 packs and the music is by Sakura Girl. |
 | Statement of AI usage (shown publicly) | Built with Claude Code as a coding assistant; game design, art direction, playtesting and review by the developer. The game icon, the cover, the banner and the key arts were generated with OpenAI Codex and post-processed. The in-game buildings, UI and sounds are Kenney's CC0 packs. |
 | App store links | none |
@@ -93,6 +91,27 @@ Linux: run ./highrise/highrise from the unzipped folder.
 
 Your city is saved on this computer; press CONTINUE to resume it.
 ```
+
+## Theme settings
+
+Set in the theme editor of the live page ("Edit theme"), as the owner has them now:
+
+| Group | Setting | Value |
+|---|---|---|
+| Color | BG | `#54D8E7` (the cover's sky blue) |
+| Color | BG 2 | `#f5c399` (the banner's peach horizon) |
+| Color | Text | `#1E1D3B` (the icon's dark navy) |
+| Color | Link | `#FFE278` (the tagline's yellow) |
+| Text | Font | Anonymous Pro |
+| Text | Size | Large |
+| Layout | Screenshots | Auto (sidebar) |
+| Images | Banner | `docs/design/banner.png`, align Center |
+| Images | Background | none |
+
+Contrast (WCAG ratio, 4.5 is the readable minimum for body text): the navy text is fine (9.6 on BG,
+10.2 on BG 2), but the yellow link `#FFE278` is not (1.3 on BG, 1.3 on BG 2), so links are hard to
+read. A darker link color fixes it: `#0A3AA8` (a deep blue, 5.7 on BG and 6.0 on BG 2) keeps the
+palette. Keep `#FFE278` for text on dark panels only. Check the result on the live page.
 
 When the game changes in a way players see (controls, features, ages), update
 `description.html` in the same PR and paste it again.
