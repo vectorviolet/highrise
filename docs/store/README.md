@@ -66,8 +66,8 @@ owner edits the page by hand; this list is the source to copy from.
 | Pricing | $0 or donate, suggested donation $2.00 (the owner's choice, as set) |
 | Uploads | `highrise-windows.zip`, `highrise-linux.zip`, `highrise-osx.zip`. The release workflow's butler jobs push the unpacked builds to the `windows`, `linux` and `osx` channels and itch.io names the files after the channels (the GitHub release zips are `highrise-windows.zip`, `highrise-linux.zip` and `highrise-macos.zip`). Tick the matching platform on each file's "Executable for" boxes (Windows, Linux, macOS), so itch.io shows the right download buttons and platform filters |
 | Description | paste `docs/store/description.html` in HTML mode |
-| Genre | Strategy |
-| Tags (max 10; itch.io says not to repeat the genre or platforms, so drop "strategy") | City Builder, Isometric, Puzzle, 2048, Casual, Relaxing, Idle, 2D, Singleplayer, Open Source. Prefer itch.io's own suggestions when it offers a near match; don't tag the game's own name |
+| Genre | Strategy, Puzzle (as on the live page) |
+| Tags (max 10; itch.io says not to repeat the genre or platforms; the live page has these 9) | City Builder, Isometric, 2048, Casual, Relaxing, Idle, 2D, Singleplayer, Open Source. Prefer itch.io's own suggestions when it offers a near match; don't tag the game's own name |
 | AI generation disclosure | **Yes.** Kinds: **Graphics** (the icon, cover, banner and key arts, made with OpenAI Codex), **Text & Dialog** (the store text, README and the Turkish strings were drafted with Claude and reviewed by the owner), **Code** (Claude Code as a coding assistant). Not Sounds: the sound effects are Kenney's CC0 packs and the music is by Sakura Girl. |
 | Statement of AI usage (shown publicly) | Built with Claude Code as a coding assistant; game design, art direction, playtesting and review by the developer. The game icon, the cover, the banner and the key arts were generated with OpenAI Codex and post-processed. The in-game buildings, UI and sounds are Kenney's CC0 packs. |
 | App store links | none |
