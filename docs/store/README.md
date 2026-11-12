@@ -51,6 +51,9 @@ Fields that live outside the description, following itch.io's
   is the preview. Keep the key content in the central 80% of the height, and check it in the theme
   editor on the live page.
 - **Icon:** `docs/design/icon.png` (1024x1024).
+- **GitHub social preview:** `docs/design/social-preview.png` (1280x640, GitHub's 2:1), built from the
+  banner by `scripts/make_social_preview.py`. Upload it by hand in the repository's Settings > Social
+  preview (GitHub has no API for it); remake it when the banner changes.
 - **Trailer:** none yet (the GIF only).
 
 ## Field values
