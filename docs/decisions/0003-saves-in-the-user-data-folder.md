@@ -1,9 +1,9 @@
 # 0003. Saves in the user-data folder (packaged build only)
-<!-- index | refs: #57 -->
+<!-- index | refs: #57, PR #99 -->
 
 - **Status:** Accepted (owner, 2026-11-17)
 - **Date:** 2026-11-18
-- **Issues / PRs:** [#57](https://github.com/vectorviolet/highrise/issues/57)
+- **Issues / PRs:** [#57](https://github.com/vectorviolet/highrise/issues/57), [PR #99](https://github.com/vectorviolet/highrise/pull/99)
 
 ## Context
 
