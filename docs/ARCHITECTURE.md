@@ -34,8 +34,9 @@ other games that use it.
 
 `__main__.py` creates `Game()` and calls `run()`. `Game` (`src/app/game.py`) extends
 `pygamine.Application` plus two mixins: `GameEventsMixin` (`game_events.py`: routing mouse and key
-events to the panels and the board) and `GamePersistenceMixin` (`game_persistence.py`: the SQLite
-save, settings and loading). `Game` itself builds the panels, owns the buildings, tasks, audio and
+events to the panels and the board) and `WebPersistenceMixin` (`web_persistence.py`: browser
+saves and settings, delegating to `GamePersistenceMixin` in `game_persistence.py` for desktop-only
+SQLite save, settings and loading). `Game` itself builds the panels, owns the buildings, tasks, audio and
 effects, and ties them together; the pieces below don't import it, they get callbacks.
 
 ## Config-driven UI
@@ -101,6 +102,25 @@ master volume scales both. Build (one sound per age), NEXT AGE and sell have the
 chosen from `action_sounds` in `config/settings.yaml` by `src/app/action_sounds.py`. The background
 track is optional: without the `bg` entry in `config/assets.yaml` the game plays no music and hides
 the music volume row.
+
+## Browser runtime
+
+`web/main.py` starts `Game.run_async()`, which prepares the same board, settings
+and menus as desktop before entering the yielding engine loop. Browser-specific
+window operations live in `src/util/web.py`. The browser hides resolution and
+intro controls, uses a fullscreen toggle and opens a Thanks for playing page on Exit.
+
+`WebPersistenceMixin` delegates to the existing SQLite mixin on desktop and uses
+Highrise-specific JSON stores in localStorage, through the engine's public `SaveStore`,
+in the browser. A restore reads the save once and holds every value to a valid one
+before the board changes (the building loop is shared with desktop); a save that cannot
+be read stays stored until an explicit New Game. The board saves on ESC, shortly
+after each build, sell, move, merge, NEXT AGE or expand, and every 10 s while it is
+open if money or the board changed, since a closed tab gives the game no QUIT. One
+browser notice says when nothing survives a reload (blocked storage, or a refused write). SQLite is never imported on the browser
+path. The browser presents 60 frames a second, so the motion steps (buildings, clouds)
+run at the desktop rate inside the frame (a desktop update steps the buildings twice, and
+the browser matches that). See [ADR 0004](decisions/0004-web-build.md).
 
 ## Tests and scripts
 

@@ -19,6 +19,7 @@ class FakeButton:
         self.clicked = clicked
         self.focused = focused
         self.base_state = None
+        self.active = True
 
     def is_clicked(self, event, mouse_pos) -> bool:
         return self.clicked
@@ -202,10 +203,14 @@ class FakeGame(GameEventsMixin):
         self.buildings = FakeBuildings(self)
         self.player = SimpleNamespace(earn=lambda a: self.calls.append(("earn", a)))
         self.calls: list = []
+        self.autosaves = 0
         self.skip_intro = False
 
     def show_gain(self, building, amount):
         self.calls.append(("show_gain", building, amount))
+
+    def request_autosave(self):
+        self.autosaves += 1
 
     def cycle_language(self, delta):
         self.calls.append(("cycle_language", delta))
@@ -542,6 +547,7 @@ def test_game_events_info_panel_open_sell_button_sells_the_building():
     assert game.audio.played == [game.action_sounds.sell]
     assert game.info_panel.close_calls == 1
     assert "update_button_texts" in game.calls
+    assert game.autosaves == 1  # the browser saves the sale a moment later
 
 
 def test_game_events_info_panel_open_close_button_just_closes_it():
@@ -1083,3 +1089,17 @@ def test_only_a_mouse_up_switches_the_panel():
     game.handle_game_events(key_up(pygame.K_RIGHT))
 
     assert game.info_panel.building is shown
+
+
+def test_an_inactive_button_is_never_clicked_or_activated():
+    game = FakeGame()
+    button = game.panel_manager["play"]["continue_button"]
+    button.clicked = True
+    button.focused = True
+    button.active = False
+
+    game.handle_play_events(click_up())
+    game.handle_play_events(pygame.event.Event(pygame.KEYUP, key=pygame.K_RETURN))
+
+    assert ("open_panel", "game") not in game.calls
+    assert game.audio.played == []

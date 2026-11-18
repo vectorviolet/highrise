@@ -16,6 +16,8 @@ Time is passed in (milliseconds), so the logic needs no real waiting.
 
 from dataclasses import dataclass
 
+from pygamine import ALPHA_BLIT
+
 import pygame
 
 
@@ -214,4 +216,5 @@ class Odometer:
                 cell.centerx - glyph.get_width() // 2,
                 cell.top + (cell.height - glyph.get_height()) // 2 + dy,
             ),
+            special_flags=ALPHA_BLIT,
         )

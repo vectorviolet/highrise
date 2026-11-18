@@ -834,3 +834,37 @@ panels:
       credits_back_button_text:
         extends: go_back_btn_text
         parent: credits_back_button
+
+  thanks:
+    objects:
+      thanks_panel:
+        extends: menu_panel
+        position: [640, 340]
+        size: [640, 340]
+      thanks_title:
+        extends: settings_text
+        parent: thanks_panel
+        position: [CENTER, 30]
+        text_key: thanks.title
+      thanks_subtitle:
+        extends: credits_entry
+        parent: thanks_panel
+        position: [CENTER, 85]
+        text_key: thanks.subtitle
+      thanks_link:
+        extends: menu_btn_green
+        parent: thanks_panel
+        position: [CENTER, 145]
+        size: [540, 60]
+      thanks_link_text:
+        extends: menu_btn_text
+        parent: thanks_link
+        text_key: thanks.rate
+        font_size: 26
+      thanks_back:
+        extends: go_back_btn
+        parent: thanks_panel
+        position: [CENTER, 235]
+      thanks_back_text:
+        extends: go_back_btn_text
+        parent: thanks_back

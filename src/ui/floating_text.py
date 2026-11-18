@@ -11,6 +11,8 @@ Every payout, sale and spend gets its own text.
 
 from dataclasses import dataclass
 
+from pygamine import ALPHA_BLIT
+
 import pygame
 from pygame.math import Vector2
 
@@ -136,7 +138,7 @@ class FloatingTexts:
             if text.over_world:
                 # A gain over the world is kept on screen; a spend may fall off the bottom.
                 rect.clamp_ip(surface.get_rect())
-            surface.blit(image, rect)
+            surface.blit(image, rect, special_flags=ALPHA_BLIT)
 
     def _ink_top(self, text: FloatingText) -> int:
         """The empty rows above the ink of `text`'s image."""
