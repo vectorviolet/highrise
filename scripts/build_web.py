@@ -1,4 +1,4 @@
-"""Build the browser version of the game with pygbag (issue #97, ADR 0003).
+"""Build the browser version of the game with pygbag (issue #97, ADR 0004).
 
     uv run python scripts/build_web.py              # stage, build, write build/web/
     uv run python scripts/build_web.py --stage-only # only stage (no pygbag, no internet)

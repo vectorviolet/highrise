@@ -87,12 +87,12 @@ The info panel (`src/ui/info_panel.py`) shows the selected building at the windo
 
 ## Persistence
 
-Saves are a SQLite database (`databases/database.db`, through pygamine's `Database`) with four
+Saves are a SQLite database (`database.db`, through pygamine's `Database`) with four
 tables: `game` (age, map size, money, volumes), `tasks`, `buildings` (level, position, door side,
 booster flag, held-back income) and `settings` (language, skip intro, UI scale, master volume). The
 tables are created on first run and older ones are migrated. All of it is in
 `GamePersistenceMixin`; leaving the board for the menu saves, and saving first finishes pending
-merges. [ADR 0002](decisions/0002-settings-table.md) explains the separate settings table.
+merges. [ADR 0002](decisions/0002-settings-table.md) explains the separate settings table. The file is in `databases/` next to the project when run from source and in the per-user data folder (`%APPDATA%\VectorViolet\highrise\databases` on Windows) in the packaged build ([ADR 0003](decisions/0003-saves-in-the-user-data-folder.md)).
 
 ## Audio
 
@@ -112,7 +112,7 @@ intro controls, uses a fullscreen toggle and opens a Thanks for playing page on 
 `WebPersistenceMixin` delegates to the existing SQLite mixin on desktop and uses
 Highrise-specific JSON SaveStores in localStorage in the browser. It never imports
 SQLite on the browser path. Both stores preserve pending merge results, building
-variants and income fractions, task state and settings. See [ADR 0003](decisions/0003-web-build.md).
+variants and income fractions, task state and settings. See [ADR 0004](decisions/0004-web-build.md).
 
 ## Tests and scripts
 

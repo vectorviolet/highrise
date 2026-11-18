@@ -1,4 +1,4 @@
-# 0003. Browser build using Chokepoint's pygbag recipe
+# 0004. Browser build using Chokepoint's pygbag recipe
 <!-- index | refs: #97 -->
 
 - **Status:** Implemented for review

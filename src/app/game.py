@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING
 from collections.abc import Callable
 from pathlib import Path
 from random import choice
@@ -25,6 +26,7 @@ from pygamine import ALPHA_BLIT
 from pygamine import Application
 from pygamine import clamp01
 from pygamine import AssetManager
+from pygamine import packaged_data_dir
 from pygamine import PanelLoaderExt
 from pygamine import PanelManager
 from pygamine import SplashScreen, standard_splash_media
@@ -49,6 +51,9 @@ from ui.task_list import TaskRow, render_task_list
 from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES, step_ui_scale
 from util.paths import LANG_FOLDER, resource_path
 from util import web
+
+if TYPE_CHECKING:
+    from pygamine import Database
 
 # The window and taskbar icon: the plate-less tower, crisp at the small sizes the OS shows.
 WINDOW_ICON = resource_path("assets", "images", "icon", "icon_64.png")
@@ -166,6 +171,18 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
     _web_elapsed_ms = 0.0
     _web_fullscreen: bool | None = None
 
+    @staticmethod
+    def _make_database() -> "Database":
+        """The save database: in the packaged build's user-data folder, or Database's own
+        default (cwd-relative `databases/`) when run from source. A method of its own
+        because `__init__` is at ruff's statement limit."""
+        from pygamine import Database
+
+        directory = packaged_data_dir("highrise", "databases")
+        if directory is None:
+            return Database("database")
+        return Database("database", directory=directory)
+
     def __init__(self) -> None:
         self.settings = yaml.safe_load(Path("config/settings.yaml").read_text())
         localization.load(LANG_FOLDER)
@@ -277,9 +294,7 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
     def _init_desktop(self) -> None:
         if not web.is_web():
             # SQLite and the threaded splash are never loaded by the browser.
-            from pygamine import Database
-
-            self.database = Database("database")
+            self.database = self._make_database()
             self.splash = SplashScreen(
                 standard_splash_media(self.audio), skip_completely=True
             )

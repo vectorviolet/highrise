@@ -72,7 +72,7 @@ imports for the current module paths).
 - `AssetManager` + `ImagePath`/`FontPath`/`SoundPath` — asset loading/caching
 - `PanelManager` + `PanelLoaderExt` — screen/panel management driven by `config/panels.yaml`
 - `GameObject` / component system (`Transform`, `Rigidbody2D`, `SpriteRenderer2D`) — Unity-style entity model
-- `Database` — SQLite wrapper (saves to `databases/database.db`)
+- `Database` — SQLite wrapper (cwd-relative `databases/` by default; the packaged build passes the user-data folder, see Persistence)
 - `MouseInteractive` mixin — mouse input for game objects
 
 **Changes to `src/pygamine/` affect all games that depend on it.**
@@ -206,7 +206,7 @@ World texts are hidden while the info panel is open. A building's
 
 ### Persistence
 
-SQLite database at `databases/database.db`. Four tables: `game` (age, map size, money, volumes), `tasks` (done tasks of the current age, BOOST unlocked; one row), `buildings` (level, row, column, door side, booster flag, held-back income fraction; old tables are migrated, old rows are plain buildings with no fraction) and `settings` (language, skip intro, UI scale, master volume; the first three are saved the moment they change on the Game and Display settings pages, the master volume with the AUDIO page's SAVE; all kept by New Game). The database auto-initializes on first run. Save/load logic lives entirely in `GamePersistenceMixin`.
+SQLite database `database.db`: in `databases/` (cwd-relative) when run from source, in `user_data_dir("highrise") / "databases"` (`%APPDATA%\VectorViolet\highrise\databases` on Windows) in the packaged build (pygamine's `packaged_data_dir("highrise", "databases")`, `Game._make_database`; ADR 0003). The installer (`packaging/highrise.iss`, built by the release workflow's `installer` job) keeps its `[Languages]` list equal to `config/lang/` (`tests/test_installer.py`). Four tables: `game` (age, map size, money, volumes), `tasks` (done tasks of the current age, BOOST unlocked; one row), `buildings` (level, row, column, door side, booster flag, held-back income fraction; old tables are migrated, old rows are plain buildings with no fraction) and `settings` (language, skip intro, UI scale, master volume; the first three are saved the moment they change on the Game and Display settings pages, the master volume with the AUDIO page's SAVE; all kept by New Game). The database auto-initializes on first run. Save/load logic lives entirely in `GamePersistenceMixin`.
 
 ### Audio
 
@@ -214,4 +214,4 @@ Channel 0 plays the looping music. Each SFX plays on a free channel from pygamin
 
 Build (one sound per age), NEXT AGE and sell have their own sounds, named in `action_sounds` in `config/settings.yaml` and looked up by `app/action_sounds.py` (`Game.action_sounds`); they play through `play_sfx` like every other SFX. A sale also starts the dust effect of `ui/dust_effect.py` (`Game.sell_effect`, drawn as a world object under the HUD, numbers in `sell_effect` in `config/settings.yaml`).
 
-Background music is optional: the game plays the `bg` sound from `config/assets.yaml` if it's there. Without it, the game plays no music and hides the music volume row on the AUDIO settings screen (`MUSIC_KEY` / `MUSIC_VOLUME_OBJECTS` in `app/game.py`). The track is Sakura Girl - Day Off (CC BY 3.0, `assets/sounds/bg.mp3`); its attribution ("Music : Sakura Girl - Day Off", youtu.be/vAv9KtrU_5c) lives in CREDITS.md and README. Any other track needs a license that allows bundling it in the game.
+Background music is optional: the game plays the `bg` sound from `config/assets.yaml` if it's there. Without it, the game plays no music and hides the music volume row on the AUDIO settings screen (`MUSIC_KEY` / `MUSIC_VOLUME_OBJECTS` in `app/game.py`). The track is Sakura Girl - Day Off (CC BY 3.0, `assets/sounds/bg.ogg`); its attribution ("Music : Sakura Girl - Day Off", youtu.be/vAv9KtrU_5c) lives in CREDITS.md and README. Any other track needs a license that allows bundling it in the game.

@@ -148,6 +148,57 @@ jobs:
           if-no-files-found: error
           retention-days: 7  # the GitHub Release keeps the zip; the artifact only hands it to publish-web and attach-web
 
+  # The Windows installer is a side build: it needs only the Windows zip (it runs even if the
+  # macOS or Linux leg failed, and the artifact download fails it cleanly if that zip is missing),
+  # and no release or itch.io job needs it, so an installer failure never blocks them. Its artifact is not named
+  # highrise-*, so nothing that globs the zips picks it up.
+  installer:
+    name: Build the Windows installer (Inno Setup)
+    needs: build
+    if: ${{ !cancelled() }}  # codespell:ignore cancelled
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download the Windows build
+        uses: actions/download-artifact@v8
+        with:
+          name: highrise-windows.zip
+          path: artifacts
+
+      - name: Unpack it to dist/ (what the installer script packs)
+        shell: pwsh
+        run: Expand-Archive artifacts/highrise-windows.zip -DestinationPath dist
+
+      # Inno Setup is preinstalled on the Windows runners; install it only if it is missing.
+      # The version is the tag's (without the "v") on a release, pyproject.toml's on a manual run.
+      - name: Compile the installer
+        shell: pwsh
+        run: |
+          $candidates = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe", "C:\Program Files\Inno Setup 6\ISCC.exe"
+          $iscc = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $iscc) {
+            choco install innosetup --version 6.7.1 -y --no-progress
+            $iscc = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          }
+          if (-not $iscc) { throw "ISCC.exe not found (looked in: $($candidates -join ', '))" }
+          if ($env:GITHUB_REF -like 'refs/tags/v*') {
+            $version = $env:GITHUB_REF_NAME.Substring(1)
+          } else {
+            $version = (Select-String -Path pyproject.toml -Pattern '^version = "(.+)"').Matches[0].Groups[1].Value
+          }
+          & $iscc "/DAppVersion=$version" packaging/highrise.iss
+          if ($LASTEXITCODE -ne 0) { throw "ISCC failed" }
+
+      - name: Upload the installer
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-installer
+          path: installer-out/highrise-windows-setup.exe
+          if-no-files-found: error
+          retention-days: 7  # the GitHub Release keeps the installer; the artifact only hands it to attach-installer
+
   release:
     name: Publish GitHub Release
     needs: build
@@ -271,4 +322,24 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: artifacts/highrise-web.zip
+          fail_on_unmatched_files: true
+
+  # Runs only after `release` succeeded, so it never creates a release on its own (the two
+  # never race), and needs the installer, never the other desktop jobs.
+  attach-installer:
+    name: Attach the installer to the GitHub Release
+    needs: [installer, release]
+    runs-on: ubuntu-latest
+    if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/') && needs.installer.result == 'success' && needs.release.result == 'success' }}  # codespell:ignore cancelled
+    steps:
+      - name: Download the installer artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: windows-installer
+          path: artifacts
+
+      - name: Attach the installer to the GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: artifacts/highrise-windows-setup.exe
           fail_on_unmatched_files: true

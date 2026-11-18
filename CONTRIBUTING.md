@@ -103,13 +103,13 @@ uv sync --group build
 uv run pyinstaller highrise.spec --noconfirm
 ```
 
-The result lands in `dist/highrise/` (`dist/Highrise.app` on macOS).
+The result lands in `dist/highrise/` (`dist/Highrise.app` on macOS). With [Inno Setup](https://jrsoftware.org/isinfo.php) 6 installed, `iscc /DAppVersion=1.0.0 packaging\highrise.iss` turns the Windows `dist\highrise` into `installer-out\highrise-windows-setup.exe`.
 
 ### Cutting a release
 
 A release goes through a "Release x.y.z" PR (version and changelog), then the owner tags the merged
 commit `vx.y.z`. The tag triggers [`.github/workflows/release.yml`](.github/workflows/release.yml),
-which builds each OS, attaches the zips to a GitHub release and pushes each build to its
+which builds each OS, attaches the zips to a GitHub release (with the Windows installer, `highrise-windows-setup.exe`, built from `packaging/highrise.iss` with Inno Setup in its own `installer` job; the itch.io channels get the zips only) and pushes each build to its
 [itch.io](https://umutcanekinci.itch.io/highrise) channel with
 [Butler](https://itch.io/docs/butler/). **Run workflow** builds without publishing.
 

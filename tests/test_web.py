@@ -192,7 +192,7 @@ def test_leaving_board_mid_merge_saves_finished_result_for_reload(browser):
 def test_thanks_clears_old_frame_pixels(browser):
     game = boot()
     game.open_panel("exit")
-    game.cloud_animation.clouds.clear()
+    game.cloud_animation.clear()
     game.window.fill("magenta")
     game.draw()
     assert game.window.get_at((0, 0)) == pygame.Color("yellow")
