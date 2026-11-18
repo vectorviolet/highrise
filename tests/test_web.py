@@ -309,6 +309,16 @@ def test_invalid_reload_leaves_existing_world_untouched(browser):
     assert list(game.buildings) == [building]
 
 
+def test_unreadable_save_shows_recovery_without_impossible_retry(browser):
+    game = boot()
+    browser[0].setItem(game.web_save.key, "{broken")
+    restored = boot()
+    assert restored.web_save_invalid
+    message = web.show_notice.call_args.args[0]
+    assert "could not be loaded" in message
+    assert "return to the game" not in message
+
+
 def test_bad_task_indices_and_audio_settings_do_not_break_startup(browser):
     game = boot()
     game.web_settings.save(

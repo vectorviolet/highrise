@@ -62,7 +62,9 @@ class WebPersistenceMixin(GamePersistenceMixin):
             (self.web_save, "progress"),
             (self.web_settings, "settings"),
         ):
-            if store.outcome != WriteOutcome.DURABLE:
+            if store.outcome != WriteOutcome.DURABLE and not (
+                kind == "progress" and self.web_save_invalid
+            ):
                 messages.append(tr(f"storage.{kind}_{store.outcome.value}"))
         web.show_notice("\n".join(messages))
 
