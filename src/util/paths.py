@@ -37,6 +37,7 @@ def packaged_databases_dir() -> Path | None:
     ``None`` from source: there ``Database`` keeps its cwd-relative ``databases/``
     default (ADR 0003), which keeps each worktree's saves apart.
     """
-    if not getattr(sys, "frozen", False):
+    # The same test as resource_root(), so assets and saves can't disagree.
+    if getattr(sys, "_MEIPASS", None) is None:
         return None
     return user_data_dir("highrise") / "databases"

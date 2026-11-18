@@ -16,7 +16,7 @@ every worktree has its own `databases/`, and the tests redirect `Database`'s def
 
 ## Decision
 
-- **The packaged build** (`sys.frozen`, PyInstaller) keeps its database in
+- **The packaged build** (`sys._MEIPASS` is set, as `resource_root()` tests; PyInstaller) keeps its database in
   `user_data_dir("highrise") / "databases"` (pygamine): `%APPDATA%\VectorViolet\highrise\databases`,
   `~/Library/Application Support/VectorViolet/highrise/databases`, or `$XDG_DATA_HOME` (default
   `~/.local/share`)`/VectorViolet/highrise/databases`.

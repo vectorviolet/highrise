@@ -30,3 +30,13 @@ def test_installer_has_a_language_dialog_and_a_folder_page():
 def test_installer_packs_the_pyinstaller_onedir_output():
     assert r'Source: "..\dist\highrise\*"' in ISS
     assert "recursesubdirs" in ISS
+
+
+def test_installer_only_wipes_internal_in_its_own_install():
+    """A folder the player picked that holds another program's _internal is never wiped."""
+    assert re.search(
+        r'^Type: filesandordirs; Name: "\{app\}\_internal"; Check: IsOurInstall$',
+        ISS,
+        re.M,
+    )
+    assert "function IsOurInstall: Boolean;" in ISS

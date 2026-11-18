@@ -73,12 +73,14 @@ jobs:
           if-no-files-found: error
           retention-days: 7  # the GitHub Release keeps the builds; artifacts only hand them to the release job
 
-  # The Windows installer is a side build: it needs only the Windows zip, and no release or
-  # itch.io job needs it, so an installer failure never blocks them. Its artifact is not named
+  # The Windows installer is a side build: it needs only the Windows zip (it runs even if the
+  # macOS or Linux leg failed, and the artifact download fails it cleanly if that zip is missing),
+  # and no release or itch.io job needs it, so an installer failure never blocks them. Its artifact is not named
   # highrise-*, so nothing that globs the zips picks it up.
   installer:
     name: Build the Windows installer (Inno Setup)
     needs: build
+    if: ${{ !cancelled() }}  # codespell:ignore cancelled
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -192,13 +194,13 @@ jobs:
           VERSION: ${{ github.ref_name }}
           PACKAGE: itch/osx
 
-  # Runs after `release` finishes (passed or failed) so the two never race to create the
-  # release, and needs only the installer, never the other desktop jobs.
+  # Runs only after `release` succeeded, so it never creates a release on its own (the two
+  # never race), and needs the installer, never the other desktop jobs.
   attach-installer:
     name: Attach the installer to the GitHub Release
     needs: [installer, release]
     runs-on: ubuntu-latest
-    if: ${{ always() && startsWith(github.ref, 'refs/tags/') && needs.installer.result == 'success' }}
+    if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/') && needs.installer.result == 'success' && needs.release.result == 'success' }}  # codespell:ignore cancelled
     steps:
       - name: Download the installer artifact
         uses: actions/download-artifact@v8

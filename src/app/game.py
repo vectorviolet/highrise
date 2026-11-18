@@ -163,13 +163,14 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     _task_list_surface: pygame.Surface | None = None
 
     @staticmethod
-    def _make_database(name: str) -> Database:
-        """A Database in the packaged build's user-data folder, or Database's own
-        default (cwd-relative `databases/`) when run from source."""
+    def _make_database() -> Database:
+        """The save database: in the packaged build's user-data folder, or Database's own
+        default (cwd-relative `databases/`) when run from source. A method of its own
+        because `__init__` is at ruff's statement limit."""
         directory = packaged_databases_dir()
-        return (
-            Database(name) if directory is None else Database(name, directory=directory)
-        )
+        if directory is None:
+            return Database("database")
+        return Database("database", directory=directory)
 
     def __init__(self) -> None:
         self.settings = yaml.safe_load(Path("config/settings.yaml").read_text())
@@ -208,7 +209,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.tilemap: Tilemap | None = None
         self.window_transform = Transform((0, 0), self.size)
         self.panel_manager = PanelManager(ui["background_colors"])
-        self.database = self._make_database("database")
+        self.database = self._make_database()
 
         self.buildings = Buildings(
             on_merge=self._on_buildings_merged,

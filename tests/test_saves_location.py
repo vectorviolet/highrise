@@ -2,6 +2,7 @@
 cwd-relative `databases/` from source (ADR 0003)."""
 
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -12,12 +13,12 @@ from util.paths import packaged_databases_dir
 
 
 def test_from_source_there_is_no_packaged_folder(monkeypatch):
-    monkeypatch.delattr(sys, "frozen", raising=False)
+    monkeypatch.delattr(sys, "_MEIPASS", raising=False)
     assert packaged_databases_dir() is None
 
 
 def test_frozen_database_goes_to_the_user_data_folder(monkeypatch):
-    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "_MEIPASS", str(Path.cwd()), raising=False)
     assert packaged_databases_dir() == user_data_dir("highrise") / "databases"
     assert packaged_databases_dir().parts[-3:] == (
         "VectorViolet",
@@ -37,7 +38,7 @@ def test_frozen_game_stores_in_the_user_data_folder(monkeypatch, tmp_path, quiet
         monkeypatch.setenv(variable, str(tmp_path / "appdata"))
     for variable in ("HOME", "USERPROFILE"):
         monkeypatch.setenv(variable, str(tmp_path / "home"))
-    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "_MEIPASS", str(Path.cwd()), raising=False)
     game = Game()
     expected = packaged_databases_dir()
     assert expected is not None
@@ -48,6 +49,6 @@ def test_frozen_game_stores_in_the_user_data_folder(monkeypatch, tmp_path, quiet
 
 
 def test_source_game_keeps_the_default_folder(monkeypatch, tmp_path, quiet_game):
-    monkeypatch.delattr(sys, "frozen", raising=False)
+    monkeypatch.delattr(sys, "_MEIPASS", raising=False)
     game = Game()  # conftest's saves_in_tmp moved Database's default into tmp_path
     assert game.database.directory == tmp_path / "databases"
