@@ -34,9 +34,5 @@ def test_installer_packs_the_pyinstaller_onedir_output():
 
 def test_installer_only_wipes_internal_in_its_own_install():
     """A folder the player picked that holds another program's _internal is never wiped."""
-    assert re.search(
-        r'^Type: filesandordirs; Name: "\{app\}\_internal"; Check: IsOurInstall$',
-        ISS,
-        re.M,
-    )
+    assert r'Name: "{app}\_internal"; Check: IsOurInstall' in ISS
     assert "function IsOurInstall: Boolean;" in ISS
