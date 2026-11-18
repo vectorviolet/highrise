@@ -28,6 +28,9 @@ def headless_run(monkeypatch) -> None:
 
 def started_game() -> Game:
     """A real Game on its first page."""
+    # A standalone run starts with conftest's 1x1 surface; use a real canvas
+    # before the dummy driver reports its desktop size to Application.
+    pygame.display.set_mode((1920, 1080))
     game = Game()
     game.set_windowed()
     game.set_resolution((1920, 1080))
@@ -53,7 +56,7 @@ def _button_assets() -> dict[str, str]:
 
     def visit(panel: str, objects: dict) -> None:
         for name, obj in objects.items():
-            if name.endswith("_button"):
+            if name.endswith("_button") or name in ("thanks_link", "thanks_back"):
                 found[f"{panel}.{name}"] = obj.get("asset") or _template_asset(
                     templates, obj["extends"]
                 )
@@ -67,6 +70,7 @@ def _button_assets() -> dict[str, str]:
 EXPECTED_BUTTON_COLORS = {
     # red: leave, cancel, destroy
     "menu.exit_button": "red_button",
+    "thanks.thanks_back": "red_button",
     "settings.settings_back_button": "red_button",
     "play.play_back_button": "red_button",
     "display_settings.display_back_button": "red_button",
@@ -76,6 +80,7 @@ EXPECTED_BUTTON_COLORS = {
     "game.sell_button": "red_button",
     # green: the main "go" action
     "menu.play_button": "green_button",
+    "thanks.thanks_link": "green_button",
     "play.continue_button": "green_button",
     "audio_settings.save_button": "green_button",
     "game.build_button": "green_button",

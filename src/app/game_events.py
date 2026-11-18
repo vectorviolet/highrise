@@ -73,7 +73,9 @@ class GameEventsMixin:
         panel = self.panel_manager["play"]
         if self._activate(panel["new_game_button"], event):
             self.new_game()
-        elif self._activate(panel["continue_button"], event):
+        elif (not web.is_web() or panel["continue_button"].active) and self._activate(
+            panel["continue_button"], event
+        ):
             self.open_panel("game")
         elif self._activate(panel["play_back_button"], event):
             self.open_panel("menu")

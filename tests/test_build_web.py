@@ -2,8 +2,15 @@
 pygbag itself is never run here (it needs internet)."""
 
 import importlib.util
+import ast
+import asyncio
+import io
 import re
+import subprocess
+import sys
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import Mock
 
 import pytest
 
@@ -142,7 +149,7 @@ def test_pygbag_is_pinned_and_run_with_can_close(build_web, monkeypatch, tmp_pat
     class Done:
         returncode = 0
 
-    def fake_run(command):
+    def fake_run(command, *, timeout):
         calls.append(command)
         index = tmp_path / "build" / "web" / "index.html"
         index.parent.mkdir(parents=True)
@@ -157,6 +164,7 @@ def test_pygbag_is_pinned_and_run_with_can_close(build_web, monkeypatch, tmp_pat
     assert command[command.index("--can_close") + 1] == "1"
     assert command[-2:] == ["--build", str(tmp_path)]
     assert command[command.index("--template") + 1] == str(build_web.TEMPLATE)
+    assert command[command.index("--icon") + 1] == str(build_web.ICON)
 
 
 def test_pygbag_failure_is_retried_once_then_reported(build_web, monkeypatch, tmp_path):
@@ -167,7 +175,9 @@ def test_pygbag_failure_is_retried_once_then_reported(build_web, monkeypatch, tm
 
     monkeypatch.setattr(build_web.shutil, "which", lambda name: "uvx")
     monkeypatch.setattr(
-        build_web.subprocess, "run", lambda command: attempts.append(1) or Failed()
+        build_web.subprocess,
+        "run",
+        lambda command, **kwargs: attempts.append(1) or Failed(),
     )
     with pytest.raises(SystemExit, match="internet"):
         build_web.run_pygbag(tmp_path)
@@ -181,7 +191,7 @@ def test_pygbag_success_on_the_retry_is_accepted(build_web, monkeypatch, tmp_pat
         def __init__(self, code):
             self.returncode = code
 
-    def fake_run(command):
+    def fake_run(command, *, timeout):
         code = results.pop(0)
         if code == 0:
             index = tmp_path / "build" / "web" / "index.html"
@@ -285,3 +295,110 @@ def test_template_cdn_version_matches_the_pinned_pygbag(build_web):
     )
     assert versions == {build_web.PYGBAG_VERSION}
     assert f"Pygbag Version : {build_web.PYGBAG_VERSION}" in TEMPLATE_TEXT
+
+
+def test_infobox_actual_declarations_have_7_to_1_contrast():
+    rules = re.search(r"#infobox\s*\{([^}]+)\}", TEMPLATE_TEXT)[1]
+    colors = dict(
+        re.findall(r"(?:^|;)\s*(color|background)\s*:\s*(#[0-9a-f]{6})", rules)
+    )
+    assert _contrast(colors["color"], colors["background"]) >= 7
+
+
+def test_pygbag_timeout_is_bounded_and_retried(build_web, monkeypatch, tmp_path):
+    attempts = []
+
+    def timeout_run(command, *, timeout):
+        attempts.append(timeout)
+        raise subprocess.TimeoutExpired(command, timeout)
+
+    monkeypatch.setattr(build_web.shutil, "which", lambda name: "uvx")
+    monkeypatch.setattr(build_web.subprocess, "run", timeout_run)
+    with pytest.raises(SystemExit, match="failed twice"):
+        build_web.run_pygbag(tmp_path)
+    assert attempts == [build_web.BUILD_TIMEOUT_SECONDS] * 2
+
+
+def test_failed_logo_copy_preserves_previous_bundle(build_web, monkeypatch, tmp_path):
+    stage = tmp_path / "stage"
+    (stage / "build" / "web").mkdir(parents=True)
+    (stage / "build" / "web" / "index.html").write_text("new")
+    out = tmp_path / "web"
+    out.mkdir()
+    (out / "index.html").write_text("old")
+    monkeypatch.setattr(build_web, "stage", lambda: stage)
+    monkeypatch.setattr(build_web, "run_pygbag", lambda stage: None)
+    monkeypatch.setattr(build_web, "OUT_DIR", out)
+    monkeypatch.setattr(build_web, "LOGO", tmp_path / "missing.png")
+    with pytest.raises(FileNotFoundError):
+        build_web.build()
+    assert (out / "index.html").read_text() == "old"
+
+
+def test_failed_promotion_restores_previous_bundle(build_web, monkeypatch, tmp_path):
+    out, replacement = tmp_path / "web", tmp_path / "replacement"
+    out.mkdir()
+    replacement.mkdir()
+    (out / "index.html").write_text("old")
+    (replacement / "index.html").write_text("new")
+    rename = Path.rename
+
+    def fail_replacement(path, target):
+        if path == replacement:
+            raise PermissionError("destination is busy")
+        return rename(path, target)
+
+    monkeypatch.setattr(Path, "rename", fail_replacement)
+    with pytest.raises(PermissionError):
+        build_web.promote_bundle(replacement, out)
+    assert (out / "index.html").read_text() == "old"
+    assert (replacement / "index.html").read_text() == "new"
+
+
+@pytest.mark.parametrize("host", ["localhost", "game.itch.zone"])
+@pytest.mark.parametrize("download_fails", [False, True])
+def test_loader_reports_failed_download_or_corrupt_archive(
+    tmp_path, monkeypatch, host, download_fails
+):
+    # Execute the real Python loader with fake browser I/O. It must stop before
+    # running the app and replace the click prompt with a retry instruction.
+    source = TEMPLATE_TEXT[
+        TEMPLATE_TEXT.index("async def custom_site()") : TEMPLATE_TEXT.index(
+            "asyncio.run( custom_site() )"
+        )
+    ]
+    module = ast.parse(source)
+
+    class Download:
+        async def __aenter__(self):
+            if download_fails:
+                raise OSError("network unavailable")
+            return io.BytesIO(b"not a valid archive")
+
+        async def __aexit__(self, *args):
+            return False
+
+    window = SimpleNamespace(
+        transfer=SimpleNamespace(style=SimpleNamespace()),
+        canvas=SimpleNamespace(style=SimpleNamespace()),
+        location=SimpleNamespace(host=host),
+        infobox=SimpleNamespace(innerText=""),
+        show_infobox=Mock(),
+    )
+    platform = SimpleNamespace(
+        window=window,
+        document=SimpleNamespace(body=SimpleNamespace(style=SimpleNamespace())),
+        fopen=lambda *args: Download(),
+        run_main=Mock(),
+    )
+    monkeypatch.setitem(sys.modules, "embed", SimpleNamespace())
+    namespace = {
+        "platform": platform,
+        "Path": lambda path: tmp_path / "game",
+        "true": True,
+    }
+    exec(compile(module, "template.tmpl", "exec"), namespace)
+    asyncio.run(namespace["custom_site"]())
+    assert "Please reload" in window.infobox.innerText
+    window.show_infobox.assert_called_once()
+    platform.run_main.assert_not_called()

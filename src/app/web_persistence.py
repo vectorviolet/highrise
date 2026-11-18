@@ -6,9 +6,9 @@ The game-specific store names also isolate Highrise from Chokepoint on localhost
 """
 
 from app.game_persistence import GamePersistenceMixin, GameSettings
-from gameplay.buildings.sprites import DOOR_SIDES, default_door_side
-from pygamine import SaveStore
-from pygamine.util.localization import DEFAULT_LANGUAGE
+from app.browser_store import BrowserStore, WriteOutcome
+from app.web_save_data import InvalidWebSave, validate_snapshot, volume_or_default
+from pygamine.util.localization import DEFAULT_LANGUAGE, tr
 from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES
 from util import web
 
@@ -18,24 +18,71 @@ class WebPersistenceMixin(GamePersistenceMixin):
         if not web.is_web():
             super().init_database()
             return
-        self.web_settings = SaveStore("highrise-settings")
-        self.web_save = SaveStore("highrise-save")
+        if not hasattr(self, "web_save"):
+            self.web_settings = BrowserStore("highrise-settings")
+            self.web_save = BrowserStore("highrise-save")
+            self.web_save_invalid = False
+            self.web_has_progress = False
+
+    def load_data(self) -> None:
+        if not web.is_web():
+            super().load_data()
+            return
+        self.init_database()
+        try:
+            if self.web_save.invalid:
+                raise InvalidWebSave("Unreadable browser save")
+            snapshot = validate_snapshot(
+                self.web_save.load(),
+                self.max_size,
+                self.max_building_level,
+                self.buildings.boosters.max_level,
+                self.starting_money,
+            )
+        except InvalidWebSave:
+            self.web_save_invalid = True
+            self.show_storage_status()
+            if self.tilemap is not None:
+                return  # Reject the whole snapshot before changing the live board.
+            snapshot = {}  # A fresh menu can still offer an explicit New Game.
+        self._web_snapshot = snapshot
+        self.web_has_progress = self.web_save.present and not self.web_save_invalid
+        self.load_game_data(self.get_game_data())
+        self.load_buildings()
+        self.load_tasks()
+        self.show_storage_status()
+
+    def show_storage_status(self) -> None:
+        if not web.is_web() or not hasattr(self, "web_save"):
+            return
+        messages = []
+        if self.web_save_invalid:
+            messages.append(tr("storage.invalid_save"))
+        for store, kind in (
+            (self.web_save, "progress"),
+            (self.web_settings, "settings"),
+        ):
+            if store.outcome != WriteOutcome.DURABLE:
+                messages.append(tr(f"storage.{kind}_{store.outcome.value}"))
+        web.show_notice("\n".join(messages))
 
     def load_settings(self) -> GameSettings:
         if not web.is_web():
             return super().load_settings()
         data = self.web_settings.load()
         scale = data.get("ui_scale", DEFAULT_UI_SCALE)
+        language = data.get("language", DEFAULT_LANGUAGE)
         return GameSettings(
-            data.get("language", DEFAULT_LANGUAGE),
+            language if isinstance(language, str) else DEFAULT_LANGUAGE,
             False,
             scale if scale in UI_SCALES else DEFAULT_UI_SCALE,
-            data.get("master_volume", 1.0),
+            volume_or_default(data.get("master_volume"), 1.0),
         )
 
     def save_language(self, language: str) -> None:
         if web.is_web():
             self.web_settings.update(language=language)
+            self.show_storage_status()
         else:
             super().save_language(language)
 
@@ -46,21 +93,24 @@ class WebPersistenceMixin(GamePersistenceMixin):
     def save_ui_scale(self, ui_scale: int) -> None:
         if web.is_web():
             self.web_settings.update(ui_scale=ui_scale)
+            self.show_storage_status()
         else:
             super().save_ui_scale(ui_scale)
 
     def get_game_data(self) -> list[tuple] | None:
         if not web.is_web():
             return super().get_game_data()
-        data = self.web_save.load()
+        data = self._web_snapshot
         settings = self.web_settings.load()
         return [
             (
                 data.get("age", 0),
                 data.get("size", 2),
                 data.get("money", self.starting_money),
-                settings.get("music_volume", self.default_music_volume),
-                settings.get("sfx_volume", self.default_sfx_volume),
+                volume_or_default(
+                    settings.get("music_volume"), self.default_music_volume
+                ),
+                volume_or_default(settings.get("sfx_volume"), self.default_sfx_volume),
             )
         ]
 
@@ -70,33 +120,22 @@ class WebPersistenceMixin(GamePersistenceMixin):
             return
         self.buildings.clear()
         assert self.tilemap is not None, "tilemap not loaded yet"
-        for saved in self.web_save.load().get("buildings", []):
+        for saved in self._web_snapshot.get("buildings", []):
             row, column = saved["row"], saved["column"]
-            if not (
-                1 <= row <= self.tilemap.row_count
-                and 1 <= column <= self.tilemap.column_count
-            ):
-                continue
-            side = saved.get("door_side")
-            if side not in DOOR_SIDES:
-                side = default_door_side(row, column)
-            booster = bool(saved.get("booster", False))
             self.add_building(
-                self._valid_level(saved["level"], row, column, booster),
+                saved["level"],
                 row,
                 column,
-                side,
-                booster=booster,
-                income_fraction=self._valid_fraction(
-                    saved.get("income_fraction", 0.0), row, column
-                ),
+                saved["door_side"],
+                booster=saved["booster"],
+                income_fraction=saved["income_fraction"],
             )
 
     def load_tasks(self) -> None:
         if not web.is_web():
             super().load_tasks()
             return
-        data = self.web_save.load()
+        data = self._web_snapshot
         self.tasks.restore(
             set(data.get("tasks_done", [])), bool(data.get("boost_unlocked", False))
         )
@@ -110,11 +149,15 @@ class WebPersistenceMixin(GamePersistenceMixin):
             music_volume=self.audio.music_volume(),
             sfx_volume=self.audio.sfx_volume(),
         )
+        self.show_storage_status()
 
     def save_game(self) -> None:
         if not web.is_web():
             super().save_game()
             return
+        if self.web_save_invalid:
+            self.show_storage_status()
+            return  # Only an explicit New Game may replace an invalid stored save.
         self.buildings.finish_pending_merges()
         assert self.tilemap is not None, "tilemap not loaded yet"
         self.web_save.save(
@@ -138,9 +181,14 @@ class WebPersistenceMixin(GamePersistenceMixin):
                 ],
             }
         )
+        self.web_has_progress = True  # Also retain a failed write for Continue/retry.
+        self.show_storage_status()
 
     def delete_data(self) -> None:
         if web.is_web():
             self.web_save.delete()
+            self.web_save_invalid = False
+            self.web_has_progress = False
+            self.show_storage_status()
         else:
             super().delete_data()

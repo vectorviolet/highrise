@@ -1,5 +1,5 @@
 # 0004. Browser build using Chokepoint's pygbag recipe
-<!-- index | refs: #97 -->
+<!-- index | refs: #97, PR #102 -->
 
 - **Status:** Implemented for review
 - **Date:** 2026-11-17
@@ -23,7 +23,10 @@ Browser progress and settings use a Highrise-specific JSON SaveStore in
 localStorage. Desktop saves continue to use SQLite with the existing migrations.
 The web path must not import SQLite or ship a developer database. Saving completes
 pending merges and preserves buildings, boosters, income fractions, tasks, age,
-money and settings. Reloading and continuing must restore that state.
+money and settings. Reloading and continuing must restore that state. Validate the whole snapshot before
+applying it, keep invalid stored data until an explicit New Game, and expose failed
+or session-only writes with a localized browser notice. A session cache keeps
+unsaved progress and settings available for retry.
 
 Browser menus expose fullscreen instead of desktop window modes and resolution.
 Exit opens a Thanks for playing page. Translucent blits use the engine's ALPHA_BLIT

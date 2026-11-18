@@ -34,8 +34,9 @@ other games that use it.
 
 `__main__.py` creates `Game()` and calls `run()`. `Game` (`src/app/game.py`) extends
 `pygamine.Application` plus two mixins: `GameEventsMixin` (`game_events.py`: routing mouse and key
-events to the panels and the board) and `GamePersistenceMixin` (`game_persistence.py`: the SQLite
-save, settings and loading). `Game` itself builds the panels, owns the buildings, tasks, audio and
+events to the panels and the board) and `WebPersistenceMixin` (`web_persistence.py`: browser
+saves and settings, delegating to `GamePersistenceMixin` in `game_persistence.py` for desktop-only
+SQLite save, settings and loading). `Game` itself builds the panels, owns the buildings, tasks, audio and
 effects, and ties them together; the pieces below don't import it, they get callbacks.
 
 ## Config-driven UI
@@ -110,9 +111,14 @@ window operations live in `src/util/web.py`. The browser hides resolution and
 intro controls, uses a fullscreen toggle and opens a Thanks for playing page on Exit.
 
 `WebPersistenceMixin` delegates to the existing SQLite mixin on desktop and uses
-Highrise-specific JSON SaveStores in localStorage in the browser. It never imports
-SQLite on the browser path. Both stores preserve pending merge results, building
-variants and income fractions, task state and settings. See [ADR 0004](decisions/0004-web-build.md).
+Highrise-specific JSON stores in localStorage in the browser. `BrowserStore` uses the
+pinned engine SaveStore namespace and storage selection, caches session changes and
+reports durable, failed or session-only writes. The browser reads one snapshot and
+validates it before replacing the board. Invalid saves remain stored until an explicit
+New Game; failed writes keep the current game available for Continue and retry. A
+localized browser notice explains persistence failures. SQLite is never imported on
+the browser path. Both backends preserve pending merge results, building variants
+and income fractions, task state and settings. See [ADR 0004](decisions/0004-web-build.md).
 
 ## Tests and scripts
 

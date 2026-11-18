@@ -969,6 +969,8 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
         self.set_ui_scale_label()
 
     def has_save_data(self) -> bool:
+        if web.is_web():
+            return self.web_has_progress or self.web_save_invalid
         return len(self.buildings) > 0 or self.buildings.age_number > 0
 
     def play(self) -> None:
@@ -1020,6 +1022,8 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
     def _apply_web_rows(self) -> None:
         if not web.is_web():
             return
+        for name in ("continue_button", "continue_button_text"):
+            self.panel_manager["play"][name].active = not self.web_save_invalid
         for panel_name, prefix in (
             ("display_settings", "window_size"),
             ("game_settings", "skip_intro"),
@@ -1119,3 +1123,4 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
         self.set_window_mode_label()
         self.set_language_label()
         self.set_skip_intro_label()
+        self.show_storage_status()

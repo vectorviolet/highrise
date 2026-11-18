@@ -9,7 +9,7 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Browser build with persistent localStorage saves, browser fullscreen controls and a Thanks for playing screen; the release workflow produces the HTML5 bundle alongside the desktop builds ([ADR 0004](docs/decisions/0004-web-build.md)).
+- Browser build with persistent localStorage saves, invalid-save recovery, visible warnings for unsaved progress/settings, browser fullscreen controls and a Thanks for playing screen; the release workflow produces the HTML5 bundle alongside the desktop builds ([ADR 0004](docs/decisions/0004-web-build.md)).
 
 - A Windows installer, `highrise-windows-setup.exe` (English or Turkish setup, you pick the folder; Start Menu shortcut, optional desktop shortcut), next to the zips on the GitHub Release ([devlog](docs/devlog/2026-11-18-user-data-and-installer.md)).
 

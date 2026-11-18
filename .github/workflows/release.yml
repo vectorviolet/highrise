@@ -203,7 +203,7 @@ jobs:
     name: Publish GitHub Release
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Download the desktop build artifacts
         uses: actions/download-artifact@v8
@@ -223,7 +223,7 @@ jobs:
     name: Publish to itch.io
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Download the desktop build artifacts
         uses: actions/download-artifact@v8
@@ -271,13 +271,13 @@ jobs:
           VERSION: ${{ github.ref_name }}
           PACKAGE: itch/osx
 
-  # Both web publish jobs need only `web`, never a desktop job's success, so a
-  # desktop failure cannot keep the web build from itch.io or the release.
+  # itch.io publishing needs only the web build. The release attachment also waits
+  # for the desktop release so an incomplete draft cannot be published accidentally.
   publish-web:
     name: Publish web build to itch.io
     needs: web
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Download the web build artifact
         uses: actions/download-artifact@v8
@@ -304,13 +304,12 @@ jobs:
 
   attach-web:
     name: Attach web build to the GitHub Release
-    # Runs after `release` finishes, whether it succeeded or failed, so the two never
-    # race to create the release. If `release` failed, the release does not exist and
-    # action-gh-release creates it (with just this zip); if it succeeded, the zip is
-    # added to it. Only the web build has to be good.
+    # Wait for the desktop release. A skipped release (failed desktop build) allows
+    # a web-only release, but a failed release may have left an incomplete draft:
+    # leave that draft untouched for retry instead of publishing it.
     needs: [web, release]
     runs-on: ubuntu-latest
-    if: ${{ always() && startsWith(github.ref, 'refs/tags/') && needs.web.result == 'success' }}
+    if: ${{ !cancelled() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && needs.web.result == 'success' && (needs.release.result == 'success' || needs.release.result == 'skipped') }}  # codespell:ignore cancelled
     steps:
       - name: Download the web build artifact
         uses: actions/download-artifact@v8
@@ -330,7 +329,7 @@ jobs:
     name: Attach the installer to the GitHub Release
     needs: [installer, release]
     runs-on: ubuntu-latest
-    if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/') && needs.installer.result == 'success' && needs.release.result == 'success' }}  # codespell:ignore cancelled
+    if: ${{ !cancelled() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && needs.installer.result == 'success' && needs.release.result == 'success' }}  # codespell:ignore cancelled
     steps:
       - name: Download the installer artifact
         uses: actions/download-artifact@v8

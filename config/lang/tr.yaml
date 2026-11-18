@@ -89,6 +89,13 @@ credits:
   fonts: "Yazı tipleri"
   built_with: "Kullanılan araçlar"
 
+storage:
+  invalid_save: "Kayıtlı ilerleme yüklenemedi ve korundu. Değiştirmek için Yeni Oyun'u seç."
+  progress_failed: "İlerleme kaydedilemedi. Bu sekmeyi açık tut; tekrar denemek için oyuna, ardından menüye dön."
+  progress_session_only: "Tarayıcı depolaması kullanılamıyor. Sekmeyi yenilersen veya kapatırsan ilerleme kaybolacak."
+  settings_failed: "Ayarlar yalnızca bu oturum için geçerli. Sayfayı yenilemeden önce tekrar kaydetmeyi dene."
+  settings_session_only: "Tarayıcı depolaması kullanılamıyor. Sekmeyi yenilersen veya kapatırsan ayarlar kaybolacak."
+
 thanks:
   title: "OYNADIĞIN İÇİN TEŞEKKÜRLER!"
   subtitle: "Highrise'i beğendin mi? Düşüncelerini bizimle paylaş."

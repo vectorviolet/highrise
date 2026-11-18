@@ -126,7 +126,7 @@ uv run python -m http.server 8765 --bind 127.0.0.1 --directory build/web
 
 Open `http://127.0.0.1:8765` in a visible, focused desktop browser. The build needs
 internet and retries once on failure; `--stage-only` validates the staged files
-without running pygbag. The runtime also loads from pygame-web.github.io.
+without running pygbag (offline staging requires an environment already prepared by `uv sync`). The runtime also loads from pygame-web.github.io.
 Keep the tab focused when measuring performance: hidden tabs are throttled.
 
 Highrise's browser saves are JSON in localStorage under its own names. Native saves
