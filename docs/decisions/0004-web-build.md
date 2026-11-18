@@ -1,48 +1,56 @@
 # 0004. Browser build using Chokepoint's pygbag recipe
 <!-- index | refs: #97, PR #102 -->
 
-- **Status:** Implemented for review
-- **Date:** 2026-11-17
-- **Issue:** [#97](https://github.com/vectorviolet/highrise/issues/97)
+- **Status:** Proposed
+- **Date:** 2026-11-18
+- **Issues / PRs:** [#97](https://github.com/vectorviolet/highrise/issues/97), [PR #102](https://github.com/vectorviolet/highrise/pull/102)
 
 ## Context
 
-Chokepoint already runs in desktop browsers through pygbag 0.9.3. Highrise uses the
-same engine, but its startup initializes a SQLite database, loads its board and
-builds panels before entering the loop. Calling Application.run_async alone skips
-those steps. Browser filesystem writes also disappear when the page reloads.
+Chokepoint already runs in desktop browsers through pygbag 0.9.3. Highrise uses the same engine,
+but its startup opens a SQLite database, loads its board and builds panels before the loop, and
+browser filesystem writes disappear when the page reloads. The build recipe here is a fork of
+Chokepoint's (`scripts/build_web.py`, `web/template.tmpl`, the itch.io limit check in
+`release.yml`, `util/web.py`); a fix to one should be checked against the other.
 
 ## Decision
 
-Reuse the pinned build tool, loader template, pure-Python PyYAML staging, async
-engine loop and browser helpers from Chokepoint. Keep native game startup and
-browser startup on the same initialization path. Skip the threaded splash on web,
-unlock audio after a click, and convert the existing licensed music to OGG.
+- **Build:** reuse Chokepoint's pinned pygbag, loader template, pure-Python PyYAML staging and
+  async engine loop. Native and browser startup share one initialization path
+  (`Game._prepare_run`); the browser skips the threaded splash.
+- **Saves:** the browser uses pygamine's public `SaveStore` (JSON in localStorage, store names
+  `highrise-save` and `highrise-settings`); desktop keeps SQLite and its migrations. The web
+  path never imports SQLite. A restore reads the save once and holds every value to a valid one
+  before the board changes, reusing the desktop's clamping (`_restore_building`). A save that
+  cannot be read is kept until an explicit New Game. Because a closed tab raises no QUIT, the
+  board saves 2 s after each build, sell, merge, NEXT AGE or expand, and on ESC. `SaveStore`
+  only logs a refused write, so `save_game` reads the save back and shows one notice if it
+  differs.
+- **Music:** `bg.mp3` became `bg.ogg` everywhere (the same CC BY 3.0 track; the credits say it
+  was converted). One file serves both builds.
+- **Rendering:** translucent blits use pygamine's `ALPHA_BLIT` (the browser's SDL2 build lacks
+  `BLEND_ALPHA_SDL2`); it changes nothing on desktop.
+- **Frame rate:** the browser presents 60 frames a second, but motion (buildings sliding, clouds)
+  steps per update at the desktop's 165 a second. The browser runs those steps by elapsed time
+  and everything else (panels, timers, texts) once a frame.
+- **Release:** `web` and `publish-web` run only on a version-tag push; the GitHub Release gets
+  `highrise-web.zip` only after the desktop release succeeded, so a failed desktop build never
+  leaves a published web-only release.
+- Browser menus show fullscreen instead of window modes and resolution; Exit opens a Thanks
+  for playing page.
 
-Browser progress and settings use a Highrise-specific JSON SaveStore in
-localStorage. Desktop saves continue to use SQLite with the existing migrations.
-The web path must not import SQLite or ship a developer database. Saving completes
-pending merges and preserves buildings, boosters, income fractions, tasks, age,
-money and settings. Reloading and continuing must restore that state. Validate the whole snapshot before
-applying it, keep invalid stored data until an explicit New Game, and expose failed
-or session-only writes with a localized browser notice. A session cache keeps
-unsaved progress and settings available for retry.
+## Consequences
 
-Browser menus expose fullscreen instead of desktop window modes and resolution.
-Exit opens a Thanks for playing page. Translucent blits use the engine's ALPHA_BLIT
-constant, as in Chokepoint. The existing cover illustrates the loading page.
+Desktop persistence is unchanged. Browser persistence is one small module. Tests use a fake
+`platform.window` (the `browser` fixture in `tests/conftest.py`). A refused write shows a notice
+but there is no retry queue: the next change saves again.
 
-## Alternatives
+## Alternatives considered
 
-- Another web spike would repeat work already completed by Chokepoint.
-- SQLite on a temporary browser filesystem would lose progress on reload and add
-  a compiled dependency; localStorage is already supported by the engine.
-- Replacing desktop SQLite would introduce an unnecessary save migration.
-- A blocking startup splash would prevent the browser from rendering frames.
-
-## Validation
-
-Test startup and storage with mocked browser objects, run the desktop suite and
-smoke test with temporary saves, then build and play in a visible, focused browser.
-Verify Continue after a page reload, settings persistence, fullscreen, Exit and
-frame time. Hidden tabs are throttled and cannot establish rendering performance.
+- SQLite on a temporary browser filesystem: lost on reload and needs a compiled dependency.
+- Replacing desktop SQLite: an unneeded save migration.
+- A write-outcome type with separate notices for progress and settings, a session cache and a
+  hand-written snapshot validator: built first, then removed as more code than the problem
+  needs (see the devlog).
+- Keeping the MP3 on desktop and swapping in OGG only for the web stage: two files to track for
+  one license note.

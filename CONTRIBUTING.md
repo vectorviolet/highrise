@@ -131,12 +131,13 @@ Keep the tab focused when measuring performance: hidden tabs are throttled.
 
 Highrise's browser saves are JSON in localStorage under its own names. Native saves
 remain in SQLite; no developer database or save is included in the web bundle.
-For a browser playtest, build and merge buildings, return to the menu to save,
-reload the page, and Continue. Check settings, sound, fullscreen and Exit too.
+For a browser playtest, build and merge buildings, close the tab without pressing ESC
+(the board saves a moment after each change), reopen the page, and Continue. Check
+settings, sound, fullscreen and Exit too.
 
 The release workflow builds `highrise-web.zip` independently of desktop builds,
 checks itch.io's HTML5 upload limits, publishes the `html5` channel on version tags
-and attaches the web zip to the release. Manual workflow runs only build artifacts.
+and attaches the web zip to the release once the desktop release succeeded. Manual workflow runs only build artifacts.
 After the first release, the owner enables **This file will be played in the
 browser** on the itch.io upload and chooses the embed size and fullscreen button.
 Leave mobile support off: the game needs a keyboard and mouse.

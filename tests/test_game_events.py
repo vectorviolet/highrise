@@ -202,10 +202,14 @@ class FakeGame(GameEventsMixin):
         self.buildings = FakeBuildings(self)
         self.player = SimpleNamespace(earn=lambda a: self.calls.append(("earn", a)))
         self.calls: list = []
+        self.autosaves = 0
         self.skip_intro = False
 
     def show_gain(self, building, amount):
         self.calls.append(("show_gain", building, amount))
+
+    def request_autosave(self):
+        self.autosaves += 1
 
     def cycle_language(self, delta):
         self.calls.append(("cycle_language", delta))
@@ -542,6 +546,7 @@ def test_game_events_info_panel_open_sell_button_sells_the_building():
     assert game.audio.played == [game.action_sounds.sell]
     assert game.info_panel.close_calls == 1
     assert "update_button_texts" in game.calls
+    assert game.autosaves == 1  # the browser saves the sale a moment later
 
 
 def test_game_events_info_panel_open_close_button_just_closes_it():

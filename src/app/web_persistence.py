@@ -1,90 +1,89 @@
-"""Browser saves use JSON/localStorage; desktop keeps its existing SQLite schema.
+"""Browser saves use JSON/localStorage through pygamine's SaveStore; desktop keeps its
+SQLite schema. No SQLite import belongs on the browser startup path. The game-specific
+store names also isolate Highrise from Chokepoint on localhost.
 
-No SQLite import belongs on the browser startup path. Each completed save is
-one localStorage write, including buildings, fractions and age-task progress.
-The game-specific store names also isolate Highrise from Chokepoint on localhost.
+The browser gives the game no QUIT when a tab closes, so the board is also saved shortly
+after every change (`request_autosave`), not only when the player leaves it.
 """
 
+import logging
+from math import isfinite
+
+import pygame
+
 from app.game_persistence import GamePersistenceMixin, GameSettings
-from app.browser_store import BrowserStore, WriteOutcome
-from app.web_save_data import InvalidWebSave, validate_snapshot, volume_or_default
+from pygamine import SaveStore
 from pygamine.util.localization import DEFAULT_LANGUAGE, tr
 from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES
 from util import web
 
+logger = logging.getLogger(__name__)
+
+# How long after a board change the save waits, so a burst of changes is one write.
+AUTOSAVE_DELAY_MS = 2000
+
+
+def _int(value: object, default: int, low: int, high: int | None = None) -> int:
+    """`value` held to low..high; `default` if it isn't an int (a hand-edited or damaged save)."""
+    if type(value) is not int:
+        return default
+    return max(low, value) if high is None else min(max(value, low), high)
+
+
+def _number(value: object, default: float) -> float:
+    """`value` if it is a finite number, else `default`."""
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        if isfinite(value):
+            return value
+    return default
+
 
 class WebPersistenceMixin(GamePersistenceMixin):
+    web_save_invalid = False  # a stored save that can't be read: kept until New Game
+    _autosave_due: int | None = None
+
     def init_database(self) -> None:
         if not web.is_web():
             super().init_database()
             return
         if not hasattr(self, "web_save"):
-            self.web_settings = BrowserStore("highrise-settings")
-            self.web_save = BrowserStore("highrise-save")
-            self.web_save_invalid = False
-            self.web_has_progress = False
+            self.web_settings = SaveStore("highrise-settings")
+            self.web_save = SaveStore("highrise-save")
 
     def load_data(self) -> None:
         if not web.is_web():
             super().load_data()
             return
         self.init_database()
-        try:
-            if self.web_save.invalid:
-                raise InvalidWebSave("Unreadable browser save")
-            snapshot = validate_snapshot(
-                self.web_save.load(),
-                self.max_size,
-                self.max_building_level,
-                self.buildings.boosters.max_level,
-                self.starting_money,
-            )
-        except InvalidWebSave:
-            self.web_save_invalid = True
-            self.show_storage_status()
-            if self.tilemap is not None:
-                return  # Reject the whole snapshot before changing the live board.
-            snapshot = {}  # A fresh menu can still offer an explicit New Game.
-        self._web_snapshot = snapshot
-        self.web_has_progress = self.web_save.present and not self.web_save_invalid
+        data = self.web_save.load()  # read once: every part below comes from it
+        self.web_save_invalid = self.web_save.exists() and not data
+        if self.web_save_invalid:
+            logger.warning("The stored browser save is unreadable; keeping it")
+            web.show_notice(tr("storage.invalid_save"))
+        self._web_snapshot = data
+        # Nothing below can fail halfway: every value is held to a valid one first.
         self.load_game_data(self.get_game_data())
         self.load_buildings()
         self.load_tasks()
-        self.show_storage_status()
-
-    def show_storage_status(self) -> None:
-        if not web.is_web() or not hasattr(self, "web_save"):
-            return
-        messages = []
-        if self.web_save_invalid:
-            messages.append(tr("storage.invalid_save"))
-        for store, kind in (
-            (self.web_save, "progress"),
-            (self.web_settings, "settings"),
-        ):
-            if store.outcome != WriteOutcome.DURABLE and not (
-                kind == "progress" and self.web_save_invalid
-            ):
-                messages.append(tr(f"storage.{kind}_{store.outcome.value}"))
-        web.show_notice("\n".join(messages))
 
     def load_settings(self) -> GameSettings:
         if not web.is_web():
             return super().load_settings()
         data = self.web_settings.load()
-        scale = data.get("ui_scale", DEFAULT_UI_SCALE)
-        language = data.get("language", DEFAULT_LANGUAGE)
+        if not data and self.web_settings.exists():
+            logger.warning("The stored browser settings are unreadable; using defaults")
+        scale = data.get("ui_scale")
+        language = data.get("language")
         return GameSettings(
             language if isinstance(language, str) else DEFAULT_LANGUAGE,
             False,
             scale if scale in UI_SCALES else DEFAULT_UI_SCALE,
-            volume_or_default(data.get("master_volume"), 1.0),
+            _number(data.get("master_volume"), 1.0),
         )
 
     def save_language(self, language: str) -> None:
         if web.is_web():
             self.web_settings.update(language=language)
-            self.show_storage_status()
         else:
             super().save_language(language)
 
@@ -95,24 +94,20 @@ class WebPersistenceMixin(GamePersistenceMixin):
     def save_ui_scale(self, ui_scale: int) -> None:
         if web.is_web():
             self.web_settings.update(ui_scale=ui_scale)
-            self.show_storage_status()
         else:
             super().save_ui_scale(ui_scale)
 
     def get_game_data(self) -> list[tuple] | None:
         if not web.is_web():
             return super().get_game_data()
-        data = self._web_snapshot
-        settings = self.web_settings.load()
+        data, settings = self._web_snapshot, self.web_settings.load()
         return [
             (
-                data.get("age", 0),
-                data.get("size", 2),
-                data.get("money", self.starting_money),
-                volume_or_default(
-                    settings.get("music_volume"), self.default_music_volume
-                ),
-                volume_or_default(settings.get("sfx_volume"), self.default_sfx_volume),
+                _int(data.get("age"), 0, 0, self.buildings.max_age_number),
+                _int(data.get("size"), 2, 2, self.max_size),
+                _int(data.get("money"), self.starting_money, 0),
+                _number(settings.get("music_volume"), self.default_music_volume),
+                _number(settings.get("sfx_volume"), self.default_sfx_volume),
             )
         ]
 
@@ -121,25 +116,39 @@ class WebPersistenceMixin(GamePersistenceMixin):
             super().load_buildings()
             return
         self.buildings.clear()
-        assert self.tilemap is not None, "tilemap not loaded yet"
-        for saved in self._web_snapshot.get("buildings", []):
-            row, column = saved["row"], saved["column"]
-            self.add_building(
-                saved["level"],
+        records = self._web_snapshot.get("buildings")
+        taken = set()
+        for saved in records if isinstance(records, list) else []:
+            if not isinstance(saved, dict):
+                continue
+            row, column, level = (
+                saved.get("row"),
+                saved.get("column"),
+                saved.get("level"),
+            )
+            if type(row) is not int or type(column) is not int:
+                continue
+            if type(level) is not int:
+                continue
+            if (row, column) not in taken and self._restore_building(
+                level,
                 row,
                 column,
-                saved["door_side"],
-                booster=saved["booster"],
-                income_fraction=saved["income_fraction"],
-            )
+                saved.get("door_side"),
+                saved.get("booster") is True,
+                _number(saved.get("income_fraction"), 0.0),
+            ):
+                taken.add((row, column))
 
     def load_tasks(self) -> None:
         if not web.is_web():
             super().load_tasks()
             return
         data = self._web_snapshot
+        done = data.get("tasks_done")
         self.tasks.restore(
-            set(data.get("tasks_done", [])), bool(data.get("boost_unlocked", False))
+            {i for i in done if type(i) is int} if isinstance(done, list) else set(),
+            data.get("boost_unlocked") is True,
         )
 
     def save_audio_settings(self) -> None:
@@ -151,46 +160,60 @@ class WebPersistenceMixin(GamePersistenceMixin):
             music_volume=self.audio.music_volume(),
             sfx_volume=self.audio.sfx_volume(),
         )
-        self.show_storage_status()
 
     def save_game(self) -> None:
         if not web.is_web():
             super().save_game()
             return
         if self.web_save_invalid:
-            self.show_storage_status()
-            return  # Only an explicit New Game may replace an invalid stored save.
+            return  # Only an explicit New Game may replace an unreadable stored save.
+        self._autosave_due = None
         self.buildings.finish_pending_merges()
         assert self.tilemap is not None, "tilemap not loaded yet"
-        self.web_save.save(
-            {
-                "version": 1,
-                "age": self.buildings.age_number,
-                "size": self.tilemap.row_count,
-                "money": self.player.money,
-                "tasks_done": sorted(self.tasks.done),
-                "boost_unlocked": self.tasks.boost_unlocked,
-                "buildings": [
-                    {
-                        "level": b.level,
-                        "row": b.tile.row_number,
-                        "column": b.tile.column_number,
-                        "door_side": b.door_side,
-                        "booster": b.is_booster,
-                        "income_fraction": b.income_fraction,
-                    }
-                    for b in self.buildings
-                ],
-            }
-        )
-        self.web_has_progress = True  # Also retain a failed write for Continue/retry.
-        self.show_storage_status()
+        data = {
+            "age": self.buildings.age_number,
+            "size": self.tilemap.row_count,
+            "money": self.player.money,
+            "tasks_done": sorted(self.tasks.done),
+            "boost_unlocked": self.tasks.boost_unlocked,
+            "buildings": [
+                {
+                    "level": b.level,
+                    "row": b.tile.row_number,
+                    "column": b.tile.column_number,
+                    "door_side": b.door_side,
+                    "booster": b.is_booster,
+                    "income_fraction": b.income_fraction,
+                }
+                for b in self.buildings
+            ],
+        }
+        self.web_save.save(data)
+        # SaveStore logs a refused write and returns normally: read it back to know.
+        saved = self.web_save.load() == data
+        web.show_notice("" if saved else tr("storage.unavailable"))
+
+    def request_autosave(self) -> None:
+        """Saves the board in AUTOSAVE_DELAY_MS (a change inside that wait joins it)."""
+        if web.is_web() and self._autosave_due is None:
+            self._autosave_due = pygame.time.get_ticks() + AUTOSAVE_DELAY_MS
+
+    def autosave_if_due(self) -> None:
+        """Called every frame; waits out a merge in progress instead of cutting it short."""
+        if (
+            self._autosave_due is not None
+            and pygame.time.get_ticks() >= self._autosave_due
+            and not self.buildings.is_busy()
+        ):
+            self.save_game()
 
     def delete_data(self) -> None:
-        if web.is_web():
-            self.web_save.delete()
-            self.web_save_invalid = False
-            self.web_has_progress = False
-            self.show_storage_status()
-        else:
+        if not web.is_web():
             super().delete_data()
+            return
+        self.web_save.delete()
+        self._autosave_due = None
+        if self.web_save_invalid:
+            self.web_save_invalid = False
+            self._apply_web_rows()
+        web.show_notice("")

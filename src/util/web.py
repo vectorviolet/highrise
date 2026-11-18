@@ -8,8 +8,6 @@ with fakes. On desktop none of them is ever called.
 import sys
 from typing import Any
 
-_notice: Any = None
-
 
 def is_web() -> bool:
     """True in the browser build. Read at call time (not import time) so a test
@@ -47,19 +45,5 @@ def toggle_fullscreen() -> None:
 
 
 def show_notice(message: str) -> None:
-    """Persistent, nonblocking browser notice; cleared after a successful retry."""
-    global _notice
-    document = _window().document
-    if _notice is None:
-        notice = document.createElement("div")
-        notice.id = "highrise-storage-notice"
-        notice.setAttribute("role", "status")
-        notice.style.cssText = (
-            "position:fixed;top:8px;left:10%;right:10%;z-index:9999;"
-            "padding:12px;background:#fff3cd;color:#522000;white-space:pre-line;"
-            "font:18px sans-serif;text-align:center;pointer-events:none"
-        )
-        document.body.appendChild(notice)
-        _notice = notice
-    _notice.textContent = message
-    _notice.style.display = "block" if message else "none"
+    """Shows `message` in the page's notice box (web/template.tmpl); an empty one hides it."""
+    _window().document.getElementById("storage-notice").textContent = message

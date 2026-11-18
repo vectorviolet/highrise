@@ -55,6 +55,11 @@ from util import web
 if TYPE_CHECKING:
     from pygamine import Database
 
+# The browser presents this many frames a second (requestAnimationFrame follows the display).
+WEB_FPS = 60
+# The longest stretch of elapsed time the browser's motion steps catch up in one frame.
+WEB_MAX_CATCH_UP_MS = 50
+
 # The window and taskbar icon: the plate-less tower, crisp at the small sizes the OS shows.
 WINDOW_ICON = resource_path("assets", "images", "icon", "icon_64.png")
 # Manifest key of the background music. Optional: without it the game plays
@@ -212,7 +217,7 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
         super().__init__(
             tuple(window["size"]),
             window["title"],
-            60 if web.is_web() else window["fps"],
+            WEB_FPS if web.is_web() else window["fps"],
         )
 
         self.assets = AssetManager()
@@ -608,8 +613,10 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
         )
 
     def update(self) -> None:
+        self.panel_manager.update()
         if web.is_web():
             self._update_web_world()
+            self.autosave_if_due()
         else:
             self._update_world()
         self.floating_texts.update(pygame.time.get_ticks())
@@ -619,16 +626,19 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
         self._update_tasks()
 
     def _update_world(self) -> None:
-        self.panel_manager.update()
+        """The frame-count motion (buildings sliding, clouds drifting): each update moves them
+        by a fixed step, so the browser runs it more than once per frame (see _update_web_world)."""
         self.buildings.update()
         self.cloud_animation.update()
 
     def _update_web_world(self) -> None:
-        # Rigidbody motion is per update in this game. Keep the desktop's
-        # nominal 165 updates/s while the browser presents about 60 frames/s.
-        # Drop long stalls (e.g. a background tab) instead of catching up forever.
+        # The motion steps are per update, tuned for the desktop's `window.fps` updates a second,
+        # but the browser presents WEB_FPS frames a second. Run as many motion steps as the elapsed
+        # time asks for (about fps / WEB_FPS = 2.75 a frame); the rest of the frame (panels, timers,
+        # texts) is time-based and runs once. Drop long stalls (a background tab) instead of
+        # catching up forever.
         tick_ms = 1000 / self.settings["window"]["fps"]
-        self._web_elapsed_ms += min(self.clock.get_time(), 100)
+        self._web_elapsed_ms += min(self.clock.get_time(), WEB_MAX_CATCH_UP_MS)
         while self._web_elapsed_ms + 1e-9 >= tick_ms:
             self._web_elapsed_ms -= tick_ms
             self._update_world()
@@ -692,6 +702,7 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
         self.audio.play_sfx(self.merge_sound_path)
         # A merge frees tiles: BUILD's hover text can't keep saying TILES FULL.
         self.update_button_texts()
+        self.request_autosave()
 
     def draw(self) -> None:
         self.panel_manager.draw(self.window)
@@ -786,6 +797,7 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
 
         self.update_button_texts()
         self.audio.play_sfx(self.click_sound_path)
+        self.request_autosave()
 
     def add_building(
         self,
@@ -859,6 +871,7 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
             )
             self._spend(cost)
             self.audio.play_sfx(self.action_sounds.build(self.buildings.age_number))
+            self.request_autosave()
             return new_building
         return None
 
@@ -879,6 +892,7 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
         assert paid
         self.set_age(self.buildings.age_number + 1)
         self.audio.play_sfx(self.action_sounds.next_age)
+        self.request_autosave()
 
     def move_buildings(self, rotation: str) -> None:
         if self.tile_selector.is_active:
@@ -970,7 +984,7 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
 
     def has_save_data(self) -> bool:
         if web.is_web():
-            return self.web_has_progress or self.web_save_invalid
+            return self.web_save.exists()
         return len(self.buildings) > 0 or self.buildings.age_number > 0
 
     def play(self) -> None:
@@ -1123,4 +1137,3 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
         self.set_window_mode_label()
         self.set_language_label()
         self.set_skip_intro_label()
-        self.show_storage_status()

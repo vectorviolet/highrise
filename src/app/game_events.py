@@ -252,6 +252,7 @@ class GameEventsMixin:
             self.show_gain(building, building.sell_price)
             self.sell_effect.spawn(building.rect, pygame.time.get_ticks())
             self.audio.play_sfx(self.action_sounds.sell)
+            self.request_autosave()
         self.info_panel.close()
         self.update_button_texts()
 

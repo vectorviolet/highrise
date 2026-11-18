@@ -16,7 +16,7 @@ links; a changed decision gets a new ADR that supersedes the old one.
 | [0001](0001-building-callbacks.md) | Wire building callbacks at creation | Proposed | 2026-10-30 | #3, PR #20, #21, PR #22 |
 | [0002](0002-settings-table.md) | Player settings in their own table | Accepted | 2026-11-04 | #29, PR #34 |
 | [0003](0003-saves-in-the-user-data-folder.md) | Saves in the user-data folder (packaged build only) | Accepted | 2026-11-18 | #57, PR #99 |
-| [0004](0004-web-build.md) | Browser build using Chokepoint's pygbag recipe | Implemented for review | 2026-11-17 | #97, PR #102 |
+| [0004](0004-web-build.md) | Browser build using Chokepoint's pygbag recipe | Proposed | 2026-11-18 | #97, PR #102 |
 <!-- index:end -->
 
 ## Adding an ADR

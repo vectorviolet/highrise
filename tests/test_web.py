@@ -1,50 +1,19 @@
-"""Browser startup, navigation and persistence with a real game and fake JS storage."""
+"""Browser startup, navigation and persistence with a real game and a fake page."""
 
 import asyncio
 import json
+import logging
 import subprocess
 import sys
 import textwrap
-from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pygame
 import pytest
 
-from app.game import Game
+from app.game import WEB_FPS, Game
+from app.web_persistence import AUTOSAVE_DELAY_MS
 from pygamine import Application
-from pygamine.assets import save_store
-from util import web
-
-
-class Storage:
-    def __init__(self):
-        self.data = {}
-
-    def getItem(self, key):
-        return self.data.get(key)
-
-    def setItem(self, key, value):
-        self.data[key] = value
-
-    def removeItem(self, key):
-        self.data.pop(key, None)
-
-
-@pytest.fixture
-def browser(monkeypatch):
-    storage = Storage()
-    document = SimpleNamespace(
-        fullscreenElement=None,
-        exitFullscreen=Mock(),
-        documentElement=SimpleNamespace(requestFullscreen=Mock()),
-    )
-    window = SimpleNamespace(document=document, open=Mock())
-    monkeypatch.setattr(web, "is_web", lambda: True)
-    monkeypatch.setattr(web, "_window", lambda: window)
-    monkeypatch.setattr(web, "show_notice", Mock())
-    monkeypatch.setattr(save_store, "_browser_storage", lambda: storage)
-    return storage, window
 
 
 def boot():
@@ -53,9 +22,15 @@ def boot():
     return game
 
 
-def test_browser_boot_does_not_import_sqlite_or_construct_splash(browser, monkeypatch):
+def stored(browser, name="highrise-save"):
+    """The raw text the page's localStorage holds for a store, or None."""
+    items = browser.localStorage.items
+    return next((v for k, v in items.items() if k.endswith(f"{name}.json")), None)
+
+
+def test_browser_boot_does_not_import_sqlite_or_construct_splash(browser):
     script = textwrap.dedent("""
-        import builtins, sys
+        import builtins, platform, sys
         original = builtins.__import__
         def no_sqlite(name, *args, **kwargs):
             assert not name.startswith(("sqlite3", "pygamine.assets.database")), name
@@ -63,14 +38,13 @@ def test_browser_boot_does_not_import_sqlite_or_construct_splash(browser, monkey
         builtins.__import__ = no_sqlite
         sys.path[:0] = ["src", "src/pygamine"]
         from types import SimpleNamespace
-        from util import web
-        from pygamine.assets import save_store
         from app.game import Game
         storage = SimpleNamespace(getItem=lambda key: None)
-        save_store._browser_storage = lambda: storage
-        web.is_web = lambda: True
-        web._window = lambda: SimpleNamespace(document=SimpleNamespace(fullscreenElement=None))
-        web.show_notice = lambda message: None
+        platform.window = SimpleNamespace(
+            localStorage=storage,
+            document=SimpleNamespace(fullscreenElement=None),
+        )
+        sys.platform = "emscripten"
         game = Game()
         game._prepare_run()
         assert not hasattr(game, "database")
@@ -173,7 +147,7 @@ def test_exit_and_escape_stay_in_browser(browser):
     game.on_exit_request()
     assert game.panel_manager.current_panel == "thanks"
     game.handle_thanks_events(pygame.event.Event(pygame.KEYUP, key=pygame.K_RETURN))
-    browser[1].open.assert_called_once_with(
+    browser.open.assert_called_once_with(
         "https://umutcanekinci.itch.io/highrise", "_blank"
     )
 
@@ -225,10 +199,10 @@ def test_thanks_clears_old_frame_pixels(browser):
 def test_f11_uses_browser_fullscreen(browser):
     game = boot()
     game._handle_core_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_F11))
-    browser[1].document.documentElement.requestFullscreen.assert_called_once()
-    browser[1].document.fullscreenElement = object()
+    browser.document.documentElement.requestFullscreen.assert_called_once()
+    browser.document.fullscreenElement = object()
     game.cycle_window_mode()
-    browser[1].document.exitFullscreen.assert_called_once()
+    browser.document.exitFullscreen.assert_called_once()
 
 
 def test_fullscreen_label_follows_delayed_browser_transition_and_native_escape(browser):
@@ -240,96 +214,14 @@ def test_fullscreen_label_follows_delayed_browser_transition_and_native_escape(b
     game.cycle_window_mode()
     game.update()
     game.set_window_mode_label.assert_not_called()
-    browser[1].document.fullscreenElement = object()
+    browser.document.fullscreenElement = object()
     game.update()
     game.set_window_mode_label.assert_called_once()
     game.update()
     game.set_window_mode_label.assert_called_once()
-    browser[1].document.fullscreenElement = None
+    browser.document.fullscreenElement = None
     game.update()
     assert game.set_window_mode_label.call_count == 2
-
-
-def test_browser_preserves_desktop_world_update_rate(browser):
-    game = boot()
-    game.clock = Mock(get_time=lambda: 1000 / 60)
-    game._update_world = Mock()
-    for _ in range(60):
-        game.update()
-    assert game._update_world.call_count == game.settings["window"]["fps"]
-    game._update_world.reset_mock()
-    game.clock = Mock(get_time=lambda: 60_000)
-    game.update()
-    assert game._update_world.call_count <= 17
-
-
-@pytest.mark.parametrize(
-    "snapshot",
-    [
-        {"age": 999},
-        {"size": -1},
-        {"size": 999999},
-        {"money": None},
-        {"buildings": [{"row": 1, "column": 1, "level": 1}, {"row": 2, "level": 1}]},
-        {"buildings": [{"row": 1, "column": 1, "level": "bad"}]},
-    ],
-)
-def test_invalid_snapshot_keeps_stored_copy_and_offers_explicit_new_game(
-    browser, snapshot
-):
-    game = boot()
-    key = game.web_save.key
-    browser[0].setItem(key, json.dumps(snapshot))
-    original = browser[0].getItem(key)
-    restored = boot()
-    assert restored.web_save_invalid
-    assert not restored.buildings
-    assert restored.tilemap.row_count == 2
-    assert restored.has_save_data()
-    restored.play()
-    assert restored.panel_manager.current_panel == "play"
-    assert not restored.panel_manager["play"]["continue_button"].active
-    restored.save_game()
-    assert browser[0].getItem(key) == original
-    assert "could not be loaded" in web.show_notice.call_args.args[0]
-    restored.new_game()
-    assert not restored.web_save_invalid
-    assert restored.panel_manager["play"]["continue_button"].active
-    assert browser[0].getItem(key) is None
-
-
-def test_invalid_reload_leaves_existing_world_untouched(browser):
-    game = boot()
-    game.add_building(1, 1, 1, "left")
-    board = game.tilemap
-    building = game.buildings[0]
-    game.web_save.data = {"age": 999}
-    game.load_data()
-    assert game.tilemap is board
-    assert list(game.buildings) == [building]
-
-
-def test_unreadable_save_shows_recovery_without_impossible_retry(browser):
-    game = boot()
-    browser[0].setItem(game.web_save.key, "{broken")
-    restored = boot()
-    assert restored.web_save_invalid
-    message = web.show_notice.call_args.args[0]
-    assert "could not be loaded" in message
-    assert "return to the game" not in message
-
-
-def test_bad_task_indices_and_audio_settings_do_not_break_startup(browser):
-    game = boot()
-    game.web_settings.save(
-        {"master_volume": None, "music_volume": "bad", "sfx_volume": []}
-    )
-    game.web_save.save({"tasks_done": [0, "bad", {}, None, True, -1, 999]})
-    restored = boot()
-    assert restored.tasks.done == {0}
-    assert restored.audio.master_volume() == 1.0
-    assert restored.audio.music_volume() == restored.default_music_volume
-    assert restored.audio.sfx_volume() == restored.default_sfx_volume
 
 
 def test_empty_expanded_board_can_continue_after_reload(browser):
@@ -345,84 +237,152 @@ def test_empty_expanded_board_can_continue_after_reload(browser):
     assert restored.player.money == game.player.money
 
 
-def test_save_is_read_once_even_if_another_tab_writes_during_restore(
-    browser, monkeypatch
-):
+def test_browser_steps_the_motion_at_the_desktop_rate_and_the_rest_once(browser):
     game = boot()
-    game.add_building(1, 1, 1, "left")
-    game.save_game()
-    original = browser[0].getItem
-    reads = []
+    game.clock = Mock(get_time=lambda: 1000 / WEB_FPS)
+    game.buildings.update = Mock()
+    game.cloud_animation.update = Mock()
+    game.panel_manager.update = Mock()
+    for _ in range(WEB_FPS):
+        game.update()
+    assert game.buildings.update.call_count == game.settings["window"]["fps"]
+    assert game.cloud_animation.update.call_count == game.settings["window"]["fps"]
+    assert game.panel_manager.update.call_count == WEB_FPS  # time-based: once a frame
+    game.buildings.update.reset_mock()
+    game.clock = Mock(get_time=lambda: 60_000)  # a background tab: no endless catch-up
+    game.update()
+    assert game.buildings.update.call_count <= 9
 
-    def changing_read(key):
-        reads.append(key)
-        result = original(key)
-        if key == game.web_save.key:
-            browser[0].setItem(key, json.dumps({"age": 3, "size": 3, "money": 1}))
-        return result
 
-    monkeypatch.setattr(browser[0], "getItem", changing_read)
+@pytest.mark.parametrize("raw", ["{broken", "[]", "null"])
+def test_unreadable_save_is_kept_until_an_explicit_new_game(browser, raw, caplog):
+    path = boot().web_save.path.as_posix()
+    browser.localStorage.setItem(f"pygamine:{path}", raw)
+    with caplog.at_level(logging.WARNING):
+        restored = boot()
+    assert "unreadable" in caplog.text
+    assert restored.web_save_invalid
+    assert "could not be loaded" in browser.notice.textContent
+    assert not restored.buildings
+    assert restored.has_save_data()
+    restored.play()
+    assert restored.panel_manager.current_panel == "play"
+    assert not restored.panel_manager["play"]["continue_button"].active
+    restored.save_game()
+    assert browser.localStorage.getItem(f"pygamine:{path}") == raw
+    restored.new_game()
+    assert not restored.web_save_invalid
+    assert restored.panel_manager["play"]["continue_button"].active
+    assert browser.localStorage.getItem(f"pygamine:{path}") is None
+
+
+def test_damaged_values_are_held_to_valid_ones_before_the_board_changes(browser):
+    game = boot()
+    game.web_save.save(
+        {
+            "age": 999,
+            "size": 999999,
+            "money": None,
+            "buildings": [
+                {"row": 1, "column": 1, "level": 1},
+                {"row": 2, "level": 1},  # no column
+                {"row": 1, "column": 1, "level": 2},  # same tile again
+                {"row": 9, "column": 9, "level": 1},  # off the board
+                {"row": 2, "column": 2, "level": 99, "income_fraction": "x"},
+                "bad",
+            ],
+        }
+    )
+    game.web_settings.save(
+        {"master_volume": None, "music_volume": "bad", "sfx_volume": []}
+    )
     restored = boot()
-    assert reads.count(game.web_save.key) == 1
-    assert restored.buildings.age_number == 0
-    assert len(restored.buildings) == 1
-    assert restored.tilemap.row_count == 2
+    assert restored.buildings.age_number == restored.buildings.max_age_number
+    assert restored.tilemap.row_count == restored.max_size
+    assert restored.player.money == restored.starting_money
+    assert [(b.tile.row_number, b.tile.column_number) for b in restored.buildings] == [
+        (1, 1),
+        (2, 2),
+    ]
+    assert restored.buildings[1].level == restored.max_building_level
+    assert restored.audio.master_volume() == 1.0
+    assert restored.audio.music_volume() == restored.default_music_volume
+    assert restored.audio.sfx_volume() == restored.default_sfx_volume
 
 
-def test_rejected_save_keeps_settled_board_for_continue_and_retry(browser, monkeypatch):
+def test_bad_task_indices_are_dropped_and_the_good_one_kept(browser):
+    boot().web_save.save({"tasks_done": [0, "bad", {}, None, True, -1, 999]})
+    assert boot().tasks.done == {0}
+
+
+def test_corrupt_settings_are_logged_and_the_game_still_starts(browser, caplog):
+    game = boot()
+    path = game.web_settings.path.as_posix()
+    browser.localStorage.setItem(f"pygamine:{path}", "{broken")
+    with caplog.at_level(logging.WARNING):
+        restored = boot()
+    assert "settings are unreadable" in caplog.text
+    assert restored.ui_scale == restored.load_settings().ui_scale
+
+
+def test_board_changes_save_after_a_short_wait(browser, monkeypatch):
+    now = {"t": 10_000}
+    monkeypatch.setattr(pygame.time, "get_ticks", lambda: now["t"])
+    game = boot()
+    game.open_panel("game")
+    game.create_building()
+    game.create_building()  # joins the first wait: one write
+    assert stored(browser) is None
+    game.update()
+    assert stored(browser) is None
+    now["t"] += AUTOSAVE_DELAY_MS
+    game.update()
+    assert len(json.loads(stored(browser))["buildings"]) == 2
+    building = game.buildings[0]
+    game.info_panel.building = building
+    game._sell(building)
+    now["t"] += AUTOSAVE_DELAY_MS
+    game.update()
+    assert len(json.loads(stored(browser))["buildings"]) == 1
+
+
+def test_autosave_waits_for_a_merge_to_finish(browser, monkeypatch):
+    now = {"t": 10_000}
+    monkeypatch.setattr(pygame.time, "get_ticks", lambda: now["t"])
     game = boot()
     game.add_building(1, 1, 1, "left")
     game.add_building(1, 1, 2, "right")
-    game.save_game()
-    previous = dict(browser[0].data)
-    original = browser[0].setItem
-    monkeypatch.setattr(browser[0], "setItem", Mock(side_effect=RuntimeError("quota")))
     game.open_panel("game")
     game.move_buildings("left")
-    game.on_exit_request()
-    assert browser[0].data == previous
-    assert len(game.buildings) == 1 and game.buildings[0].level == 2
-    assert game.has_save_data()
-    assert "Progress could not be saved" in web.show_notice.call_args.args[0]
-    game.play()
-    assert game.panel_manager.current_panel == "play"
-    monkeypatch.setattr(browser[0], "setItem", original)
-    game.open_panel("game")
-    game.on_exit_request()
-    assert web.show_notice.call_args.args[0] == ""
-    assert boot().buildings[0].level == 2
+    game.request_autosave()
+    now["t"] += AUTOSAVE_DELAY_MS
+    assert game.buildings.is_busy()
+    game.autosave_if_due()
+    assert stored(browser) is None
+    for _ in range(600):
+        game.update()
+        if not game.buildings.is_busy():
+            break
+    game.update()
+    assert [b["level"] for b in json.loads(stored(browser))["buildings"]] == [2]
 
 
-def test_failed_preferences_remain_in_session_and_retry_together(browser, monkeypatch):
-    game = boot()
-    original = browser[0].setItem
-    monkeypatch.setattr(
-        browser[0], "setItem", Mock(side_effect=RuntimeError("blocked"))
-    )
-    game.save_language("tr")
-    game.save_ui_scale(90)
-    game.audio.set_master_volume(0.4)
-    game.save_audio_settings()
-    assert "Settings apply to this session only" in web.show_notice.call_args.args[0]
-    assert game.load_settings().language == "tr"
-    assert game.load_settings().ui_scale == 90
-    monkeypatch.setattr(browser[0], "setItem", original)
-    game.save_audio_settings()
-    assert web.show_notice.call_args.args[0] == ""
-    restored = boot()
-    assert restored.load_settings().language == "tr"
-    assert restored.ui_scale == 90
-    assert restored.audio.master_volume() == pytest.approx(0.4)
-
-
-def test_unavailable_storage_warns_before_reload_and_keeps_session(
+def test_refused_write_shows_one_notice_and_a_later_save_clears_it(
     browser, monkeypatch
 ):
-    monkeypatch.setattr(save_store, "_browser_storage", lambda: None)
     game = boot()
-    assert "Progress will be lost" in web.show_notice.call_args.args[0]
-    game.player.money = 4321
+    game.add_building(1, 1, 1, "left")
     game.save_game()
-    assert game.has_save_data()
-    assert game.web_save.load()["money"] == 4321
-    assert "Progress will be lost" in web.show_notice.call_args.args[0]
+    before = stored(browser)
+    original = browser.localStorage.setItem
+    monkeypatch.setattr(
+        browser.localStorage, "setItem", Mock(side_effect=RuntimeError("quota"))
+    )
+    game.player.money += 5
+    game.save_game()
+    assert stored(browser) == before
+    assert "Progress will be lost" in browser.notice.textContent
+    monkeypatch.setattr(browser.localStorage, "setItem", original)
+    game.save_game()
+    assert browser.notice.textContent == ""
+    assert json.loads(stored(browser))["money"] == game.player.money

@@ -9,12 +9,14 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Browser build with persistent localStorage saves, invalid-save recovery, visible warnings for unsaved progress/settings, browser fullscreen controls and a Thanks for playing screen; the release workflow produces the HTML5 bundle alongside the desktop builds ([ADR 0004](docs/decisions/0004-web-build.md)).
+- Browser build (pygbag): progress and settings live in localStorage and the board saves a moment after every build, sell, merge, NEXT AGE and expand; an unreadable save is kept until New Game and a refused write shows one notice; browser fullscreen replaces the window-mode rows, and Exit opens a Thanks for playing screen with a link to rate the game. The release workflow builds the HTML5 bundle, pushes it to itch.io and attaches `highrise-web.zip` after the desktop release succeeded ([ADR 0004](docs/decisions/0004-web-build.md), [devlog](docs/devlog/2026-11-18-web-build.md)).
 
 - A Windows installer, `highrise-windows-setup.exe` (English or Turkish setup, you pick the folder; Start Menu shortcut, optional desktop shortcut), next to the zips on the GitHub Release ([devlog](docs/devlog/2026-11-18-user-data-and-installer.md)).
 
 ### Changed
 
+- The background music is now `bg.ogg` (the same CC BY 3.0 track, converted from MP3 to OGG Vorbis; 7.4 MB to 3.9 MB), so desktop and browser play one file.
+- Translucent blits (floating money text, sell dust, odometer, tiles, the task list) use pygamine's `ALPHA_BLIT`, which blends like before on desktop and also works on the browser's SDL2 build.
 - The downloaded game keeps its save database in your user-data folder (`%APPDATA%\VectorViolet\highrise\databases` on Windows, and the macOS and Linux equivalents) instead of inside the game folder, so an uninstall or update keeps it. Old saves (in `_internal\databases` of the old game folder) are not moved over. Running from source is unchanged ([ADR 0003](docs/decisions/0003-saves-in-the-user-data-folder.md)).
 
 ### Development

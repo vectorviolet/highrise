@@ -21,7 +21,6 @@ import importlib.util
 import shutil
 import subprocess
 import sys
-from uuid import uuid4
 from collections.abc import Callable
 from pathlib import Path
 
@@ -173,40 +172,11 @@ def build() -> Path:
     """Stage, run pygbag and copy the result to build/web/. Returns that folder."""
     stage_dir = stage()
     run_pygbag(stage_dir)
-    # Assemble on the same filesystem before touching the served bundle.
-    OUT_DIR.parent.mkdir(parents=True, exist_ok=True)
-    # A TemporaryDirectory uses a private ACL on Windows. A sibling created by
-    # copytree inherits the build folder's permissions, so a preview server
-    # running without elevation can still serve it after promotion.
-    replacement = OUT_DIR.with_name(f"{OUT_DIR.name}.next-{uuid4().hex}")
-    try:
-        shutil.copytree(stage_dir / "build" / "web", replacement)
-        shutil.copy2(LOGO, replacement / "logo.png")
-        promote_bundle(replacement, OUT_DIR)
-    finally:
-        if replacement.exists():
-            assert replacement.resolve().parent == OUT_DIR.resolve().parent
-            shutil.rmtree(replacement)
+    if OUT_DIR.exists():
+        shutil.rmtree(OUT_DIR)
+    shutil.copytree(stage_dir / "build" / "web", OUT_DIR)
+    shutil.copy2(LOGO, OUT_DIR / "logo.png")
     return OUT_DIR
-
-
-def promote_bundle(replacement: Path, destination: Path) -> None:
-    """Swap complete bundles; retain the old one if the replacement cannot move."""
-    backup = destination.with_name(destination.name + ".previous")
-    if backup.exists():
-        raise RuntimeError(
-            f"Previous bundle still at {backup}; inspect it before rebuilding"
-        )
-    if destination.exists():
-        destination.rename(backup)
-    try:
-        replacement.rename(destination)
-    except OSError:
-        if backup.exists():
-            backup.rename(destination)
-        raise
-    if backup.exists():
-        shutil.rmtree(backup)
 
 
 def main(argv: list[str] | None = None) -> int:

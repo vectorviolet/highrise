@@ -111,14 +111,14 @@ window operations live in `src/util/web.py`. The browser hides resolution and
 intro controls, uses a fullscreen toggle and opens a Thanks for playing page on Exit.
 
 `WebPersistenceMixin` delegates to the existing SQLite mixin on desktop and uses
-Highrise-specific JSON stores in localStorage in the browser. `BrowserStore` uses the
-pinned engine SaveStore namespace and storage selection, caches session changes and
-reports durable, failed or session-only writes. The browser reads one snapshot and
-validates it before replacing the board. Invalid saves remain stored until an explicit
-New Game; failed writes keep the current game available for Continue and retry. A
-localized browser notice explains persistence failures. SQLite is never imported on
-the browser path. Both backends preserve pending merge results, building variants
-and income fractions, task state and settings. See [ADR 0004](decisions/0004-web-build.md).
+Highrise-specific JSON stores in localStorage, through the engine's public `SaveStore`,
+in the browser. A restore reads the save once and holds every value to a valid one
+before the board changes (the building loop is shared with desktop); a save that cannot
+be read stays stored until an explicit New Game. The board saves on ESC and shortly
+after each build, sell, merge, NEXT AGE or expand, since a closed tab gives the game no
+QUIT. A refused write shows one browser notice. SQLite is never imported on the browser
+path. The browser presents 60 frames a second, so the motion steps (buildings, clouds)
+run at the desktop rate inside the frame. See [ADR 0004](decisions/0004-web-build.md).
 
 ## Tests and scripts
 

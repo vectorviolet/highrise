@@ -272,7 +272,8 @@ jobs:
           PACKAGE: itch/osx
 
   # itch.io publishing needs only the web build. The release attachment also waits
-  # for the desktop release so an incomplete draft cannot be published accidentally.
+  # for the desktop release to succeed, so a failed desktop build never leaves a
+  # published web-only release.
   publish-web:
     name: Publish web build to itch.io
     needs: web
@@ -304,12 +305,11 @@ jobs:
 
   attach-web:
     name: Attach web build to the GitHub Release
-    # Wait for the desktop release. A skipped release (failed desktop build) allows
-    # a web-only release, but a failed release may have left an incomplete draft:
-    # leave that draft untouched for retry instead of publishing it.
+    # Runs only after `release` succeeded, like attach-installer: it never creates a release
+    # on its own, so a failed desktop build can't leave a published web-only release.
     needs: [web, release]
     runs-on: ubuntu-latest
-    if: ${{ !cancelled() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && needs.web.result == 'success' && (needs.release.result == 'success' || needs.release.result == 'skipped') }}  # codespell:ignore cancelled
+    if: ${{ !cancelled() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && needs.web.result == 'success' && needs.release.result == 'success' }}  # codespell:ignore cancelled
     steps:
       - name: Download the web build artifact
         uses: actions/download-artifact@v8

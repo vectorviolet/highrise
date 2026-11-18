@@ -319,42 +319,6 @@ def test_pygbag_timeout_is_bounded_and_retried(build_web, monkeypatch, tmp_path)
     assert attempts == [build_web.BUILD_TIMEOUT_SECONDS] * 2
 
 
-def test_failed_logo_copy_preserves_previous_bundle(build_web, monkeypatch, tmp_path):
-    stage = tmp_path / "stage"
-    (stage / "build" / "web").mkdir(parents=True)
-    (stage / "build" / "web" / "index.html").write_text("new")
-    out = tmp_path / "web"
-    out.mkdir()
-    (out / "index.html").write_text("old")
-    monkeypatch.setattr(build_web, "stage", lambda: stage)
-    monkeypatch.setattr(build_web, "run_pygbag", lambda stage: None)
-    monkeypatch.setattr(build_web, "OUT_DIR", out)
-    monkeypatch.setattr(build_web, "LOGO", tmp_path / "missing.png")
-    with pytest.raises(FileNotFoundError):
-        build_web.build()
-    assert (out / "index.html").read_text() == "old"
-
-
-def test_failed_promotion_restores_previous_bundle(build_web, monkeypatch, tmp_path):
-    out, replacement = tmp_path / "web", tmp_path / "replacement"
-    out.mkdir()
-    replacement.mkdir()
-    (out / "index.html").write_text("old")
-    (replacement / "index.html").write_text("new")
-    rename = Path.rename
-
-    def fail_replacement(path, target):
-        if path == replacement:
-            raise PermissionError("destination is busy")
-        return rename(path, target)
-
-    monkeypatch.setattr(Path, "rename", fail_replacement)
-    with pytest.raises(PermissionError):
-        build_web.promote_bundle(replacement, out)
-    assert (out / "index.html").read_text() == "old"
-    assert (replacement / "index.html").read_text() == "new"
-
-
 @pytest.mark.parametrize("host", ["localhost", "game.itch.zone"])
 @pytest.mark.parametrize("download_fails", [False, True])
 def test_loader_reports_failed_download_or_corrupt_archive(

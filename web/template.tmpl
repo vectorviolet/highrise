@@ -231,6 +231,22 @@ function show_infobox() {
         #progress::-webkit-progress-value { background: #a8e063; }
         #progress::-moz-progress-bar { background: #a8e063; }
 
+        /* The game's "couldn't save" notice (util/web.py show_notice). */
+        #storage-notice:empty { display: none; }
+        #storage-notice {
+            position: fixed;
+            top: 8px;
+            left: 10%;
+            right: 10%;
+            z-index: 9999;
+            padding: 12px;
+            background: #fff3cd;
+            color: #522000;
+            font: 18px sans-serif;
+            text-align: center;
+            pointer-events: none;
+        }
+
         #infobox:empty { display: none; }
         #infobox {
             /* centered in the viewport, also after a resize */
@@ -363,6 +379,7 @@ height="720px"
     </canvas>
 
     <div id="infobox"></div>
+    <div id="storage-notice" role="status"></div>
 
     <div id=html></div>
 

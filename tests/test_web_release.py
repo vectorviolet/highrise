@@ -57,15 +57,11 @@ def test_version_tag_push_can_publish(job):
 
 
 @pytest.mark.parametrize(
-    "result,expected",
-    [
-        ("success", True),
-        ("skipped", True),
-        ("failure", False),
-        ("cancelled", False),  # codespell:ignore cancelled
-    ],
+    "result",
+    ["skipped", "failure", "cancelled"],  # codespell:ignore cancelled
 )
-def test_web_attachment_preserves_failed_desktop_drafts(result, expected):
-    assert allowed("attach-web", release=result) == expected
-    assert not allowed("attach-web", release=result, web="failure")
-    assert not allowed("attach-web", release=result, canceled=True)
+def test_web_attachment_needs_a_successful_desktop_release(result):
+    assert allowed("attach-web")
+    assert not allowed("attach-web", release=result)
+    assert not allowed("attach-web", web="failure")
+    assert not allowed("attach-web", canceled=True)

@@ -2901,7 +2901,8 @@ files:
   "sounds/bg.ogg":
     source: music-sakura-girl-day-off
     original: "Sakura Girl - Day Off.mp3"
-    note: "transcoded from the artist's free Hypeddit MP3 download to OGG Vorbis (ffmpeg, quality 5) for desktop and browser playback; not trimmed"
+    modified: "transcoded from the artist's MP3 to OGG Vorbis (ffmpeg, libvorbis quality 5) for desktop and browser playback; same audio, not trimmed, same license (CC BY 3.0)"
+    note: "the MP3 it was made from was byte-identical to the artist's free Hypeddit download (https://hypeddit.com/sakuragirl/dayoff; Sakura Girl - Day Off.mp3); the SoundCloud track's license field is cc-by"
   "sounds/build-wood.ogg":
     source: kenney-impact-sounds
     original: "Audio/impactPlank_medium_000.ogg"

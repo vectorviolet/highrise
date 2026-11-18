@@ -96,10 +96,7 @@ credits:
 
 storage:
   invalid_save: "Saved progress could not be loaded and has been kept. Choose New Game to replace it."
-  progress_failed: "Progress could not be saved. Keep this tab open; return to the game and then the menu to retry."
-  progress_session_only: "Browser storage is unavailable. Progress will be lost when you reload or close this tab."
-  settings_failed: "Settings apply to this session only. Try saving them again before reloading."
-  settings_session_only: "Browser storage is unavailable. Settings will be lost when you reload or close this tab."
+  unavailable: "Browser storage is unavailable. Progress will be lost when you reload or close this tab."
 
 thanks:
   title: "THANKS FOR PLAYING!"
