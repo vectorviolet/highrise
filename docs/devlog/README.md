@@ -30,6 +30,7 @@ PR. "Owner" is the project owner; "Claude" is the Claude Code session that imple
 | 2026-11-11 | [itch.io store page text and checklist](2026-11-11-itch-store-page.md) | Docs | #82, PR #83 |
 | 2026-11-11 | [Menu polish](2026-11-11-menu-polish.md) | UI | #55, #62, #63, #66, PR #67 |
 | 2026-11-11 | [README screenshots and preview GIF](2026-11-11-readme-screenshots.md) | Docs | #44, PR #81 |
+| 2026-11-18 | [Saves in the user-data folder and a Windows installer](2026-11-18-user-data-and-installer.md) | Platform, release | #57 |
 <!-- index:end -->
 
 ## Adding an entry

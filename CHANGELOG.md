@@ -7,6 +7,18 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- A Windows installer, `highrise-windows-setup.exe` (English or Turkish setup, you pick the folder; Start Menu shortcut, optional desktop shortcut), next to the zips on the GitHub Release ([devlog](docs/devlog/2026-11-18-user-data-and-installer.md)).
+
+### Changed
+
+- The downloaded game keeps its save database in your user-data folder (`%APPDATA%\VectorViolet\highrise\databases` on Windows, and the macOS and Linux equivalents) instead of inside the game folder, so an uninstall or update keeps it. Old saves (in `_internal\databases` of the old game folder) are not moved over. Running from source is unchanged ([ADR 0003](docs/decisions/0003-saves-in-the-user-data-folder.md)).
+
+### Development
+
+- Bump pygamine to its `user_data_dir` (with web build support and the dependency bumps since v1.0.0); the release workflow builds the installer with Inno Setup (`packaging/highrise.iss`), and a test keeps its language list in step with `config/lang/`.
+
 ## [1.0.0] – 2026-11-11
 
 The first stable release: eleven building levels with their own look, boosters, age tasks that gate

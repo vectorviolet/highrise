@@ -18,8 +18,25 @@ need to change.
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
 from pygamine import resource_root as resource_root, resource_path as resource_path
+from pygamine import user_data_dir
 
 # The language files (config/lang/<code>.yaml), anchored to the resource root so
 # the game, the tests and the smoke test all find them from any folder.
 LANG_FOLDER = resource_path("config", "lang")
+
+
+def packaged_databases_dir() -> Path | None:
+    """Where the save database lives in the packaged (PyInstaller) build.
+
+    The per-user folder, ``user_data_dir("highrise") / "databases"`` (under
+    ``%APPDATA%`` on Windows), so an installer or an update never touches it.
+    ``None`` from source: there ``Database`` keeps its cwd-relative ``databases/``
+    default (ADR 0003), which keeps each worktree's saves apart.
+    """
+    if not getattr(sys, "frozen", False):
+        return None
+    return user_data_dir("highrise") / "databases"

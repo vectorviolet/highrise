@@ -47,7 +47,7 @@ from ui.money_format import format_money
 from ui.odometer import Odometer
 from ui.task_list import TaskRow, render_task_list
 from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES, step_ui_scale
-from util.paths import LANG_FOLDER, resource_path
+from util.paths import LANG_FOLDER, packaged_databases_dir, resource_path
 
 # The window and taskbar icon: the plate-less tower, crisp at the small sizes the OS shows.
 WINDOW_ICON = resource_path("assets", "images", "icon", "icon_64.png")
@@ -162,6 +162,15 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     _task_list_key: tuple | None = None
     _task_list_surface: pygame.Surface | None = None
 
+    @staticmethod
+    def _make_database(name: str) -> Database:
+        """A Database in the packaged build's user-data folder, or Database's own
+        default (cwd-relative `databases/`) when run from source."""
+        directory = packaged_databases_dir()
+        return (
+            Database(name) if directory is None else Database(name, directory=directory)
+        )
+
     def __init__(self) -> None:
         self.settings = yaml.safe_load(Path("config/settings.yaml").read_text())
         localization.load(LANG_FOLDER)
@@ -199,7 +208,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.tilemap: Tilemap | None = None
         self.window_transform = Transform((0, 0), self.size)
         self.panel_manager = PanelManager(ui["background_colors"])
-        self.database = Database("database")
+        self.database = self._make_database("database")
 
         self.buildings = Buildings(
             on_merge=self._on_buildings_merged,
