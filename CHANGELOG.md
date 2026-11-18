@@ -18,6 +18,7 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Development
 
 - Bump pygamine to its `user_data_dir` (with web build support and the dependency bumps since v1.0.0); the release workflow builds the installer with Inno Setup (`packaging/highrise.iss`), and a test keeps its language list in step with `config/lang/`.
+- Bump pygamine to its `packaged_data_dir` and use it for the packaged save-database folder, replacing the game's own helper (no behavior change).
 
 ## [1.0.0] – 2026-11-11
 

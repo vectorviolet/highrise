@@ -25,6 +25,7 @@ from pygamine import Application
 from pygamine import clamp01
 from pygamine import AssetManager
 from pygamine import Database
+from pygamine import packaged_data_dir
 from pygamine import PanelLoaderExt
 from pygamine import PanelManager
 from pygamine import SplashScreen, standard_splash_media
@@ -47,7 +48,7 @@ from ui.money_format import format_money
 from ui.odometer import Odometer
 from ui.task_list import TaskRow, render_task_list
 from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES, step_ui_scale
-from util.paths import LANG_FOLDER, packaged_databases_dir, resource_path
+from util.paths import LANG_FOLDER, resource_path
 
 # The window and taskbar icon: the plate-less tower, crisp at the small sizes the OS shows.
 WINDOW_ICON = resource_path("assets", "images", "icon", "icon_64.png")
@@ -167,7 +168,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         """The save database: in the packaged build's user-data folder, or Database's own
         default (cwd-relative `databases/`) when run from source. A method of its own
         because `__init__` is at ruff's statement limit."""
-        directory = packaged_databases_dir()
+        directory = packaged_data_dir("highrise", "databases")
         if directory is None:
             return Database("database")
         return Database("database", directory=directory)

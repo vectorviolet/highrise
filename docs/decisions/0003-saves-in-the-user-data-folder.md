@@ -22,7 +22,7 @@ every worktree has its own `databases/`, and the tests redirect `Database`'s def
   `~/.local/share`)`/VectorViolet/highrise/databases`.
 - **Running from source** keeps `Database`'s own default, the cwd-relative `databases/`. Highrise has
   no web build on `main`, so there is nothing to keep there.
-- One helper decides, `util.paths.packaged_databases_dir()` (`None` means "use the default"), and
+- One helper decides, pygamine's `packaged_data_dir("highrise", "databases")` (`None` means "use the default"), and
   `Game._make_database` is the only place that builds the `Database`.
 - **No migration** of old saves next to the executable (the owner's decision).
 
