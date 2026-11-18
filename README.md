@@ -43,17 +43,19 @@ Place buildings on the isometric grid, then slide them with WASD or the arrow ke
 
 [![Available on itch.io](https://static.itch.io/images/badge.svg)](https://umutcanekinci.itch.io/highrise)
 
-Grab a ready-to-play build for your OS from [itch.io](https://umutcanekinci.itch.io/highrise) or the [latest GitHub release](https://github.com/vectorviolet/highrise/releases/latest) — no Python required. Unzip and run:
+Grab a ready-to-play build for your OS from [itch.io](https://umutcanekinci.itch.io/highrise) or the [latest GitHub release](https://github.com/vectorviolet/highrise/releases/latest) — no Python required. On Windows, run the installer, or unzip and run:
 
 | OS | Run |
 |----|-----|
-| Windows | Extract `highrise-windows.zip`, run `highrise.exe` |
+| Windows | Run `highrise-windows-setup.exe` (choose the language and the install folder, e.g. `C:\Games`; it adds a Start Menu shortcut and, if you tick it, a desktop one), or extract `highrise-windows.zip` and run `highrise.exe` |
 | macOS | Extract `highrise-macos.zip`, open `Highrise.app` |
 | Linux | Extract `highrise-linux.zip`, run `./highrise/highrise` |
 
 > macOS Gatekeeper: the app is unsigned, so the first launch needs **right-click → Open** (or `xattr -dr com.apple.quarantine Highrise.app`).
 >
-> Windows SmartScreen: the app is unsigned, so the first launch shows **"Windows protected your PC."** Click **More info → Run anyway**. This is Microsoft's download-reputation check, not a virus warning — brand-new unsigned executables always trigger it.
+> Windows SmartScreen: the app is unsigned, so the first launch shows **"Windows protected your PC."** Click **More info → Run anyway**. This is Microsoft's download-reputation check, not a virus warning — brand-new unsigned executables always trigger it. The installer is unsigned too and shows the same warning.
+
+**Where your saves are.** The downloaded game keeps its save database in your user-data folder, so it survives an uninstall or an update: `%APPDATA%\VectorViolet\highrise\databases` on Windows, `~/Library/Application Support/VectorViolet/highrise/databases` on macOS, `~/.local/share/VectorViolet/highrise/databases` on Linux (`$XDG_DATA_HOME` if set). Running from source keeps it in a `databases/` folder in the project. Saves from older downloads are not moved over: they are in the `databases` folder inside the old game folder (`highrise\_internal\databases` in the Windows zip, inside the app bundle on macOS, `highrise/_internal/databases` on Linux); copy `database.db` into the new folder by hand if you want it. Installing over an old unzipped folder removes it.
 
 ## Running from source
 
