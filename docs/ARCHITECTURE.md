@@ -102,6 +102,18 @@ chosen from `action_sounds` in `config/settings.yaml` by `src/app/action_sounds.
 track is optional: without the `bg` entry in `config/assets.yaml` the game plays no music and hides
 the music volume row.
 
+## Browser runtime
+
+`web/main.py` starts `Game.run_async()`, which prepares the same board, settings
+and menus as desktop before entering the yielding engine loop. Browser-specific
+window operations live in `src/util/web.py`. The browser hides resolution and
+intro controls, uses a fullscreen toggle and opens a Thanks for playing page on Exit.
+
+`WebPersistenceMixin` delegates to the existing SQLite mixin on desktop and uses
+Highrise-specific JSON SaveStores in localStorage in the browser. It never imports
+SQLite on the browser path. Both stores preserve pending merge results, building
+variants and income fractions, task state and settings. See [ADR 0003](decisions/0003-web-build.md).
+
 ## Tests and scripts
 
 `tests/` is the app's own suite (pygamine has its own); `tests/conftest.py` sets dummy SDL drivers

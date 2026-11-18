@@ -78,6 +78,7 @@ ui:
   cursor_size: [32, 32]  # the Kenney Cursor Pack sprite's native size: crisp pixel art
   background_colors:
     menu: yellow
+    thanks: yellow
     play: yellow
     settings: yellow
     display_settings: yellow
@@ -85,3 +86,6 @@ ui:
     game_settings: yellow
     credits: yellow
     game: [72, 218, 233]
+
+links:
+  itch_page: "https://umutcanekinci.itch.io/highrise"

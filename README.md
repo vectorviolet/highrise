@@ -71,6 +71,10 @@ If you forgot `--recurse-submodules`, or the engine folder is out of step after 
 
 Tests, code style, bundles and releases are in [CONTRIBUTING.md](CONTRIBUTING.md); how the code fits together is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
+The browser build can also be built and tested locally; see
+[browser build instructions](CONTRIBUTING.md#browser-build). It targets desktop
+browsers with a keyboard and mouse and stores progress in the browser.
+
 ## Links
 
 - [Devlog](docs/devlog/README.md): every feature and design decision, with screenshots; [decision records](docs/decisions/README.md)

@@ -93,3 +93,8 @@ credits:
   music: "Music"
   fonts: "Fonts"
   built_with: "Built with"
+
+thanks:
+  title: "THANKS FOR PLAYING!"
+  subtitle: "Enjoyed Highrise? Tell us what you think."
+  rate: "LEAVE A COMMENT OR RATING"

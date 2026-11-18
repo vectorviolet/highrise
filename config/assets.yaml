@@ -30,7 +30,7 @@ sounds:
     # Background music: Sakura Girl - Day Off (CC BY 3.0, credited in
     # CREDITS.md). Without a `bg` entry the game plays no music and hides the
     # music volume control.
-    bg:             {folder: "", name: bg, extension: mp3}
+    bg:             {folder: "", name: bg, extension: ogg}
     click:          {folder: "", name: click-a}
     back:           {folder: "", name: click-b}
     switch_up:      {folder: "", name: switch-b}

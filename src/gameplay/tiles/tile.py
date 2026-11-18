@@ -2,6 +2,7 @@ from typing import override
 
 from pygame import SRCALPHA, Surface
 from pygame.draw import polygon
+from pygamine import ALPHA_BLIT
 from pygamine import ImagePath
 from pygamine import load_image
 
@@ -90,6 +91,7 @@ class Tile(GameObject):
         window.blit(
             self.selected_surface if self.selected else self.unselected_surface,
             self.rect,
+            special_flags=ALPHA_BLIT,
         )
         if self.highlighted:
-            window.blit(self.highlight_surface, self.rect)
+            window.blit(self.highlight_surface, self.rect, special_flags=ALPHA_BLIT)

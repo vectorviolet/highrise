@@ -88,3 +88,8 @@ credits:
   music: "Müzik"
   fonts: "Yazı tipleri"
   built_with: "Kullanılan araçlar"
+
+thanks:
+  title: "OYNADIĞIN İÇİN TEŞEKKÜRLER!"
+  subtitle: "Highrise'i beğendin mi? Düşüncelerini bizimle paylaş."
+  rate: "YORUM YAP VEYA PUAN VER"

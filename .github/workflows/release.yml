@@ -1,6 +1,7 @@
 name: Release
 
-# Build per-OS bundles and publish them to a GitHub Release.
+# Build per-OS bundles and publish them to a GitHub Release; the browser (pygbag)
+# bundle is built and published by its own jobs (web, publish-web, attach-web).
 # Cut a release by pushing a tag:  git tag v0.1.0 && git push origin v0.1.0
 # Use "Run workflow" (workflow_dispatch) to build without releasing.
 on:
@@ -73,15 +74,90 @@ jobs:
           if-no-files-found: error
           retention-days: 7  # the GitHub Release keeps the builds; artifacts only hand them to the release job
 
+  # The browser build is independent of the desktop jobs: if pygbag fails (it
+  # needs internet), the desktop release and its itch.io pushes still go out.
+  web:
+    name: Build web (pygbag)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (with pygamine submodule)
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Set up uv + Python
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync
+
+      # Stages the bundle and runs the pinned pygbag (needs internet);
+      # the result is build/web with index.html at its root.
+      - name: Build web bundle with pygbag
+        run: uv run python scripts/build_web.py
+
+      # itch.io's HTML5 limits for a zip upload (checked here so a too-big bundle fails
+      # the build, not the push after the desktop builds went out). Source:
+      # https://itch.io/docs/creators/html5 ("ZIP file requirements"): at most 1,000
+      # files, 240 characters per file name including its path, 200 MB per extracted
+      # file and 500 MB extracted in total. Update the numbers if that page changes.
+      - name: Check the bundle against itch.io's HTML5 limits
+        run: |
+          max_files=1000
+          max_name=240
+          max_file_bytes=$((200 * 1024 * 1024))
+          max_total_bytes=$((500 * 1024 * 1024))
+          cd build/web
+          files=$(find . -type f | wc -l)
+          total=$(find . -type f -printf '%s\n' | awk '{s += $1} END {print s + 0}')
+          fail=0
+          if [ "$files" -gt "$max_files" ]; then
+            echo "::error::Web bundle has $files files; itch.io allows at most $max_files."
+            fail=1
+          fi
+          if [ "$total" -gt "$max_total_bytes" ]; then
+            echo "::error::Web bundle is $total bytes extracted; itch.io allows at most $max_total_bytes."
+            fail=1
+          fi
+          while IFS= read -r -d '' f; do
+            name=${f#./}
+            size=$(stat -c %s "$f")
+            if [ "${#name}" -gt "$max_name" ]; then
+              echo "::error::Web bundle file name is ${#name} characters (limit $max_name): $name"
+              fail=1
+            fi
+            if [ "$size" -gt "$max_file_bytes" ]; then
+              echo "::error::Web bundle file $name is $size bytes; itch.io allows at most $max_file_bytes per file."
+              fail=1
+            fi
+          done < <(find . -type f -print0)
+          echo "Web bundle: $files files, $total bytes extracted."
+          exit $fail
+
+      - name: Package
+        run: cd build/web && zip -r ../../highrise-web.zip .
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          # Not "highrise-*": the desktop release jobs download that pattern.
+          name: web-bundle
+          path: highrise-web.zip
+          if-no-files-found: error
+          retention-days: 7  # the GitHub Release keeps the zip; the artifact only hands it to publish-web and attach-web
+
   release:
     name: Publish GitHub Release
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: Download all build artifacts
+      - name: Download the desktop build artifacts
         uses: actions/download-artifact@v8
         with:
+          pattern: highrise-*
           path: artifacts
           merge-multiple: true
 
@@ -98,9 +174,10 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: Download all build artifacts
+      - name: Download the desktop build artifacts
         uses: actions/download-artifact@v8
         with:
+          pattern: highrise-*
           path: artifacts
           merge-multiple: true
 
@@ -142,3 +219,56 @@ jobs:
           CHANNEL: osx
           VERSION: ${{ github.ref_name }}
           PACKAGE: itch/osx
+
+  # Both web publish jobs need only `web`, never a desktop job's success, so a
+  # desktop failure cannot keep the web build from itch.io or the release.
+  publish-web:
+    name: Publish web build to itch.io
+    needs: web
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download the web build artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: web-bundle
+          path: artifacts
+
+      # index.html sits at the zip's root, as itch.io expects; unpacked so
+      # butler diffs at the file level.
+      - name: Unpack web bundle
+        run: |
+          mkdir -p itch/web
+          unzip -q artifacts/highrise-web.zip -d itch/web
+
+      - name: Push web build
+        uses: yeslayla/butler-publish-itchio-action@v1.2.0
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
+          ITCH_USER: umutcanekinci
+          ITCH_GAME: highrise
+          CHANNEL: html5
+          VERSION: ${{ github.ref_name }}
+          PACKAGE: itch/web
+
+  attach-web:
+    name: Attach web build to the GitHub Release
+    # Runs after `release` finishes, whether it succeeded or failed, so the two never
+    # race to create the release. If `release` failed, the release does not exist and
+    # action-gh-release creates it (with just this zip); if it succeeded, the zip is
+    # added to it. Only the web build has to be good.
+    needs: [web, release]
+    runs-on: ubuntu-latest
+    if: ${{ always() && startsWith(github.ref, 'refs/tags/') && needs.web.result == 'success' }}
+    steps:
+      - name: Download the web build artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: web-bundle
+          path: artifacts
+
+      - name: Attach the web bundle to the GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: artifacts/highrise-web.zip
+          fail_on_unmatched_files: true

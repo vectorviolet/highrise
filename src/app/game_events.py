@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any
 import pygame
 
 from ui.ui_scale import DEFAULT_UI_SCALE
+from util import web
 
 # Game-panel keys that move every building one step (KEYUP).
 MOVE_KEYS = {
@@ -103,7 +104,9 @@ class GameEventsMixin:
             ("ui_scale_plus_button", self.step_ui_scale, 1),
         )
         for button_name, step, delta in steppers:
-            if panel[button_name].is_clicked(event, self.mouse.position):
+            if (not web.is_web() or panel[button_name].active) and panel[
+                button_name
+            ].is_clicked(event, self.mouse.position):
                 step(delta)
                 return
         if self._activate(panel["ui_scale_reset_button"], event):
@@ -132,7 +135,9 @@ class GameEventsMixin:
             MASTER_STEPPERS + (MUSIC_STEPPERS if has_music else ()) + SFX_STEPPERS
         )
         for button_name, channel, delta in steppers:
-            if panel[button_name].is_clicked(event, self.mouse.position):
+            if (not web.is_web() or panel[button_name].active) and panel[
+                button_name
+            ].is_clicked(event, self.mouse.position):
                 self._step_volume(channel, delta)
                 return
         if self._activate(panel["cancel_button"], event):
@@ -174,7 +179,9 @@ class GameEventsMixin:
             ("skip_intro_plus_button", self._toggle_skip_intro, 1),
         )
         for button_name, step, delta in steppers:
-            if panel[button_name].is_clicked(event, self.mouse.position):
+            if (not web.is_web() or panel[button_name].active) and panel[
+                button_name
+            ].is_clicked(event, self.mouse.position):
                 step(delta)
                 return
         if self._activate(panel["game_settings_back_button"], event):
@@ -184,6 +191,13 @@ class GameEventsMixin:
         panel = self.panel_manager["credits"]
         if self._activate(panel["credits_back_button"], event):
             self.open_panel("menu")
+
+    def handle_thanks_events(self, event: pygame.event.Event) -> None:
+        panel = self.panel_manager["thanks"]
+        if self._activate(panel["thanks_back"], event):
+            self.open_panel("menu")
+        elif self._activate(panel["thanks_link"], event):
+            web.open_in_new_tab(self.settings["links"]["itch_page"])
 
     def handle_game_events(self, event: pygame.event.Event) -> None:
         panel = self.panel_manager["game"]

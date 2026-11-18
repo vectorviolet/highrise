@@ -2898,10 +2898,10 @@ files:
   "images/tile.png":
     source: kenney-isometric-landscape
     original: "PNG/landscapeTiles_067.png"
-  "sounds/bg.mp3":
+  "sounds/bg.ogg":
     source: music-sakura-girl-day-off
     original: "Sakura Girl - Day Off.mp3"
-    note: "byte-identical to the artist's free Hypeddit download (https://hypeddit.com/sakuragirl/dayoff); not converted or trimmed"
+    note: "transcoded from the artist's free Hypeddit MP3 download to OGG Vorbis (ffmpeg, quality 5) for desktop and browser playback; not trimmed"
   "sounds/build-wood.ogg":
     source: kenney-impact-sounds
     original: "Audio/impactPlank_medium_000.ogg"
