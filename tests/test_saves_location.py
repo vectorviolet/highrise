@@ -9,22 +9,6 @@ import pytest
 import pygamine
 from app.game import Game
 from pygamine import user_data_dir
-from util.paths import packaged_databases_dir
-
-
-def test_from_source_there_is_no_packaged_folder(monkeypatch):
-    monkeypatch.delattr(sys, "_MEIPASS", raising=False)
-    assert packaged_databases_dir() is None
-
-
-def test_frozen_database_goes_to_the_user_data_folder(monkeypatch):
-    monkeypatch.setattr(sys, "_MEIPASS", str(Path.cwd()), raising=False)
-    assert packaged_databases_dir() == user_data_dir("highrise") / "databases"
-    assert packaged_databases_dir().parts[-3:] == (
-        "VectorViolet",
-        "highrise",
-        "databases",
-    )
 
 
 @pytest.fixture
@@ -40,8 +24,8 @@ def test_frozen_game_stores_in_the_user_data_folder(monkeypatch, tmp_path, quiet
         monkeypatch.setenv(variable, str(tmp_path / "home"))
     monkeypatch.setattr(sys, "_MEIPASS", str(Path.cwd()), raising=False)
     game = Game()
-    expected = packaged_databases_dir()
-    assert expected is not None
+    expected = user_data_dir("highrise") / "databases"
+    assert expected.parts[-3:] == ("VectorViolet", "highrise", "databases")
     assert game.database.directory == expected
     assert tmp_path in expected.parents  # never the real user folder in tests
     game.init_database()
