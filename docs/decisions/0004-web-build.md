@@ -23,16 +23,20 @@ Chokepoint's (`scripts/build_web.py`, `web/template.tmpl`, the itch.io limit che
   path never imports SQLite. A restore reads the save once and holds every value to a valid one
   before the board changes, reusing the desktop's clamping (`_restore_building`). A save that
   cannot be read is kept until an explicit New Game. Because a closed tab raises no QUIT, the
-  board saves 2 s after each build, sell, merge, NEXT AGE or expand, and on ESC. `SaveStore`
-  only logs a refused write, so `save_game` reads the save back and shows one notice if it
-  differs.
+  board saves 2 s after each build, sell, move, merge, NEXT AGE or expand, on ESC, and every
+  10 s while the board is open if money or the board changed (payouts). One notice says when
+  nothing survives a reload: a probe of localStorage (`util/web.storage_available`, since
+  blocked storage makes `SaveStore` fall back to memory) and a read-back after each save
+  (a refused write).
 - **Music:** `bg.mp3` became `bg.ogg` everywhere (the same CC BY 3.0 track; the credits say it
   was converted). One file serves both builds.
 - **Rendering:** translucent blits use pygamine's `ALPHA_BLIT` (the browser's SDL2 build lacks
   `BLEND_ALPHA_SDL2`); it changes nothing on desktop.
 - **Frame rate:** the browser presents 60 frames a second, but motion (buildings sliding, clouds)
-  steps per update at the desktop's 165 a second. The browser runs those steps by elapsed time
-  and everything else (panels, timers, texts) once a frame.
+  steps per update at the desktop's 165 a second. A desktop update steps the buildings twice (the
+  game panel's own update and the world's) and the clouds once; the browser runs the same
+  number of steps per second by elapsed time, and everything else (panels, timers, texts) once
+  a frame.
 - **Release:** `web` and `publish-web` run only on a version-tag push; the GitHub Release gets
   `highrise-web.zip` only after the desktop release succeeded, so a failed desktop build never
   leaves a published web-only release.

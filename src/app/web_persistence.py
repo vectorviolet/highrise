@@ -21,6 +21,8 @@ logger = logging.getLogger(__name__)
 
 # How long after a board change the save waits, so a burst of changes is one write.
 AUTOSAVE_DELAY_MS = 2000
+# How often the open board is checked for changes nobody asked a save for (the payouts).
+AUTOSAVE_INTERVAL_MS = 10_000
 
 
 def _int(value: object, default: int, low: int, high: int | None = None) -> int:
@@ -41,6 +43,11 @@ def _number(value: object, default: float) -> float:
 class WebPersistenceMixin(GamePersistenceMixin):
     web_save_invalid = False  # a stored save that can't be read: kept until New Game
     _autosave_due: int | None = None
+    _autosave_check_at: int | None = None
+    _last_saved: dict | None = None
+    web_storage_ok = (
+        True  # False when the browser blocks localStorage (nothing survives a reload)
+    )
 
     def init_database(self) -> None:
         if not web.is_web():
@@ -49,6 +56,14 @@ class WebPersistenceMixin(GamePersistenceMixin):
         if not hasattr(self, "web_save"):
             self.web_settings = SaveStore("highrise-settings")
             self.web_save = SaveStore("highrise-save")
+            self.web_storage_ok = web.storage_available()
+            self._web_settings_data = (
+                self.web_settings.load()
+            )  # read once, kept current
+            if not self._web_settings_data and self.web_settings.exists():
+                logger.warning(
+                    "The stored browser settings are unreadable; using defaults"
+                )
 
     def load_data(self) -> None:
         if not web.is_web():
@@ -59,19 +74,26 @@ class WebPersistenceMixin(GamePersistenceMixin):
         self.web_save_invalid = self.web_save.exists() and not data
         if self.web_save_invalid:
             logger.warning("The stored browser save is unreadable; keeping it")
-            web.show_notice(tr("storage.invalid_save"))
         self._web_snapshot = data
         # Nothing below can fail halfway: every value is held to a valid one first.
         self.load_game_data(self.get_game_data())
         self.load_buildings()
         self.load_tasks()
+        self._last_saved = self._snapshot()
+        self._show_storage_notice()
+
+    def _show_storage_notice(self, unsaved: bool = False) -> None:
+        """One notice for everything the player should know about storage: an unreadable save
+        that is kept, and progress that will not survive a reload (`unsaved`: a refused write)."""
+        keys = ["storage.invalid_save"] if self.web_save_invalid else []
+        if unsaved or not self.web_storage_ok:
+            keys.append("storage.unavailable")
+        web.show_notice("\n".join(tr(key) for key in keys))
 
     def load_settings(self) -> GameSettings:
         if not web.is_web():
             return super().load_settings()
-        data = self.web_settings.load()
-        if not data and self.web_settings.exists():
-            logger.warning("The stored browser settings are unreadable; using defaults")
+        data = self._web_settings_data
         scale = data.get("ui_scale")
         language = data.get("language")
         return GameSettings(
@@ -83,7 +105,7 @@ class WebPersistenceMixin(GamePersistenceMixin):
 
     def save_language(self, language: str) -> None:
         if web.is_web():
-            self.web_settings.update(language=language)
+            self._web_settings_data = self.web_settings.update(language=language)
         else:
             super().save_language(language)
 
@@ -93,14 +115,14 @@ class WebPersistenceMixin(GamePersistenceMixin):
 
     def save_ui_scale(self, ui_scale: int) -> None:
         if web.is_web():
-            self.web_settings.update(ui_scale=ui_scale)
+            self._web_settings_data = self.web_settings.update(ui_scale=ui_scale)
         else:
             super().save_ui_scale(ui_scale)
 
     def get_game_data(self) -> list[tuple] | None:
         if not web.is_web():
             return super().get_game_data()
-        data, settings = self._web_snapshot, self.web_settings.load()
+        data, settings = self._web_snapshot, self._web_settings_data
         return [
             (
                 _int(data.get("age"), 0, 0, self.buildings.max_age_number),
@@ -155,7 +177,7 @@ class WebPersistenceMixin(GamePersistenceMixin):
         if not web.is_web():
             super().save_audio_settings()
             return
-        self.web_settings.update(
+        self._web_settings_data = self.web_settings.update(
             master_volume=self.audio.master_volume(),
             music_volume=self.audio.music_volume(),
             sfx_volume=self.audio.sfx_volume(),
@@ -167,10 +189,18 @@ class WebPersistenceMixin(GamePersistenceMixin):
             return
         if self.web_save_invalid:
             return  # Only an explicit New Game may replace an unreadable stored save.
-        self._autosave_due = None
         self.buildings.finish_pending_merges()
+        data = self._snapshot()
+        self.web_save.save(data)
+        self._autosave_due = None
+        self._last_saved = data
+        # SaveStore logs a refused write and returns normally: read it back to know.
+        self._show_storage_notice(unsaved=self.web_save.load() != data)
+
+    def _snapshot(self) -> dict:
+        """What a save holds, from the live game."""
         assert self.tilemap is not None, "tilemap not loaded yet"
-        data = {
+        return {
             "age": self.buildings.age_number,
             "size": self.tilemap.row_count,
             "money": self.player.money,
@@ -188,10 +218,6 @@ class WebPersistenceMixin(GamePersistenceMixin):
                 for b in self.buildings
             ],
         }
-        self.web_save.save(data)
-        # SaveStore logs a refused write and returns normally: read it back to know.
-        saved = self.web_save.load() == data
-        web.show_notice("" if saved else tr("storage.unavailable"))
 
     def request_autosave(self) -> None:
         """Saves the board in AUTOSAVE_DELAY_MS (a change inside that wait joins it)."""
@@ -199,10 +225,24 @@ class WebPersistenceMixin(GamePersistenceMixin):
             self._autosave_due = pygame.time.get_ticks() + AUTOSAVE_DELAY_MS
 
     def autosave_if_due(self) -> None:
-        """Called every frame; waits out a merge in progress instead of cutting it short."""
+        """Called every frame. While the board is open, every AUTOSAVE_INTERVAL_MS also saves what
+        changed without a request (the payouts). Waits out a merge in progress instead of
+        cutting it short."""
+        now = pygame.time.get_ticks()
+        if self._autosave_check_at is None:
+            self._autosave_check_at = now + AUTOSAVE_INTERVAL_MS
+        elif now >= self._autosave_check_at:
+            self._autosave_check_at = now + AUTOSAVE_INTERVAL_MS
+            if (
+                self.panel_manager.current_panel == "game"
+                and not self.web_save_invalid
+                and not self.buildings.is_busy()
+                and self._snapshot() != self._last_saved
+            ):
+                self._autosave_due = now
         if (
             self._autosave_due is not None
-            and pygame.time.get_ticks() >= self._autosave_due
+            and now >= self._autosave_due
             and not self.buildings.is_busy()
         ):
             self.save_game()
@@ -216,4 +256,4 @@ class WebPersistenceMixin(GamePersistenceMixin):
         if self.web_save_invalid:
             self.web_save_invalid = False
             self._apply_web_rows()
-        web.show_notice("")
+        self._show_storage_notice()

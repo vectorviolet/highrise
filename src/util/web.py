@@ -44,6 +44,19 @@ def toggle_fullscreen() -> None:
         window.document.documentElement.requestFullscreen()
 
 
+def storage_available() -> bool:
+    """True when the browser lets the page keep data in localStorage. In a blocked (private or
+    sandboxed) frame pygamine's SaveStore quietly falls back to memory, so nothing it saves
+    survives a reload; this is the one probe that tells."""
+    try:
+        storage = _window().localStorage
+        storage.setItem("highrise-probe", "1")
+        storage.removeItem("highrise-probe")
+    except Exception:  # JS errors surface as arbitrary exception types
+        return False
+    return True
+
+
 def show_notice(message: str) -> None:
     """Shows `message` in the page's notice box (web/template.tmpl); an empty one hides it."""
     _window().document.getElementById("storage-notice").textContent = message

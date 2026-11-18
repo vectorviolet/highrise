@@ -19,6 +19,7 @@ class FakeButton:
         self.clicked = clicked
         self.focused = focused
         self.base_state = None
+        self.active = True
 
     def is_clicked(self, event, mouse_pos) -> bool:
         return self.clicked
@@ -1088,3 +1089,17 @@ def test_only_a_mouse_up_switches_the_panel():
     game.handle_game_events(key_up(pygame.K_RIGHT))
 
     assert game.info_panel.building is shown
+
+
+def test_an_inactive_button_is_never_clicked_or_activated():
+    game = FakeGame()
+    button = game.panel_manager["play"]["continue_button"]
+    button.clicked = True
+    button.focused = True
+    button.active = False
+
+    game.handle_play_events(click_up())
+    game.handle_play_events(pygame.event.Event(pygame.KEYUP, key=pygame.K_RETURN))
+
+    assert ("open_panel", "game") not in game.calls
+    assert game.audio.played == []

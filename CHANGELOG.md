@@ -9,7 +9,7 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Browser build (pygbag): progress and settings live in localStorage and the board saves a moment after every build, sell, merge, NEXT AGE and expand; an unreadable save is kept until New Game and a refused write shows one notice; browser fullscreen replaces the window-mode rows, and Exit opens a Thanks for playing screen with a link to rate the game. The release workflow builds the HTML5 bundle, pushes it to itch.io and attaches `highrise-web.zip` after the desktop release succeeded ([ADR 0004](docs/decisions/0004-web-build.md), [devlog](docs/devlog/2026-11-18-web-build.md)).
+- Browser build (pygbag): progress and settings live in localStorage and the board saves a moment after every build, sell, move, merge, NEXT AGE and expand and every 10 s for payouts; an unreadable save is kept until New Game and a refused write shows one notice; browser fullscreen replaces the window-mode rows, and Exit opens a Thanks for playing screen with a link to rate the game. The release workflow builds the HTML5 bundle, pushes it to itch.io and attaches `highrise-web.zip` after the desktop release succeeded ([ADR 0004](docs/decisions/0004-web-build.md), [devlog](docs/devlog/2026-11-18-web-build.md)).
 
 - A Windows installer, `highrise-windows-setup.exe` (English or Turkish setup, you pick the folder; Start Menu shortcut, optional desktop shortcut), next to the zips on the GitHub Release ([devlog](docs/devlog/2026-11-18-user-data-and-installer.md)).
 

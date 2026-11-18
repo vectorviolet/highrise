@@ -490,10 +490,7 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
                 "exit_button",
             )
         ]
-        play_buttons = [
-            self.panel_manager["play"][n]
-            for n in ("continue_button", "new_game_button", "play_back_button")
-        ]
+        play_buttons = self._play_buttons()
         settings_buttons = [
             self.panel_manager["settings"][n]
             for n in (
@@ -614,11 +611,10 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
 
     def update(self) -> None:
         self.panel_manager.update()
+        self._update_world()
         if web.is_web():
-            self._update_web_world()
+            self._update_web_motion()
             self.autosave_if_due()
-        else:
-            self._update_world()
         self.floating_texts.update(pygame.time.get_ticks())
         self.sell_effect.update(pygame.time.get_ticks())
         self._close_stale_info_panel()
@@ -626,26 +622,40 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
         self._update_tasks()
 
     def _update_world(self) -> None:
-        """The frame-count motion (buildings sliding, clouds drifting): each update moves them
-        by a fixed step, so the browser runs it more than once per frame (see _update_web_world)."""
+        """The world's part of one update that is not a panel's: the buildings and the transition
+        clouds. (On the game panel the panel's own update steps the buildings once more, and its
+        looping clouds, so a desktop update moves the buildings twice.)"""
         self.buildings.update()
         self.cloud_animation.update()
 
-    def _update_web_world(self) -> None:
+    def _motion_step(self) -> None:
+        """What one more desktop update adds to the frame-count motion (buildings sliding,
+        clouds drifting), without the time-based rest of `panel_manager.update()`."""
+        self._update_world()
+        if self.panel_manager.current_panel == "game":
+            game_panel = self.panel_manager["game"]
+            game_panel["buildings"].update()
+            game_panel["clouds"].update()
+
+    def _update_web_motion(self) -> None:
         # The motion steps are per update, tuned for the desktop's `window.fps` updates a second,
-        # but the browser presents WEB_FPS frames a second. Run as many motion steps as the elapsed
-        # time asks for (about fps / WEB_FPS = 2.75 a frame); the rest of the frame (panels, timers,
-        # texts) is time-based and runs once. Drop long stalls (a background tab) instead of
-        # catching up forever.
+        # but the browser presents WEB_FPS frames a second. The frame above did one whole update;
+        # add the motion steps the elapsed time still owes (about fps / WEB_FPS - 1 a frame). The
+        # rest of the frame (panels, timers, texts) is time-based. Drop long stalls (a background
+        # tab) instead of catching up forever.
         tick_ms = 1000 / self.settings["window"]["fps"]
-        self._web_elapsed_ms += min(self.clock.get_time(), WEB_MAX_CATCH_UP_MS)
+        self._web_elapsed_ms += (
+            min(self.clock.get_time(), WEB_MAX_CATCH_UP_MS) - tick_ms
+        )
         while self._web_elapsed_ms + 1e-9 >= tick_ms:
             self._web_elapsed_ms -= tick_ms
-            self._update_world()
-        fullscreen = web.is_fullscreen()
-        if fullscreen != self._web_fullscreen:
-            self._web_fullscreen = fullscreen
-            self.set_window_mode_label()
+            self._motion_step()
+        # Ask the page only while the label is on screen: every query crosses into JavaScript.
+        if self.panel_manager.current_panel == "display_settings":
+            fullscreen = web.is_fullscreen()
+            if fullscreen != self._web_fullscreen:
+                self._web_fullscreen = fullscreen
+                self.set_window_mode_label()
 
     def _update_tasks(self) -> None:
         """Measures and latches the tasks; a newly done one updates the buttons' texts (BOOST
@@ -898,6 +908,7 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
         if self.tile_selector.is_active:
             return
         self.buildings.move(rotation, self._tilemap, self.max_building_level)
+        self.request_autosave()
 
     def show_gain_and_earn(self, building: Building, amount: int) -> None:
         """Pays `amount` as it is (no booster multiplier) with its "+amount" text over
@@ -1033,11 +1044,23 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
         else:
             super().cycle_window_mode(step)
 
+    def _play_buttons(self) -> list:
+        """The play menu's buttons that are shown (a hidden Continue is out of the keyboard
+        navigation, its starting focus and its hover)."""
+        panel = self.panel_manager["play"]
+        names = ("continue_button", "new_game_button", "play_back_button")
+        return [panel[n] for n in names if panel[n].active]
+
     def _apply_web_rows(self) -> None:
         if not web.is_web():
             return
         for name in ("continue_button", "continue_button_text"):
             self.panel_manager["play"][name].active = not self.web_save_invalid
+        if controller := self.menu_controllers.get("play"):
+            for button in controller.buttons:
+                button.focused = False
+            controller.buttons = self._play_buttons()
+            controller.buttons[0].focused = True
         for panel_name, prefix in (
             ("display_settings", "window_size"),
             ("game_settings", "skip_intro"),

@@ -114,11 +114,13 @@ intro controls, uses a fullscreen toggle and opens a Thanks for playing page on 
 Highrise-specific JSON stores in localStorage, through the engine's public `SaveStore`,
 in the browser. A restore reads the save once and holds every value to a valid one
 before the board changes (the building loop is shared with desktop); a save that cannot
-be read stays stored until an explicit New Game. The board saves on ESC and shortly
-after each build, sell, merge, NEXT AGE or expand, since a closed tab gives the game no
-QUIT. A refused write shows one browser notice. SQLite is never imported on the browser
+be read stays stored until an explicit New Game. The board saves on ESC, shortly
+after each build, sell, move, merge, NEXT AGE or expand, and every 10 s while it is
+open if money or the board changed, since a closed tab gives the game no QUIT. One
+browser notice says when nothing survives a reload (blocked storage, or a refused write). SQLite is never imported on the browser
 path. The browser presents 60 frames a second, so the motion steps (buildings, clouds)
-run at the desktop rate inside the frame. See [ADR 0004](decisions/0004-web-build.md).
+run at the desktop rate inside the frame (a desktop update steps the buildings twice, and
+the browser matches that). See [ADR 0004](decisions/0004-web-build.md).
 
 ## Tests and scripts
 

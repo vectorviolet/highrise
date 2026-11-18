@@ -37,9 +37,16 @@ class GameEventsMixin:
         # Attributes / methods supplied by the host class (Game).
         def __getattr__(self, name: str) -> Any: ...
 
+    def _clicked(self, button, event) -> bool:
+        """True when the mouse clicked the button; an inactive (hidden) one never is."""
+        return button.active and button.is_clicked(event, self.mouse.position)
+
     def _is_activated(self, button, event) -> bool:
-        """True when the button was activated (click or focused-Space/Enter); silent."""
-        return button.is_clicked(event, self.mouse.position) or (
+        """True when the button was activated (click or focused-Space/Enter); silent.
+        An inactive (hidden) button never is."""
+        if not button.active:
+            return False
+        return self._clicked(button, event) or (
             event.type == pygame.KEYUP
             and event.key in (pygame.K_SPACE, pygame.K_RETURN)
             and getattr(button, "focused", False)
@@ -73,9 +80,7 @@ class GameEventsMixin:
         panel = self.panel_manager["play"]
         if self._activate(panel["new_game_button"], event):
             self.new_game()
-        elif (not web.is_web() or panel["continue_button"].active) and self._activate(
-            panel["continue_button"], event
-        ):
+        elif self._activate(panel["continue_button"], event):
             self.open_panel("game")
         elif self._activate(panel["play_back_button"], event):
             self.open_panel("menu")
@@ -106,9 +111,7 @@ class GameEventsMixin:
             ("ui_scale_plus_button", self.step_ui_scale, 1),
         )
         for button_name, step, delta in steppers:
-            if (not web.is_web() or panel[button_name].active) and panel[
-                button_name
-            ].is_clicked(event, self.mouse.position):
+            if self._clicked(panel[button_name], event):
                 step(delta)
                 return
         if self._activate(panel["ui_scale_reset_button"], event):
@@ -137,9 +140,7 @@ class GameEventsMixin:
             MASTER_STEPPERS + (MUSIC_STEPPERS if has_music else ()) + SFX_STEPPERS
         )
         for button_name, channel, delta in steppers:
-            if (not web.is_web() or panel[button_name].active) and panel[
-                button_name
-            ].is_clicked(event, self.mouse.position):
+            if self._clicked(panel[button_name], event):
                 self._step_volume(channel, delta)
                 return
         if self._activate(panel["cancel_button"], event):
@@ -181,9 +182,7 @@ class GameEventsMixin:
             ("skip_intro_plus_button", self._toggle_skip_intro, 1),
         )
         for button_name, step, delta in steppers:
-            if (not web.is_web() or panel[button_name].active) and panel[
-                button_name
-            ].is_clicked(event, self.mouse.position):
+            if self._clicked(panel[button_name], event):
                 step(delta)
                 return
         if self._activate(panel["game_settings_back_button"], event):

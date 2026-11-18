@@ -1233,6 +1233,7 @@ def test_the_window_mode_label_is_translated(assets):
 class FakeButton:
     def __init__(self):
         self.clicked = False
+        self.active = True
 
     def is_clicked(self, event, mouse_pos) -> bool:
         clicked, self.clicked = self.clicked, False

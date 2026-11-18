@@ -3,6 +3,7 @@
 import asyncio
 import json
 import logging
+import platform
 import subprocess
 import sys
 import textwrap
@@ -12,7 +13,7 @@ import pygame
 import pytest
 
 from app.game import WEB_FPS, Game
-from app.web_persistence import AUTOSAVE_DELAY_MS
+from app.web_persistence import AUTOSAVE_DELAY_MS, AUTOSAVE_INTERVAL_MS
 from pygamine import Application
 
 
@@ -39,10 +40,15 @@ def test_browser_boot_does_not_import_sqlite_or_construct_splash(browser):
         sys.path[:0] = ["src", "src/pygamine"]
         from types import SimpleNamespace
         from app.game import Game
-        storage = SimpleNamespace(getItem=lambda key: None)
+        storage = SimpleNamespace(
+            getItem=lambda key: None, setItem=lambda k, v: None, removeItem=lambda k: None
+        )
         platform.window = SimpleNamespace(
             localStorage=storage,
-            document=SimpleNamespace(fullscreenElement=None),
+            document=SimpleNamespace(
+                fullscreenElement=None,
+                getElementById=lambda name: SimpleNamespace(textContent=""),
+            ),
         )
         sys.platform = "emscripten"
         game = Game()
@@ -207,6 +213,7 @@ def test_f11_uses_browser_fullscreen(browser):
 
 def test_fullscreen_label_follows_delayed_browser_transition_and_native_escape(browser):
     game = boot()
+    game.open_panel("display_settings")
     game.clock = Mock(get_time=lambda: 0)
     game.set_window_mode_label = Mock(wraps=game.set_window_mode_label)
     game.update()
@@ -237,21 +244,47 @@ def test_empty_expanded_board_can_continue_after_reload(browser):
     assert restored.player.money == game.player.money
 
 
-def test_browser_steps_the_motion_at_the_desktop_rate_and_the_rest_once(browser):
-    game = boot()
-    game.clock = Mock(get_time=lambda: 1000 / WEB_FPS)
-    game.buildings.update = Mock()
-    game.cloud_animation.update = Mock()
-    game.panel_manager.update = Mock()
-    for _ in range(WEB_FPS):
+def motion_steps_per_second(game, frames, frame_ms):
+    """Counts the frame-count motion steps (buildings, both kinds of clouds) over `frames`
+    simulated frames of `frame_ms` each on the game panel."""
+    game.open_panel("game")
+    game.clock = Mock(get_time=lambda: frame_ms)
+    counts = {"buildings": 0, "clouds": 0, "transition_clouds": 0}
+    for key, owner in (
+        ("buildings", game.buildings),
+        ("clouds", game.panel_manager["game"]["clouds"]),
+        ("transition_clouds", game.cloud_animation),
+    ):
+
+        def count(key=key):
+            counts[key] += 1
+
+        owner.update = count
+    for _ in range(frames):
         game.update()
-    assert game.buildings.update.call_count == game.settings["window"]["fps"]
-    assert game.cloud_animation.update.call_count == game.settings["window"]["fps"]
-    assert game.panel_manager.update.call_count == WEB_FPS  # time-based: once a frame
-    game.buildings.update.reset_mock()
-    game.clock = Mock(get_time=lambda: 60_000)  # a background tab: no endless catch-up
-    game.update()
-    assert game.buildings.update.call_count <= 9
+    return counts
+
+
+def test_the_browser_steps_motion_as_often_per_second_as_desktop(browser, monkeypatch):
+    web_game = boot()
+    fps = web_game.settings["window"]["fps"]
+    web = motion_steps_per_second(web_game, WEB_FPS, 1000 / WEB_FPS)
+    monkeypatch.setattr(sys, "platform", "win32")
+    desktop = motion_steps_per_second(boot(), fps, 1000 / fps)
+    # The desktop steps the buildings twice an update (the panel's and the world's own).
+    assert desktop == {
+        "buildings": 2 * fps,
+        "clouds": fps,
+        "transition_clouds": fps,
+    }
+    for key, steps in desktop.items():
+        assert abs(web[key] - steps) <= 2, (key, web, desktop)
+
+
+def test_a_long_stall_does_not_make_the_browser_catch_up_for_ever(browser):
+    game = boot()
+    counts = motion_steps_per_second(game, 1, 60_000)
+    assert counts["transition_clouds"] <= 9
 
 
 @pytest.mark.parametrize("raw", ["{broken", "[]", "null"])
@@ -386,3 +419,82 @@ def test_refused_write_shows_one_notice_and_a_later_save_clears_it(
     game.save_game()
     assert browser.notice.textContent == ""
     assert json.loads(stored(browser))["money"] == game.player.money
+
+
+def test_idle_income_is_saved_by_the_periodic_check(browser, monkeypatch):
+    now = {"t": 10_000}
+    monkeypatch.setattr(pygame.time, "get_ticks", lambda: now["t"])
+    game = boot()
+    game.open_panel("game")
+    game.update()
+    assert stored(browser) is None  # nothing changed: no write
+    game.player.money += 77  # a payout: nobody asked for a save
+    now["t"] += AUTOSAVE_INTERVAL_MS
+    game.update()
+    assert json.loads(stored(browser))["money"] == game.player.money
+    writes = Mock(wraps=game.web_save.save)
+    monkeypatch.setattr(game.web_save, "save", writes)
+    now["t"] += AUTOSAVE_INTERVAL_MS
+    game.update()
+    writes.assert_not_called()  # unchanged since the last save
+
+
+def test_a_move_without_a_merge_is_saved(browser, monkeypatch):
+    now = {"t": 10_000}
+    monkeypatch.setattr(pygame.time, "get_ticks", lambda: now["t"])
+    game = boot()
+    game.add_building(1, 1, 1, "left")
+    game.open_panel("game")
+    game.move_buildings("right")
+    for _ in range(600):
+        game.update()
+        if not game.buildings.is_busy():
+            break
+    now["t"] += AUTOSAVE_DELAY_MS
+    game.update()
+    assert json.loads(stored(browser))["buildings"][0]["column"] == 2
+
+
+def test_blocked_storage_shows_the_notice_even_though_saving_seems_to_work(
+    browser, monkeypatch
+):
+    class Blocked:
+        document = browser.document
+
+        @property
+        def localStorage(self):  # noqa: N802
+            raise RuntimeError("SecurityError")
+
+    monkeypatch.setattr(platform, "window", Blocked())
+    game = boot()
+    assert "Progress will be lost" in browser.notice.textContent
+    game.save_game()  # SaveStore keeps it in memory: the read-back matches
+    assert game.web_save.load()["money"] == game.player.money
+    assert "Progress will be lost" in browser.notice.textContent
+
+
+def test_a_new_game_does_not_read_the_stored_settings_again(browser, monkeypatch):
+    game = boot()
+    game.audio.set_music_volume(0.3)
+    game.save_audio_settings()
+    reads = Mock(wraps=game.web_settings.load)
+    monkeypatch.setattr(game.web_settings, "load", reads)
+    game.new_game()
+    reads.assert_not_called()
+    assert game.audio.music_volume() == pytest.approx(0.3)
+
+
+def test_a_hidden_continue_is_out_of_the_play_menus_navigation(browser):
+    game = boot()
+    game.web_save.save({"age": 0})
+    path = game.web_save.path.as_posix()
+    browser.localStorage.setItem(f"pygamine:{path}", "{broken")
+    game = boot()
+    controller = game.menu_controllers["play"]
+    panel = game.panel_manager["play"]
+    assert panel["continue_button"] not in controller.buttons
+    assert controller.focused is panel["new_game_button"]
+    game.new_game()  # replaces the unreadable save: Continue is back, first in line
+    assert controller.buttons[0] is panel["continue_button"]
+    assert controller.focused is panel["continue_button"]
+    assert not panel["new_game_button"].focused
