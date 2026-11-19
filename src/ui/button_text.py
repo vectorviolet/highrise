@@ -2,51 +2,58 @@
 
 Every button's hover face is `yellow_button` (#FFCC00). White on it is 1.5:1, navy
 #1E1D3B is 10.7:1; text on the blue, red and green faces stays white. pygamine's TextObject
-has one color, but it already switches *state* with its button's hover, so a ButtonText has a
-"hover" state whose text mirrors the default one and takes the navy color there.
+has one color, so a ButtonText asks its parent button, once a frame, which face it shows.
 """
 
 from collections.abc import Callable
 
-from pygamine import AssetManager, TextObject, Transform, load_font
+from pygamine import (
+    AssetManager,
+    SpriteRenderer2D,
+    StateObject,
+    TextObject,
+    Transform,
+    load_font,
+)
 
 # The text color on a yellow face (#1E1D3B).
 YELLOW_TEXT_COLOR = (30, 29, 59)
 
 
 class ButtonText(TextObject):
-    def __init__(self, *args, hover_color=YELLOW_TEXT_COLOR, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._normal_color = self.color
-        self._hover_color = self._parse_color(hover_color)
-        # A text with its own hover text (a price) keeps it; the others show the same text.
-        self.states.setdefault("hover", self.states["default"])
 
-    def _set_state_text(self, target: str, text: str) -> None:
-        mirrored = (
-            target == "default" and self.states.get("hover") == self.states["default"]
-        )
-        super()._set_state_text(target, text)
-        if mirrored:
-            super()._set_state_text("hover", text)
+    def set_color(self, color) -> None:
+        """The color on the button's normal face; a yellow face still shows navy."""
+        self._normal_color = self._parse_color(color)
+        self._apply_color()
 
-    def set_state(self, state: str | None) -> None:
-        # The color first: set_state() re-renders the text once, with it.
-        self.color = self._hover_color if state == "hover" else self._normal_color
-        super().set_state(state)
+    def update(self) -> None:
+        super().update()
+        self._apply_color()
 
-    def _resolve_state_from(self, parent) -> str | None:
-        # The button's yellow face also shows while the keyboard has it focused.
-        if getattr(parent, "focused", False):
-            return "hover"
-        return super()._resolve_state_from(parent)
+    def _apply_color(self) -> None:
+        color = YELLOW_TEXT_COLOR if self._yellow_face_showing() else self._normal_color
+        if color != self.color:
+            super().set_color(color)
+
+    def _yellow_face_showing(self) -> bool:
+        """True when the parent button shows a face other than its normal one: the hover face,
+        for the mouse over it or the keyboard on it, whatever state (on/off) it is in."""
+        parent = getattr(self.rect.parent, "game_object", None)
+        if not isinstance(parent, StateObject):
+            return False
+        shown = parent.require_component(SpriteRenderer2D).image
+        return shown is not None and shown is not parent.images.get(parent.state)
 
 
 def make_button_text_factory(
     assets: AssetManager,
 ) -> Callable[[dict, Transform], ButtonText]:
-    """A panels.yaml `type: button_text` object: like pygamine's `text` type, plus an optional
-    `hover_color` (default YELLOW_TEXT_COLOR)."""
+    """A panels.yaml `type: button_text` object: pygamine's `text` type as a ButtonText.
+    (The argument list repeats pygamine's make_text_factory, which builds a fixed class.)"""
 
     def make_button_text(cfg: dict, parent: Transform) -> ButtonText:
         return ButtonText(
@@ -61,7 +68,6 @@ def make_button_text_factory(
             states=cfg.get("states"),
             text_key=cfg.get("text_key"),
             text_params=cfg.get("text_params"),
-            hover_color=cfg.get("hover_color", YELLOW_TEXT_COLOR),
         )
 
     return make_button_text
