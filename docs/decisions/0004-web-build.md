@@ -28,8 +28,8 @@ Chokepoint's (`scripts/build_web.py`, `web/template.tmpl`, the itch.io limit che
   nothing survives a reload: a probe of localStorage (`util/web.storage_available`, since
   blocked storage makes `SaveStore` fall back to memory) and a read-back after each save
   (a refused write).
-- **Music:** `bg.mp3` became `bg.ogg` everywhere (the same CC BY 3.0 track; the credits say it
-  was converted). One file serves both builds.
+- **Music:** `bg.mp3` became `bg.ogg` everywhere (the same CC BY 3.0 track; CC BY 3.0 section 3
+  allows a format-only change, and SOURCES.yaml records the transcode). One file serves both builds.
 - **Rendering:** translucent blits use pygamine's `ALPHA_BLIT` (the browser's SDL2 build lacks
   `BLEND_ALPHA_SDL2`); it changes nothing on desktop.
 - **Frame rate:** the browser presents 60 frames a second, but motion (buildings sliding, clouds)

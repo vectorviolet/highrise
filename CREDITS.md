@@ -48,9 +48,6 @@ asks for these lines as attribution:
 > Music : Sakura Girl - Day Off
 > Link : youtu.be/vAv9KtrU_5c
 
-Changes made: the downloaded MP3 was converted to OGG Vorbis (same audio, not trimmed) so one
-file plays on desktop and in the browser.
-
 ## Software
 
 | Software | License |
