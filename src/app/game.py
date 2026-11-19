@@ -41,6 +41,7 @@ from pygamine import (
 )
 from pygamine import MenuController
 from pygamine.util.localization import DEFAULT_LANGUAGE, localization, tr
+from ui.button_text import make_button_text_factory
 from ui.cash_display import apply_cash_display
 from ui.dust_effect import DustBursts, DustConfig, DustLayer
 from ui.floating_text import FloatingTextConfig, FloatingTexts
@@ -443,6 +444,7 @@ class Game(GameEventsMixin, WebPersistenceMixin, Application):
         loader.authored_size = self._authored_size
         loader.register("object", make_factory(self.assets), default=True)
         loader.register("text", make_text_factory(self.assets))
+        loader.register("button_text", make_button_text_factory(self.assets))
         loader.register("animated", make_animated_factory(self.assets))
         loader.register("scrolling_panel", make_scrolling_panel_factory(self.assets))
         loader.load("config/panels.yaml")

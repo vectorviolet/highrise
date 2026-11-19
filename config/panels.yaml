@@ -25,7 +25,7 @@ object_templates:
     hover: yellow_button
     nine_slice: 20
   menu_btn_text:
-    type: text
+    type: button_text
     font: titillium_bold
     font_size: 30
     color: [251, 254, 255]
@@ -52,7 +52,7 @@ object_templates:
     color: white
     position: [CENTER, CENTER]
   bottom_panel_btn_text:
-    type: text
+    type: button_text
     font: titillium_bold
     font_size: 27
     color: White
@@ -62,7 +62,7 @@ object_templates:
     asset: red_button
     hover: yellow_button
   go_back_btn_text:
-    type: text
+    type: button_text
     text_key: common.go_back
     font: titillium_bold
     font_size: 28
@@ -315,7 +315,7 @@ panels:
         hover: yellow_button
         # No on_click_sound: Game._sell plays the sell sound.
       sell_button_text:
-        type: text
+        type: button_text
         font: titillium_bold
         font_size: 28
         color: White
@@ -550,7 +550,7 @@ panels:
         hover: yellow_button
         on_click_sound: back
       cancel_button_text:
-        type: text
+        type: button_text
         font: titillium_bold
         font_size: 28
         color: White
@@ -564,7 +564,7 @@ panels:
         hover: yellow_button
         on_click_sound: back
       save_button_text:
-        type: text
+        type: button_text
         font: titillium_bold
         font_size: 28
         color: White

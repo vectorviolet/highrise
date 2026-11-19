@@ -15,7 +15,8 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- The background music is now `bg.ogg` (the same CC BY 3.0 track, converted from MP3 to OGG Vorbis; 7.4 MB to 3.9 MB), so desktop and browser play one file.
+- Text on a button's yellow face (the hover and keyboard-focus look of every button, and the Thanks screen's rate button) is dark navy instead of white: white on that yellow was 1.5:1, navy is 10.7:1. Text on blue, red and green stays white ([devlog](docs/devlog/2026-11-18-web-build.md)).
+- The background music ships as `bg.ogg` (3.9 MB instead of 7.4 MB), so desktop and browser play one file.
 - Translucent blits (floating money text, sell dust, odometer, tiles, the task list) use pygamine's `ALPHA_BLIT`, which blends like before on desktop and also works on the browser's SDL2 build.
 - The downloaded game keeps its save database in your user-data folder (`%APPDATA%\VectorViolet\highrise\databases` on Windows, and the macOS and Linux equivalents) instead of inside the game folder, so an uninstall or update keeps it. Old saves (in `_internal\databases` of the old game folder) are not moved over. Running from source is unchanged ([ADR 0003](docs/decisions/0003-saves-in-the-user-data-folder.md)).
 

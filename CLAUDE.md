@@ -119,7 +119,10 @@ turns them into booleans.
 
 Red (`red_button`) leaves, cancels or destroys (EXIT, every GO BACK, CANCEL, SELL), green goes (PLAY,
 CONTINUE, SAVE, BUILD, BOOST), blue is the rest; `tests/test_menu_polish.py` lists every button's color, so add a
-new button there.
+new button there. Every button's hover (and keyboard-focus) face is the yellow `yellow_button`, so text on a button is
+`type: button_text` in `config/panels.yaml` (`ui/button_text.py`, registered in `Game.build_panels`): white as written, dark navy
+#1E1D3B (`YELLOW_TEXT_COLOR`) while the button shows its yellow face; `tests/test_button_text.py` checks every text on a hoverable
+button is one. Use `button_text`, not `text`, for a new button's label.
 
 ### Credits page
 
