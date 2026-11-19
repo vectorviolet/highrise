@@ -169,28 +169,44 @@ class GamePersistenceMixin:
         )
         if not buildings:
             return
-        assert self.tilemap is not None, "tilemap not loaded yet"
-        rows = self.tilemap.row_count
-        cols = self.tilemap.column_count
         for level, row, column, door_side, booster, fraction in buildings:
-            if 1 <= row <= rows and 1 <= column <= cols:
-                # A save from before door sides (or a damaged value) gets a fixed default.
-                if door_side not in DOOR_SIDES:
-                    door_side = default_door_side(row, column)
-                is_booster = bool(booster)
-                self.add_building(
-                    self._valid_level(level, row, column, is_booster),
-                    row,
-                    column,
-                    door_side,
-                    booster=is_booster,
-                    income_fraction=self._valid_fraction(fraction, row, column),
-                )
-            else:
+            if not self._restore_building(
+                level, row, column, door_side, bool(booster), fraction
+            ):
                 self.database.execute_safely(
                     "DELETE FROM buildings WHERE level=? AND row=? AND column=?",
                     params=(level, row, column),
                 )
+
+    def _restore_building(
+        self,
+        level: int,
+        row: int,
+        column: int,
+        door_side: str | None,
+        booster: bool,
+        fraction: float,
+    ) -> bool:
+        """Puts one saved building on the board, its values held to what a building can have
+        (the browser save shares this). False, and nothing placed, when its tile is off the board."""
+        assert self.tilemap is not None, "tilemap not loaded yet"
+        if not (
+            1 <= row <= self.tilemap.row_count
+            and 1 <= column <= self.tilemap.column_count
+        ):
+            return False
+        # A save from before door sides (or a damaged value) gets a fixed default.
+        if door_side not in DOOR_SIDES:
+            door_side = default_door_side(row, column)
+        self.add_building(
+            self._valid_level(level, row, column, booster),
+            row,
+            column,
+            door_side,
+            booster=booster,
+            income_fraction=self._valid_fraction(fraction, row, column),
+        )
+        return True
 
     def load_tasks(self) -> None:
         """The saved task state, for the age that was loaded. A save from before age tasks has an

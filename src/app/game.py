@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING
 from collections.abc import Callable
 from pathlib import Path
 from random import choice
@@ -10,9 +11,9 @@ from app.action_sounds import ActionSounds
 from app.game_events import GameEventsMixin
 from app.game_persistence import (
     DEFAULT_MASTER_VOLUME,
-    GamePersistenceMixin,
     GameSettings,
 )
+from app.web_persistence import WebPersistenceMixin
 from domain.player import Player
 from gameplay.buildings import sprites
 from gameplay.buildings.boosters import BoosterConfig
@@ -21,10 +22,10 @@ from gameplay.clouds.cloud_container import OneShotCloudAnimation, LoopingCloudA
 from gameplay.tasks import AgeTasks, TasksConfig
 from gameplay.tile_selector import TileSelector
 from gameplay.tilemap import Tilemap
+from pygamine import ALPHA_BLIT
 from pygamine import Application
 from pygamine import clamp01
 from pygamine import AssetManager
-from pygamine import Database
 from pygamine import packaged_data_dir
 from pygamine import PanelLoaderExt
 from pygamine import PanelManager
@@ -40,6 +41,7 @@ from pygamine import (
 )
 from pygamine import MenuController
 from pygamine.util.localization import DEFAULT_LANGUAGE, localization, tr
+from ui.button_text import make_button_text_factory
 from ui.cash_display import apply_cash_display
 from ui.dust_effect import DustBursts, DustConfig, DustLayer
 from ui.floating_text import FloatingTextConfig, FloatingTexts
@@ -49,6 +51,15 @@ from ui.odometer import Odometer
 from ui.task_list import TaskRow, render_task_list
 from ui.ui_scale import DEFAULT_UI_SCALE, UI_SCALES, step_ui_scale
 from util.paths import LANG_FOLDER, resource_path
+from util import web
+
+if TYPE_CHECKING:
+    from pygamine import Database
+
+# The browser presents this many frames a second (requestAnimationFrame follows the display).
+WEB_FPS = 60
+# The longest stretch of elapsed time the browser's motion steps catch up in one frame.
+WEB_MAX_CATCH_UP_MS = 50
 
 # The window and taskbar icon: the plate-less tower, crisp at the small sizes the OS shows.
 WINDOW_ICON = resource_path("assets", "images", "icon", "icon_64.png")
@@ -104,6 +115,7 @@ BACK_TARGETS = {
     "display_settings": "settings",
     "game_settings": "settings",
     "credits": "menu",
+    "thanks": "menu",
 }
 
 # Localization keys (config/lang/*.yaml) of the window-mode labels.
@@ -149,7 +161,7 @@ def set_window_icon(path: Path = WINDOW_ICON) -> None:
     pygame.display.set_icon(icon)
 
 
-class Game(GameEventsMixin, GamePersistenceMixin, Application):
+class Game(GameEventsMixin, WebPersistenceMixin, Application):
     # What _highlight_boosted_tiles last lit up (the booster and where it stood, and the board).
     _highlight_key: tuple | None = None
     _highlight_tilemap: Tilemap | None = None
@@ -162,12 +174,16 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
     # The task checklist surface and what it was drawn from (rows, UI scale, language).
     _task_list_key: tuple | None = None
     _task_list_surface: pygame.Surface | None = None
+    _web_elapsed_ms = 0.0
+    _web_fullscreen: bool | None = None
 
     @staticmethod
-    def _make_database() -> Database:
+    def _make_database() -> "Database":
         """The save database: in the packaged build's user-data folder, or Database's own
         default (cwd-relative `databases/`) when run from source. A method of its own
         because `__init__` is at ruff's statement limit."""
+        from pygamine import Database
+
         directory = packaged_data_dir("highrise", "databases")
         if directory is None:
             return Database("database")
@@ -199,7 +215,11 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         # Before the window exists: X11 and macOS apply the icon only if it is set before the
         # first set_mode() (pygame.display.set_icon works before pygame.init()).
         set_window_icon()
-        super().__init__(tuple(window["size"]), window["title"], window["fps"])
+        super().__init__(
+            tuple(window["size"]),
+            window["title"],
+            WEB_FPS if web.is_web() else window["fps"],
+        )
 
         self.assets = AssetManager()
         self.assets.load_manifest("config/assets.yaml")
@@ -210,7 +230,6 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.tilemap: Tilemap | None = None
         self.window_transform = Transform((0, 0), self.size)
         self.panel_manager = PanelManager(ui["background_colors"])
-        self.database = self._make_database()
 
         self.buildings = Buildings(
             on_merge=self._on_buildings_merged,
@@ -263,9 +282,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.info_panel = InfoPanel(self.panel_manager)
         self.tile_selector = TileSelector(self.tilemap, self.mouse, self.buildings)
         self.cloud_animation = OneShotCloudAnimation(self.size)
-        self.splash = SplashScreen(
-            standard_splash_media(self.audio), skip_completely=True
-        )
+        self._init_desktop()
 
         self.handlers = {
             "menu": self.handle_menu_events,
@@ -276,8 +293,17 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             "game_settings": self.handle_game_settings_events,
             "credits": self.handle_credits_events,
             "game": self.handle_game_events,
+            "thanks": self.handle_thanks_events,
         }
         self.menu_controllers: dict = {}
+
+    def _init_desktop(self) -> None:
+        if not web.is_web():
+            # SQLite and the threaded splash are never loaded by the browser.
+            self.database = self._make_database()
+            self.splash = SplashScreen(
+                standard_splash_media(self.audio), skip_completely=True
+            )
 
     def on_canvas_resized(self, new_size: tuple[int, int]) -> None:
         # Every panel in config/panels.yaml is positioned with absolute pixel
@@ -313,7 +339,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             # more height than 16:9): lay them out again against this one.
             self.rebuild_panels()
 
-    def run(self) -> None:
+    def _prepare_run(self) -> None:
         # Application.run() would call this itself, but this project needs
         # menu/panel/audio setup interleaved between the splash and the
         # main loop, so it keeps its own run() override for that -- just
@@ -322,7 +348,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         # built, and "skip intro" decides whether the splash runs at all.
         self.init_database()
         self._apply_settings(self.load_settings())
-        if self.skip_intro:
+        if self.skip_intro or web.is_web():
             self.splash = None
         self.show_splash()
         self.mouse.set_cursor_visible(False)
@@ -343,9 +369,20 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         if self.background_music_sound_path is not None:
             self.audio.play_music(str(self.background_music_sound_path))
 
+    def run(self) -> None:
+        self._prepare_run()
         self.watch_language()
         try:
             super().run()
+        finally:
+            self.unwatch_language()
+
+    async def run_async(self) -> None:
+        """Prepare the same session as desktop, then yield after every frame."""
+        self._prepare_run()
+        self.watch_language()
+        try:
+            await super().run_async()
         finally:
             self.unwatch_language()
 
@@ -407,10 +444,12 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         loader.authored_size = self._authored_size
         loader.register("object", make_factory(self.assets), default=True)
         loader.register("text", make_text_factory(self.assets))
+        loader.register("button_text", make_button_text_factory(self.assets))
         loader.register("animated", make_animated_factory(self.assets))
         loader.register("scrolling_panel", make_scrolling_panel_factory(self.assets))
         loader.load("config/panels.yaml")
         self._show_music_controls(self.background_music_sound_path is not None)
+        self._apply_web_rows()
 
         panel = self.panel_manager["game"]
         for name in INFO_PANEL_OBJECTS:
@@ -453,10 +492,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
                 "exit_button",
             )
         ]
-        play_buttons = [
-            self.panel_manager["play"][n]
-            for n in ("continue_button", "new_game_button", "play_back_button")
-        ]
+        play_buttons = self._play_buttons()
         settings_buttons = [
             self.panel_manager["settings"][n]
             for n in (
@@ -473,6 +509,13 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
                 settings_buttons, self.audio, switch_up, switch_down
             ),
         }
+
+        self.menu_controllers["thanks"] = MenuController(
+            [self.panel_manager["thanks"][n] for n in ("thanks_link", "thanks_back")],
+            self.audio,
+            switch_up,
+            switch_down,
+        )
 
         apply_cash_display(
             panel["money_panel"],
@@ -570,13 +613,51 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def update(self) -> None:
         self.panel_manager.update()
-        self.buildings.update()
+        self._update_world()
+        if web.is_web():
+            self._update_web_motion()
+            self.autosave_if_due()
         self.floating_texts.update(pygame.time.get_ticks())
         self.sell_effect.update(pygame.time.get_ticks())
         self._close_stale_info_panel()
         self._highlight_boosted_tiles()
         self._update_tasks()
+
+    def _update_world(self) -> None:
+        """The world's part of one update that is not a panel's: the buildings and the transition
+        clouds. (On the game panel the panel's own update steps the buildings once more, and its
+        looping clouds, so a desktop update moves the buildings twice.)"""
+        self.buildings.update()
         self.cloud_animation.update()
+
+    def _motion_step(self) -> None:
+        """What one more desktop update adds to the frame-count motion (buildings sliding,
+        clouds drifting), without the time-based rest of `panel_manager.update()`."""
+        self._update_world()
+        if self.panel_manager.current_panel == "game":
+            game_panel = self.panel_manager["game"]
+            game_panel["buildings"].update()
+            game_panel["clouds"].update()
+
+    def _update_web_motion(self) -> None:
+        # The motion steps are per update, tuned for the desktop's `window.fps` updates a second,
+        # but the browser presents WEB_FPS frames a second. The frame above did one whole update;
+        # add the motion steps the elapsed time still owes (about fps / WEB_FPS - 1 a frame). The
+        # rest of the frame (panels, timers, texts) is time-based. Drop long stalls (a background
+        # tab) instead of catching up forever.
+        tick_ms = 1000 / self.settings["window"]["fps"]
+        self._web_elapsed_ms += (
+            min(self.clock.get_time(), WEB_MAX_CATCH_UP_MS) - tick_ms
+        )
+        while self._web_elapsed_ms + 1e-9 >= tick_ms:
+            self._web_elapsed_ms -= tick_ms
+            self._motion_step()
+        # Ask the page only while the label is on screen: every query crosses into JavaScript.
+        if self.panel_manager.current_panel == "display_settings":
+            fullscreen = web.is_fullscreen()
+            if fullscreen != self._web_fullscreen:
+                self._web_fullscreen = fullscreen
+                self.set_window_mode_label()
 
     def _update_tasks(self) -> None:
         """Measures and latches the tasks; a newly done one updates the buttons' texts (BOOST
@@ -633,6 +714,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.audio.play_sfx(self.merge_sound_path)
         # A merge frees tiles: BUILD's hover text can't keep saying TILES FULL.
         self.update_button_texts()
+        self.request_autosave()
 
     def draw(self) -> None:
         self.panel_manager.draw(self.window)
@@ -691,14 +773,14 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         surface = self._task_list()
         gap = round(10 * self.ui_scale / 100)
         rect = surface.get_rect(midbottom=(button.rect.centerx, button.rect.top - gap))
-        self.window.blit(surface, rect)
+        self.window.blit(surface, rect, special_flags=ALPHA_BLIT)
 
     def on_exit_request(self) -> None:
         self.audio.play_sfx(self.go_back_sound_path)
         panel = self.panel_manager.current_panel
 
         if panel == "menu":
-            self.exit()
+            self.open_panel("exit")
         elif panel == "audio_settings":
             self._revert_audio_settings()
             self.open_panel("settings")
@@ -727,6 +809,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
         self.update_button_texts()
         self.audio.play_sfx(self.click_sound_path)
+        self.request_autosave()
 
     def add_building(
         self,
@@ -800,6 +883,7 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
             )
             self._spend(cost)
             self.audio.play_sfx(self.action_sounds.build(self.buildings.age_number))
+            self.request_autosave()
             return new_building
         return None
 
@@ -820,11 +904,13 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         assert paid
         self.set_age(self.buildings.age_number + 1)
         self.audio.play_sfx(self.action_sounds.next_age)
+        self.request_autosave()
 
     def move_buildings(self, rotation: str) -> None:
         if self.tile_selector.is_active:
             return
         self.buildings.move(rotation, self._tilemap, self.max_building_level)
+        self.request_autosave()
 
     def show_gain_and_earn(self, building: Building, amount: int) -> None:
         """Pays `amount` as it is (no booster multiplier) with its "+amount" text over
@@ -867,8 +953,10 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
 
     def open_panel(self, tab: str) -> None:
         if tab == "exit":
-            self.exit()
-            return
+            if not web.is_web():
+                self.exit()
+                return
+            tab = "thanks"
         if tab == "credits":
             self.panel_manager["credits"][
                 "credits_scroller"
@@ -908,6 +996,8 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         self.set_ui_scale_label()
 
     def has_save_data(self) -> bool:
+        if web.is_web():
+            return self.web_save.exists()
         return len(self.buildings) > 0 or self.buildings.age_number > 0
 
     def play(self) -> None:
@@ -940,9 +1030,54 @@ class Game(GameEventsMixin, GamePersistenceMixin, Application):
         )
 
     def set_window_mode_label(self) -> None:
+        if web.is_web():
+            panel = self.panel_manager["display_settings"]
+            panel["window_mode_text"].set_text(tr("display_settings.modes.fullscreen"))
+            key = "common.enabled" if web.is_fullscreen() else "common.disabled"
+            panel["window_mode_entry_text"].set_text(tr(key))
+            return
         self.panel_manager["display_settings"]["window_mode_entry_text"].set_text(
             tr(WINDOW_MODE_KEYS[self._window_mode])
         )
+
+    def cycle_window_mode(self, step: int = 1) -> None:
+        if web.is_web():
+            web.toggle_fullscreen()
+        else:
+            super().cycle_window_mode(step)
+
+    def _play_buttons(self) -> list:
+        """The play menu's buttons that are shown (a hidden Continue is out of the keyboard
+        navigation, its starting focus and its hover)."""
+        panel = self.panel_manager["play"]
+        names = ("continue_button", "new_game_button", "play_back_button")
+        return [panel[n] for n in names if panel[n].active]
+
+    def _apply_web_rows(self) -> None:
+        if not web.is_web():
+            return
+        for name in ("continue_button", "continue_button_text"):
+            self.panel_manager["play"][name].active = not self.web_save_invalid
+        if controller := self.menu_controllers.get("play"):
+            for button in controller.buttons:
+                button.focused = False
+            controller.buttons = self._play_buttons()
+            controller.buttons[0].focused = True
+        for panel_name, prefix in (
+            ("display_settings", "window_size"),
+            ("game_settings", "skip_intro"),
+        ):
+            panel = self.panel_manager[panel_name]
+            for suffix in (
+                "text",
+                "minus_button",
+                "plus_button",
+                "entry",
+                "entry_text",
+                "minus_icon",
+                "plus_icon",
+            ):
+                panel[f"{prefix}_{suffix}"].active = False
 
     def set_ui_scale_label(self) -> None:
         self.panel_manager["display_settings"]["ui_scale_entry_text"].set_text(

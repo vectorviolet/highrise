@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any
 import pygame
 
 from ui.ui_scale import DEFAULT_UI_SCALE
+from util import web
 
 # Game-panel keys that move every building one step (KEYUP).
 MOVE_KEYS = {
@@ -36,9 +37,16 @@ class GameEventsMixin:
         # Attributes / methods supplied by the host class (Game).
         def __getattr__(self, name: str) -> Any: ...
 
+    def _clicked(self, button, event) -> bool:
+        """True when the mouse clicked the button; an inactive (hidden) one never is."""
+        return button.active and button.is_clicked(event, self.mouse.position)
+
     def _is_activated(self, button, event) -> bool:
-        """True when the button was activated (click or focused-Space/Enter); silent."""
-        return button.is_clicked(event, self.mouse.position) or (
+        """True when the button was activated (click or focused-Space/Enter); silent.
+        An inactive (hidden) button never is."""
+        if not button.active:
+            return False
+        return self._clicked(button, event) or (
             event.type == pygame.KEYUP
             and event.key in (pygame.K_SPACE, pygame.K_RETURN)
             and getattr(button, "focused", False)
@@ -103,7 +111,7 @@ class GameEventsMixin:
             ("ui_scale_plus_button", self.step_ui_scale, 1),
         )
         for button_name, step, delta in steppers:
-            if panel[button_name].is_clicked(event, self.mouse.position):
+            if self._clicked(panel[button_name], event):
                 step(delta)
                 return
         if self._activate(panel["ui_scale_reset_button"], event):
@@ -132,7 +140,7 @@ class GameEventsMixin:
             MASTER_STEPPERS + (MUSIC_STEPPERS if has_music else ()) + SFX_STEPPERS
         )
         for button_name, channel, delta in steppers:
-            if panel[button_name].is_clicked(event, self.mouse.position):
+            if self._clicked(panel[button_name], event):
                 self._step_volume(channel, delta)
                 return
         if self._activate(panel["cancel_button"], event):
@@ -174,7 +182,7 @@ class GameEventsMixin:
             ("skip_intro_plus_button", self._toggle_skip_intro, 1),
         )
         for button_name, step, delta in steppers:
-            if panel[button_name].is_clicked(event, self.mouse.position):
+            if self._clicked(panel[button_name], event):
                 step(delta)
                 return
         if self._activate(panel["game_settings_back_button"], event):
@@ -184,6 +192,13 @@ class GameEventsMixin:
         panel = self.panel_manager["credits"]
         if self._activate(panel["credits_back_button"], event):
             self.open_panel("menu")
+
+    def handle_thanks_events(self, event: pygame.event.Event) -> None:
+        panel = self.panel_manager["thanks"]
+        if self._activate(panel["thanks_back"], event):
+            self.open_panel("menu")
+        elif self._activate(panel["thanks_link"], event):
+            web.open_in_new_tab(self.settings["links"]["itch_page"])
 
     def handle_game_events(self, event: pygame.event.Event) -> None:
         panel = self.panel_manager["game"]
@@ -236,6 +251,7 @@ class GameEventsMixin:
             self.show_gain(building, building.sell_price)
             self.sell_effect.spawn(building.rect, pygame.time.get_ticks())
             self.audio.play_sfx(self.action_sounds.sell)
+            self.request_autosave()
         self.info_panel.close()
         self.update_button_texts()
 

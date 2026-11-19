@@ -112,3 +112,32 @@ commit `vx.y.z`. The tag triggers [`.github/workflows/release.yml`](.github/work
 which builds each OS, attaches the zips to a GitHub release (with the Windows installer, `highrise-windows-setup.exe`, built from `packaging/highrise.iss` with Inno Setup in its own `installer` job; the itch.io channels get the zips only) and pushes each build to its
 [itch.io](https://umutcanekinci.itch.io/highrise) channel with
 [Butler](https://itch.io/docs/butler/). **Run workflow** builds without publishing.
+
+### Browser build
+
+The web pipeline follows [Chokepoint's browser build](https://github.com/vectorviolet/chokepoint/blob/main/CONTRIBUTING.md#the-browser-version-itchio-html5-channel).
+It uses the same pinned pygbag 0.9.3 runtime, pure-Python PyYAML staging,
+click-to-play loader and `--can_close 1` option. Build and serve locally:
+
+```bash
+uv run python scripts/build_web.py
+uv run python -m http.server 8765 --bind 127.0.0.1 --directory build/web
+```
+
+Open `http://127.0.0.1:8765` in a visible, focused desktop browser. The build needs
+internet and retries once on failure; `--stage-only` validates the staged files
+without running pygbag (offline staging requires an environment already prepared by `uv sync`). The runtime also loads from pygame-web.github.io.
+Keep the tab focused when measuring performance: hidden tabs are throttled.
+
+Highrise's browser saves are JSON in localStorage under its own names. Native saves
+remain in SQLite; no developer database or save is included in the web bundle.
+For a browser playtest, build and merge buildings, close the tab without pressing ESC
+(the board saves a moment after each change), reopen the page, and Continue. Check
+settings, sound, fullscreen and Exit too.
+
+The release workflow builds `highrise-web.zip` independently of desktop builds,
+checks itch.io's HTML5 upload limits, publishes the `html5` channel on version tags
+and attaches the web zip to the release once the desktop release succeeded. Manual workflow runs only build artifacts.
+After the first release, the owner enables **This file will be played in the
+browser** on the itch.io upload and chooses the embed size and fullscreen button.
+Leave mobile support off: the game needs a keyboard and mouse.

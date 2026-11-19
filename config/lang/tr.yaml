@@ -88,3 +88,12 @@ credits:
   music: "Müzik"
   fonts: "Yazı tipleri"
   built_with: "Kullanılan araçlar"
+
+storage:
+  invalid_save: "Kayıtlı ilerleme yüklenemedi ve korundu. Değiştirmek için Yeni Oyun'u seç."
+  unavailable: "Tarayıcı depolaması kullanılamıyor. Sekmeyi yenilersen veya kapatırsan ilerleme kaybolacak."
+
+thanks:
+  title: "OYNADIĞIN İÇİN TEŞEKKÜRLER!"
+  subtitle: "Highrise'i beğendin mi? Düşüncelerini bizimle paylaş."
+  rate: "YORUM YAP VEYA PUAN VER"

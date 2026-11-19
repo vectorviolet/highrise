@@ -12,6 +12,8 @@ opacity step and cached, so a frame copies no surface. A burst that is over is d
 import random
 from dataclasses import dataclass
 
+from pygamine import ALPHA_BLIT
+
 import pygame
 from pygame.math import Vector2
 
@@ -184,7 +186,9 @@ class DustBursts:
                 image = self._image(particle, t, fade)
                 position = self.position(particle, t)
                 center = (round(position.x), round(position.y))
-                surface.blit(image, image.get_rect(center=center))
+                surface.blit(
+                    image, image.get_rect(center=center), special_flags=ALPHA_BLIT
+                )
 
     def _image(self, particle: Particle, t: float, fade: int) -> pygame.Surface:
         """The picture of `particle` at opacity step `fade`, cached. A puff grows as it

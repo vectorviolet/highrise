@@ -203,3 +203,19 @@ jobs:
           SDL_VIDEODRIVER: dummy
           SDL_AUDIODRIVER: dummy
         run: uv run python scripts/smoke_test.py
+
+  web-stage:
+    name: Stage web bundle
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (with pygamine submodule)
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+      - name: Set up uv + Python
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Stage browser files without downloading pygbag
+        run: uv run python scripts/build_web.py --stage-only

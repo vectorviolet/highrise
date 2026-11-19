@@ -5,6 +5,10 @@ cwd == repo root for its own "config/..."-relative paths).
 """
 
 import os
+import platform
+import sys
+from types import SimpleNamespace
+from unittest.mock import Mock
 
 # Dummy SDL drivers so pygame can run headless (e.g. in CI) without opening a
 # real window or probing for a sound device. Must be set before pygame is
@@ -54,3 +58,38 @@ def english_strings():
     localization.set_language("en")
     yield
     localization.set_language("en")
+
+
+# -- the browser (web build tests): a fake page with a localStorage --
+
+
+class FakeStorage:
+    def __init__(self):
+        self.items: dict[str, str] = {}
+
+    def getItem(self, key):  # noqa: N802
+        return self.items.get(key)
+
+    def setItem(self, key, value):  # noqa: N802
+        self.items[key] = value
+
+    def removeItem(self, key):  # noqa: N802
+        self.items.pop(key, None)
+
+
+@pytest.fixture
+def browser(monkeypatch):
+    """The page (`platform.window`), with the process pretending to run in it."""
+    notice = SimpleNamespace(textContent="")
+    document = SimpleNamespace(
+        fullscreenElement=None,
+        exitFullscreen=Mock(),
+        documentElement=SimpleNamespace(requestFullscreen=Mock()),
+        getElementById=lambda name: notice,
+    )
+    window = SimpleNamespace(
+        localStorage=FakeStorage(), document=document, open=Mock(), notice=notice
+    )
+    monkeypatch.setattr(platform, "window", window, raising=False)
+    monkeypatch.setattr(sys, "platform", "emscripten")
+    return window
