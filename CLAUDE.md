@@ -1,25 +1,7 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## Running the Game
-
-```bash
-# Install dependencies (resolved from pyproject.toml / uv.lock)
-uv sync             # preferred — installs the locked dep set
-# or for users without uv:
-pip install .       # installs pygame-ce + pyyaml from pyproject.toml
-
-# Run the game (__main__.py adds src/ and src/pygamine/ to sys.path)
-python __main__.py
-```
-
-## Testing
-
-```bash
-uv run --group dev pytest tests/ -q                      # this app's own logic tests
-uv run --group dev pytest tests/ --cov --cov-report=term  # with coverage
-```
+This file guides Claude Code in this repo. Setup, run, test and lint commands: README, CONTRIBUTING.md, `pyproject.toml`, CI.
+The module layout and subsystem tours: `docs/ARCHITECTURE.md` (layout, entry point, subsystems) and the code.
 
 **Asset sources:** every file under `assets/` must be listed in `assets/SOURCES.yaml` with its
 source pack (or `own`) and its original file name. Each pack needs its license text in
@@ -39,60 +21,22 @@ the tables by hand. `tests/test_devlog_index.py` fails in CI if a table is out o
 also writes the devlog's candidate pictures). A PR that changes how the game looks reruns it and
 commits the changed pictures.
 
-**Type check and spelling:** CI also runs `uv run --group dev mypy` (lenient: `src/` only,
-`src/pygamine` excluded; config in `[tool.mypy]`) and `uv run --group dev codespell` (typos plus
-British to American spelling; config in `[tool.codespell]`, project dictionary in
-`.codespell-en-us.txt`). Fix the type or spelling; real words go in `ignore-words-list` with a reason.
+**Type check and spelling:** CI also runs `mypy` (lenient, `src/` only; config in `[tool.mypy]`) and
+`codespell` (typos plus British to American spelling; project dictionary in `.codespell-en-us.txt`).
+Fix the type or spelling; real words go in `ignore-words-list` with a reason.
 
-**Code style:** run `uv run --group dev ruff format .` and `uv run --group dev ruff check .`
-before every commit. Formatting is Black-compatible (`[tool.ruff.format]` in `pyproject.toml`);
-lint (`[tool.ruff.lint]`) runs pyflakes (F), return-type annotations on every function in
-`src/` (ANN201–ANN206; tests are exempt), no-self-use (PLR6301, a preview rule) and
-complexity limits at ruff's defaults (C901 complexity 10, PLR0912 12 branches, PLR0915 50
-statements). CI fails on `ruff format --check .` and on lint
-errors. Keep pure reformatting out of feature commits; a repo-wide reformat goes in its own
-commit, with its hash added to `.git-blame-ignore-revs`.
+**Code style:** run `uv run --group dev ruff format .` and `uv run --group dev ruff check .` before
+every commit (rules in `pyproject.toml`; CI fails on either). Keep pure reformatting out of feature
+commits; a repo-wide reformat goes in its own commit, with its hash added to `.git-blame-ignore-revs`.
 
-Note: several paths in this file (`src/game.py`,
-`src/game_events.py`, `src/game_audio.py`, `src/building.py`, `src/cloud.py`, `src/tile.py`,
-`src/ext/guiobject.py`) are stale — the actual layout has since moved to `src/app/`,
-`src/domain/`, `src/gameplay/{buildings,clouds,tiles}/`, and `src/ui/` (see the test suite's
-imports for the current module paths).
+## Architecture notes
 
-## Architecture Overview
+`src/pygamine/` is a git submodule shared with other games: **changes there affect all of them.**
 
-### Entry Point and Game Class
+### YAML-driven UI
 
-`__main__.py` calls `Game().run()`. `src/game.py` defines the `Game` class, which inherits from `pygamine.Application` and three mixins: `GameEventsMixin` (`src/game_events.py`), `WebPersistenceMixin` (`src/app/web_persistence.py`, on top of `GamePersistenceMixin`), and `GameAudioMixin` (`src/game_audio.py`). These mixins handle event routing, save/load (SQLite on desktop, localStorage in the browser build, see Persistence), and sound management respectively.
-
-### pygamine — Shared Utility Package
-
-`src/pygamine/` is a standalone, editable-installed package shared across multiple game projects. It provides:
-- `Application` — base game loop class
-- `AssetManager` + `ImagePath`/`FontPath`/`SoundPath` — asset loading/caching
-- `PanelManager` + `PanelLoaderExt` — screen/panel management driven by `config/panels.yaml`
-- `GameObject` / component system (`Transform`, `Rigidbody2D`, `SpriteRenderer2D`) — Unity-style entity model
-- `Database` — SQLite wrapper (cwd-relative `databases/` by default; the packaged build passes the user-data folder, see Persistence)
-- `MouseInteractive` mixin — mouse input for game objects
-
-**Changes to `src/pygamine/` affect all games that depend on it.**
-
-### Entity Hierarchy
-
-```
-pygamine.GameObject
-├── StateObject (src/state_object.py) + MouseInteractive
-│   ├── Building  (src/building.py)
-│   └── Cloud     (src/cloud.py)
-└── TextObject, InputBox  (pygamine ui_widgets)
-
-GuiObject (src/ext/guiobject.py) — extends StateObject for UI elements
-Button, ButtonText (src/button.py) — extend GuiObject
-```
-
-### YAML-Driven UI
-
-All UI panels, buttons, and layout are declared in `config/panels.yaml`. Python code never hard-codes widget positions or sizes for UI — use `PanelLoaderExt` and `panel_factory.py` to wire YAML definitions to Python objects. `config/assets.yaml` declares the asset manifest (fonts, images by category).
+All UI panels, buttons and layout are declared in `config/panels.yaml`. Python code never hard-codes
+widget positions or sizes for UI: use `PanelLoaderExt` and `panel_factory.py` to wire YAML to objects.
 
 ### UI scale
 
@@ -127,10 +71,6 @@ button is one. Use `button_text`, not `text`, for a new button's label.
 ### Credits page
 
 The CREDITS page (`credits` panel) scrolls its sections with pygamine's `scrolling_panel`; `Game.open_panel` restarts it each time (content enters from below). Its entries are written in `config/panels.yaml`: when an asset pack is added to `assets/SOURCES.yaml`, add it there too (`tests/test_sources.py` checks).
-
-### Isometric Tilemap
-
-`src/tile.py` renders an isometric diamond grid. Tile selection uses point-in-quadrangle collision. Selected tiles visually shift up by 10 px. Building movement (WASD/arrows) triggers 2048-style merge logic: same-level adjacent buildings merge and level up.
 
 ### Buildings
 
@@ -209,13 +149,13 @@ World texts are hidden while the info panel is open. A building's
 
 ### Persistence
 
-SQLite database `database.db`: in `databases/` (cwd-relative) when run from source, in `user_data_dir("highrise") / "databases"` (`%APPDATA%\VectorViolet\highrise\databases` on Windows) in the packaged build (pygamine's `packaged_data_dir("highrise", "databases")`, `Game._make_database`; ADR 0003). The installer (`packaging/highrise.iss`, built by the release workflow's `installer` job) keeps its `[Languages]` list equal to `config/lang/` (`tests/test_installer.py`). Four tables: `game` (age, map size, money, volumes), `tasks` (done tasks of the current age, BOOST unlocked; one row), `buildings` (level, row, column, door side, booster flag, held-back income fraction; old tables are migrated, old rows are plain buildings with no fraction) and `settings` (language, skip intro, UI scale, master volume; the first three are saved the moment they change on the Game and Display settings pages, the master volume with the AUDIO page's SAVE; all kept by New Game). The database auto-initializes on first run. Save/load logic for desktop lives in `GamePersistenceMixin`.
+SQLite database `database.db`: in `databases/` (cwd-relative) when run from source, in `user_data_dir("highrise") / "databases"` (`%APPDATA%\VectorViolet\highrise\databases` on Windows) in the packaged build (pygamine's `packaged_data_dir("highrise", "databases")`, `Game._make_database`; ADR 0003). The installer (`packaging/highrise.iss`, built by the release workflow's `installer` job) keeps its `[Languages]` list equal to `config/lang/` (`tests/test_installer.py`). Tables `game`, `tasks`, `buildings`, `settings`: old tables are migrated, old building rows are plain buildings with no fraction. `settings` (language, skip intro, UI scale, master volume): the first three are saved the moment they change on the Game and Display settings pages, the master volume with the AUDIO page's SAVE; all are kept by New Game.
 
-**Browser build (issue #97, ADR 0004):** `Game` inherits `WebPersistenceMixin` (`app/web_persistence.py`) instead, which delegates to the SQLite mixin on desktop and, when `util/web.is_web()` is true (pygbag, `sys.platform == "emscripten"`), keeps progress and settings as JSON in localStorage through pygamine's public `SaveStore` (`highrise-save`, `highrise-settings`; no SQLite import and no `Database` on that path). Restoring reads the save once, holds every value to a valid one (the building loop is `GamePersistenceMixin._restore_building`, shared with desktop) and never touches the board halfway. A stored save that can't be read is kept (and Continue hidden) until an explicit New Game. The board saves on ESC and also 2 s after a build, sell, move, merge, NEXT AGE or expand, and every 10 s while the game panel is open if money or the board changed (the payouts) (`request_autosave` / `autosave_if_due`), because a closed tab raises no QUIT. One notice (`storage.unavailable`, through `util/web.show_notice`) tells the player when nothing survives a reload: `util/web.storage_available()` probes localStorage once (blocked storage makes `SaveStore` fall back to memory, which looks like a working save), and `save_game` reads the save back to catch a refused write. `util/web.py` is the only module that talks to the page (fullscreen, opening the itch.io page, the notice box in `web/template.tmpl`); tests fake it with the `browser` fixture in `tests/conftest.py`. Exit opens the `thanks` panel instead of quitting. `web/main.py` is the entry point (`Game.run_async()`), and `uv run python scripts/build_web.py` stages and builds the bundle in `build/web/`. The browser renders `WEB_FPS` frames a second while the motion (buildings sliding, clouds) steps per update, so `Game._update_web_motion` adds the steps (`Game._motion_step`: the buildings twice and both cloud kinds, as a desktop update does) the elapsed time owes, at the desktop's `window.fps` rate; `tests/test_web.py` counts them per second against desktop. Inactive (hidden) buttons are ignored where activation happens (`GameEventsMixin._clicked` / `_is_activated`), and a hidden Continue is left out of the play menu's keyboard controller (`Game._play_buttons`).
+**Browser build (issue #97, ADR 0004):** `WebPersistenceMixin` delegates to the SQLite mixin on desktop and, when `util/web.is_web()` is true (pygbag, `sys.platform == "emscripten"`), keeps progress and settings as JSON in localStorage through pygamine's public `SaveStore` (`highrise-save`, `highrise-settings`; no SQLite import and no `Database` on that path). Restoring reads the save once, holds every value to a valid one (the building loop is `GamePersistenceMixin._restore_building`, shared with desktop) and never touches the board halfway. A stored save that can't be read is kept (and Continue hidden) until an explicit New Game. The board saves on ESC and also 2 s after a build, sell, move, merge, NEXT AGE or expand, and every 10 s while the game panel is open if money or the board changed (the payouts) (`request_autosave` / `autosave_if_due`), because a closed tab raises no QUIT. One notice (`storage.unavailable`, through `util/web.show_notice`) tells the player when nothing survives a reload: `util/web.storage_available()` probes localStorage once (blocked storage makes `SaveStore` fall back to memory, which looks like a working save), and `save_game` reads the save back to catch a refused write. `util/web.py` is the only module that talks to the page (fullscreen, opening the itch.io page, the notice box in `web/template.tmpl`); tests fake it with the `browser` fixture in `tests/conftest.py`. Exit opens the `thanks` panel instead of quitting.  `uv run python scripts/build_web.py` builds the bundle in `build/web/`. The browser renders `WEB_FPS` frames a second while the motion (buildings sliding, clouds) steps per update, so `Game._update_web_motion` adds the steps (`Game._motion_step`: the buildings twice and both cloud kinds, as a desktop update does) the elapsed time owes, at the desktop's `window.fps` rate; `tests/test_web.py` counts them per second against desktop. Inactive (hidden) buttons are ignored where activation happens (`GameEventsMixin._clicked` / `_is_activated`), and a hidden Continue is left out of the play menu's keyboard controller (`Game._play_buttons`).
 
 ### Audio
 
-Channel 0 plays the looping music. Each SFX plays on a free channel from pygamine's pool (channels 3 and up; 1 and 2 are reserved and unused here), so SFX overlap; if all are busy the new sound is dropped. The SFX volume applies to the whole pool. The master volume (first row of the AUDIO page) scales the music and the SFX pool through pygamine's `GameAudio`. The music and SFX volumes are stored in the `game` table, the master volume in `settings`, and all are applied on load. All audio logic is in `GameAudioMixin`.
+Channel 0 is the looping music; SFX use pygamine's pool (channel 3 up; 1 and 2 are reserved and unused here), and a sound is dropped when all are busy. Master volume scales music and SFX through `GameAudio`; music and SFX volumes are in the `game` table, the master volume in `settings`.
 
 Build (one sound per age), NEXT AGE and sell have their own sounds, named in `action_sounds` in `config/settings.yaml` and looked up by `app/action_sounds.py` (`Game.action_sounds`); they play through `play_sfx` like every other SFX. A sale also starts the dust effect of `ui/dust_effect.py` (`Game.sell_effect`, drawn as a world object under the HUD, numbers in `sell_effect` in `config/settings.yaml`).
 
